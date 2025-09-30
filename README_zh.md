@@ -40,11 +40,7 @@
 - [🚀 后端使用](#-后端使用)
   - [安装](#安装)
   - [配置](#配置)
-  - [运行服务器](#运行服务器)
-  - [API 端点](#api-端点)
-    - [核心API](#核心api)
-    - [WebSocket](#websocket)
-  - [开发](#开发)
+  - [运行服务](#运行服务器)
 - [👥 社区](#-社区-1)
   - [社区与支持](#社区与支持-1)
 - [📃 许可证](#-许可证)
@@ -295,42 +291,7 @@ python -m context_lab.cli start
 python -m context_lab.cli start --config /path/to/config.yaml
 ```
 
-### API 端点
-
-#### 核心API
-
-- `GET /health` - 健康检查
-- `POST /capture/screenshot` - 提交屏幕截图
-- `POST /capture/document` - 提交文档
-- `GET /contexts` - 查询上下文
-- `GET /context/{id}` - 获取特定上下文
-- `POST /search` - 搜索上下文
-- `POST /generate/summary` - 生成摘要
-- `POST /generate/todo` - 生成待办列表
-- `POST /generate/tips` - 生成提示
-
-#### WebSocket
-
-- `ws://localhost:8765/ws` - 实时事件流
-
-### 开发
-
-```bash
-# 安装开发依赖
-pip install -e ".[dev]"
-
-# 运行测试
-pytest
-
-# 代码格式化
-black context_lab/
-isort context_lab/
-
-# 类型检查
-mypy context_lab/
-```
-
-## 👥 社区
+### 👥 社区
 
 ### 社区与支持
 

@@ -155,7 +155,7 @@ consumption:
 # web server
 web:
   host: "127.0.0.1"
-  port: 8002
+  port: 8001
 
 # API authentication configuration
 api_auth:

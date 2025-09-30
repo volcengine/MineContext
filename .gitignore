@@ -11,3 +11,4 @@ __pycache__
 /config/runtime
 /test_script
 /config/user_setting.yaml
+.DS_Store

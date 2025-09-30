@@ -39,10 +39,6 @@ Table of Contents
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Running the Server](#running-the-server)
-  - [API Endpoints](#api-endpoints)
-    - [Core APIs](#core-apis)
-    - [WebSocket](#websocket)
-  - [Development](#development)
 - [👥 Community](#-community)
   - [Community and Support](#community-and-support)
 - [📃 License](#-license)
@@ -285,42 +281,7 @@ python -m context_lab.cli start
 python -m context_lab.cli start --config /path/to/config.yaml
 ```
 
-### API Endpoints
-
-#### Core APIs
-
-- `GET /health` - Health check
-- `POST /capture/screenshot` - Submit screenshot
-- `POST /capture/document` - Submit document
-- `GET /contexts` - Query contexts
-- `GET /context/{id}` - Get specific context
-- `POST /search` - Search contexts
-- `POST /generate/summary` - Generate summary
-- `POST /generate/todo` - Generate todo list
-- `POST /generate/tips` - Generate tips
-
-#### WebSocket
-
-- `ws://localhost:8765/ws` - Real-time event streaming
-
-### Development
-
-```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# Code formatting
-black context_lab/
-isort context_lab/
-
-# Type checking
-mypy context_lab/
-```
-
-## 👥 Community
+#### 👥 Community
 
 ### Community and Support
 

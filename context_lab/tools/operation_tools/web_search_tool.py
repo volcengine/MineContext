@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-联网搜索工具
-提供互联网搜索能力，帮助获取最新信息
+Web search tool
+Provides internet search capabilities to help obtain the latest information
 """
 
 from typing import Dict, Any, List
@@ -17,17 +17,17 @@ from context_lab.config.global_config import get_config
 logger = get_logger(__name__)
 
 class WebSearchTool(BaseTool):
-    """联网搜索工具"""
+    """Web search tool"""
     
     def __init__(self):
         super().__init__()
         self.config = get_config('tools.operation_tools.web_search_tool') or {}
-        # 从配置中获取搜索引擎设置
+        # Get search engine settings from config
         self.search_config = self.config.get('web_search', {})
         self.default_engine = self.search_config.get('engine', 'duckduckgo')
         self.max_results = self.search_config.get('max_results', 5)
         self.timeout = self.search_config.get('timeout', 10)
-        # 代理设置
+        # Proxy settings
         self.proxy = self.search_config.get('proxy', None)
         if self.proxy:
             self.proxies = {
@@ -43,7 +43,7 @@ class WebSearchTool(BaseTool):
     
     @classmethod
     def get_description(cls) -> str:
-        return "搜索互联网获取最新信息。支持关键词搜索，返回相关网页标题、摘要和链接。适用于获取实时信息、新闻、技术文档等。"
+        return "Search the internet for the latest information. Supports keyword search, returns relevant webpage titles, summaries, and links. Suitable for obtaining real-time information, news, technical documentation, etc."
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
@@ -52,18 +52,18 @@ class WebSearchTool(BaseTool):
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "搜索关键词或问题"
+                    "description": "Search keywords or question"
                 },
                 "max_results": {
                     "type": "integer",
-                    "description": "最大结果数量，默认5",
+                    "description": "Maximum number of results, default 5",
                     "minimum": 1,
                     "maximum": 20,
                     "default": 5
                 },
                 "lang": {
                     "type": "string", 
-                    "description": "搜索语言偏好，如 'zh-cn', 'en' 等",
+                    "description": "Search language preference, e.g. 'zh-cn', 'en', etc.",
                     "default": "zh-cn"
                 }
             },
@@ -71,11 +71,11 @@ class WebSearchTool(BaseTool):
         }
     
     def execute(self, query: str, max_results: int = None, lang: str = "zh-cn", **kwargs) -> Dict[str, Any]:
-        """执行网络搜索，支持自动降级"""
+        """Execute web search with automatic fallback support"""
         if max_results is None:
             max_results = self.max_results
         
-        max_results = min(max_results, 20)  # 限制最大结果数
+        max_results = min(max_results, 20)  # Limit maximum results
         
         logger.info(f"Using primary search engine: {self.default_engine}")
         if self.default_engine == 'duckduckgo':
@@ -93,7 +93,7 @@ class WebSearchTool(BaseTool):
                 "engine": self.default_engine
             }
         
-        # 所有搜索引擎都失败
+        # All search engines failed
         return {
             "success": False,
             "query": query,
@@ -102,25 +102,25 @@ class WebSearchTool(BaseTool):
         }
     
     def _search_duckduckgo(self, query: str, max_results: int, lang: str) -> List[Dict[str, Any]]:
-        """使用 ddgs 库进行搜索"""
+        """Search using ddgs library"""
         try:
             from ddgs import DDGS
             
-            # 获取区域设置
+            # Get region settings
             region = self._get_region(lang)
             results = []
             
-            # 使用 ddgs API，启用SSL验证以确保安全连接
+            # Use ddgs API with SSL verification enabled for secure connection
             with DDGS(proxy=self.proxy, timeout=self.timeout, verify=True) as ddgs:
-                # 新版 API: text(query, ...) 作为第一个位置参数
+                # New API: text(query, ...) as the first positional argument
                 search_results = list(ddgs.text(
-                    query,  # 第一个位置参数
+                    query,  # First positional argument
                     region=region,
                     safesearch='moderate',
                     max_results=max_results
                 ))
             
-            # 格式化结果
+            # Format results
             for r in search_results:
                 results.append({
                     'title': r.get('title', ''),
@@ -139,7 +139,7 @@ class WebSearchTool(BaseTool):
             raise
 
     def _get_region(self, lang: str) -> str:
-        """根据语言获取区域代码（用于 DuckDuckGo）"""
+        """Get region code based on language (for DuckDuckGo)"""
         region_map = {
             'zh-cn': 'cn-zh',
             'zh': 'cn-zh',
@@ -154,4 +154,4 @@ class WebSearchTool(BaseTool):
             'ru': 'ru-ru',
         }
         
-        return region_map.get(lang.lower(), 'wt-wt')  # wt-wt 表示无特定区域
+        return region_map.get(lang.lower(), 'wt-wt')  # wt-wt means no specific region

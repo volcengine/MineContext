@@ -144,11 +144,12 @@ class LLMClient:
                 create_params['tool_choice'] = "auto"
             
             if thinking:
-                create_params["extra_body"] = {
-                    "thinking": {
-                        "type": thinking
+                if self.provider == LLMProvider.DOUBAO.value:
+                    create_params["extra_body"] = {
+                        "thinking": {
+                            "type": thinking
+                        }
                     }
-                }
 
             response = await self.async_client.chat.completions.create(**create_params)
             # if hasattr(response.choices[0].message, 'reasoning_content'):
@@ -191,11 +192,12 @@ class LLMClient:
                 create_params['tool_choice'] = "auto"
             
             if thinking:
-                create_params["extra_body"] = {
-                    "thinking": {
-                        "type": thinking
+                if self.provider == LLMProvider.DOUBAO.value:
+                    create_params["extra_body"] = {
+                        "thinking": {
+                            "type": thinking
+                        }
                     }
-                }
 
             stream = self.client.chat.completions.create(**create_params)
             return stream
@@ -229,11 +231,12 @@ class LLMClient:
                 create_params['tool_choice'] = "auto"
             
             if thinking:
-                create_params["extra_body"] = {
-                    "thinking": {
-                        "type": thinking
+                if self.provider == LLMProvider.DOUBAO.value:
+                    create_params["extra_body"] = {
+                        "thinking": {
+                            "type": thinking
+                        }
                     }
-                }
 
             stream = await async_client.chat.completions.create(**create_params)
             

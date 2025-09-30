@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-基础检索工具类，提供通用的检索功能和格式化方法
+Base retrieval tool class, provides common retrieval functions and formatting methods
 """
 
 from dataclasses import dataclass, field
@@ -17,7 +17,7 @@ from context_lab.tools.profile_tools.profile_entity_tool import ProfileEntityToo
 
 @dataclass
 class TimeRangeFilter:
-    """时间范围过滤条件"""
+    """Time range filter conditions"""
     start: Optional[int] = None
     end: Optional[int] = None
     timezone: Optional[str] = None
@@ -25,25 +25,25 @@ class TimeRangeFilter:
 
 @dataclass
 class RetrievalToolFilter:
-    """检索工具过滤条件"""
+    """Retrieval tool filter conditions"""
     time_range: Optional[TimeRangeFilter] = None
     entities: List[str] = field(default_factory=list)
 
 class BaseRetrievalTool(BaseTool):
-    """检索工具基类，提供通用的检索功能"""
+    """Base class for retrieval tools, provides common retrieval functions"""
     
     def __init__(self):
         super().__init__()
-        # 初始化用户实体统一工具
+        # Initialize user entity unification tool
         self.profile_entity_tool = ProfileEntityTool()
     
     @property
     def storage(self):
-        """从全局单例获取 storage"""
+        """Get storage from global singleton"""
         return get_storage()
 
     def _build_filters(self, filters: RetrievalToolFilter) -> Dict[str, Any]:
-        """构建过滤条件"""
+        """Build filter conditions"""
         build_filter = {}
         if filters.time_range is not None and filters.time_range.time_type:
             time_type = filters.time_range.time_type
@@ -53,14 +53,14 @@ class BaseRetrievalTool(BaseTool):
             if filters.time_range.end:
                 build_filter[time_type]["$lte"] = filters.time_range.end
         if filters.entities is not None and filters.entities:
-            # 使用Profile实体工具处理实体统一
+            # Use Profile entity tool to handle entity unification
             unify_result = self.profile_entity_tool.execute(
                 entities=filters.entities,
                 operation="match_entities",
                 context_info=""
             )
             if unify_result.get("success"):
-                # 提取匹配的标准化实体名称
+                # Extract matched standardized entity names
                 matches = unify_result.get("matches", [])
                 unified_entities = [match.get("entity_canonical_name", match["input_entity"]) for match in matches]
                 if not unified_entities:
@@ -75,12 +75,12 @@ class BaseRetrievalTool(BaseTool):
                        context_types: List[str],
                        filters: RetrievalToolFilter,
                        top_k: int = 10) -> List[Tuple[ProcessedContext, float]]:
-        """执行搜索操作"""
+        """Execute search operation"""
         
         filters = self._build_filters(filters)
         
         if query:
-            # 语义搜索
+            # Semantic search
             vectorize = Vectorize(text=query)
             return self.storage.search(
                 query=vectorize,
@@ -89,14 +89,14 @@ class BaseRetrievalTool(BaseTool):
                 top_k=top_k
             )
         else:
-            # 纯过滤查询
+            # Pure filter query
             results_dict = self.storage.get_all_processed_contexts(
                 context_types=context_types,
                 limit=top_k,
                 filter=filters
             )
             
-            # 将结果转换为 (context, score) 格式
+            # Convert results to (context, score) format
             results = []
             for context_type in context_types:
                 contexts = results_dict.get(context_type, [])
@@ -109,12 +109,12 @@ class BaseRetrievalTool(BaseTool):
                               context: ProcessedContext, 
                               score: float,
                               additional_fields: Dict[str, Any] = None) -> Dict[str, Any]:
-        """格式化单个上下文结果"""
+        """Format single context result"""
         result = {
             "similarity_score": score
         }
         result["context"] = context.get_llm_context_string()
-        # 添加额外字段
+        # Add additional fields
         if additional_fields:
             result.update(additional_fields)
 
@@ -123,13 +123,13 @@ class BaseRetrievalTool(BaseTool):
     def _format_results(self, 
                        search_results: List[Tuple[ProcessedContext, float]],
                        additional_processing: callable = None) -> List[Dict[str, Any]]:
-        """格式化搜索结果"""
+        """Format search results"""
         formatted_results = []
         
         for context, score in search_results:
             result = self._format_context_result(context, score)
             
-            # 执行额外的处理逻辑
+            # Execute additional processing logic
             if additional_processing:
                 result = additional_processing(result, context, score)
             
@@ -138,9 +138,9 @@ class BaseRetrievalTool(BaseTool):
         return formatted_results
     
     def execute_with_error_handling(self, **kwargs) -> List[Dict[str, Any]]:
-        """带错误处理的执行方法"""
+        """Execute method with error handling"""
         try:
             return self.execute(**kwargs)
         except Exception as e:
-            error_message = f"执行{self.get_name()}时发生错误: {str(e)}"
+            error_message = f"Error occurred while executing {self.get_name()}: {str(e)}"
             return [{"error": error_message}]
