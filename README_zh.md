@@ -1,7 +1,7 @@
 <div align="center">
 
 <picture>
-  <img alt="MineContext" src="MineContext-Banner.svg" width="80%" height="auto">
+  <img alt="MineContext" src="src/MineContext-Banner.svg" width="80%" height="auto">
 </picture>
 
 一个开源、主动的上下文感知AI伙伴，致力于让您的工作、学习与创作更加清晰高效。
