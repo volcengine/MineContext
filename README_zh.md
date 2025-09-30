@@ -27,7 +27,7 @@
   - [2. 禁用隔离属性](#2-禁用隔离属性)
   - [3. 输入您的API密钥](#3-输入您的api密钥)
   - [4. 开始记录](#4-开始记录)
-  - [5. 让我们忘记它](#5-让我们忘记它)
+  - [5. 忘掉它](#5-忘掉它)
 - [💎 MineContext与我的世界](#-minecontext与我的世界)
 - [🎯 目标用户](#-目标用户)
 - [🔌 上下文来源](#-上下文来源)
@@ -42,8 +42,8 @@
 - [🚀 后端使用](#-后端使用)
   - [安装](#安装)
   - [配置](#配置)
-  - [运行服务](#运行服务器)
-- [👥 社区](#-社区-1)
+  - [运行服务器](#运行服务器)
+  - [👥 社区](#-社区-1)
   - [社区与支持](#社区与支持-1)
 - [📃 许可证](#-许可证)
 
@@ -74,6 +74,9 @@ MineContext专注于三个核心功能：轻松收集、智能重显和主动交
 
 点击 [Github Latest Release](https://github.com/volcengine/MineContext/releases) 下载最新版本。
 
+![Download APP](src/Download-App.gif)
+
+
 ### 2. 禁用隔离属性
 
 在运行应用程序之前，在终端中输入以下命令以禁用隔离属性。
@@ -82,17 +85,29 @@ MineContext专注于三个核心功能：轻松收集、智能重显和主动交
 sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 ```
 
+![Quarantine](src/Quarantine.gif)
+
 ### 3. 输入您的API密钥
 
-应用程序加载后，按照引导输入您的API密钥。我们目前支持豆包和OpenAI，未来将添加更多平台和本地Ollama模型。
+应用程序加载后(初次运行时需要安装一些后端环境，可能需要等待两分钟左右)，按照引导输入您的API密钥。我们目前支持豆包和OpenAI，未来将添加更多平台和本地Ollama模型。
+
+![Enter API-Key](src/Enter-API-Key.gif)
+
 
 ### 4. 开始记录
 
-进入【Screen Monitor】启用屏幕分享的系统权限，然后进入【Settings】设置您的屏幕共享区域，点击【Start Recording】开始。
+进入【Screen Monitor】启用屏幕分享的系统权限，设置完之后需要重新启动应用使其生效。
 
-### 5. 让我们忘记它
+![Enable-Permissions](src/Enable-Permissions.gif)
 
-启动记录后，您的上下文将逐渐被收集。然后，忘记它，安心专注于其他任务吧。MineContext将会在后台为您生成待办事项、提示、摘要和活动。当然，您也可以通过【Chat with AI】进行主动问答。
+重新启动应用后，请先在【Settings】设置您的屏幕共享区域，然后点击【Start Recording】开始截图。
+
+![Screen-Settings](src/Screen-Settings.gif)
+
+
+### 5. 忘掉它
+
+启动记录后，您的上下文将逐渐被收集。这会需要一些时间才能产生价值。所以说，忘记它，安心专注于其他任务吧。MineContext将会在后台为您生成待办事项、提示、摘要和活动。当然，您也可以通过【Chat with AI】进行主动问答。
 
 ## 💎 MineContext与我的世界
 
