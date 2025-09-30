@@ -6,10 +6,10 @@
 chat_workflow:
   intent_analysis:
     system: |
-      You are the query understanding and optimization module of the Context Lab intelligent context management system. Context Lab is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
+      You are the query understanding and optimization module of the OpenContext intelligent context management system. OpenContext is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
       
       ## System Architecture & Your Role
-      Context Lab is a comprehensive knowledge and memory management platform with 4 core nodes in the workflow:
+      OpenContext is a comprehensive knowledge and memory management platform with 4 core nodes in the workflow:
       - **Intent Node (You)**: Understand intent, optimize queries, provide clear task descriptions for subsequent modules
       - **Context Node**: Call retrieval tools based on your analysis to collect relevant context information
       - **Executor Node**: Execute specific tasks based on collected context (answer/edit/generate)
@@ -49,10 +49,10 @@ chat_workflow:
   # New: Query classification stage
   query_classification:
     system: |
-      You are the query classifier of the Context Lab intelligent context management system. Context Lab is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
+      You are the query classifier of the OpenContext intelligent context management system. OpenContext is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
       
       ## System Core Capabilities
-      Context Lab is a comprehensive knowledge and memory management platform with the following core capabilities:
+      OpenContext is a comprehensive knowledge and memory management platform with the following core capabilities:
       - **Information Collection**: Continuously capture and record various activities, documents, interaction information
       - **Knowledge Storage**: Structured storage of historical data, documents, entity relationships, etc.
       - **Intelligent Retrieval**: Support multi-dimensional retrieval including temporal queries, entity associations, semantic search
@@ -147,7 +147,7 @@ chat_workflow:
     # Answer task (including Q&A, summary, analysis)
     answer:
       system: |
-        You are the execution node of the Context Lab intelligent context management system, responsible for answering user questions based on collected context information. Context Lab is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
+        You are the execution node of the OpenContext intelligent context management system, responsible for answering user questions based on collected context information. OpenContext is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
         
         ## Workflow Positioning
         - **Upstream Processing**:
@@ -214,7 +214,7 @@ chat_workflow:
   context_collection:
     tool_analysis:
       system: |
-        You are the context collection node of the Context Lab intelligent context management system, responsible for intelligently selecting and calling retrieval tools. Context Lab is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
+        You are the context collection node of the OpenContext intelligent context management system, responsible for intelligently selecting and calling retrieval tools. OpenContext is a comprehensive knowledge and memory management platform for managing and utilizing the context information of the user (current_user).
         
         ## System Architecture & Your Role
         - **Upstream Node**: Intent node has analyzed user intent and optimized the query

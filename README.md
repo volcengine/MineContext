@@ -180,7 +180,7 @@ MineContext adopts a modular, layered architecture design with clear separation 
 ### Core Architecture Components
 
 ```
-context_lab/
+opencontext/
 ├── server/             # Web server and API layer
 ├── managers/           # Business logic managers
 ├── context_capture/    # Context acquisition modules
@@ -236,6 +236,9 @@ context_lab/
 git clone https://github.com/volcengine/MineContext.git
 cd MineContext
 
+python -m venv venv
+source venv/bin/activate
+
 # Install dependencies
 pip install -r requirements.txt
 ```
@@ -275,10 +278,10 @@ capture:
 
 ```bash
 # Start with default configuration
-python -m context_lab.cli start
+python -m opencontext.cli start
 
 # Start with custom config
-python -m context_lab.cli start --config /path/to/config.yaml
+python -m opencontext.cli start --config /path/to/config.yaml
 ```
 
 #### 👥 Community

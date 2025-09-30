@@ -1,7 +1,7 @@
 /build
 /context_lab_env
 __pycache__
-/context_lab.egg-info
+/opencontext.egg-info
 /screenshots
 /logs
 /persist

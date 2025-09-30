@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Context Lab Build Script
+# OpenContext Build Script
 # Packages the project into a single executable using PyInstaller.
 
 set -e
 
-echo "=== Context Lab Build Script ==="
+echo "=== OpenContext Build Script ==="
 
 # 1. Dependency Check
 echo "--> Checking for python3..."
@@ -30,7 +30,7 @@ rm -rf dist/ build/
 
 # 5. Run PyInstaller build
 echo "--> Starting application build with PyInstaller..."
-pyinstaller --clean --noconfirm --log-level INFO context-lab.spec
+pyinstaller --clean --noconfirm --log-level INFO opencontext.spec
 
 # 6. Verify build and package
 echo "--> Verifying build output..."
@@ -62,7 +62,7 @@ if [ -f "dist/$EXECUTABLE_NAME" ] || [ -f "dist/$EXECUTABLE_NAME.exe" ]; then
     echo "--> Creating start script in 'dist/'..."
     cat > dist/start.sh << 'EOF'
 #!/bin/bash
-# Context Lab Start Script
+# OpenContext Start Script
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -77,10 +77,10 @@ export CONTEXT_API_KEY='your_api_key'
 # --- Start Application ---
 EXECUTABLE="./main"
 if [ -f "$EXECUTABLE" ]; then
-    echo "Starting Context Lab..."
+    echo "Starting OpenContext..."
     "$EXECUTABLE" start "$@"
 elif [ -f "$EXECUTABLE.exe" ]; then
-    echo "Starting Context Lab..."
+    echo "Starting OpenContext..."
     "$EXECUTABLE.exe" start "$@"
 else
     echo "❌ Error: Main executable not found in the current directory."

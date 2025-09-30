@@ -140,7 +140,7 @@ storage:
       config:
         mode: "local"  # Options: "local", "server"
         path: "${CONTEXT_PATH:.}/persist/chromadb"
-        collection_prefix: "context_lab"
+        collection_prefix: "opencontext"
     
     - name: "document_store"
       storage_type: "document_db"
@@ -155,7 +155,7 @@ consumption:
 # web server
 web:
   host: "127.0.0.1"
-  port: 8001
+  port: 8000
 
 # API authentication configuration
 api_auth:

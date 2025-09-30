@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统监控 - MineContext</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            padding-top: 56px;
+        }
+        .navbar {
+            background-color: #212529 !important;
+        }
+        .metric-card {
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .metric-card .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .refresh-btn {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .loading {
+            display: none;
+        }
+        .loading.active {
+            display: inline-block;
+        }
+        .todo-stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+        }
+        .todo-stat-item {
+            text-align: center;
+        }
+        .todo-stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .todo-stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 顶部导航栏 -->
+    <nav class="navbar navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand" href="/">OpenContext - 系统监控</a>
+                <a href="/" class="btn btn-outline-light btn-sm ms-3">回到 home 页</a>
+            </div>
+            <div class="d-flex">
+                <a href="/" class="btn btn-outline-light btn-sm me-2">返回主页</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 - 全屏显示 -->
+    <div class="container-fluid px-4">
+        <!-- 刷新按钮 -->
+        <button class="btn btn-primary refresh-btn" onclick="refreshAllData()">
+            <span class="loading spinner-border spinner-border-sm" role="status"></span>
+            刷新数据
+        </button>
+
+        <!-- 页面标题 -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <h1 class="text-center mb-4">OpenContext 系统监控</h1>
+                <div class="alert alert-info">
+                    <strong>系统运行时间:</strong> <span id="uptime">加载中...</span> | 
+                    <strong>最后更新:</strong> <span id="lastUpdate">加载中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 概览统计卡片 -->
+        <div class="row mb-4 align-items-stretch">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">总Token消耗</h5>
+                        <h3 class="card-text text-center" id="totalTokens">-</h3>
+                        <small class="text-muted d-block text-center">24小时内</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">TODO任务</h5>
+                        <div class="todo-stats">
+                            <div class="todo-stat-item">
+                                <div class="todo-stat-value text-success" id="todoCompleted">-</div>
+                                <div class="todo-stat-label">已完成</div>
+                            </div>
+                            <div class="todo-stat-item">
+                                <div class="todo-stat-value text-warning" id="todoPending">-</div>
+                                <div class="todo-stat-label">未完成</div>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block text-center">24小时内</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">Tips提示</h5>
+                        <h3 class="card-text text-center" id="totalTips">-</h3>
+                        <small class="text-muted d-block text-center">24小时内</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">活动记录</h5>
+                        <h3 class="card-text text-center" id="totalActivities">-</h3>
+                        <small class="text-muted d-block text-center">24小时内</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="row">
+            <!-- 上下文类型分布 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>上下文类型分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="contextTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Token使用分布 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>模型Token使用分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="tokenUsageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <!-- 处理器性能 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>处理器平均耗时</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="processingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上下文记录统计 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>上下文记录总览</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="contextStatsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细数据表格 -->
+        <div class="row mt-4 mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>详细统计数据</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#tokenDetails">Token详情</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#processingDetails">处理详情</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#contextDetails">上下文详情</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3">
+                            <div class="tab-pane fade show active" id="tokenDetails">
+                                <div id="tokenDetailsContent">加载中...</div>
+                            </div>
+                            <div class="tab-pane fade" id="processingDetails">
+                                <div id="processingDetailsContent">加载中...</div>
+                            </div>
+                            <div class="tab-pane fade" id="contextDetails">
+                                <div id="contextDetailsContent">加载中...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+            // 每30秒自动刷新一次
+            setInterval(loadAllData, 30000);
+        });
+
+        async function refreshAllData() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const loading = refreshBtn.querySelector('.loading');
+            loading.classList.add('active');
+            refreshBtn.disabled = true;
+
+            try {
+                await loadAllData();
+            } finally {
+                loading.classList.remove('active');
+                refreshBtn.disabled = false;
+            }
+        }
+
+        async function loadAllData() {
+            try {
+                // 获取系统概览
+                const overview = await fetchData('/api/monitoring/overview');
+                updateOverview(overview.data);
+                
+                // 获取上下文类型统计
+                const contextTypes = await fetchData('/api/monitoring/context-types');
+                updateContextTypeChart(contextTypes.data);
+                updateContextStatsChart(contextTypes.data);
+                
+                // 获取Token使用统计
+                const tokenUsage = await fetchData('/api/monitoring/token-usage');
+                updateTokenUsageChart(tokenUsage.data);
+                
+                // 获取处理性能
+                const processing = await fetchData('/api/monitoring/processing');
+                updateProcessingChart(processing.data);
+                
+                // 获取TODO统计
+                const todoStats = await fetchData('/api/monitoring/todo-stats');
+                updateTodoStats(todoStats.data);
+                
+                // 获取Tips数量
+                const tipsCount = await fetchData('/api/monitoring/tips-count');
+                updateTipsCount(tipsCount.data);
+                
+                // 获取Activity数量
+                const activityCount = await fetchData('/api/monitoring/activity-count');
+                updateActivityCount(activityCount.data);
+
+                // 更新详细信息
+                updateDetailTables(tokenUsage.data, processing.data, contextTypes.data);
+                
+            } catch (error) {
+                console.error('Failed to load monitoring data:', error);
+                showError('加载监控数据失败: ' + error.message);
+            }
+        }
+
+        async function fetchData(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return await response.json();
+        }
+
+        function updateOverview(data) {
+            document.getElementById('uptime').textContent = data.uptime_formatted || '未知';
+            document.getElementById('lastUpdate').textContent = new Date(data.last_updated).toLocaleString();
+            document.getElementById('totalTokens').textContent = data.token_usage?.total_tokens?.toLocaleString() || '0';
+        }
+
+        function updateTodoStats(data) {
+            document.getElementById('todoCompleted').textContent = data.completed || '0';
+            document.getElementById('todoPending').textContent = data.pending || '0';
+        }
+
+        function updateTipsCount(data) {
+            document.getElementById('totalTips').textContent = data.total || '0';
+        }
+
+        function updateActivityCount(data) {
+            document.getElementById('totalActivities').textContent = data.total || '0';
+        }
+
+        function updateContextTypeChart(data) {
+            const ctx = document.getElementById('contextTypeChart').getContext('2d');
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            if (charts.contextType) {
+                charts.contextType.destroy();
+            }
+            
+            charts.contextType = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateContextStatsChart(data) {
+            const ctx = document.getElementById('contextStatsChart').getContext('2d');
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            if (charts.contextStats) {
+                charts.contextStats.destroy();
+            }
+            
+            charts.contextStats = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '记录数量',
+                        data: values,
+                        backgroundColor: '#9966FF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTokenUsageChart(data) {
+            const ctx = document.getElementById('tokenUsageChart').getContext('2d');
+            const models = Object.keys(data.by_model || {});
+            const tokenCounts = models.map(model => data.by_model[model].total_tokens);
+            
+            if (charts.tokenUsage) {
+                charts.tokenUsage.destroy();
+            }
+            
+            charts.tokenUsage = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: models,
+                    datasets: [{
+                        label: 'Token消耗',
+                        data: tokenCounts,
+                        backgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateProcessingChart(data) {
+            const ctx = document.getElementById('processingChart').getContext('2d');
+            const processors = Object.keys(data.by_processor || {});
+            const avgDurations = processors.map(proc => data.by_processor[proc].avg_duration);
+            
+            if (charts.processing) {
+                charts.processing.destroy();
+            }
+            
+            charts.processing = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: processors,
+                    datasets: [{
+                        label: '平均耗时 (ms)',
+                        data: avgDurations,
+                        backgroundColor: '#4BC0C0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDetailTables(tokenData, processingData, contextData) {
+            // Token详情
+            let tokenHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>模型</th><th>调用次数</th><th>总Token</th><th>输入Token</th><th>输出Token</th></tr></thead><tbody>';
+            for (const [model, stats] of Object.entries(tokenData.by_model || {})) {
+                tokenHtml += `<tr>
+                    <td>${model}</td>
+                    <td>${stats.count}</td>
+                    <td>${stats.total_tokens.toLocaleString()}</td>
+                    <td>${stats.prompt_tokens.toLocaleString()}</td>
+                    <td>${stats.completion_tokens.toLocaleString()}</td>
+                </tr>`;
+            }
+            tokenHtml += '</tbody></table></div>';
+            document.getElementById('tokenDetailsContent').innerHTML = tokenHtml;
+
+            // 处理详情
+            let processingHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>处理器</th><th>操作次数</th><th>平均耗时(ms)</th><th>处理上下文数</th></tr></thead><tbody>';
+            for (const [processor, stats] of Object.entries(processingData.by_processor || {})) {
+                processingHtml += `<tr>
+                    <td>${processor}</td>
+                    <td>${stats.count}</td>
+                    <td>${Math.round(stats.avg_duration)}</td>
+                    <td>${stats.contexts}</td>
+                </tr>`;
+            }
+            processingHtml += '</tbody></table></div>';
+            document.getElementById('processingDetailsContent').innerHTML = processingHtml;
+
+            // 上下文详情
+            let contextHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>上下文类型</th><th>记录数量</th><th>占比</th></tr></thead><tbody>';
+            const total = Object.values(contextData).reduce((sum, count) => sum + count, 0);
+            for (const [type, count] of Object.entries(contextData)) {
+                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : '0';
+                contextHtml += `<tr>
+                    <td>${type}</td>
+                    <td>${count.toLocaleString()}</td>
+                    <td>${percentage}%</td>
+                </tr>`;
+            }
+            contextHtml += '</tbody></table></div>';
+            document.getElementById('contextDetailsContent').innerHTML = contextHtml;
+        }
+
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <strong>错误!</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

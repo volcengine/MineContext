@@ -190,7 +190,7 @@ MineContext 采用模块化、分层的架构设计，各组件职责明确，�
 ### 核心架构组件
 
 ```
-context_lab/
+opencontext/
 ├── server/             # Web服务器和API层
 ├── managers/           # 业务逻辑管理器
 ├── context_capture/    # 上下文获取模块
@@ -246,6 +246,9 @@ context_lab/
 git clone https://github.com/volcengine/MineContext.git
 cd MineContext
 
+python -m venv venv
+source venv/bin/activate
+
 # 安装依赖
 pip install -r requirements.txt
 ```
@@ -285,10 +288,10 @@ capture:
 
 ```bash
 # 使用默认配置启动
-python -m context_lab.cli start
+python -m opencontext.cli start
 
 # 使用自定义配置启动
-python -m context_lab.cli start --config /path/to/config.yaml
+python -m opencontext.cli start --config /path/to/config.yaml
 ```
 
 ### 👥 社区
