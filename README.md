@@ -61,6 +61,10 @@ MineContext focuses on three key features: effortless collection, intelligent re
    Delivers key information and insights proactively in daily use. It extracts summarized content from your context—such as daily/weekly summaries, tips, and todos—and pushes them directly to your homepage.
 3. 💡 Intelligent Resurfacing
    Surfaces relevant and useful context intelligently during creation. Ensures assisted creativity without overwhelming you with information.
+4. 🛡️ Privacy-First
+   All data is stored locally, ensuring your privacy and security.
+6. 🎯 Context Engineering Architecture
+   Supports the complete lifecycle of multimodal, multi-source data—from capture, processing, and storage to management, retrieval, and consumption—enabling the generation of six types of intelligent context.
 
 ## 🏁 Quick Start
 
