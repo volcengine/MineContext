@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat - MineContext</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .chat-header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .chat-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .chat-header .subtitle {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            margin-right: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-avatar {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .assistant-avatar {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 15px 20px;
+            resize: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            max-height: 120px;
+        }
+        
+        .chat-input textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .send-button {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .send-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .send-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing-indicator {
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        .typing-indicator.show {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .typing-content {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-right: 10px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6c757d;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .tool-call {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .tool-call-header {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+        
+        .diff-preview {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .diff-preview h6 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .settings-panel {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 20px;
+        }
+        
+        .settings-toggle {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .settings-content {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .settings-content.show {
+            display: block;
+        }
+        
+        .form-check {
+            margin-bottom: 10px;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        pre code {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+        
+        .message-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .message-content li {
+            margin: 5px 0;
+        }
+        
+        .message-content strong {
+            font-weight: 600;
+        }
+        
+        .message-content em {
+            font-style: italic;
+        }
+        
+        .message-content a {
+            color: #4facfe;
+            text-decoration: none;
+        }
+        
+        .message-content a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <h1>🤖 AI Chat Assistant</h1>
+            <div class="subtitle">支持联网搜索、文件操作、数据库查询等工具调用</div>
+        </div>
+        
+        <!-- Settings -->
+        <div class="settings-panel">
+            <button class="settings-toggle" onclick="toggleSettings()">
+                <i class="bi bi-gear"></i> 设置
+            </button>
+            <div class="settings-content" id="settingsContent">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enableTools" checked>
+                            <label class="form-check-label" for="enableTools">
+                                启用工具调用
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="alwaysApproveSqlite">
+                            <label class="form-check-label" for="alwaysApproveSqlite">
+                                自动批准SQLite操作
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="thinkingMode">
+                            <label class="form-check-label" for="thinkingMode">
+                                思考模式
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="temperature" class="form-label">温度: <span id="tempValue">0.7</span></label>
+                        <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="0.7" onInput="updateTempValue(this.value)">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">
+                <div class="message-avatar assistant-avatar">AI</div>
+                <div class="message-content">
+                    你好！我是 AI 助手，可以帮你进行以下操作：
+                    <ul>
+                        <li>🔍 联网搜索最新信息</li>
+                        <li>📁 读取和写入本地文件</li>
+                        <li>💾 查询和修改 SQLite 数据库（支持 diff 预览）</li>
+                        <li>📊 检索上下文信息</li>
+                    </ul>
+                    请输入你的问题或指令！
+                </div>
+            </div>
+        </div>
+        
+        <!-- Typing indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-avatar assistant-avatar">AI</div>
+            <div class="typing-content">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input -->
+        <div class="chat-input-container">
+            <div class="chat-input">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="输入你的消息..."
+                    rows="1"
+                    onkeypress="handleKeyPress(event)"
+                    oninput="adjustTextareaHeight(this)"
+                ></textarea>
+                <button class="send-button" id="sendButton" onclick="sendMessage()">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isWaitingResponse = false;
+        let messages = [];
+        
+        function toggleSettings() {
+            const content = document.getElementById('settingsContent');
+            content.classList.toggle('show');
+        }
+        
+        function updateTempValue(value) {
+            document.getElementById('tempValue').textContent = value;
+        }
+        
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function addMessage(role, content, isHtml = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatarClass = role === 'user' ? 'user-avatar' : 'assistant-avatar';
+            const avatarText = role === 'user' ? '你' : 'AI';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar ${avatarClass}">${avatarText}</div>
+                <div class="message-content">${isHtml ? content : escapeHtml(content)}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store message
+            messages.push({ role, content: isHtml ? content : escapeHtml(content) });
+        }
+        
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('show');
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('show');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatContent(content) {
+            // 更完善的 Markdown 样式处理
+            let formatted = content;
+            
+            // 处理代码块 (``` 包围的多行代码)
+            formatted = formatted.replace(/```([^`]*)```/g, '<pre><code>$1</code></pre>');
+            
+            // 处理行内代码
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // 处理粗体
+            formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            
+            // 处理斜体
+            formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            
+            // 处理链接
+            formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // 处理换行
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            // 处理列表 (简单版本)
+            formatted = formatted.replace(/^\- (.+)$/gm, '<li>$1</li>');
+            formatted = formatted.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            
+            return formatted;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = input.value.trim();
+            
+            if (!message || isWaitingResponse) return;
+            
+            // Add user message
+            addMessage('user', message);
+            
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+            
+            // Disable input
+            isWaitingResponse = true;
+            sendButton.disabled = true;
+            input.disabled = true;
+            showTypingIndicator();
+            
+            try {
+                // Prepare request
+                const requestMessages = [
+                    ...messages.map(msg => ({
+                        role: msg.role,
+                        content: typeof msg.content === 'string' ? msg.content.replace(/<[^>]*>/g, '') : msg.content
+                    })),
+                    { role: 'user', content: message }
+                ];
+                
+                const requestData = {
+                    messages: requestMessages,
+                    enable_tools: document.getElementById('enableTools').checked,
+                    always_approve_sqlite: document.getElementById('alwaysApproveSqlite').checked,
+                    thinking: document.getElementById('thinkingMode').checked,
+                    temperature: parseFloat(document.getElementById('temperature').value)
+                };
+                
+                // Send request
+                const response = await fetch('/api/chat_stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                hideTypingIndicator();
+                
+                // Process streaming response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let assistantMessage = '';
+                let messageContainer = null;
+                
+                // Create assistant message container
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                const messageId = `message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                messageDiv.className = 'message assistant';
+                messageDiv.innerHTML = `
+                    <div class="message-avatar assistant-avatar">AI</div>
+                    <div class="message-content" id="${messageId}"></div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+                messageContainer = document.getElementById(messageId);
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const jsonStr = line.slice(6).trim();
+                                if (jsonStr) {
+                                    const data = JSON.parse(jsonStr);
+                                    
+                                    if (data.type === 'content') {
+                                        assistantMessage += data.content;
+                                        messageContainer.innerHTML = formatContent(assistantMessage);
+                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    }
+                                    else if (data.type === 'tool_calls_start') {
+                                        const toolInfo = `<div class="tool-call"><div class="tool-call-header">🔧 执行工具调用 (${data.tool_count} 个)</div></div>`;
+                                        messageContainer.innerHTML += toolInfo;
+                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    }
+                                    else if (data.type === 'tool_result') {
+                                        const toolResult = `<div class="tool-call"><div class="tool-call-header">✅ ${data.tool_name}</div><pre>${JSON.stringify(data.result, null, 2)}</pre></div>`;
+                                        messageContainer.innerHTML += toolResult;
+                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    }
+                                    else if (data.type === 'status') {
+                                        // 状态消息仅在控制台显示，不干扰用户界面
+                                        console.log('Status:', data.message);
+                                    }
+                                    else if (data.type === 'error') {
+                                        messageContainer.innerHTML += `<div style="color: red; margin: 10px 0;"><strong>❌ 错误:</strong> ${data.error}</div>`;
+                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    }
+                                    else if (data.type === 'done') {
+                                        console.log('Chat completed');
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Error parsing SSE data:', e, 'Line:', line);
+                            }
+                        }
+                    }
+                }
+                
+                // Store assistant message
+                messages.push({ role: 'assistant', content: assistantMessage });
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('assistant', `抱歉，发生了错误：${error.message}`, true);
+                console.error('Chat error:', error);
+            } finally {
+                // Re-enable input
+                isWaitingResponse = false;
+                sendButton.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+        }
+        
+        // Initialize
+        document.getElementById('messageInput').focus();
+        
+        // Test connection on load
+        console.log('Chat interface loaded successfully');
+        
+        // Add a test button for debugging (temporary)
+        window.testSSE = function() {
+            console.log('Testing SSE connection...');
+            fetch('/api/chat_stream', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    messages: [{"role": "user", "content": "Hello"}],
+                    enable_tools: false,
+                    temperature: 0.7
+                })
+            }).then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.text();
+            }).then(data => {
+                console.log('Response data:', data);
+            }).catch(error => {
+                console.error('Test error:', error);
+            });
+        };
+    </script>
+</body>
+</html>

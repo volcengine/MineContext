@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">向量检索</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">检索参数</h5>
+            </div>
+            <div class="card-body">
+                <form id="vectorSearchForm">
+                    <div class="mb-3">
+                        <label for="query" class="form-label">查询内容</label>
+                        <textarea class="form-control" id="query" rows="3" placeholder="输入要检索的内容..." required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="topK" class="form-label">返回数量 (Top-K)</label>
+                        <input type="number" class="form-control" id="topK" value="10" min="1" max="100">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">上下文类型</label>
+                        <div id="contextTypes">
+                            <!-- 动态加载上下文类型选择框 -->
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="startTime" class="form-label">开始时间</label>
+                        <input type="datetime-local" class="form-control" id="startTime">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="endTime" class="form-label">结束时间</label>
+                        <input type="datetime-local" class="form-control" id="endTime">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="entities" class="form-label">实体过滤</label>
+                        <input type="text" class="form-control" id="entities" placeholder="用逗号分隔多个实体">
+                        <div class="form-text">例如: entity1,entity2,entity3</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="keywords" class="form-label">关键词过滤</label>
+                        <input type="text" class="form-control" id="keywords" placeholder="用逗号分隔多个关键词">
+                        <div class="form-text">例如: keyword1,keyword2,keyword3</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" id="loadingSpinner"></span>
+                        <span id="searchButtonText">开始检索</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">检索结果</h5>
+                <span class="badge bg-secondary" id="resultCount">0 条结果</span>
+            </div>
+            <div class="card-body">
+                <div id="searchResults">
+                    <div class="text-muted text-center py-5">
+                        <i data-feather="search" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <p>请输入查询内容并点击"开始检索"按钮</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 加载上下文类型
+    loadContextTypes();
+    
+    // 绑定表单提交事件
+    document.getElementById('vectorSearchForm').addEventListener('submit', handleSearch);
+});
+
+async function loadContextTypes() {
+    try {
+        const response = await fetch('/api/context_types');
+        const contextTypes = await response.json();
+        
+        const container = document.getElementById('contextTypes');
+        container.innerHTML = '';
+        
+        // 添加"全选"选项
+        const selectAllDiv = document.createElement('div');
+        selectAllDiv.className = 'form-check mb-2';
+        selectAllDiv.innerHTML = `
+            <input class="form-check-input" type="checkbox" id="selectAllContextTypes" checked>
+            <label class="form-check-label fw-bold" for="selectAllContextTypes">
+                全选
+            </label>
+        `;
+        container.appendChild(selectAllDiv);
+        
+        // 添加分隔线
+        const hr = document.createElement('hr');
+        hr.className = 'my-2';
+        container.appendChild(hr);
+        
+        // 添加各个上下文类型
+        contextTypes.forEach(type => {
+            const div = document.createElement('div');
+            div.className = 'form-check';
+            div.innerHTML = `
+                <input class="form-check-input context-type-checkbox" type="checkbox" value="${type}" id="context_${type}" checked>
+                <label class="form-check-label" for="context_${type}">
+                    ${type}
+                </label>
+            `;
+            container.appendChild(div);
+        });
+        
+        // 绑定全选逻辑
+        document.getElementById('selectAllContextTypes').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.context-type-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+        
+        // 绑定单个选择框逻辑
+        document.querySelectorAll('.context-type-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allChecked = Array.from(document.querySelectorAll('.context-type-checkbox')).every(c => c.checked);
+                const anyChecked = Array.from(document.querySelectorAll('.context-type-checkbox')).some(c => c.checked);
+                const selectAllCb = document.getElementById('selectAllContextTypes');
+                selectAllCb.checked = allChecked;
+                selectAllCb.indeterminate = !allChecked && anyChecked;
+            });
+        });
+        
+    } catch (error) {
+        console.error('Failed to load context types:', error);
+        document.getElementById('contextTypes').innerHTML = '<div class="alert alert-warning">无法加载上下文类型</div>';
+    }
+}
+
+async function handleSearch(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const query = document.getElementById('query').value.trim();
+    const topK = parseInt(document.getElementById('topK').value) || 10;
+    const startTime = document.getElementById('startTime').value;
+    const endTime = document.getElementById('endTime').value;
+    const tags = document.getElementById('entities').value;
+    const keywords = document.getElementById('keywords').value;
+    
+    // 获取选中的上下文类型
+    const selectedContextTypes = Array.from(document.querySelectorAll('.context-type-checkbox:checked'))
+        .map(cb => cb.value);
+    
+    if (!query) {
+        alert('请输入查询内容');
+        return;
+    }
+    
+    if (selectedContextTypes.length === 0) {
+        alert('请至少选择一个上下文类型');
+        return;
+    }
+    
+    // 显示加载状态
+    setLoading(true);
+    
+    try {
+        // 构建过滤器
+        const filters = {};
+        if (startTime) {
+            filters.create_time_ts = filters.create_time_ts || {};
+            filters.create_time_ts.$gte = new Date(startTime).getTime() / 1000;
+        }
+        if (endTime) {
+            filters.create_time_ts = filters.create_time_ts || {};
+            filters.create_time_ts.$lte = new Date(endTime).getTime() / 1000;
+        }
+        if (tags) {
+            const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
+            if (tagList.length > 0) {
+                filters.tags = {"$in": tagList};
+            }
+        }
+        if (keywords) {
+            const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k);
+            if (keywordList.length > 0) {
+                filters.keywords = {"$in": keywordList};
+            }
+        }
+
+        // 构建请求体
+        const requestBody = {
+            query: query,
+            top_k: topK,
+            context_types: selectedContextTypes,
+            filters: filters
+        };
+
+        const response = await fetch('/api/vector_search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.detail || data.message || '检索失败');
+        }
+        
+        displayResults(data.data.results || []);
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        displayError(error.message);
+    } finally {
+        setLoading(false);
+    }
+}
+
+function setLoading(loading) {
+    const spinner = document.getElementById('loadingSpinner');
+    const buttonText = document.getElementById('searchButtonText');
+    const submitButton = document.querySelector('#vectorSearchForm button[type="submit"]');
+    
+    if (loading) {
+        spinner.classList.remove('d-none');
+        buttonText.textContent = '检索中...';
+        submitButton.disabled = true;
+    } else {
+        spinner.classList.add('d-none');
+        buttonText.textContent = '开始检索';
+        submitButton.disabled = false;
+    }
+}
+
+function displayResults(results) {
+    const container = document.getElementById('searchResults');
+    const resultCount = document.getElementById('resultCount');
+    
+    resultCount.textContent = `${results.length} 条结果`;
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="text-muted text-center py-5">
+                <i data-feather="search" class="mb-3" style="width: 48px; height: 48px;"></i>
+                <p>未找到匹配的结果</p>
+            </div>
+        `;
+        feather.replace();
+        return;
+    }
+    
+    let html = '';
+    results.forEach((result, index) => {
+        const context = result.context;
+        const score = result.score;
+        const createTime = new Date(context.properties.create_time * 1000).toLocaleString('zh-CN');
+        
+        html += `
+            <div class="border rounded mb-3 p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="mb-1">
+                        <a href="#" onclick="viewContext('${context.id}', '${context.extracted_data.context_type}')" class="text-decoration-none">${context.extracted_data.title || '未命名'}</a>
+                    </h6>
+                    <div class="text-end">
+                        <span class="badge bg-primary">${score.toFixed(4)}</span>
+                        <small class="text-muted d-block">${context.extracted_data.context_type}</small>
+                    </div>
+                </div>
+                
+                <p class="text-muted small mb-2">${context.extracted_data.summary || '无摘要'}</p>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">创建时间: ${createTime}</small>
+                        ${context.extracted_data.tags && context.extracted_data.tags.length > 0 ? 
+                            `<div class="mt-1">${context.extracted_data.tags.map(tag => `<span class="badge bg-light text-dark me-1">${tag}</span>`).join('')}</div>` 
+                            : ''
+                        }
+                    </div>
+                    <div>
+                        <button onclick="viewContext('${context.id}', '${context.extracted_data.context_type}')" class="btn btn-sm btn-outline-primary">查看详情</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    feather.replace();
+}
+
+function displayError(message) {
+    const container = document.getElementById('searchResults');
+    container.innerHTML = `
+        <div class="alert alert-danger">
+            <i data-feather="alert-circle" class="me-2"></i>
+            检索出错: ${message}
+        </div>
+    `;
+    feather.replace();
+}
+
+async function viewContext(contextId, contextType) {
+    try {
+        const response = await fetch('/contexts/detail', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: contextId,
+                context_type: contextType
+            })
+        });
+        
+        if (response.ok) {
+            const html = await response.text();
+            document.open();
+            document.write(html);
+            document.close();
+        } else {
+            alert('查看失败');
+        }
+    } catch (error) {
+        console.error('查看操作失败:', error);
+        alert('查看操作失败');
+    }
+}
+</script>
+{% endblock %}

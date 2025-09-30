@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}智能笔记编辑器{% endblock %}
+
+{% block content %}
+<!-- 引入必要的库 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/continuelist.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="/static/css/note_editor.css">
+
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- 左侧：文档列表 -->
+        <div class="col-md-3 border-right h-100 p-0">
+            <div class="document-sidebar">
+                <div class="sidebar-header p-3">
+                    <h5><i class="bi bi-journal-text me-2"></i>我的笔记</h5>
+                    <div class="btn-group w-100 mt-2">
+                        <button class="btn btn-primary btn-sm" onclick="createNewNote()">
+                            <i class="bi bi-plus"></i> 新建
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="saveCurrentNote()">
+                            <i class="bi bi-floppy"></i> 保存
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteCurrentNote()">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="document-list" id="documentList">
+                    <div class="loading-placeholder text-center p-3">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <div class="mt-2 text-muted">加载文档中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中间：编辑器 -->
+        <div class="col-md-6 h-100 p-0">
+            <div class="editor-container">
+                <!-- 编辑器头部 -->
+                <div class="editor-header p-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="document-info">
+                            <input type="text" class="form-control form-control-sm" 
+                                   id="documentTitle" placeholder="文档标题..." 
+                                   style="max-width: 300px;">
+                        </div>
+                        <div class="editor-actions">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" onclick="togglePreview()" id="previewToggle">
+                                    <i class="bi bi-eye"></i> 预览
+                                </button>
+                                <button class="btn btn-outline-info" onclick="toggleCompletionSettings()" 
+                                        title="补全设置">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 补全设置面板 -->
+                    <div class="completion-settings mt-3" id="completionSettings" style="display: none;">
+                        <div class="card card-body p-2">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label text-sm">补全触发</label>
+                                    <select class="form-select form-select-sm" id="triggerMode">
+                                        <option value="auto">自动触发</option>
+                                        <option value="manual">手动触发</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-sm">建议数量</label>
+                                    <select class="form-select form-select-sm" id="maxSuggestions">
+                                        <option value="1">1个</option>
+                                        <option value="2">2个</option>
+                                        <option value="3" selected>3个</option>
+                                        <option value="5">5个</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-sm">补全类型</label>
+                                    <div class="form-check form-check-sm">
+                                        <input class="form-check-input" type="checkbox" id="enableSemantic" checked>
+                                        <label class="form-check-label text-sm">语义续写</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 编辑器主体 -->
+                <div class="editor-body">
+                    <div class="editor-wrapper" id="editorWrapper">
+                        <textarea id="noteEditor" placeholder="开始编写你的笔记...支持Markdown语法，按Tab键获取智能补全建议"></textarea>
+                    </div>
+                    
+                    <!-- 补全建议浮层 -->
+                    <div class="completion-overlay" id="completionOverlay" style="display: none;">
+                        <div class="completion-suggestions" id="completionSuggestions">
+                            <!-- 动态生成补全建议 -->
+                        </div>
+                        <div class="completion-controls text-muted">
+                            <small>
+                                <kbd>Tab</kbd> 接受 • <kbd>Esc</kbd> 取消 • <kbd>↑</kbd><kbd>↓</kbd> 选择
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 状态栏 -->
+                <div class="editor-status border-top p-2">
+                    <div class="d-flex justify-content-between align-items-center text-muted">
+                        <div class="status-left">
+                            <small id="cursorPosition">行 1, 列 1</small>
+                            <span class="mx-2">•</span>
+                            <small id="documentStats">0 字符, 0 词</small>
+                        </div>
+                        <div class="status-right">
+                            <small id="completionStatus">智能补全已就绪</small>
+                            <span class="mx-2">•</span>
+                            <small id="saveStatus">未保存</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧：预览和补全上下文 -->
+        <div class="col-md-3 h-100 p-0">
+            <div class="preview-panel">
+                <!-- 预览头部 -->
+                <div class="preview-header p-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="bi bi-eye me-2"></i>实时预览
+                        </h6>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick="refreshPreview()" title="刷新预览">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 预览内容 -->
+                <div class="preview-content" id="previewContent">
+                    <div class="empty-preview text-center p-4">
+                        <i class="bi bi-eye-slash text-muted"></i>
+                        <p class="text-muted mt-2">开始编辑以查看预览</p>
+                    </div>
+                </div>
+                
+                <!-- 补全上下文信息 -->
+                <div class="completion-context mt-3" id="completionContext" style="display: none;">
+                    <div class="context-header p-2 border-top">
+                        <h6 class="mb-0 text-muted">
+                            <i class="bi bi-lightbulb me-1"></i>补全上下文
+                        </h6>
+                    </div>
+                    <div class="context-content p-2" id="contextContent">
+                        <!-- 动态显示相关上下文 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 加载中遮罩 -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">处理中...</span>
+        </div>
+        <p class="mt-2">正在获取智能补全建议...</p>
+    </div>
+</div>
+
+<!-- 快捷键帮助 -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">快捷键帮助</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <h6>编辑操作</h6>
+                        <ul class="list-unstyled">
+                            <li><kbd>Ctrl</kbd> + <kbd>S</kbd> 保存</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>N</kbd> 新建</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>P</kbd> 预览</li>
+                            <li><kbd>F11</kbd> 全屏</li>
+                        </ul>
+                    </div>
+                    <div class="col-6">
+                        <h6>智能补全</h6>
+                        <ul class="list-unstyled">
+                            <li><kbd>Tab</kbd> 触发/接受补全</li>
+                            <li><kbd>Esc</kbd> 取消补全</li>
+                            <li><kbd>↑</kbd><kbd>↓</kbd> 选择建议</li>
+                            <li><kbd>Ctrl</kbd> + <kbd>Space</kbd> 强制补全</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/note_editor.js"></script>
+<script src="/static/js/completion_handler.js"></script>
+
+<script>
+// 页面初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化编辑器
+    if (typeof NoteEditor !== 'undefined') {
+        window.noteEditor = new NoteEditor();
+    }
+    
+    // 绑定快捷键
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key.toLowerCase()) {
+                case 's':
+                    e.preventDefault();
+                    saveCurrentNote();
+                    break;
+                case 'n':
+                    e.preventDefault();
+                    createNewNote();
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    togglePreview();
+                    break;
+            }
+        }
+        
+        if (e.key === 'F1') {
+            e.preventDefault();
+            $('#helpModal').modal('show');
+        }
+    });
+    
+    console.log('智能笔记编辑器已加载');
+});
+</script>
+
+{% endblock %}
