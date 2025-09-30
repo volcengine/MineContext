@@ -41,7 +41,7 @@ Table of Contents
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Running the Server](#running-the-server)
-- [👥 Community](#-community)
+    - [👥 Community](#-community)
   - [Community and Support](#community-and-support)
 - [📃 License](#-license)
 
@@ -72,7 +72,9 @@ MineContext focuses on five key features: effortless collection, intelligent res
 
 ### 1. Installation
 
-Click Below Link or Github Latest Release to Download
+Click [Github Latest Release](https://github.com/volcengine/MineContext/releases) to Download
+
+![Download APP](src/Download-App.gif)
 
 ### 2. Disable the quarantine attribute
 
@@ -81,18 +83,27 @@ Enter the following command in the terminal to disable the quarantine attribute 
 ```
 sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 ```
+![Quarantine](src/Quarantine.gif)
 
 ### 3. Enter Your API-Key
 
-After the application loads, follow the instructions to enter your API-Key. We currently support Doubao and OpenAI, with more platforms and local Ollama models to be added in the future.
+After the application loads（initial run may require installation of some backend environments, which may take a few minutes）, follow the instructions to enter your API-Key. We currently support Doubao and OpenAI, with more platforms and local Ollama models to be added in the future.
+
+![Enter API-Key](src/Enter-API-Key.gif)
 
 ### 4. Start Recording
 
-Enter the 【Settings】 in 【Screen Monitor】 to set your screen sharing area, and click 【Start Recording】 to begin.
+Enter 【Screen Monitor】 to enable the system permissions for screen sharing. After completing the setup, you need to restart the application for the changes to take effect.
+![Enable-Permissions](src/Enable-Permissions.gif)
+
+After restarting the application, please first set your screen sharing area in 【Settings】, then click [Start Recording] to begin taking screenshots.
+![Screen-Settings](src/Screen-Settings.gif)
 
 ### 5. Forget it
 
-After starting recording, your Context will be gradually collected. Then, forget about it and focus on other tasks with peace of mind. MineContext will generate todos, tips, summaries, and activities for you one after another. Of course, you can also engage in proactive Q&A through 【Chat With AI】.
+After starting the recording, your context will gradually be collected. It will take some time to generate value. So, forget about it and focus on other tasks with peace of mind. MineContext will generate to-dos, prompts, summaries, and activities for you in the background. Of course, you can also engage in proactive Q&A through [Chat with AI].
+
+
 
 ## 💎 The Philosophy Behind the Name
 
