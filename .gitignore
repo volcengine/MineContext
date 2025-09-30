@@ -1,0 +1,13 @@
+/build
+/context_lab_env
+__pycache__
+/context_lab.egg-info
+/screenshots
+/logs
+/persist
+/dist/*
+/venv/*
+/test_storage
+/config/runtime
+/test_script
+/config/user_setting.yaml

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 添加必要的库和样式 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="/static/css/assistant.css" rel="stylesheet">
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-robot me-2"></i>
+        智能助手
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="clearChat()">
+                <i class="bi bi-trash3"></i> 清空对话
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-info" onclick="exportChat()">
+                <i class="bi bi-download"></i> 导出
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 主容器 -->
+<div class="assistant-container">
+    <!-- 左侧时间线面板 -->
+    <div class="timeline-panel">
+        <div class="timeline-header">
+            <i class="bi bi-clock-history me-2"></i>
+            执行时间线
+            <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="clearTimeline()">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
+        <div class="timeline-container" id="timelineContainer">
+            <div class="timeline-empty" id="timelineEmpty">
+                <div class="timeline-empty-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <div class="timeline-empty-text">暂无执行记录</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧对话面板 -->
+    <div class="chat-panel">
+        <div class="chat-header">
+            <i class="bi bi-chat-dots me-2"></i>
+            智能对话助手
+            <div class="chat-status" id="chatStatus">
+                <span class="status-indicator offline"></span>
+                <span class="status-text">未连接</span>
+            </div>
+        </div>
+
+        <!-- 对话历史 -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="welcome-text">
+                    <h5>您好！我是智能助手</h5>
+                    <p>我可以帮助您处理各种任务，包括：</p>
+                    <ul>
+                        <li>回答问题和提供信息</li>
+                        <li>分析和处理文档内容</li>
+                        <li>协助完成复杂任务</li>
+                        <li>提供智能建议和解决方案</li>
+                    </ul>
+                    <p>请输入您的问题或需求，我将为您提供帮助。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="chat-input-area">
+            <div class="input-group">
+                <textarea 
+                    class="form-control" 
+                    id="messageInput" 
+                    placeholder="请输入您的问题或需求..."
+                    rows="2"
+                    onkeydown="handleKeyDown(event)"
+                ></textarea>
+                <button class="btn btn-primary" type="button" id="sendButton" onclick="sendMessage()">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+            <div class="input-hints">
+                <small class="text-muted">
+                    按 Ctrl+Enter 发送消息 | 支持 Markdown 格式
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 确认对话框 -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认操作</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody">
+                确定要执行此操作吗？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmButton">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/assistant.js"></script>
+{% endblock %}

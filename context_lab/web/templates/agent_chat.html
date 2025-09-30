@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 添加必要的库和样式 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/continuelist.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="/static/css/agent_chat.css" rel="stylesheet">
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-robot me-2"></i>
+        智能 Agent 对话
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="clearChat()">
+                <i class="bi bi-trash3"></i> 清空对话
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-info" onclick="exportChat()">
+                <i class="bi bi-download"></i> 导出
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 主容器 -->
+<div class="agent-chat-container">
+    <!-- 左侧文档列表面板 -->
+    <div class="documents-panel">
+        <div class="documents-header">
+            <i class="bi bi-folder2-open me-1"></i>
+            我的文档
+        </div>
+        
+        <div class="document-actions">
+            <button class="btn btn-sm btn-success" onclick="createNewDocument()">
+                <i class="bi bi-file-plus me-1"></i>新建
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteCurrentDocument()">
+                <i class="bi bi-trash me-1"></i>删除
+            </button>
+        </div>
+        
+        <div class="documents-list" id="documentsList">
+            <div class="loading" id="documentsLoading">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <div class="mt-2">加载文档中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 中间文档编辑面板 -->
+    <div class="document-preview-panel">
+        <div class="document-header">
+            <div class="header-info">
+                <i class="bi bi-file-text me-2"></i>
+                <span id="documentTitle">选择文档开始编辑</span>
+            </div>
+            <div class="header-actions">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success" id="saveDocBtn" onclick="saveDocument()" disabled>
+                        <i class="bi bi-floppy"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 选中内容显示区域 -->
+        <div class="selected-content-panel" id="selectedContentPanel" style="display: none;">
+            <div class="selected-content-label">当前选中内容：</div>
+            <div class="selected-content-text" id="selectedContentText"></div>
+        </div>
+        
+        <!-- 文档编辑器容器 -->
+        <div class="document-editor" id="documentEditor">
+            <textarea id="documentEditorTextarea" placeholder="选择一个文档开始编辑...支持Markdown语法，按Tab键获取智能补全建议"></textarea>
+        </div>
+        
+        <!-- 补全建议浮层 -->
+        <div class="completion-overlay" id="completionOverlay" style="display: none;">
+            <div class="completion-suggestions" id="completionSuggestions">
+                <!-- 动态生成补全建议 -->
+            </div>
+            <div class="completion-controls text-muted">
+                <small>
+                    <kbd>Tab</kbd> 接受 • <kbd>Esc</kbd> 取消 • <kbd>↑</kbd><kbd>↓</kbd> 选择
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧任务流程面板 -->
+    <div class="workflow-panel">
+        <div class="workflow-header">
+            <i class="bi bi-diagram-3 me-2"></i>
+            任务执行流程
+        </div>
+        
+        <!-- 会话状态 -->
+        <div class="session-status" id="sessionStatus">
+            <div class="status-item">
+                <span class="status-label">会话状态:</span>
+                <span class="status-value" id="sessionStatusValue">等待中</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">当前阶段:</span>
+                <span class="status-value" id="currentStage">-</span>
+            </div>
+        </div>
+
+        <!-- 任务步骤列表 -->
+        <div class="workflow-steps" id="workflowSteps">
+            <div class="empty-workflow">
+                <i class="bi bi-hourglass-split"></i>
+                <p>等待任务开始...</p>
+            </div>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="workflow-progress" id="workflowProgress" style="display: none;">
+            <div class="progress-label">执行进度</div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar">
+                    <span id="progressText">0/0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最右侧AI对话面板 -->
+    <div class="chat-panel">
+        <div class="chat-header">
+            <div class="header-info">
+                <i class="bi bi-chat-dots me-2"></i>
+                智能对话助手
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="切换主题">
+                    <i class="bi bi-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 聊天消息区域 -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- 欢迎消息 -->
+            <div class="message assistant">
+                <div class="message-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="message-text">
+                        👋 你好！我是基于 LangGraph 的智能助手。我可以：
+                        <ul>
+                            <li>💬 与你进行自然对话</li>
+                            <li>📋 制定和执行复杂任务计划</li>
+                            <li>✅ 在执行前征求你的确认</li>
+                            <li>🔄 实时显示任务执行进度</li>
+                            <li>📝 帮助处理文档和内容</li>
+                            <li>📖 基于选中文档内容提供建议</li>
+                        </ul>
+                        试着向我提出问题或请求吧！
+                    </div>
+                    <div class="message-time">刚刚</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="chat-input-area">
+            <div class="input-container">
+                <textarea 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="输入你的问题或请求..."
+                    rows="3"></textarea>
+                <div class="input-actions">
+                    <button class="btn btn-primary chat-send-btn" id="chatSendBtn" onclick="sendMessage()">
+                        <i class="bi bi-send me-1"></i>发送
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 确认对话框模态框 -->
+<div class="modal fade" id="confirmationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                    需要确认执行
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmationModalBody">
+                <!-- 确认内容将动态填充 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="rejectConfirmation()">
+                    <i class="bi bi-x-lg me-1"></i>拒绝
+                </button>
+                <button type="button" class="btn btn-primary" onclick="approveConfirmation()">
+                    <i class="bi bi-check-lg me-1"></i>确认执行
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 任务详情模态框 -->
+<div class="modal fade" id="taskDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-list-task me-2"></i>
+                    任务执行详情
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="taskDetailModalBody">
+                <!-- 任务详情将动态填充 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 加载 JavaScript -->
+<script src="/static/js/agent_chat.js"></script>
+<script src="/static/js/completion_handler.js"></script>
+
+{% endblock %}

@@ -1,0 +1,481 @@
+/* 智能笔记编辑器样式 */
+
+/* 全局样式 */
+.h-100 {
+    height: 100vh !important;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+/* 文档侧边栏样式 */
+.document-sidebar {
+    height: 100vh;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+.sidebar-header {
+    background: #e9ecef;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.document-list {
+    height: calc(100vh - 140px);
+    overflow-y: auto;
+}
+
+.document-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.document-item:hover {
+    background: #e9ecef;
+}
+
+.document-item.active {
+    background: #007bff;
+    color: white;
+}
+
+.document-item .doc-title {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.document-item .doc-meta {
+    font-size: 0.8em;
+    color: #6c757d;
+}
+
+.document-item.active .doc-meta {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 编辑器容器样式 */
+.editor-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-header {
+    flex-shrink: 0;
+    background: white;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.editor-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.editor-wrapper {
+    height: 100%;
+    position: relative;
+}
+
+/* CodeMirror编辑器样式 */
+.CodeMirror {
+    height: 100% !important;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    border: none;
+}
+
+.CodeMirror-scroll {
+    padding: 20px;
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid #007bff;
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+/* 补全建议浮层 */
+.completion-overlay {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 300px;
+    max-width: 500px;
+    max-height: 200px;
+    overflow: hidden;
+}
+
+.completion-suggestions {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.completion-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.completion-item:hover,
+.completion-item.selected {
+    background: #f8f9fa;
+}
+
+.completion-item.selected {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.completion-text {
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.completion-type {
+    font-size: 11px;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.completion-type.semantic_continuation {
+    color: #28a745;
+}
+
+.completion-type.template_completion {
+    color: #007bff;
+}
+
+.completion-type.reference_suggestion {
+    color: #ffc107;
+}
+
+.completion-controls {
+    padding: 6px 12px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+}
+
+/* 补全设置面板 */
+.completion-settings {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+
+.completion-settings .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.completion-settings .form-check-label {
+    font-size: 0.875rem;
+}
+
+/* 编辑器状态栏 */
+.editor-status {
+    flex-shrink: 0;
+    background: #f8f9fa;
+    font-size: 0.8em;
+}
+
+/* 预览面板样式 */
+.preview-panel {
+    height: 100vh;
+    background: white;
+    border-left: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-header {
+    flex-shrink: 0;
+    background: #f8f9fa;
+}
+
+.preview-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.preview-content h1:first-child,
+.preview-content h2:first-child,
+.preview-content h3:first-child {
+    margin-top: 0;
+}
+
+.preview-content p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+}
+
+.preview-content code {
+    background: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.preview-content pre {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.preview-content blockquote {
+    border-left: 4px solid #007bff;
+    padding-left: 16px;
+    margin: 1em 0;
+    color: #6c757d;
+}
+
+/* 补全上下文信息 */
+.completion-context {
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+}
+
+.context-header {
+    background: #f8f9fa;
+}
+
+.context-content {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.context-item {
+    padding: 8px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.context-source {
+    font-weight: 500;
+    color: #007bff;
+    margin-bottom: 4px;
+}
+
+/* 加载状态 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.loading-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.loading-placeholder {
+    color: #6c757d;
+}
+
+/* 空状态样式 */
+.empty-preview {
+    color: #6c757d;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-preview i {
+    font-size: 3em;
+    margin-bottom: 16px;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+    .document-sidebar {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 300px;
+        z-index: 1050;
+        transition: left 0.3s ease;
+    }
+    
+    .document-sidebar.show {
+        left: 0;
+    }
+    
+    .editor-container {
+        margin-left: 0;
+    }
+    
+    .preview-panel {
+        display: none;
+    }
+    
+    .col-md-6 {
+        width: 100% !important;
+    }
+}
+
+/* 暗色主题支持 */
+@media (prefers-color-scheme: dark) {
+    .document-sidebar {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .sidebar-header {
+        background: #4a5568;
+        border-color: #718096;
+    }
+    
+    .document-item:hover {
+        background: #4a5568;
+    }
+    
+    .completion-overlay {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .completion-item:hover {
+        background: #4a5568;
+    }
+    
+    .CodeMirror {
+        background: #1a202c;
+        color: #e2e8f0;
+    }
+}
+
+/* 动画效果 */
+.completion-overlay {
+    animation: fadeInUp 0.2s ease;
+}
+
+.completion-overlay.fade-in {
+    animation: fadeInUp 0.15s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.completion-item {
+    transition: all 0.15s ease;
+    transform: translateX(0);
+}
+
+.completion-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+}
+
+.completion-item.selected {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+/* 编辑器打字效果 */
+.CodeMirror-cursor {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* 状态指示器动画 */
+.editor-status .text-warning {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* 键盘快捷键显示 */
+kbd {
+    background-color: #e9ecef;
+    border: 1px solid #adb5bd;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.2),inset 0 0 0 2px #fff;
+    color: #495057;
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    white-space: nowrap;
+}
+
+/* 滚动条美化 */
+.completion-suggestions::-webkit-scrollbar,
+.document-list::-webkit-scrollbar,
+.preview-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.completion-suggestions::-webkit-scrollbar-track,
+.document-list::-webkit-scrollbar-track,
+.preview-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.completion-suggestions::-webkit-scrollbar-thumb,
+.document-list::-webkit-scrollbar-thumb,
+.preview-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.completion-suggestions::-webkit-scrollbar-thumb:hover,
+.document-list::-webkit-scrollbar-thumb:hover,
+.preview-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

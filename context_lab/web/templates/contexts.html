@@ -1,0 +1,144 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">上下文列表</h1>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <select name="type" class="form-select me-2">
+                <option value="">所有类型</option>
+                {% for context_type in context_types %}
+                    <option value="{{ context_type }}" {% if type == context_type %}selected{% endif %}>{{ context_type }}</option>
+                {% endfor %}
+            </select>
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="limit" value="{{ limit }}">
+            <button type="submit" class="btn btn-primary">筛选</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">上下文</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-3">ID</th>
+                        <th>标题</th>
+                        <th>总结</th>
+                        <th>类型</th>
+                        <th>创建时间</th>
+                        <th class="text-end px-3">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for context in contexts %}
+                    <tr>
+                        <td class="px-3"><a href="#" onclick="viewContext('{{ context.id }}', '{{ context.context_type }}')" title="{{ context.id }}">{{ context.id[:8] }}...</a></td>
+                        <td>{{ context.title or 'N/A' }}</td>
+                        <td>{{ (context.summary or '')[:50] }}{% if context.summary and context.summary|length > 50 %}...{% endif %}</td>
+                        <td><span class="badge bg-secondary">{{ context.context_type }}</span></td>
+                        <td>{{ context.create_time }}</td>
+                        <td class="text-end px-3">
+                            <button onclick="viewContext('{{ context.id }}', '{{ context.context_type }}')" class="btn btn-sm btn-outline-primary">查看</button>
+                            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ context.id }}" data-type="{{ context.context_type }}">删除</button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">没有找到上下文</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="text-muted">
+            第 {{ page }} 页
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+                <li class="page-item {% if not has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ page - 1 }}&limit={{ limit }}{% if type %}&type={{ type }}{% endif %}">上一页</a>
+                </li>
+                <li class="page-item {% if not has_next %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ page + 1 }}&limit={{ limit }}{% if type %}&type={{ type }}{% endif %}">下一页</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function viewContext(contextId, contextType) {
+        try {
+            const response = await fetch('/contexts/detail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: contextId,
+                    context_type: contextType
+                })
+            });
+            
+            if (response.ok) {
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } else {
+                alert('查看失败');
+            }
+        } catch (error) {
+            console.error('查看操作失败:', error);
+            alert('查看操作失败');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const contextId = this.getAttribute('data-id');
+                const contextType = this.getAttribute('data-type');
+                if (confirm('确定要删除这个上下文吗？此操作不可撤销。')) {
+                    try {
+                        const response = await fetch('/contexts/delete', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: contextId,
+                                context_type: contextType
+                            })
+                        });
+                        if (response.ok) {
+                            this.closest('tr').remove();
+                        } else {
+                            const error = await response.json();
+                            alert(`删除失败: ${error.detail || '未知错误'}`);
+                        }
+                    } catch (error) {
+                        console.error('删除操作失败:', error);
+                        alert('删除操作失败，请查看控制台获取详细信息。');
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+        

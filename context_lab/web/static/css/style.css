@@ -1,0 +1,72 @@
+/* General Body Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+}
+
+.sidebar .nav-link {
+    color: #333;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    color: #0d6efd;
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link .feather {
+    margin-right: 8px;
+    color: #6c757d;
+}
+
+.sidebar .nav-link.active .feather,
+.sidebar .nav-link:hover .feather {
+    color: #0d6efd;
+}
+
+/* Main Content Styles */
+.content {
+    padding: 2rem;
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: transparent;
+    color: #212529;
+    font-weight: 500;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+/* Utility classes */
+.border-bottom {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+.h2 {
+    font-weight: 300;
+}

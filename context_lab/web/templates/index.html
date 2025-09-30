@@ -1,0 +1,140 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">主页</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">系统状态</h5>
+            </div>
+            <div class="card-body">
+                <div id="system-status-cards" class="row"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">快速操作</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="/contexts" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">浏览上下文</h6>
+                            <small>&rarr;</small>
+                        </div>
+                        <p class="mb-1">查看所有捕获和处理的上下文信息</p>
+                    </a>
+                    <a href="/monitoring" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">系统监控</h6>
+                            <small>&rarr;</small>
+                        </div>
+                        <p class="mb-1">查看系统性能指标、token消耗和处理统计</p>
+                    </a>
+                    <a href="/debug" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">调试面板</h6>
+                            <small>&rarr;</small>
+                        </div>
+                        <p class="mb-1">调试SQLite数据表和内容生成</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 获取系统状态
+    async function getSystemStatus() {
+        try {
+            const response = await fetch('/api/status');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const container = document.getElementById('system-status-cards');
+            
+            let cardsHtml = '';
+
+            // Capture Module Card
+            cardsHtml += createStatusCard('捕获模块', data.capture, 'cpu');
+            // Processor Module Card
+            cardsHtml += createStatusCard('处理器', data.processor, 'cogs');
+            // Storage Module Card
+            cardsHtml += createStatusCard('存储', data.storage, 'database');
+
+            container.innerHTML = cardsHtml;
+            feather.replace();
+
+        } catch (error) {
+            console.error('获取系统状态失败:', error);
+            document.getElementById('system-status-cards').innerHTML = `<div class="col-12"><div class="alert alert-danger">获取系统状态失败: ${error.message}</div></div>`;
+        }
+    }
+
+    function createStatusCard(title, statusData, icon) {
+        let contentHtml = '<ul class="list-unstyled">';
+        if (Object.keys(statusData).length > 0) {
+            for (const [key, value] of Object.entries(statusData)) {
+                if (typeof value === 'object' && value !== null) {
+                    contentHtml += `<li><strong>${key}:</strong></li>`;
+                    contentHtml += '<ul class="list-unstyled ms-3">';
+                    for (const [subKey, subValue] of Object.entries(value)) {
+                        contentHtml += `<li><strong>${subKey}:</strong> ${renderValue(subValue)}</li>`;
+                    }
+                    contentHtml += '</ul>';
+                } else {
+                    contentHtml += `<li><strong>${key}:</strong> ${renderValue(value)}</li>`;
+                }
+            }
+        } else {
+            contentHtml += '<li>未初始化或无活动组件</li>';
+        }
+        contentHtml += '</ul>';
+
+        return `
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <span data-feather="${icon}" class="me-2"></span>
+                            <h5 class="card-title mb-0">${title}</h5>
+                        </div>
+                        ${contentHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderValue(value) {
+        if (typeof value === 'boolean') {
+            return value ? '<span class="badge bg-success">是</span>' : '<span class="badge bg-danger">否</span>';
+        } if (typeof value === 'number') {
+            return `<span class="badge bg-primary">${value.toFixed(2)}</span>`;
+        }
+        return value;
+    }
+
+    // 页面加载完成后获取系统状态
+    document.addEventListener('DOMContentLoaded', function() {
+        getSystemStatus();
+        // 每30秒刷新一次
+        setInterval(getSystemStatus, 30000);
+    });
+</script>
+{% endblock %}
+        

@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{{ title }} - MineContext</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+            <link rel="stylesheet" href="/static/css/style.css">
+            <style>
+                .sidebar {
+                    position: fixed;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    z-index: 100;
+                    padding: 48px 0 0;
+                    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+                }
+                .sidebar-sticky {
+                    position: relative;
+                    top: 0;
+                    height: calc(100vh - 48px);
+                    padding-top: .5rem;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                }
+                .navbar-brand {
+                    padding-top: .75rem;
+                    padding-bottom: .75rem;
+                    font-size: 1rem;
+                    background-color: rgba(0, 0, 0, .25);
+                    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+                }
+                .navbar .navbar-toggler {
+                    top: .25rem;
+                    right: 1rem;
+                }
+                .content {
+                    padding-top: 60px;
+                }
+                
+                /* 优化侧边栏在大屏幕上的显示 */
+                @media (min-width: 992px) {
+                    .sidebar .nav-link {
+                        text-align: center;
+                        padding: 12px 8px;
+                    }
+                    .sidebar .nav-link [data-feather] {
+                        width: 24px;
+                        height: 24px;
+                    }
+                }
+                
+                /* 为只显示图标的链接添加 tooltip 样式 */
+                .sidebar .nav-link {
+                    position: relative;
+                }
+            </style>
+        </head>
+        <body>
+            <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+                <a class="navbar-brand col-md-2 col-lg-1 me-0 px-3" href="/">MineContext</a>
+                <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-nav">
+                    <div class="nav-item text-nowrap">
+                        <button class="btn btn-outline-light btn-sm me-2" onclick="window.apiAuth.showAPIKeyManager()" title="API Key 设置">
+                            <i data-feather="key"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="container-fluid">
+                <div class="row">
+                    <nav id="sidebarMenu" class="col-md-2 col-lg-1 d-md-block bg-light sidebar collapse">
+                        <div class="sidebar-sticky pt-3">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/" title="主页">
+                                        <span data-feather="home"></span>
+                                        <span class="d-lg-none">主页</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/contexts" title="上下文列表">
+                                        <span data-feather="list"></span>
+                                        <span class="d-lg-none">上下文列表</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/monitoring" title="系统监控">
+                                        <span data-feather="activity"></span>
+                                        <span class="d-lg-none">系统监控</span>
+                                    </a>
+                                </li>
+                                <!-- 暂时隐藏 vaults 界面
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/vaults" title="AI文档协作">
+                                        <span data-feather="book-open"></span>
+                                        <span class="d-lg-none">AI文档协作</span>
+                                    </a>
+                                </li>
+                                -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/assistant" title="智能助手">
+                                        <span data-feather="message-circle"></span>
+                                        <span class="d-lg-none">智能助手</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/vector_search" title="向量检索">
+                                        <span data-feather="database"></span>
+                                        <span class="d-lg-none">向量检索</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/debug" title="调试面板">
+                                        <span data-feather="tool"></span>
+                                        <span class="d-lg-none">调试面板</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+
+                    <main class="col-md-10 ms-sm-auto col-lg-11 px-md-4 content">
+                        {% block content %}{% endblock %}
+                    </main>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+            <script src="/static/js/api_auth.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    feather.replace();
+                    
+                    // Highlight the current page link
+                    const currentPath = window.location.pathname;
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        if (link.getAttribute('href') === currentPath) {
+                            link.classList.add('active');
+                        }
+                    });
+                });
+            </script>
+            {% block scripts %}{% endblock %}
+        </body>
+        </html>
+        

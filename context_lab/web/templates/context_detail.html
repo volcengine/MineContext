@@ -1,0 +1,186 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">上下文详情</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="/contexts" class="btn btn-sm btn-outline-secondary">返回列表</a>
+            <button class="btn btn-sm btn-outline-danger" id="delete-btn">删除</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <!-- Title and Processed Info/Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ context.title or 'N/A' }}</h5>
+            </div>
+            <div class="card-body">
+                <!-- Summary -->
+                {% if context.summary %}
+                <div class="mb-4">
+                    <h6>总结</h6>
+                    <p class="text-muted">{{ context.summary }}</p>
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Processed Info -->
+                <h6>处理后信息</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>ID:</strong> <small class="text-muted">{{ context.id }}</small></li>
+                    <li class="list-group-item"><strong>上下文类型:</strong> <span class="badge bg-primary">{{ context.context_type }}</span></li>
+                    <li class="list-group-item"><strong>创建时间:</strong> <small class="text-muted">{{ context.create_time }}</small></li>
+                    <li class="list-group-item"><strong>更新时间:</strong> <small class="text-muted">{{ context.update_time }}</small></li>
+                    <li class="list-group-item"><strong>事件时间:</strong> <small class="text-muted">{{ context.event_time }}</small></li>
+                    <li class="list-group-item"><strong>调用次数:</strong> <small class="text-muted">{{ context.call_count }}</small></li>
+                    <li class="list-group-item"><strong>合并次数:</strong> <small class="text-muted">{{ context.merge_count }}</small></li>
+                    <li class="list-group-item"><strong>持续次数:</strong> <small class="text-muted">{{ context.duration_count }}</small></li>
+                    <li class="list-group-item"><strong>置信度:</strong> <small class="text-muted">{{ context.confidence }}</small></li>
+                    <li class="list-group-item"><strong>重要性:</strong> <small class="text-muted">{{ context.importance }}</small></li>
+                    <li class="list-group-item"><strong>是否发生:</strong> <small class="text-muted">{{ context.is_happend }}</small></li>
+                </ul>
+                {% if context.entities %}
+                <hr>
+                <h6>实体</h6>
+                <p>
+                    {% for entity in context.entities %}
+                        <span class="badge bg-info">{{ entity }}</span>
+                    {% endfor %}
+                </p>
+                {% endif %}
+                {% if context.metadata %}
+                <hr>
+                <h6>元数据</h6>
+                <ul class="list-group list-group-flush">
+                    {% for key, value in context.metadata.items() %}
+                        <li class="list-group-item">
+                            <strong>{{ key }}:</strong> 
+                            {% if value is mapping %}
+                                <pre class="mb-0 bg-light p-2 rounded">{{ value | tojson(indent=2) }}</pre>
+                            {% elif value is iterable and value is not string %}
+                                <div>
+                                    {% for item in value %}
+                                        <span class="badge bg-secondary">{{ item }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <small class="text-muted">{{ value }}</small>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <hr>
+                <h6>Keywords</h6>
+                <p>
+                    {% if context.keywords %}
+                        {% for keyword in context.keywords %}
+                            <span class="badge bg-secondary">{{ keyword }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <small class="text-muted">No keywords.</small>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Raw Data -->
+        <div class="card mb-4">
+            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" href="#raw-data-collapse" role="button" aria-expanded="false" aria-controls="raw-data-collapse">
+                <h6 class="d-flex justify-content-between align-items-center mb-0">
+                    原始数据
+                    <i class="fas fa-chevron-down"></i>
+                </h6>
+            </div>
+            <div class="collapse" id="raw-data-collapse">
+                <div class="card-body">
+                    {% if context.raw_contexts %}
+                        {% for raw_context in context.raw_contexts %}
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <strong>Object ID:</strong> <small class="text-muted">{{ raw_context.object_id }}</small>
+                            </div>
+                            <div class="card-body">
+                                {% if raw_context.content_format == 'image' and raw_context.content_path %}
+                                    <img src="/files/{{ raw_context.content_path }}" class="img-fluid rounded" alt="Image">
+                                {% elif raw_context.content_format == 'video' and raw_context.content_path %}
+                                    <video controls class="img-fluid rounded">
+                                        <source src="/files/{{ raw_context.content_path }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% elif raw_context.content_text is mapping %}
+                                    <pre class="content-pre bg-light p-3 rounded">{{ raw_context.content_text | tojson(indent=2) }}</pre>
+                                {% elif raw_context.content_text is string and (raw_context.content_text.strip().startswith('{') or raw_context.content_text.strip().startswith('[')) %}
+                                    <pre class="content-pre bg-light p-3 rounded">{{ raw_context.content_text | tojson(indent=2) }}</pre>
+                                {% else %}
+                                    <pre class="content-pre bg-light p-3 rounded">{{ raw_context.content_text }}</pre>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <h6>元数据</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>类型:</strong> <span class="badge bg-info">{{ raw_context.source }}</span></li>
+                                    <li class="list-group-item"><strong>数据类型:</strong> <span class="badge bg-success">{{ raw_context.content_format }}</span></li>
+                                    <li class="list-group-item"><strong>创建时间:</strong> <small class="text-muted">{{ raw_context.create_time }}</small></li>
+                                </ul>
+                                {% if raw_context.additional_info %}
+                                <hr>
+                                <h6>Additional Info</h6>
+                                <ul class="list-group list-group-flush">
+                                    {% for key, value in raw_context.additional_info.items() %}
+                                        <li class="list-group-item"><strong>{{ key }}:</strong> <small class="text-muted">{{ value }}</small></li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">没有原始数据。</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-pre, .metadata-pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('delete-btn').addEventListener('click', async function() {
+            if (confirm('确定要删除这个上下文吗？此操作不可撤销。')) {
+                try {
+                    const response = await fetch(`/api/contexts/{{ context.id }}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        window.location.href = '/contexts';
+                    } else {
+                        const error = await response.json();
+                        alert(`删除失败: ${error.detail || '未知错误'}`);
+                    }
+                } catch (error) {
+                    console.error('删除操作失败:', error);
+                    alert('删除操作失败，请查看控制台获取详细信息。');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+        
