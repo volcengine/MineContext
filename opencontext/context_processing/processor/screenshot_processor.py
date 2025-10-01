@@ -218,11 +218,6 @@ class ScreenshotProcessor(BaseContextProcessor):
                     "type": "image_url",
                     "image_url": {
                         "url": f"data:image/png;base64,{base64_image}",
-                        "detail": "auto"
-                    },
-                    "source": {
-                        # "screen_id": i,
-                        "time": raw_contexts[i].create_time.isoformat()  # Recommend using UTC with timezone
                     }
                 }))
 
