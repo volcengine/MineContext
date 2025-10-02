@@ -1,12 +1,22 @@
 <div align="center">
 
 <picture>
-  <img alt="MineContext" src="src/MineContext-Banner.svg" width="80%" height="auto">
+  <img alt="MineContext" src="src/MineContext-Banner.svg" width="100%" height="auto">
 </picture>
+
+### MineContext：Create with Context,Clarity from Chaos
 
 An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
 
 <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
+
+[![][release-shield]][release-link]
+[![][github-stars-shield]][github-stars-link]
+[![][github-issues-shield]][github-issues-shield-link]
+[![][github-contributors-shield]][github-contributors-link]
+[![][license-shield]][license-shield-link]  
+[![][last-commit-shield]][last-commit-shield-link]
+[![][wechat-shield]][wechat-shield-link]
 
 [中文](README_zh.md) / English
 
@@ -41,8 +51,9 @@ Table of Contents
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Running the Server](#running-the-server)
-    - [👥 Community](#-community)
+- [👥 Community](#-community)
   - [Community and Support](#community-and-support)
+- [Star History](#star-history)
 - [📃 License](#-license)
 
 <br>
@@ -133,7 +144,8 @@ We will prioritize the expansion of Context Sources according to the following p
 
 | Context Capture Capability   | Context Source                     | Priority | Completion Status |
 | :--------------------------- | :--------------------------------- | :------- | :---------------- |
-| Desktop Screenshot Monitor   | User PC Information                | P0       | ✅                |
+| Screen Screenshot            | User PC Information                | P0       | ✅                |
+| Note Editing                 | Application Internal Creation Information | P0       | ✅                |
 | Link Upload                  | Internet Information               | P0       |                   |
 | File Upload                  | Structured Documents               | P1       |                   |
 | File Upload                  | Unstructured Documents             | P1       |                   |
@@ -301,13 +313,18 @@ python -m opencontext.cli start
 python -m opencontext.cli start --config /path/to/config.yaml
 ```
 
-#### 👥 Community
+## 👥 Community
 
 ### Community and Support
 
 - [GitHub Issues](https://github.com/bytedance/MineContext/issues): Errors and issues encountered while using MineContext.
 - [Email Support](mailto:minecontext@bytedance.com): Feedback and questions about using MineContext.
 - <a href="Online Supportl">WeChat Group</a>: Discuss SwanLab usage and share the latest AI technologies.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=volcengine/MineContext&type=Timeline)](https://www.star-history.com/#volcengine/MineContext&Timeline)
+
 
 ## 📃 License
 

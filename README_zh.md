@@ -1,12 +1,22 @@
 <div align="center">
 
 <picture>
-  <img alt="MineContext" src="src/MineContext-Banner.svg" width="80%" height="auto">
+  <img alt="MineContext" src="src/MineContext-Banner.svg" width="100%" height="auto">
 </picture>
+
+### MineContext：洞察本质，激发创造
 
 一个开源、主动的上下文感知AI伙伴，致力于让您的工作、学习与创作更加清晰高效。
 
 <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
+
+[![][release-shield]][release-link]
+[![][github-stars-shield]][github-stars-link]
+[![][github-issues-shield]][github-issues-shield-link]
+[![][github-contributors-shield]][github-contributors-link]
+[![][license-shield]][license-shield-link]  
+[![][last-commit-shield]][last-commit-shield-link]
+[![][wechat-shield]][wechat-shield-link]
 
 中文 / [English](README.md)
 
@@ -34,8 +44,6 @@
 - [🆚 与同类应用的比较](#-与同类应用的比较)
   - [MineContext vs ChatGPT Pulse](#minecontext-vs-chatgpt-pulse)
   - [MineContext vs Dayflow](#minecontext-vs-dayflow)
-- [👥 社区](#-社区)
-  - [社区与支持](#社区与支持)
 - [🏗️ 后端架构](#️-后端架构)
   - [核心架构组件](#核心架构组件)
   - [各层职责](#各层职责)
@@ -43,8 +51,9 @@
   - [安装](#安装)
   - [配置](#配置)
   - [运行服务器](#运行服务器)
-  - [👥 社区](#-社区-1)
-  - [社区与支持](#社区与支持-1)
+- [👥 社区](#-社区)
+  - [社区与支持](#社区与支持)
+- [Star History](#star-history)
 - [📃 许可证](#-许可证)
 
 ## 👋🏻 MineContext是什么
@@ -55,9 +64,9 @@ MineContext 是一个具有上下文感知能力的主动式AI伙伴。它基于
 
 ## 🚀 核心功能
 
-MineContext专注于三个核心功能：轻松收集、智能重显和主动交付。
+MineContext专注于五个核心功能：轻松收集、智能重显和主动交付。
 
-1. 📥 无负担收集
+1. 📥 无感收集
    支持收集和处理海量的Context，并通过设计存储管理来实现海量收集却没有心智负担。
 2. 🚀 主动推送
    支持日常主动推送关键信息和洞见，能够提炼Context中的总结信息，比如每日总结，每周总结，tips，todo，主动推送到主页。
@@ -137,7 +146,8 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 
 | 上下文捕获能力   | 上下文来源       | 优先级 | 完成状态 |
 | :--------------- | :--------------- | :----- | :------- |
-| 桌面截图监控     | 用户PC信息       | P0     | ✅       |
+| 屏幕截图     | 用户PC信息       | P0     | ✅       |
+| 笔记编辑     | 应用内创作信息       | P0     | ✅       |
 | 链接上传         | 互联网信息       | P0     |          |
 | 文件上传         | 结构化文档       | P1     |          |
 | 文件上传         | 非结构化文档     | P1     |          |
@@ -191,14 +201,6 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
   MineContext允许您基于捕获的上下文提问和生成新内容，解锁更广泛的应用场景，如内容起草和项目规划。DayFlow仅限于被动的活动记录和回顾。
 - ✨ 更优质的活动生成与体验：
   MineContext生成的活动记录更加清晰和详细，具有更直观和交互式的仪表板，提供无缝的用户体验。DayFlow的活动日志更基本，交互性有限。
-
-## 👥 社区
-
-### 社区与支持
-
-- [GitHub Issues](https://github.com/bytedance/MineContext/issues)：使用MineContext时遇到的错误和问题。
-- [邮件支持](mailto:minecontext@bytedance.com)：关于使用MineContext的反馈和问题。
-- <a href="Online Supportl">微信群</a>：讨论MineContext使用并分享最新AI技术。
 
 ## 🏗️ 后端架构
 
@@ -311,13 +313,18 @@ python -m opencontext.cli start
 python -m opencontext.cli start --config /path/to/config.yaml
 ```
 
-### 👥 社区
+## 👥 社区
 
 ### 社区与支持
 
 - [GitHub Issues](https://github.com/bytedance/MineContext/issues)：使用MineContext时遇到的错误和问题。
 - [邮件支持](mailto:minecontext@bytedance.com)：关于使用MineContext的反馈和问题。
 - <a href="Online Supportl">微信群</a>：讨论MineContext使用并分享最新AI技术。
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=volcengine/MineContext&type=Timeline)](https://www.star-history.com/#volcengine/MineContext&Timeline)
+
 
 ## 📃 许可证
 
