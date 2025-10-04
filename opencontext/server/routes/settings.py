@@ -29,12 +29,15 @@ router = APIRouter(tags=["model-settings"])
 _config_lock = threading.Lock()
 
 class ModelSettingsVO(BaseModel):
-    """模型设置数据结构"""
+    """模型设置数据结构 (保持原始字段以兼容历史客户端)
+    安全调整: GET 接口中 apiKey 字段现在直接返回掩码后的值，而非明文；。
+    这样旧前端仍可显示(只是掩码)，避免破坏性变更。
+    """
     modelPlatform: str = Field(..., description="模型平台: doubao | openai")
     modelId: str = Field(..., description="VLM模型ID")
     baseUrl: str = Field(..., description="API基础URL")
     embeddingModelId: str = Field(..., description="嵌入模型ID")
-    apiKey: str = Field(..., description="API密钥")
+    apiKey: str = Field(..., description="API密钥(更新请求需提供; 查询返回为掩码值)")
 
 
 class GetModelSettingsRequest(BaseModel):
@@ -43,12 +46,12 @@ class GetModelSettingsRequest(BaseModel):
 
 
 class GetModelSettingsResponse(BaseModel):
-    """获取模型设置响应"""
+    """获取模型设置响应 (apiKey 为掩码值)"""
     config: ModelSettingsVO
 
 
 class UpdateModelSettingsRequest(BaseModel):
-    """更新模型设置请求"""
+    """更新模型设置请求 (继续使用原始模型, 接受明文 apiKey)"""
     config: ModelSettingsVO
 
 
@@ -65,10 +68,16 @@ async def get_model_settings(
     获取当前模型配置
     """
     try:
+        def _mask_api_key(raw: str) -> str:
+            # 直接硬编码：保留前4后2，中间 ***
+            if not raw:
+                return ""
+            if len(raw) <= 6:  # 4 + 2
+                return raw[0] + "***" if len(raw) > 1 else "***"
+            return f"{raw[:4]}***{raw[-2:]}"
         # 从全局配置获取当前设置
         global_config = GlobalConfig.get_instance()
         config = global_config.get_config()
-        
         if not config:
             raise HTTPException(status_code=500, detail="配置未初始化")
         
@@ -80,13 +89,15 @@ async def get_model_settings(
         base_url = vlm_config.get("base_url", "")
         platform = vlm_config.get("provider", "")
         
-        # 构造响应
+        # 构造响应 - 使用掩码
+        masked_key = _mask_api_key(vlm_config.get("api_key", ""))
+        # 注意：apiKey 字段返回空串以兼容老客户端字段存在性，但不泄露明文
         model_settings = ModelSettingsVO(
             modelPlatform=platform,
             modelId=vlm_config.get("model", ""),
             baseUrl=base_url,
             embeddingModelId=embedding_config.get("model", ""),
-            apiKey=vlm_config.get("api_key", "")
+            apiKey=masked_key  # 直接使用掩码后的 key，避免泄露明文
         )
         
         response = GetModelSettingsResponse(config=model_settings)
@@ -98,7 +109,6 @@ async def get_model_settings(
         logger.exception(f"获取模型设置失败: {e}")
         return convert_resp(code=500, status=500, message=f"获取模型设置失败: {str(e)}")
 
-
 @router.post("/api/model_settings/update")
 async def update_model_settings(
     request: UpdateModelSettingsRequest,
@@ -109,8 +119,26 @@ async def update_model_settings(
     """
     with _config_lock:
         try:
-            # 验证请求
-            if not request.config.apiKey:
+            def _is_masked_api_key(val: str) -> bool:
+                # 直接硬编码：包含 *** 且不以 *** 结尾 且长度>=6
+                if not val:
+                    return False
+                return ("***" in val) and not val.endswith("***") and len(val) >= 6
+            global_config = GlobalConfig.get_instance()
+            current_cfg = global_config.get_config() or {}
+            current_vlm_key = (current_cfg.get("vlm_model") or {}).get("api_key", "")
+ 
+            incoming_key = request.config.apiKey
+            keep_original = _is_masked_api_key(incoming_key)
+
+            if not incoming_key and not current_vlm_key:
+                # 没有任何真实 key
+                raise HTTPException(status_code=400, detail="api key cannot be empty")
+
+            # 如果是掩码表示不修改；否则使用新 key
+            final_api_key = current_vlm_key if keep_original else incoming_key
+
+            if not final_api_key:
                 raise HTTPException(status_code=400, detail="api key cannot be empty")
             if not request.config.modelId:
                 raise HTTPException(status_code=400, detail="vlm model cannot be empty")
@@ -125,14 +153,14 @@ async def update_model_settings(
             new_settings = {
                 "vlm_model": {
                     "base_url": request.config.baseUrl,
-                    "api_key": request.config.apiKey,
+                    "api_key": final_api_key,
                     "model": request.config.modelId,
                     "provider": request.config.modelPlatform,
                     "temperature": 0.7
                 },
                 "embedding_model": {
                     "base_url": request.config.baseUrl,
-                    "api_key": request.config.apiKey,
+                    "api_key": final_api_key,
                     "model": request.config.embeddingModelId,
                     "provider": request.config.modelPlatform,
                     "output_dim": 2048
@@ -177,6 +205,7 @@ async def update_model_settings(
         except HTTPException:
             raise
         except Exception as e:
+            logger.error(f"更新模型设置失败: {e}")
             return convert_resp(
                 code=500,
                 status=500,
