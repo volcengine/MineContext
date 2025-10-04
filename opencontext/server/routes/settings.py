@@ -29,12 +29,15 @@ router = APIRouter(tags=["model-settings"])
 _config_lock = threading.Lock()
 
 class ModelSettingsVO(BaseModel):
-    """模型设置数据结构"""
+    """模型设置数据结构 (保持原始字段以兼容历史客户端)
+    安全调整: GET 接口中 apiKey 字段现在直接返回掩码后的值，而非明文；。
+    这样旧前端仍可显示(只是掩码)，避免破坏性变更。
+    """
     modelPlatform: str = Field(..., description="模型平台: doubao | openai")
     modelId: str = Field(..., description="VLM模型ID")
     baseUrl: str = Field(..., description="API基础URL")
     embeddingModelId: str = Field(..., description="嵌入模型ID")
-    apiKey: str = Field(..., description="API密钥")
+    apiKey: str = Field(..., description="API密钥(更新请求需提供; 查询返回为掩码值)")
 
 
 class GetModelSettingsRequest(BaseModel):
@@ -43,12 +46,12 @@ class GetModelSettingsRequest(BaseModel):
 
 
 class GetModelSettingsResponse(BaseModel):
-    """获取模型设置响应"""
+    """获取模型设置响应 (apiKey 为掩码值)"""
     config: ModelSettingsVO
 
 
 class UpdateModelSettingsRequest(BaseModel):
-    """更新模型设置请求"""
+    """更新模型设置请求 (继续使用原始模型, 接受明文 apiKey)"""
     config: ModelSettingsVO
 
 
@@ -80,13 +83,24 @@ async def get_model_settings(
         base_url = vlm_config.get("base_url", "")
         platform = vlm_config.get("provider", "")
         
-        # 构造响应
+        # 构造响应 - 使用掩码
+        def _mask_key(raw: str) -> str:
+            """对密钥做掩码：保持前4后2，中间替换为***，长度不足时简单处理。
+            不在任何情况下回显原始密钥。"""
+            if not raw:
+                return ""
+            if len(raw) <= 6:
+                return raw[0] + "***" if len(raw) > 1 else "***"
+            return f"{raw[:4]}***{raw[-2:]}"
+
+        masked_key = _mask_key(vlm_config.get("api_key", ""))
+        # 注意：apiKey 字段返回空串以兼容老客户端字段存在性，但不泄露明文
         model_settings = ModelSettingsVO(
             modelPlatform=platform,
             modelId=vlm_config.get("model", ""),
             baseUrl=base_url,
             embeddingModelId=embedding_config.get("model", ""),
-            apiKey=vlm_config.get("api_key", "")
+            apiKey=masked_key  # 直接使用掩码后的 key，避免泄露明文
         )
         
         response = GetModelSettingsResponse(config=model_settings)
