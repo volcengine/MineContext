@@ -25,38 +25,39 @@ from typing import Optional
 logger = get_logger(__name__)
 router = APIRouter(tags=["model-settings"])
 
-# 全局锁，用于确保配置更新的原子性
+# Global lock to ensure atomic configuration updates
 _config_lock = threading.Lock()
 
 class ModelSettingsVO(BaseModel):
-    """模型设置数据结构 (保持原始字段以兼容历史客户端)
-    安全调整: GET 接口中 apiKey 字段现在直接返回掩码后的值，而非明文；。
-    这样旧前端仍可显示(只是掩码)，避免破坏性变更。
     """
-    modelPlatform: str = Field(..., description="模型平台: doubao | openai")
-    modelId: str = Field(..., description="VLM模型ID")
-    baseUrl: str = Field(..., description="API基础URL")
-    embeddingModelId: str = Field(..., description="嵌入模型ID")
-    apiKey: str = Field(..., description="API密钥(更新请求需提供; 查询返回为掩码值)")
+    Model settings data structure (keeps original field names for backward compatibility).
+    Security adjustment: In the GET API, the apiKey field now returns a masked value instead of the plaintext.
+    This allows old frontends to still display (masked) without a breaking change.
+    """
+    modelPlatform: str = Field(..., description="Model platform: doubao | openai")
+    modelId: str = Field(..., description="VLM model ID")
+    baseUrl: str = Field(..., description="API base URL")
+    embeddingModelId: str = Field(..., description="Embedding model ID")
+    apiKey: str = Field(..., description="API key (plaintext required in update request; masked in query response)")
 
 
 class GetModelSettingsRequest(BaseModel):
-    """获取模型设置请求（空请求）"""
+    """Request body for fetching model settings (empty body)."""
     pass
 
 
 class GetModelSettingsResponse(BaseModel):
-    """获取模型设置响应 (apiKey 为掩码值)"""
+    """Response body for fetching model settings (apiKey is masked)."""
     config: ModelSettingsVO
 
 
 class UpdateModelSettingsRequest(BaseModel):
-    """更新模型设置请求 (继续使用原始模型, 接受明文 apiKey)"""
+    """Request body for updating model settings (accepts plaintext apiKey)."""
     config: ModelSettingsVO
 
 
 class UpdateModelSettingsResponse(BaseModel):
-    """更新模型设置响应"""
+    """Response body for updating model settings."""
     success: bool
     message: str
 
@@ -65,39 +66,39 @@ async def get_model_settings(
     _auth: str = auth_dependency
 ):
     """
-    获取当前模型配置
+    Get current model configuration.
     """
     try:
         def _mask_api_key(raw: str) -> str:
-            # 直接硬编码：保留前4后2，中间 ***
+            # Fixed rule: keep first 4 and last 2 characters, mask the middle with ***
             if not raw:
                 return ""
             if len(raw) <= 6:  # 4 + 2
                 return raw[0] + "***" if len(raw) > 1 else "***"
             return f"{raw[:4]}***{raw[-2:]}"
-        # 从全局配置获取当前设置
+        # Retrieve current settings from global config
         global_config = GlobalConfig.get_instance()
         config = global_config.get_config()
         if not config:
             raise HTTPException(status_code=500, detail="配置未初始化")
         
-        # 获取VLM和嵌入模型配置
+        # Get VLM and embedding model configs
         vlm_config = config.get("vlm_model", {})
         embedding_config = config.get("embedding_model", {})
         
-        # 推断平台类型
+        # Infer platform type
         base_url = vlm_config.get("base_url", "")
         platform = vlm_config.get("provider", "")
         
-        # 构造响应 - 使用掩码
+        # Build response - using masked api key
         masked_key = _mask_api_key(vlm_config.get("api_key", ""))
-        # 注意：apiKey 字段返回空串以兼容老客户端字段存在性，但不泄露明文
+        # Note: apiKey returns masked string for backward compatibility (field presence kept)
         model_settings = ModelSettingsVO(
             modelPlatform=platform,
             modelId=vlm_config.get("model", ""),
             baseUrl=base_url,
             embeddingModelId=embedding_config.get("model", ""),
-            apiKey=masked_key  # 直接使用掩码后的 key，避免泄露明文
+            apiKey=masked_key
         )
         
         response = GetModelSettingsResponse(config=model_settings)
@@ -106,7 +107,7 @@ async def get_model_settings(
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"获取模型设置失败: {e}")
+        logger.exception(f"Failed to get model settings: {e}")
         return convert_resp(code=500, status=500, message=f"获取模型设置失败: {str(e)}")
 
 @router.post("/api/model_settings/update")
@@ -115,12 +116,12 @@ async def update_model_settings(
     _auth: str = auth_dependency
 ):
     """
-    更新模型配置并重新初始化LLM客户端
+    Update model configuration and reinitialize LLM clients.
     """
     with _config_lock:
         try:
             def _is_masked_api_key(val: str) -> bool:
-                # 直接硬编码：包含 *** 且不以 *** 结尾 且长度>=6
+                # Heuristic: contains *** , does not end with *** , and length >= 6
                 if not val:
                     return False
                 return ("***" in val) and not val.endswith("***") and len(val) >= 6
@@ -132,10 +133,10 @@ async def update_model_settings(
             keep_original = _is_masked_api_key(incoming_key)
 
             if not incoming_key and not current_vlm_key:
-                # 没有任何真实 key
+                # No valid key provided
                 raise HTTPException(status_code=400, detail="api key cannot be empty")
 
-            # 如果是掩码表示不修改；否则使用新 key
+            # If masked -> keep original; else use new key
             final_api_key = current_vlm_key if keep_original else incoming_key
 
             if not final_api_key:
@@ -149,7 +150,7 @@ async def update_model_settings(
             if not request.config.baseUrl:
                 raise HTTPException(status_code=400, detail="vlm model base url cannot be empty")
             
-            # 构造新的配置
+            # Construct new settings dict
             new_settings = {
                 "vlm_model": {
                     "base_url": request.config.baseUrl,
@@ -167,7 +168,7 @@ async def update_model_settings(
                 }
             }
             
-            # 获取配置管理器
+            # Get config manager
             config_manager = GlobalConfig.get_instance().get_config_manager()
             
             if not config_manager:
@@ -180,16 +181,16 @@ async def update_model_settings(
             config_manager.load_config(current_config_path)
 
             try:
-                # 重新初始化VLM客户端
+                # Reinitialize VLM client
                 vlm_success = GlobalVLMClient.get_instance().reinitialize()
-                logger.info("VLM客户端重新初始化成功")
+                logger.info("VLM client reinitialized successfully")
                 embedding_success = GlobalEmbeddingClient.get_instance().reinitialize()
-                logger.info("嵌入客户端重新初始化成功")
+                logger.info("Embedding client reinitialized successfully")
                 if not vlm_success or not embedding_success:
                     raise HTTPException(status_code=500, detail="internal error: reinitialize LLM clients failed")
                 
             except Exception as e:
-                logger.error(f"重新初始化LLM客户端失败: {e}")
+                logger.error(f"Failed to reinitialize LLM client: {e}")
                 return convert_resp(
                     code=500,
                     status=500,
@@ -205,7 +206,7 @@ async def update_model_settings(
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"更新模型设置失败: {e}")
+            logger.error(f"Failed to update model settings: {e}")
             return convert_resp(
                 code=500,
                 status=500,
