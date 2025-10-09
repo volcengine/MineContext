@@ -43,7 +43,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: "MineContext Version"
+      label: "🛠️ MineContext Version"
       description: "What version of MineContext are you using?"
       placeholder: "e.g., 0.1.0"
     validations:
@@ -52,7 +52,7 @@ body:
   - type: textarea
     id: platform
     attributes:
-      label: "Platform Details"
+      label: "💻 Platform Details"
       description: "Please specify your platform, OS version, and any other relevant system information"
       placeholder: |
           Operating System: 

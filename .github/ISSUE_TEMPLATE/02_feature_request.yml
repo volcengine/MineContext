@@ -3,13 +3,10 @@ description: "Suggest an idea for this project"
 title: "[FEATURE]: "
 labels: ["feature"]
 body:
-  - type: markdown
-    attributes:
-      value: "## 📝 Features description [Please make everyone to understand it]"
   - type: textarea
     id: feature-description
     attributes:
-      label: "Feature Description"
+      label: "📝 Feature Description [Please make everyone to understand it]"
       description: "Briefly describe this feature"
       placeholder: "Please provide a clear and concise description of the feature suggestion..."
     validations:
