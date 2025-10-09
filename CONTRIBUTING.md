@@ -14,16 +14,52 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    ```
 2. **Set up your environment**
 
+   We recommend using [uv](https://docs.astral.sh/uv/) for faster dependency management:
+
+   **Option 1: Using uv (Recommended)**
+
+   ```bash
+   # Install uv if you haven't already
+   # macOS/Linux:
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   # Windows:
+   # powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+   # Install dependencies
+   uv sync
+
+   # Run commands in the uv environment
+   uv run python -m opencontext.cli start
+   ```
+
+   **Option 2: Using traditional venv**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
+   pip install -e .
    ```
 3. **Configure and run**
 
+   **If using uv:**
    ```bash
-   # Start the server
+   # Start with default configuration
+   uv run python -m opencontext.cli start
+
+   # Start with custom config
+   uv run python -m opencontext.cli start --config /path/to/config.yaml
+   ```
+
+   **If using traditional venv:**
+   ```bash
+   # Make sure virtual environment is activated first
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+   # Start with default configuration
    python -m opencontext.cli start
+
+   # Start with custom config
+   python -m opencontext.cli start --config /path/to/config.yaml
    ```
 
 ## How to Contribute

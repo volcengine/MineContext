@@ -260,16 +260,18 @@ opencontext/
 
 ### 安装
 
+我们推荐使用 [uv](https://docs.astral.sh/uv/) 进行快速、可靠的包管理：
+
 ```bash
 # 克隆仓库
 git clone https://github.com/volcengine/MineContext.git
 cd MineContext
 
-python -m venv venv
-source venv/bin/activate
+# 安装 uv（如果尚未安装）
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 安装依赖
-pip install -r requirements.txt
+# 同步依赖（自动创建虚拟环境）
+uv sync
 ```
 
 ### 配置
@@ -307,10 +309,18 @@ capture:
 
 ```bash
 # 使用默认配置启动
-python -m opencontext.cli start
+uv run python -m opencontext.cli start
 
 # 使用自定义配置启动
-python -m opencontext.cli start --config /path/to/config.yaml
+uv run python -m opencontext.cli start --config /path/to/config.yaml
+```
+
+或者，你也可以手动激活虚拟环境：
+
+```bash
+source .venv/bin/activate  # Windows系统: .venv\Scripts\activate
+pip install -e .
+python -m opencontext.cli start
 ```
 
 ## 👥 社区

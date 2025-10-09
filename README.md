@@ -260,16 +260,18 @@ opencontext/
 
 ### Installation
 
+We recommend using [uv](https://docs.astral.sh/uv/) for fast and reliable package management:
+
 ```bash
 # Clone repository
 git clone https://github.com/volcengine/MineContext.git
 cd MineContext
 
-python -m venv venv
-source venv/bin/activate
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pip install -r requirements.txt
+# Sync dependencies (automatically creates virtual environment)
+uv sync
 ```
 
 ### Configuration
@@ -307,10 +309,18 @@ capture:
 
 ```bash
 # Start with default configuration
-python -m opencontext.cli start
+uv run python -m opencontext.cli start
 
 # Start with custom config
-python -m opencontext.cli start --config /path/to/config.yaml
+uv run python -m opencontext.cli start --config /path/to/config.yaml
+```
+
+Alternatively, you can activate the virtual environment manually:
+
+```bash
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -e .
+python -m opencontext.cli start
 ```
 
 ## 👥 Community
