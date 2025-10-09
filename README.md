@@ -247,7 +247,7 @@ opencontext/
    - Multi-modal content processing (text, images)
 5. **Storage Layer** (`storage/`)
 
-   - Multi-backend support (SQLite, ChromaDB, VikingDB)
+   - Multi-backend support (SQLite, ChromaDB)
    - Vector storage for similarity search
    - Unified storage interface
 6. **LLM Integration** (`llm/`)

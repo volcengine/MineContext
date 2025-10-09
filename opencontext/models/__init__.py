@@ -10,7 +10,6 @@
 from opencontext.models.enums import (
     ContextSource,
     ContentFormat,
-    ExtractedTags,
 )
 from opencontext.models.context import (
     RawContextProperties,
@@ -26,5 +25,4 @@ __all__ = [
     "ContextProperties",
     "ContextSource",
     "ContentFormat",
-    "ExtractedTags",
 ]

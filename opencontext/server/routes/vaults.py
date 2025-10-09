@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Vaults文档管理API路由
-专注于文档的CRUD操作，AI对话功能由advanced_chat处理
+Vaults document management API routes
+Focuses on document CRUD operations, AI chat functionality handled by advanced_chat
 """
 
 import json
@@ -33,9 +33,9 @@ templates_path = Path(__file__).parent.parent.parent / "web" / "templates"
 templates = Jinja2Templates(directory=templates_path)
 
 
-# API模型定义
+# API model definitions
 class VaultDocument(BaseModel):
-    """Vault文档模型"""
+    """Vault document model"""
     id: Optional[int] = None
     title: str
     content: str
@@ -46,48 +46,48 @@ class VaultDocument(BaseModel):
 @router.get("/vaults", response_class=HTMLResponse)
 async def vaults_workspace(request: Request):
     """
-    Vaults工作空间主页面 - 重定向到统一的文档协作界面
+    Vaults workspace main page - redirects to unified document collaboration interface
     """
     try:
         return templates.TemplateResponse("agent_chat.html", {
             "request": request,
-            "title": "智能 Agent 对话"
+            "title": "Intelligent Agent Chat"
         })
     except Exception as e:
-        logger.exception(f"渲染文档协作页面失败: {e}")
+        logger.exception(f"Failed to render document collaboration page: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/vaults/editor", response_class=HTMLResponse)
 async def note_editor_page(request: Request):
     """
-    智能笔记编辑器页面
-    提供带有AI补全功能的Markdown编辑器
+    Intelligent note editor page
+    Provides Markdown editor with AI completion functionality
     """
     try:
         return templates.TemplateResponse("note_editor.html", {
             "request": request,
-            "title": "智能笔记编辑器"
+            "title": "Intelligent Note Editor"
         })
     except Exception as e:
-        logger.exception(f"渲染笔记编辑器页面失败: {e}")
+        logger.exception(f"Failed to render note editor page: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/api/vaults/list")
 async def get_documents_list(
-    limit: int = Query(default=50, description="返回数量限制"),
-    offset: int = Query(default=0, description="偏移量"),
+    limit: int = Query(default=50, description="Return limit"),
+    offset: int = Query(default=0, description="Offset"),
     _auth: str = auth_dependency
 ):
     """
-    获取文档列表
+    Get document list
     """
     try:
         storage = get_storage()
         documents = storage.get_vaults(limit=limit, offset=offset, is_deleted=False)
-        
-        # 格式化返回数据
+
+        # Format return data
         result = []
         for doc in documents:
             result.append({
@@ -107,7 +107,7 @@ async def get_documents_list(
         })
         
     except Exception as e:
-        logger.exception(f"获取文档列表失败: {e}")
+        logger.exception(f"Failed to get document list: {e}")
         return JSONResponse({
             "success": False,
             "error": str(e)
@@ -121,22 +121,22 @@ async def create_document(
     _auth: str = auth_dependency
 ):
     """
-    创建新文档
+    Create new document
     """
     try:
         logger.info(f"Creating document with data: {document}")
         storage = get_storage()
-        
-        # 创建新文档 - 使用insert_vaults方法
+
+        # Create new document - use insert_vaults method
         doc_id = storage.insert_vaults(
             title=document.title,
-            summary=document.summary, 
-            content=document.content, # insert_vaults会自动处理None的情况
+            summary=document.summary,
+            content=document.content, # insert_vaults will automatically handle None
             document_type=document.document_type,
             tags=document.tags,
         )
-        
-        # 异步触发context处理
+
+        # Asynchronously trigger context processing
         document_data = {
             'title': document.title,
             'content': document.content,
@@ -148,14 +148,14 @@ async def create_document(
         
         return JSONResponse({
             "success": True,
-            "message": "文档创建成功",
+            "message": "Document created successfully",
             "doc_id": doc_id,
             "table_name": "vaults",
-            "context_processing": "triggered"  # 表示已触发context处理
+            "context_processing": "triggered"  # Indicates context processing has been triggered
         })
-        
+
     except Exception as e:
-        logger.exception(f"创建文档失败: {e}")
+        logger.exception(f"Failed to create document: {e}")
         return JSONResponse({
             "success": False,
             "error": str(e)
@@ -168,14 +168,14 @@ async def get_document(
     _auth: str = auth_dependency
 ):
     """
-    获取文档详情
+    Get document details
     """
     try:
         storage = get_storage()
-        # 获取所有文档来查找指定ID的文档
+        # Get all documents to find the document with specified ID
         documents = storage.get_vaults(limit=100, offset=0, is_deleted=False)
-        
-        # 找到指定ID的文档
+
+        # Find the document with specified ID
         document = None
         for doc in documents:
             if doc["id"] == document_id:
@@ -183,8 +183,8 @@ async def get_document(
                 break
         
         if not document:
-            raise HTTPException(status_code=404, detail="文档未找到")
-        
+            raise HTTPException(status_code=404, detail="Document not found")
+
         return JSONResponse({
             "success": True,
             "data": {
@@ -202,7 +202,7 @@ async def get_document(
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"获取文档详情失败: {e}")
+        logger.exception(f"Failed to get document details: {e}")
         return JSONResponse({
             "success": False,
             "error": str(e)
@@ -217,15 +217,15 @@ async def save_document(
     _auth: str = auth_dependency
 ):
     """
-    保存文档
+    Save document
     """
     try:
         storage = get_storage()
-        
-        # 先清理旧的context数据
+
+        # First clean up old context data
         background_tasks.add_task(cleanup_document_context, document_id)
-        
-        # 更新现有文档
+
+        # Update existing document
         success = storage.update_vault(
             vault_id=document_id,
             title=document.title,
@@ -235,7 +235,7 @@ async def save_document(
         )
         
         if success:
-            # 异步触发新的context处理
+            # Asynchronously trigger new context processing
             document_data = {
                 'title': document.title,
                 'content': document.content,
@@ -244,21 +244,21 @@ async def save_document(
                 'document_type': document.document_type
             }
             background_tasks.add_task(trigger_document_processing, document_id, document_data, "updated")
-            
+
             return JSONResponse({
                 "success": True,
-                "message": "文档保存成功",
+                "message": "Document saved successfully",
                 "doc_id": document_id,
                 "table_name": "vaults",
-                "context_processing": "reprocessing"  # 表示重新处理context
+                "context_processing": "reprocessing"  # Indicates reprocessing context
             })
         else:
-            raise HTTPException(status_code=404, detail="文档未找到或更新失败")
+            raise HTTPException(status_code=404, detail="Document not found or update failed")
             
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"保存文档失败: {e}")
+        logger.exception(f"Failed to save document: {e}")
         return JSONResponse({
             "success": False,
             "error": str(e)
@@ -272,33 +272,33 @@ async def delete_document(
     _auth: str = auth_dependency
 ):
     """
-    删除文档（软删除）
+    Delete document (soft delete)
     """
     try:
         storage = get_storage()
-        
-        # 软删除文档
+
+        # Soft delete document
         success = storage.update_vault(
             vault_id=document_id,
             is_deleted=True
         )
         
         if success:
-            # 异步清理相关的context数据
+            # Asynchronously clean up related context data
             background_tasks.add_task(cleanup_document_context, document_id)
-            
+
             return JSONResponse({
                 "success": True,
-                "message": "文档删除成功",
-                "context_cleanup": "triggered"  # 表示已触发context清理
+                "message": "Document deleted successfully",
+                "context_cleanup": "triggered"  # Indicates context cleanup has been triggered
             })
         else:
-            raise HTTPException(status_code=404, detail="文档未找到")
+            raise HTTPException(status_code=404, detail="Document not found")
             
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"删除文档失败: {e}")
+        logger.exception(f"Failed to delete document: {e}")
         return JSONResponse({
             "success": False,
             "error": str(e)
@@ -311,10 +311,10 @@ async def get_document_context_status(
     _auth: str = auth_dependency
 ):
     """
-    获取文档的context处理状态
+    Get document context processing status
     """
     try:
-        # 获取context信息
+        # Get context information
         context_info = get_document_context_info(document_id)
         
         return JSONResponse({
@@ -324,30 +324,30 @@ async def get_document_context_status(
         })
         
     except Exception as e:
-        logger.exception(f"获取文档context状态失败: {e}")
+        logger.exception(f"Failed to get document context status: {e}")
         return JSONResponse({
             "success": False,
             "error": str(e)
         }, status_code=500)
 
 
-# Context处理辅助函数
+# Context processing helper functions
 
 async def trigger_document_processing(doc_id: int, document_data: dict, event_type: str = "created"):
     """
-    异步触发文档的context处理
-    
+    Asynchronously trigger document context processing
+
     Args:
-        doc_id: 文档ID
-        document_data: 文档数据
-        event_type: 事件类型 (created/updated/deleted)
+        doc_id: Document ID
+        document_data: Document data
+        event_type: Event type (created/updated/deleted)
     """
     try:
         from opencontext.models.context import RawContextProperties
         from opencontext.models.enums import ContextSource, ContentFormat
         from opencontext.context_processing.processor.document_processor import DocumentProcessor
-        
-        # 创建RawContextProperties
+
+        # Create RawContextProperties
         context_data = RawContextProperties(
             source=ContextSource.TEXT,
             content_format=ContentFormat.TEXT,
@@ -361,69 +361,69 @@ async def trigger_document_processing(doc_id: int, document_data: dict, event_ty
                 'tags': document_data.get('tags', ''),
                 'document_type': document_data.get('document_type', 'vaults'),
                 'event_type': event_type,
-                'folder_path': f"/vault_{doc_id}"  # 简化的路径
+                'folder_path': f"/vault_{doc_id}"  # Simplified path
             }
         )
-        
-        # 获取文档处理器并触发处理
+
+        # Get document processor and trigger processing
         processor = DocumentProcessor()
         success = processor.process(context_data)
-        
+
         if success:
-            logger.info(f"文档 {doc_id} 的context处理已触发 ({event_type})")
+            logger.info(f"Context processing triggered for document {doc_id} ({event_type})")
         else:
-            logger.warning(f"文档 {doc_id} 的context处理触发失败 ({event_type})")
-            
+            logger.warning(f"Failed to trigger context processing for document {doc_id} ({event_type})")
+
     except Exception as e:
-        logger.exception(f"触发文档context处理失败: {e}")
+        logger.exception(f"Failed to trigger document context processing: {e}")
 
 
 async def cleanup_document_context(doc_id: int):
     """
-    清理文档的所有context数据
-    
+    Clean up all context data for a document
+
     Args:
-        doc_id: 文档ID
+        doc_id: Document ID
     """
     try:
         from opencontext.tools.retrieval_tools.document_retrieval_tool import DocumentRetrievalTool
-        
-        # 使用DocumentRetrievalTool删除相关chunks
+
+        # Use DocumentRetrievalTool to delete related chunks
         retrieval_tool = DocumentRetrievalTool()
         result = retrieval_tool.delete_document_chunks(
             raw_type="vaults",
             raw_id=str(doc_id)
         )
-        
+
         if result.get('success'):
-            logger.info(f"已清理文档 {doc_id} 的 {result.get('deleted_count', 0)} 个context chunks")
+            logger.info(f"Cleaned up {result.get('deleted_count', 0)} context chunks for document {doc_id}")
         else:
-            logger.warning(f"清理文档 {doc_id} 的context失败: {result.get('error')}")
-            
+            logger.warning(f"Failed to cleanup context for document {doc_id}: {result.get('error')}")
+
     except Exception as e:
-        logger.exception(f"清理文档context失败: {e}")
+        logger.exception(f"Failed to cleanup document context: {e}")
 
 
 def get_document_context_info(doc_id: int) -> dict:
     """
-    获取文档的context处理信息
-    
+    Get document context processing information
+
     Args:
-        doc_id: 文档ID
-        
+        doc_id: Document ID
+
     Returns:
-        context信息字典
+        Context information dictionary
     """
     try:
         from opencontext.tools.retrieval_tools.document_retrieval_tool import DocumentRetrievalTool
-        
+
         retrieval_tool = DocumentRetrievalTool()
         result = retrieval_tool.get_document_by_id(
             raw_type="vaults",
             raw_id=str(doc_id),
             return_chunks=False
         )
-        
+
         if result.get('success'):
             return {
                 'has_context': True,
@@ -436,9 +436,9 @@ def get_document_context_info(doc_id: int) -> dict:
                 'total_chunks': 0,
                 'document_info': None
             }
-            
+
     except Exception as e:
-        logger.exception(f"获取文档context信息失败: {e}")
+        logger.exception(f"Failed to get document context information: {e}")
         return {
             'has_context': False,
             'total_chunks': 0,

@@ -247,7 +247,7 @@ opencontext/
    - 多模态内容处理（文本、图像）
 5. **存储层** (`storage/`)
 
-   - 多后端支持（SQLite、ChromaDB、VikingDB）
+   - 多后端支持（SQLite、ChromaDB）
    - 用于相似性搜索的向量存储
    - 统一的存储接口
 6. **LLM集成** (`llm/`)

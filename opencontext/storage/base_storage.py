@@ -20,9 +20,8 @@ from opencontext.models.context import ProcessedContext, Vectorize
 
 class StorageType(Enum):
     """Enumeration of supported storage types."""
-    VECTOR_DB = "vector_db"      # Vector databases: ChromaDB, VikingDB
+    VECTOR_DB = "vector_db"      # Vector databases: ChromaDB
     DOCUMENT_DB = "document_db"  # Document databases: SQLite, MongoDB
-    CLOUD_NOTE = "cloud_note"    # Cloud notes: Notion, Feishu docs
 
 
 class DataType(Enum):
@@ -131,28 +130,6 @@ class IVectorStorageBackend(IStorageBackend):
 
 class IDocumentStorageBackend(IStorageBackend):
     """Document storage backend interface"""
-    
-    @abstractmethod
-    def text_search(self, 
-                   query: str, 
-                   limit: int = 10,
-                   filters: Optional[Dict[str, Any]] = None) -> QueryResult:
-        """Text search"""
-    
-    @abstractmethod
-    def store_image(self, image_data: Union[str, bytes], metadata: Dict[str, Any]) -> str:
-        """Store image data, return image ID or path"""
-    
-    @abstractmethod
-    def get_image(self, image_id: str) -> Optional[Union[str, bytes]]:
-        """Get image data"""
-
-    @abstractmethod
-    def list_documents(self, 
-                      limit: int = 100, 
-                      offset: int = 0,
-                      filters: Optional[Dict[str, Any]] = None) -> QueryResult:
-        """List documents"""
 
     @abstractmethod
     def insert_vaults(self, title: str, summary: str, content: str, document_type: str, tags: str = None, 
@@ -229,18 +206,3 @@ class IDocumentStorageBackend(IStorageBackend):
     @abstractmethod
     def update_todo_status(self, todo_id: int, status: int, end_time: datetime = None) -> bool:
         """Update todo item status"""
-
-class ICloudNoteBackend(IStorageBackend):
-    """Cloud note backend interface"""
-    
-    @abstractmethod
-    def create_page(self, title: str, content: str, parent_id: Optional[str] = None) -> str:
-        """Create page"""
-    
-    @abstractmethod
-    def update_page(self, page_id: str, title: str, content: str) -> bool:
-        """Update page"""
-    
-    @abstractmethod
-    def get_page_hierarchy(self, page_id: Optional[str] = None) -> Dict[str, Any]:
-        """Get page hierarchy"""

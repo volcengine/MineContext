@@ -12,6 +12,6 @@ from .sqlite_backend import SQLiteBackend
 from .chromadb_backend import ChromaDBBackend
 
 try:
-    __all__ = ['SQLiteBackend', 'ChromaDBBackend', 'VikingDBBackend']
+    __all__ = ['SQLiteBackend', 'ChromaDBBackend']
 except ImportError:
     __all__ = ['SQLiteBackend', 'ChromaDBBackend']

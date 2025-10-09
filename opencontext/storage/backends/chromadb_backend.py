@@ -264,15 +264,6 @@ class ChromaDBBackend(IVectorStorageBackend):
     def get_storage_type(self) -> StorageType:
         return StorageType.VECTOR_DB
     
-    def _get_collection_for_context(self, context: ProcessedContext) -> Optional[chromadb.Collection]:
-        """Get the corresponding collection based on the context_type of the ProcessedContext"""
-        context_type = context.extracted_data.context_type.value
-        collection = self._collections.get(context_type)
-        if not collection:
-            logger.warning(f"No collection found for context_type '{context_type}'")
-            return None
-        return collection
-    
     def _ensure_vectorized(self, context: ProcessedContext) -> List[float]:
         """Ensure the context is vectorized, and vectorize it if not"""
         # Check if vector already exists
@@ -503,56 +494,56 @@ class ChromaDBBackend(IVectorStorageBackend):
                     result[context_type] = contexts
                         
             except Exception as e:
-                logger.exception(f"从 {context_type} collection获取contexts失败: {e}")
+                logger.exception(f"Failed to get contexts from {context_type} collection: {e}")
                 continue
         
         return result
 
     def delete_processed_context(self, id: str, context_type: str) -> bool:
-        """根据ID删除ProcessedContext"""
+        """Delete ProcessedContext by ID"""
         return self.delete_contexts([id], context_type)
     
-    def search(self, query: Vectorize, top_k: int = 10, context_types: Optional[List[str]] = None, 
+    def search(self, query: Vectorize, top_k: int = 10, context_types: Optional[List[str]] = None,
               filters: Optional[Dict[str, Any]] = None, need_vector: bool = False) -> List[Tuple[ProcessedContext, float]]:
-        """向量搜索ProcessedContext"""
+        """Vector search for ProcessedContext"""
         if not self._initialized:
             return []
-        
-        # 确定要搜索的collections
+
+        # Determine which collections to search
         target_collections = {}
         if context_types:
             for context_type in context_types:
                 if context_type in self._collections:
                     target_collections[context_type] = self._collections[context_type]
                 else:
-                    logger.warning(f"未找到指定的collection: {context_type}")
+                    logger.warning(f"Collection not found: {context_type}")
         else:
             target_collections = self._collections
-        
-        # 确保查询向量化
+
+        # Ensure query is vectorized
         query_vector = None
         if query.vector and len(query.vector) > 0:
             query_vector = query.vector
         else:
             do_vectorize(query)
             query_vector = query.vector
-        
+
         if not query_vector:
-            logger.warning("无法获取查询向量，搜索失败")
+            logger.warning("Unable to get query vector, search failed")
             return []
         
         all_results = []
         
         for context_type, collection in target_collections.items():
             try:
-                # 检查collection是否为空
+                # Check if collection is empty
                 try:
                     count = collection.count()
                     if count == 0:
                         continue
                 except Exception as count_error:
-                    logger.debug(f"无法获取collection '{context_type}' 的计数: {count_error}")
-                    # 如果连count都失败，说明collection有问题，跳过
+                    logger.debug(f"Unable to get count for collection '{context_type}': {count_error}")
+                    # If count fails, collection has issues, skip
                     continue
                 
                 where_clause = self._build_where_clause(filters)
@@ -576,28 +567,28 @@ class ChromaDBBackend(IVectorStorageBackend):
                         context = self._chroma_result_to_context(doc, need_vector)
                         if context:
                             distance = results['distances'][0][i]
-                            score = 1 - distance  # 转换为相似度分数
+                            score = 1 - distance  # Convert to similarity score
                             all_results.append((context, score))
                         
             except Exception as e:
-                # 特殊处理 HNSW 索引错误
+                # Special handling for HNSW index errors
                 if "hnsw segment reader" in str(e).lower() or "nothing found on disk" in str(e).lower():
-                    logger.error(f"Collection '{context_type}' 索引未初始化(无数据)，跳过搜索: {e}")
+                    logger.error(f"Collection '{context_type}' index not initialized (no data), skipping search: {e}")
                     continue
                 else:
-                    logger.exception(f"在 {context_type} collection进行向量搜索失败: {e}")
+                    logger.exception(f"Vector search failed in {context_type} collection: {e}")
                     continue
-        
-        # 按分数排序并限制结果数量
+
+        # Sort by score and limit results
         all_results.sort(key=lambda x: x[1], reverse=True)
-        # logger.info(f"搜索到 {len(all_results)} 条结果，返回 top {top_k}")
+        # logger.info(f"Found {len(all_results)} results, returning top {top_k}")
         return all_results[:top_k]
     
     def _chroma_result_to_context(self, doc: Dict[str, Any], need_vector: bool = True) -> Optional[ProcessedContext]:
-        """将ChromaDB查询结果转换为ProcessedContext"""
+        """Convert ChromaDB query result to ProcessedContext"""
         try:
             if not doc.get('id'):
-                logger.warning("ChromaDB结果缺少id字段")
+                logger.warning("ChromaDB result missing id field")
                 return None
             extracted_data_field_names = set(ExtractedData.model_fields.keys())
             properties_field_names = set(ContextProperties.model_fields.keys())
@@ -608,19 +599,19 @@ class ChromaDBBackend(IVectorStorageBackend):
             context_dict = {}
             vectorize_dict = {}
             metadata_dict = {}
-            
-            # 所有字段现在都在同一层级
+
+            # All fields are now at the same level
             document = doc.pop('document', None)
             embedding = doc.pop('embedding', None)
             metadata = doc.pop('metadata', {})
             doc_id = doc.pop('id')
-            
-            # 处理vectorize数据
+
+            # Process vectorize data
             if document:
                 vectorize_dict['text'] = document
             vectorize_dict['vector'] = embedding
-            
-            # 根据context_type确定metadata字段
+
+            # Determine metadata fields based on context_type
             metadata_field_names = set()
             context_type_value = metadata.get('context_type')
             
@@ -628,12 +619,12 @@ class ChromaDBBackend(IVectorStorageBackend):
                 # Import ProfileContextMetadata to get its field names
                 from opencontext.models.context import ProfileContextMetadata
                 metadata_field_names = set(ProfileContextMetadata.model_fields.keys())
-            # 其他context_type可以在这里添加对应的metadata模型
+            # Other context_types can add corresponding metadata models here
             # elif context_type_value == ContextType.ACTIVITY_CONTEXT.value:
             #     from opencontext.models.context import ActivityContextMetadata
             #     metadata_field_names = set(ActivityContextMetadata.model_fields.keys())
-            
-            # 从扁平化的字段中重构对象
+
+            # Reconstruct objects from flattened fields
             for key, value in metadata.items():
                 # timestamp fields are redundant
                 if key.endswith('_ts'):
@@ -646,7 +637,7 @@ class ChromaDBBackend(IVectorStorageBackend):
                         val = json.loads(value)
                     except (json.JSONDecodeError, TypeError):
                         pass  # Keep original value if not valid JSON
-                # 分配到相应的字典
+                # Assign to appropriate dictionary
                 if key in extracted_data_field_names:
                     extracted_data_dict[key] = val
                 elif key in properties_field_names:
@@ -654,7 +645,7 @@ class ChromaDBBackend(IVectorStorageBackend):
                 elif key in vectorize_field_names:
                     vectorize_dict[key] = val
                 elif metadata_field_names and key in metadata_field_names:
-                    # 这是metadata的字段
+                    # This is a metadata field
                     metadata_dict[key] = val
                 else:
                     context_dict[key] = val
@@ -665,8 +656,8 @@ class ChromaDBBackend(IVectorStorageBackend):
             context_dict['extracted_data'] = ExtractedData.model_validate(extracted_data_dict)
             context_dict['properties'] = ContextProperties.model_validate(properties_dict)
             context_dict['vectorize'] = Vectorize.model_validate(vectorize_dict)
-            
-            # 如果有metadata字段，添加到context_dict
+
+            # If there are metadata fields, add to context_dict
             if metadata_dict:
                 context_dict['metadata'] = metadata_dict
             # Validate the final ProcessedContext object
@@ -674,26 +665,26 @@ class ChromaDBBackend(IVectorStorageBackend):
             if not need_vector:
                 context.vectorize.vector = None
             return context
-            
+
         except Exception as e:
-            logger.exception(f"转换ChromaDB结果为ProcessedContext失败: {e}")
+            logger.exception(f"Failed to convert ChromaDB result to ProcessedContext: {e}")
             return None
     
     def _build_where_clause(self, filters: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-        """构建ChromaDB的where查询条件"""
+        """Build ChromaDB where query conditions"""
         if not filters:
             return None
-        
+
         where_conditions = []
-        
+
         for key, value in filters.items():
             if key == 'context_type':
-                # context_type通过collection选择，这里跳过
+                # context_type is selected through collection, skip here
                 continue
             elif not value:
                 continue
             elif key.endswith('_ts') and isinstance(value, dict):
-                # 时间范围查询
+                # Time range query
                 if "$gte" in value:
                     where_conditions.append({key: {"$gte": value["$gte"]}})
                 if "$lte" in value:
@@ -703,7 +694,7 @@ class ChromaDBBackend(IVectorStorageBackend):
                     where_conditions.append({key: {"$in": value}})
                 else:
                     where_conditions.append({key: value})
-        
+
         if not where_conditions:
             return None
         elif len(where_conditions) == 1:
@@ -712,45 +703,45 @@ class ChromaDBBackend(IVectorStorageBackend):
             return {"$and": where_conditions}
     
     def delete_contexts(self, ids: List[str], context_type: str) -> bool:
-        """删除指定类型的上下文"""
+        """Delete contexts of specified type"""
         if not self._initialized:
             return False
-        
+
         if context_type not in self._collections:
             return False
-        
+
         collection = self._collections[context_type]
         try:
             collection.delete(ids=ids)
             return True
         except Exception as e:
-            logger.exception(f"删除ChromaDB上下文失败: {e}")
+            logger.exception(f"Failed to delete ChromaDB contexts: {e}")
             return False
 
     def get_processed_context_count(self, context_type: str) -> int:
-        """获取指定context_type的记录数量"""
+        """Get record count for specified context_type"""
         if not self._initialized:
             return 0
-        
+
         if context_type not in self._collections:
             return 0
-            
+
         try:
             collection = self._collections[context_type]
-            # 使用count方法获取集合中的文档数量
+            # Use count method to get the number of documents in the collection
             count = collection.count()
             return count
         except Exception as e:
-            logger.warning(f"获取{context_type}记录数量失败: {e}")
+            logger.warning(f"Failed to get record count for {context_type}: {e}")
             return 0
 
     def get_all_processed_context_counts(self) -> Dict[str, int]:
-        """获取所有context_type的记录数量"""
+        """Get record counts for all context_types"""
         if not self._initialized:
             return {}
-        
+
         result = {}
         for context_type in self._collections.keys():
             result[context_type] = self.get_processed_context_count(context_type)
-        
+
         return result
