@@ -1,0 +1,37 @@
+---
+name: "🏠 Feature Advice"
+description: "Suggest an idea for this project"
+title: "[ADVICE]: "
+labels: ["advice"]
+assignees: ""
+body:
+  - type: markdown
+    attributes:
+      value: "## 🤪 Features description [Please make everyone to understand it]"
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "Feature Description"
+      description: "Briefly describe this feature"
+      placeholder: "Please provide a clear and concise description of the feature suggestion..."
+    validations:
+      required: true
+  - type: textarea
+    id: problem-solution
+    attributes:
+      label: "👍 What problem does this feature solve"
+      description: "Explain what problem or pain point this feature would address"
+      placeholder: "This feature would solve..."
+  - type: textarea
+    id: proposed-api
+    attributes:
+      label: "👾 What does the proposed API look like"
+      description: "If applicable, describe how the API or interface would work"
+      placeholder: "The proposed API would include..."
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: "🚑 Any additional information"
+      description: "Add any other context, screenshots, or examples here"
+      placeholder: "Screenshots, mockups, or additional context..."
+---
