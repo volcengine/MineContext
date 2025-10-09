@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-事件推送路由 - 缓存版本，支持获取并清空机制
+Event push routes - Cached version, supports fetch and clear mechanism
 """
 
 from typing import List, Optional
@@ -31,24 +31,24 @@ async def fetch_and_clear_events(
     _auth: str = auth_dependency
 ):
     """
-    获取并清空缓存事件 - 核心API
-    
-    返回缓存中的所有事件并清空缓存。
-    前端应定期调用此接口获取新事件。
+    Fetch and clear cached events - Core API
+
+    Returns all cached events and clears the cache.
+    Frontend should call this endpoint periodically to get new events.
     """
     try:
         event_manager = get_event_manager()
         events = event_manager.fetch_and_clear_events()
-        
+
         return convert_resp(data={
             "events": events,
             "count": len(events),
             "message": "success"
         })
-        
+
     except Exception as e:
-        logger.exception(f"获取事件失败: {e}")
-        return convert_resp(code=500, status=500, message=f"获取事件失败: {str(e)}")
+        logger.exception(f"Failed to fetch events: {e}")
+        return convert_resp(code=500, status=500, message=f"Failed to fetch events: {str(e)}")
 
 
 @router.get("/api/events/status")
@@ -56,19 +56,19 @@ async def get_event_status(
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
-    """获取事件缓存状态"""
+    """Get event cache status"""
     try:
         event_manager = get_event_manager()
         status = event_manager.get_cache_status()
-        
+
         return convert_resp(data={
             "event_system_status": "active",
             **status
         })
-        
+
     except Exception as e:
-        logger.exception(f"获取事件状态失败: {e}")
-        return convert_resp(code=500, status=500, message=f"获取事件状态失败: {str(e)}")
+        logger.exception(f"Failed to get event status: {e}")
+        return convert_resp(code=500, status=500, message=f"Failed to get event status: {str(e)}")
 
 
 @router.post("/api/events/publish")
@@ -78,29 +78,29 @@ async def publish_event(
     _auth: str = auth_dependency
 ):
     """
-    发布事件（主要用于测试）
+    Publish event (mainly for testing)
     """
     try:
         event_manager = get_event_manager()
-        
-        # 验证事件类型
+
+        # Validate event type
         try:
             event_type = EventType(request.event_type)
         except ValueError:
-            return convert_resp(code=400, status=400, message=f"无效的事件类型: {request.event_type}")
-        
-        # 发布事件
+            return convert_resp(code=400, status=400, message=f"Invalid event type: {request.event_type}")
+
+        # Publish event
         event_id = event_manager.publish_event(
             event_type=event_type,
             data=request.data
         )
-        
+
         return convert_resp(data={
             "event_id": event_id,
             "event_type": request.event_type,
-            "message": "事件发布成功"
+            "message": "Event published successfully"
         })
-        
+
     except Exception as e:
-        logger.exception(f"发布事件失败: {e}")
-        return convert_resp(code=500, status=500, message=f"发布事件失败: {str(e)}")
+        logger.exception(f"Failed to publish event: {e}")
+        return convert_resp(code=500, status=500, message=f"Failed to publish event: {str(e)}")

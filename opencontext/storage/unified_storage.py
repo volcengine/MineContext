@@ -19,7 +19,6 @@ from opencontext.models.enums import ContextType
 from opencontext.models.context import ProcessedContext
 from opencontext.utils.logging_utils import get_logger
 from opencontext.models.context import Vectorize
-from datetime import datetime
 
 logger = get_logger(__name__)
 
@@ -31,7 +30,6 @@ class StorageBackendFactory:
         self._backends = {
             StorageType.VECTOR_DB: {
                 'chromadb': self._create_chromadb_backend,
-                'vikingdb': self._create_vikingdb_backend,
             },
             StorageType.DOCUMENT_DB: {
                 'sqlite': self._create_sqlite_backend,
@@ -70,10 +68,6 @@ class StorageBackendFactory:
         from opencontext.storage.backends.chromadb_backend import ChromaDBBackend
         return ChromaDBBackend()
     
-    def _create_vikingdb_backend(self, config: Dict[str, Any]):
-        from opencontext.storage.backends.vikingdb_backend import VikingDBBackend
-        return VikingDBBackend()
-    
     def _create_sqlite_backend(self, config: Dict[str, Any]):
         from opencontext.storage.backends.sqlite_backend import SQLiteBackend
         return SQLiteBackend()
@@ -87,7 +81,6 @@ class UnifiedStorage:
     def __init__(self):
         self._factory = StorageBackendFactory()
         self._initialized = False
-        self._embedding_client: Optional[LLMClient] = None
         self._vector_backend: IVectorStorageBackend = None
         self._document_backend: IDocumentStorageBackend = None
 
@@ -104,8 +97,8 @@ class UnifiedStorage:
         Args:
             storage_configs: Storage configuration list, each configuration contains:
                 - name: Backend name
-                - storage_type: Storage type (vector_db/document_db/cloud_note)
-                - backend: Specific backend (chromadb/vikingdb/sqlite etc.)
+                - storage_type: Storage type (vector_db/document_db)
+                - backend: Specific backend (chromadb/sqlite etc.)
                 - config: Backend specific configuration
                 - default: Whether it's the default backend for this type
                 - data_types: List of supported data types
@@ -223,10 +216,7 @@ class UnifiedStorage:
         except Exception as e:
             logger.exception(f"Failed to query ProcessedContext: {e}")
             return {}
-    
-        # Return cached data or empty dictionary
-        return {k: v.count for k, v in self._context_type_stats.items()}
-    
+
     def get_processed_context_count(self, context_type: str) -> int:
         """Get record count for specified context_type"""
         if not self._initialized:
@@ -293,12 +283,6 @@ class UnifiedStorage:
         except Exception as e:
             logger.exception(f"Vector search failed: {e}")
             return []
-
-    def _process_image_path(self, image_path: str) -> str:
-        """Process image path, add MineContext:// protocol"""
-        if not image_path.startswith('MineContext://'):
-            return f'MineContext://{image_path}'
-        return image_path
     
     def get_document(self, doc_id: str) -> Optional[DocumentData]:
         """Get document"""

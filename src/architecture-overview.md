@@ -30,9 +30,9 @@ MineContext is designed as a modular, event-driven system with clear separation 
                            ↓
 ┌──────────────────────────────────────────────────────────┐
 │                     Storage Layer                        │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │    SQLite    │  │   ChromaDB   │  │   VikingDB   │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  │
+│  ┌──────────────┐  ┌──────────────┐  │
+│  │    SQLite    │  │   ChromaDB   │  │
+│  └──────────────┘  └──────────────┘  │
 └──────────────────────────────────────────────────────────┘
                            ↓
 ┌──────────────────────────────────────────────────────────┐
@@ -153,7 +153,7 @@ The MineContext system flow is designed as a highly modular and extensible archi
 │  │  Knowledge   │  │   Records    │  │  Relations   │ │
 │  │(Vector Store)│  │(Vector Store)│  │(Vector Store)│ │
 │  └──────────────┘  └──────────────┘  └──────────────┘ │
-│                    SQLite + ChromaDB + VikingDB             │
+│                      SQLite + ChromaDB                      │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐

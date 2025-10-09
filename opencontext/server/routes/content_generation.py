@@ -24,7 +24,7 @@ async def get_content_generation_status(
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
-    """获取内容生成服务状态"""
+    """Get content generation service status"""
     try:
         if not hasattr(opencontext, 'consumption_manager') or not opencontext.consumption_manager:
             return convert_resp(data={
@@ -45,7 +45,7 @@ async def start_content_generation(
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
-    """启动内容生成定时任务"""
+    """Start content generation scheduled tasks"""
     try:
         if not hasattr(opencontext, 'consumption_manager') or not opencontext.consumption_manager:
             return convert_resp(code=500, status=500, message="Consumption manager not initialized")
@@ -65,7 +65,7 @@ async def stop_content_generation(
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
-    """停止内容生成定时任务"""
+    """Stop content generation scheduled tasks"""
     try:
         if hasattr(opencontext, 'consumption_manager') and opencontext.consumption_manager:
             opencontext.consumption_manager.stop_scheduled_tasks()

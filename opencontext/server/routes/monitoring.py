@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Server component: monitoring routes - 监控相关API端点
+Server component: monitoring routes - Monitoring API endpoints
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -25,114 +25,114 @@ async def get_system_overview(
     _auth: str = auth_dependency
 ):
     """
-    获取系统监控概览
+    Get system monitoring overview
     """
     try:
         monitor = get_monitor()
         overview = monitor.get_system_overview()
         return {"success": True, "data": overview}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取系统概览失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get system overview: {str(e)}")
 
 
 @router.get("/context-types")
 async def get_context_type_stats(
-    force_refresh: bool = Query(False, description="是否强制刷新缓存"),
+    force_refresh: bool = Query(False, description="Whether to force refresh cache"),
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
     """
-    获取各context_type的候选数量统计
+    Get candidate count statistics for each context_type
     """
     try:
         monitor = get_monitor()
         stats = monitor.get_context_type_stats(force_refresh=force_refresh)
         return {"success": True, "data": stats}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取上下文类型统计失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get context type statistics: {str(e)}")
 
 
 @router.get("/token-usage")
 async def get_token_usage_summary(
-    hours: int = Query(24, ge=1, le=168, description="统计时间范围（小时）"),
+    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     _auth: str = auth_dependency
 ):
     """
-    获取模型token消耗详情
+    Get model token consumption details
     """
     try:
         monitor = get_monitor()
         summary = monitor.get_token_usage_summary(hours=hours)
         return {"success": True, "data": summary}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取token使用统计失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get token usage statistics: {str(e)}")
 
 
 @router.get("/processing")
 async def get_processing_metrics(
-    hours: int = Query(24, ge=1, le=168, description="统计时间范围（小时）"),
+    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     _auth: str = auth_dependency
 ):
     """
-    获取处理器性能指标
+    Get processor performance metrics
     """
     try:
         monitor = get_monitor()
         metrics = monitor.get_processing_summary(hours=hours)
         return {"success": True, "data": metrics}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取处理性能指标失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get processing performance metrics: {str(e)}")
 
 
 @router.get("/todo-stats")
 async def get_todo_stats(
-    hours: int = Query(24, ge=1, le=168, description="统计时间范围（小时）"),
+    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
     """
-    获取TODO任务统计
+    Get TODO task statistics
     """
     try:
         monitor = get_monitor()
         stats = monitor.get_todo_stats(hours=hours)
         return {"success": True, "data": stats}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取TODO统计失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get TODO statistics: {str(e)}")
 
 
 @router.get("/tips-count")
 async def get_tips_count(
-    hours: int = Query(24, ge=1, le=168, description="统计时间范围（小时）"),
+    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
     """
-    获取Tips提示数量
+    Get Tips count
     """
     try:
         monitor = get_monitor()
         count = monitor.get_tips_count(hours=hours)
         return {"success": True, "data": count}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取Tips数量失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get Tips count: {str(e)}")
 
 
 @router.get("/activity-count")
 async def get_activity_count(
-    hours: int = Query(24, ge=1, le=168, description="统计时间范围（小时）"),
+    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
     """
-    获取活动记录数量
+    Get activity record count
     """
     try:
         monitor = get_monitor()
         count = monitor.get_activity_count(hours=hours)
         return {"success": True, "data": count}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取活动数量失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get activity count: {str(e)}")
 
 
 @router.post("/refresh-context-stats")
@@ -141,14 +141,14 @@ async def refresh_context_type_stats(
     _auth: str = auth_dependency
 ):
     """
-    刷新上下文类型统计缓存
+    Refresh context type statistics cache
     """
     try:
         monitor = get_monitor()
         stats = monitor.get_context_type_stats(force_refresh=True)
-        return {"success": True, "data": stats, "message": "统计数据已刷新"}
+        return {"success": True, "data": stats, "message": "Statistics data refreshed"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"刷新统计数据失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to refresh statistics data: {str(e)}")
 
 
 @router.get("/health")
@@ -156,7 +156,7 @@ async def monitoring_health(
     _auth: str = auth_dependency
 ):
     """
-    监控系统健康检查
+    Monitoring system health check
     """
     try:
         monitor = get_monitor()

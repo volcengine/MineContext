@@ -103,7 +103,7 @@ async def get_context_types(
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
-    """获取所有可用的上下文类型。"""
+    """Get all available context types."""
     try:
         context_types = opencontext.get_context_types()
         return context_types
@@ -118,7 +118,7 @@ async def vector_search(
     opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency
 ):
-    """直接检索向量库，不走大模型。"""
+    """Directly search vector database without using LLM."""
     try:
         results = opencontext.search(
             query=request.query,

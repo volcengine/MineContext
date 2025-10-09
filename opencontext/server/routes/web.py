@@ -80,32 +80,32 @@ async def debug_page(request: Request):
 
 @router.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
-    """AI 聊天界面 - 重定向到高级聊天"""
+    """AI chat interface - redirects to advanced chat"""
     return RedirectResponse(url="/advanced_chat")
 
 
 @router.get("/advanced_chat", response_class=HTMLResponse)
 async def advanced_chat_page(request: Request):
-    """高级AI聊天界面 - 重定向到AI文档协作"""
+    """Advanced AI chat interface - redirects to AI document collaboration"""
     return RedirectResponse(url="/vaults")
 
 
 @router.get("/files/{file_path:path}")
 async def serve_file(file_path: str, _auth: str = auth_dependency):
-    # 安全检查：阻止访问敏感目录
+    # Security check: block access to sensitive directories
     sensitive_paths = [
-        'config/', '.env', '.git/', 'opencontext/', 
+        'config/', '.env', '.git/', 'opencontext/',
         '__pycache__/', '.pytest_cache/', 'logs/',
         'private/', 'secret', 'password', 'key'
     ]
-    
-    # 检查是否访问敏感路径
+
+    # Check if accessing sensitive paths
     file_path_lower = file_path.lower()
     for sensitive in sensitive_paths:
         if file_path_lower.startswith(sensitive.lower()) or sensitive.lower() in file_path_lower:
             raise HTTPException(status_code=403, detail="Access to sensitive files is forbidden")
-    
-    # 仅允许访问特定的安全目录
+
+    # Only allow access to specific safe directories
     allowed_prefixes = [
         'screenshots/', 'static/', 'uploads/', 'public/',
         'docs/', 'examples/', 'templates/public/'
@@ -127,16 +127,16 @@ async def serve_file(file_path: str, _auth: str = auth_dependency):
 
 @router.get("/monitoring", response_class=HTMLResponse)
 async def monitoring_page(request: Request):
-    """监控页面"""
+    """Monitoring page"""
     return templates.TemplateResponse("monitoring.html", {"request": request})
 
 
 @router.get("/assistant", response_class=HTMLResponse)
 async def assistant_page(request: Request):
-    """智能助手页面"""
+    """Intelligent assistant page"""
     return templates.TemplateResponse("assistant.html", {
         "request": request,
-        "title": "智能助手"
+        "title": "Intelligent Assistant"
     })
 
 
