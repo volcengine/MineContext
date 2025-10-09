@@ -5,7 +5,7 @@ labels: ["feature"]
 body:
   - type: markdown
     attributes:
-      value: "## 🤪 Features description [Please make everyone to understand it]"
+      value: "## 📝 Features description [Please make everyone to understand it]"
   - type: textarea
     id: feature-description
     attributes:
