@@ -10,14 +10,6 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 
 <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
 
-[![][release-shield]][release-link]
-[![][github-stars-shield]][github-stars-link]
-[![][github-issues-shield]][github-issues-shield-link]
-[![][github-contributors-shield]][github-contributors-link]
-[![][license-shield]][license-shield-link]  
-[![][last-commit-shield]][last-commit-shield-link]
-[![][wechat-shield]][wechat-shield-link]
-
 [中文](README_zh.md) / English
 
 👋 Join our [WeChat / Lark / Red Note Group](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
@@ -75,7 +67,7 @@ MineContext focuses on five key features: effortless collection, intelligent res
 3. 💡 Intelligent Resurfacing
    Surfaces relevant and useful context intelligently during creation. Ensures assisted creativity without overwhelming you with information.
 4. 🛡️ Privacy-First
-    All data is stored locally, ensuring your privacy and security.
+   All data is stored locally, ensuring your privacy and security.
 5. 🎯 Context Engineering Architecture
    Supports the complete lifecycle of multimodal, multi-source data—from capture, processing, and storage to management, retrieval, and consumption—enabling the generation of six types of intelligent context.
 
@@ -94,6 +86,7 @@ Enter the following command in the terminal to disable the quarantine attribute 
 ```
 sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 ```
+
 ![Quarantine](src/Quarantine.gif)
 
 ### 3. Enter Your API-Key
@@ -113,8 +106,6 @@ After restarting the application, please first set your screen sharing area in �
 ### 5. Forget it
 
 After starting the recording, your context will gradually be collected. It will take some time to generate value. So, forget about it and focus on other tasks with peace of mind. MineContext will generate to-dos, prompts, summaries, and activities for you in the background. Of course, you can also engage in proactive Q&A through [Chat with AI].
-
-
 
 ## 💎 The Philosophy Behind the Name
 
@@ -142,39 +133,39 @@ We will prioritize the expansion of Context Sources according to the following p
 - P4: Personal deep context loop (WeChat, QQ chat data acquisition, mobile screenshots)
 - P5: Physical world context loop (smart wearable synchronization, smart glasses synchronization)
 
-| Context Capture Capability   | Context Source                     | Priority | Completion Status |
-| :--------------------------- | :--------------------------------- | :------- | :---------------- |
-| Screen Screenshot            | User PC Information                | P0       | ✅                |
+| Context Capture Capability   | Context Source                            | Priority | Completion Status |
+| :--------------------------- | :---------------------------------------- | :------- | :---------------- |
+| Screen Screenshot            | User PC Information                       | P0       | ✅                |
 | Note Editing                 | Application Internal Creation Information | P0       | ✅                |
-| Link Upload                  | Internet Information               | P0       |                   |
-| File Upload                  | Structured Documents               | P1       |                   |
-| File Upload                  | Unstructured Documents             | P1       |                   |
-| File Upload                  | Images                             | P1       |                   |
-| File Upload                  | Audio                              | P4       |                   |
-| File Upload                  | Video                              | P4       |                   |
-| File Upload                  | Code                               | P4       |                   |
-| Browser Extension            | AI Conversation Records            | P2       |                   |
-| Browser Extension            | Refined Internet Information       | P5       |                   |
-| Meeting Records              | Meeting Information                | P2       |                   |
-| RSS                          | Consultation Information           | P3       |                   |
-| Deep Research                | High-Quality Research Analysis     | P3       |                   |
-| Application MCP/API          | Payment Records                    | P4       |                   |
-| Application MCP/API          | Research Papers                    | P3       |                   |
-| Application MCP/API          | News                               | P4       |                   |
-| Application MCP/API          | Emails                             | P4       |                   |
-| Application MCP/API          | Notion                             | P2       |                   |
-| Application MCP/API          | Obsidian                           | P2       |                   |
-| Application MCP/API          | Slack                              | P4       |                   |
-| Application MCP/API          | Jira                               | P4       |                   |
-| Application MCP/API          | Figma                              | P2       |                   |
-| Application MCP/API          | Linear                             | P4       |                   |
-| Application MCP/API          | Todoist                            | P4       |                   |
-| Memory Bank Migration Import | User Memory                        | P4       |                   |
-| WeChat Data Capture          | WeChat Chat History                | P4       |                   |
-| QQ Data Capture              | QQ Chat History                    | P4       |                   |
-| Mobile Screenshot Monitor    | User Mobile End Information        | P4       |                   |
-| Smart Glasses Data Sync      | Physical World Interaction Records | P5       |                   |
-| Smart Bracelet Data Sync     | Physiological Data                 | P5       |                   |
+| Link Upload                  | Internet Information                      | P0       |                   |
+| File Upload                  | Structured Documents                      | P1       |                   |
+| File Upload                  | Unstructured Documents                    | P1       |                   |
+| File Upload                  | Images                                    | P1       |                   |
+| File Upload                  | Audio                                     | P4       |                   |
+| File Upload                  | Video                                     | P4       |                   |
+| File Upload                  | Code                                      | P4       |                   |
+| Browser Extension            | AI Conversation Records                   | P2       |                   |
+| Browser Extension            | Refined Internet Information              | P5       |                   |
+| Meeting Records              | Meeting Information                       | P2       |                   |
+| RSS                          | Consultation Information                  | P3       |                   |
+| Deep Research                | High-Quality Research Analysis            | P3       |                   |
+| Application MCP/API          | Payment Records                           | P4       |                   |
+| Application MCP/API          | Research Papers                           | P3       |                   |
+| Application MCP/API          | News                                      | P4       |                   |
+| Application MCP/API          | Emails                                    | P4       |                   |
+| Application MCP/API          | Notion                                    | P2       |                   |
+| Application MCP/API          | Obsidian                                  | P2       |                   |
+| Application MCP/API          | Slack                                     | P4       |                   |
+| Application MCP/API          | Jira                                      | P4       |                   |
+| Application MCP/API          | Figma                                     | P2       |                   |
+| Application MCP/API          | Linear                                    | P4       |                   |
+| Application MCP/API          | Todoist                                   | P4       |                   |
+| Memory Bank Migration Import | User Memory                               | P4       |                   |
+| WeChat Data Capture          | WeChat Chat History                       | P4       |                   |
+| QQ Data Capture              | QQ Chat History                           | P4       |                   |
+| Mobile Screenshot Monitor    | User Mobile End Information               | P4       |                   |
+| Smart Glasses Data Sync      | Physical World Interaction Records        | P5       |                   |
+| Smart Bracelet Data Sync     | Physiological Data                        | P5       |                   |
 
 ## 🆚 Comparison with Familiar Application
 
@@ -260,16 +251,18 @@ opencontext/
 
 ### Installation
 
+We recommend using [uv](https://docs.astral.sh/uv/) for fast and reliable package management:
+
 ```bash
 # Clone repository
 git clone https://github.com/volcengine/MineContext.git
 cd MineContext
 
-python -m venv venv
-source venv/bin/activate
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pip install -r requirements.txt
+# Sync dependencies (automatically creates virtual environment)
+uv sync
 ```
 
 ### Configuration
@@ -307,10 +300,18 @@ capture:
 
 ```bash
 # Start with default configuration
-python -m opencontext.cli start
+uv run python -m opencontext.cli start
 
 # Start with custom config
-python -m opencontext.cli start --config /path/to/config.yaml
+uv run python -m opencontext.cli start --config /path/to/config.yaml
+```
+
+Alternatively, you can activate the virtual environment manually:
+
+```bash
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -e .
+python -m opencontext.cli start
 ```
 
 ## 👥 Community
@@ -324,7 +325,6 @@ python -m opencontext.cli start --config /path/to/config.yaml
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=volcengine/MineContext&type=Timeline)](https://www.star-history.com/#volcengine/MineContext&Timeline)
-
 
 ## 📃 License
 

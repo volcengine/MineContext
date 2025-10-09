@@ -12,3 +12,6 @@ __pycache__
 /test_script
 /config/user_setting.yaml
 .DS_Store
+
+.venv/
+uv.lock

@@ -6,7 +6,6 @@
 
 
 """
-上下文管理器模块，包含系统各个组件的管理器类
 """
 
 from opencontext.managers.capture_manager import ContextCaptureManager
