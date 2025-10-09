@@ -10,12 +10,13 @@
 
 <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
 
-
-
-
-
-
-
+[![][release-shield]][release-link]
+[![][github-stars-shield]][github-stars-link]
+[![][github-issues-shield]][github-issues-shield-link]
+[![][github-contributors-shield]][github-contributors-link]
+[![][license-shield]][license-shield-link]  
+[![][last-commit-shield]][last-commit-shield-link]
+[![][wechat-shield]][wechat-shield-link]
 
 中文 / [English](README.md)
 
@@ -84,6 +85,7 @@ MineContext专注于五个核心功能：轻松收集、智能重显和主动交
 
 ![Download APP](src/Download-App.gif)
 
+
 ### 2. 禁用隔离属性
 
 在运行应用程序之前，在终端中输入以下命令以禁用隔离属性。
@@ -100,6 +102,7 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 ![Enter API-Key](src/Enter-API-Key.gif)
 
+
 ### 4. 开始记录
 
 进入【Screen Monitor】启用屏幕分享的系统权限，设置完之后需要重新启动应用使其生效。
@@ -109,6 +112,7 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 重新启动应用后，请先在【Settings】设置您的屏幕共享区域，然后点击【Start Recording】开始截图。
 
 ![Screen-Settings](src/Screen-Settings.gif)
+
 
 ### 5. 忘掉它
 
@@ -142,8 +146,8 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 
 | 上下文捕获能力   | 上下文来源       | 优先级 | 完成状态 |
 | :--------------- | :--------------- | :----- | :------- |
-| 屏幕截图         | 用户PC信息       | P0     | ✅       |
-| 笔记编辑         | 应用内创作信息   | P0     | ✅       |
+| 屏幕截图     | 用户PC信息       | P0     | ✅       |
+| 笔记编辑     | 应用内创作信息       | P0     | ✅       |
 | 链接上传         | 互联网信息       | P0     |          |
 | 文件上传         | 结构化文档       | P1     |          |
 | 文件上传         | 非结构化文档     | P1     |          |
@@ -330,6 +334,7 @@ python -m opencontext.cli start
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=volcengine/MineContext&type=Timeline)](https://www.star-history.com/#volcengine/MineContext&Timeline)
+
 
 ## 📃 许可证
 

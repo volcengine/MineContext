@@ -76,32 +76,33 @@ Found a bug or have a feature request? [Create an issue](https://github.com/volc
 
 Use descriptive branch names with appropriate prefixes:
 
-| Prefix                    | Purpose                   | Example                             |
-| ------------------------- | ------------------------- | ----------------------------------- |
-| `feature/` or `feat/` | New features              | `feature/add-notion-integration`  |
-| `fix/`                  | Bug fixes                 | `fix/screenshot-capture-error`    |
-| `hotfix/`               | Critical production fixes | `hotfix/memory-leak`              |
-| `docs/`                 | Documentation only        | `docs/update-api-guide`           |
-| `refactor/`             | Code refactoring          | `refactor/simplify-storage-layer` |
-| `test/`                 | Adding or updating tests  | `test/add-processor-tests`        |
-| `chore/`                | Maintenance tasks         | `chore/update-dependencies`       |
+| Prefix | Purpose | Example |
+|--------|---------|---------|
+| `feature/` or `feat/` | New features | `feature/add-notion-integration` |
+| `fix/` | Bug fixes | `fix/screenshot-capture-error` |
+| `hotfix/` | Critical production fixes | `hotfix/memory-leak` |
+| `docs/` | Documentation only | `docs/update-api-guide` |
+| `refactor/` | Code refactoring | `refactor/simplify-storage-layer` |
+| `test/` | Adding or updating tests | `test/add-processor-tests` |
+| `chore/` | Maintenance tasks | `chore/update-dependencies` |
 
 ### Submitting Code
 
 1. **Create a branch**
 
    Follow the branch naming convention above:
-
    ```bash
    git checkout -b feature/your-feature-name
    # or
    git checkout -b fix/your-bug-fix
    ```
+
 2. **Make your changes**
 
    - Follow [PEP 8](https://pep8.org/) style guidelines
    - Add tests for new features
    - Update documentation if needed
+
 3. **Commit with clear messages**
 
    ```bash
@@ -109,6 +110,7 @@ Use descriptive branch names with appropriate prefixes:
    # or
    git commit -m "fix: fix your bug description"
    ```
+
 4. **Push and create a Pull Request**
 
    ```bash
