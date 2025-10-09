@@ -1,4 +1,3 @@
----
 name: "📚 Documentation Improvement"
 description: "Suggest improvements or report errors in documentation"
 title: "[Docs]: "
@@ -19,4 +18,3 @@ body:
     attributes:
       label: "Suggested Improvement"
       description: "How do you think it should be modified?"
----

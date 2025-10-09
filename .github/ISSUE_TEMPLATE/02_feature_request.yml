@@ -1,9 +1,7 @@
----
-name: "🏠 Feature Advice"
+name: "✨ Feature Request"
 description: "Suggest an idea for this project"
-title: "[ADVICE]: "
-labels: ["advice"]
-assignees: ""
+title: "[FEATURE]: "
+labels: ["feature"]
 body:
   - type: markdown
     attributes:
@@ -34,4 +32,3 @@ body:
       label: "🚑 Any additional information"
       description: "Add any other context, screenshots, or examples here"
       placeholder: "Screenshots, mockups, or additional context..."
----

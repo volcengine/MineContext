@@ -1,9 +1,7 @@
----
 name: "🐛 Bug Report"
 description: "Create a report to help us improve"
 title: "[BUG]: "
 labels: ["bug"]
-assignees: ""
 body:
   - type: markdown
     attributes:
@@ -48,15 +46,17 @@ body:
       label: "MineContext Version"
       description: "What version of MineContext are you using?"
       placeholder: "e.g., 0.1.0"
+    validations:
+      required: true
+
   - type: textarea
     id: platform
     attributes:
-        label: "Platform Details"
-        description: "Please specify your platform, OS version, and any other relevant system information"
-        placeholder: |
-            Operating System: 
-            Version: 
-            Additional Details:
+      label: "Platform Details"
+      description: "Please specify your platform, OS version, and any other relevant system information"
+      placeholder: |
+          Operating System: 
+          Version: 
+          Additional Details:
     validations:
         required: true
----
