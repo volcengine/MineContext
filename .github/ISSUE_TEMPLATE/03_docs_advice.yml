@@ -1,4 +1,3 @@
----
 name: "📚 Documentation Improvement"
 description: "Suggest improvements or report errors in documentation"
 title: "[Docs]: "
@@ -7,16 +6,15 @@ body:
   - type: textarea
     id: doc-location
     attributes:
-      label: "Documentation Location"
+      label: "📌 Documentation Location"
       description: "Please provide the URL or path to the relevant documentation."
   - type: textarea
     id: current-content
     attributes:
-      label: "Issue with Current Content"
+      label: "🚑 Issue with Current Content"
       description: "What's the problem with the current documentation? Is it incorrect, unclear, or missing?"
   - type: textarea
     id: suggested-improvement
     attributes:
-      label: "Suggested Improvement"
+      label: "👍 Suggested Improvement"
       description: "How do you think it should be modified?"
----

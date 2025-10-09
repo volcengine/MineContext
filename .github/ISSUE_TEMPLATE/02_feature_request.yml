@@ -1,17 +1,12 @@
----
-name: "🏠 Feature Advice"
+name: "✨ Feature Request"
 description: "Suggest an idea for this project"
-title: "[ADVICE]: "
-labels: ["advice"]
-assignees: ""
+title: "[FEATURE]: "
+labels: ["feature"]
 body:
-  - type: markdown
-    attributes:
-      value: "## 🤪 Features description [Please make everyone to understand it]"
   - type: textarea
     id: feature-description
     attributes:
-      label: "Feature Description"
+      label: "📝 Feature Description [Please make everyone to understand it]"
       description: "Briefly describe this feature"
       placeholder: "Please provide a clear and concise description of the feature suggestion..."
     validations:
@@ -34,4 +29,3 @@ body:
       label: "🚑 Any additional information"
       description: "Add any other context, screenshots, or examples here"
       placeholder: "Screenshots, mockups, or additional context..."
----
