@@ -202,8 +202,10 @@ class ConsumptionManager:
                     try:
                         end_time = int(now.timestamp())
                         start_time = int((now - timedelta(days=1)).timestamp())
-                        
+
                         report_content = asyncio.run(self._activity_generator.generate_report(start_time, end_time))
+                        # Update last report date to prevent duplicate generation on the same day
+                        self._last_report_date = today
                     except Exception as e:
                         logger.exception(f"Failed to generate daily report: {e}")
             except Exception as e:
