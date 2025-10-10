@@ -43,7 +43,41 @@ class WebSearchTool(BaseTool):
     
     @classmethod
     def get_description(cls) -> str:
-        return "Search the internet for the latest information. Supports keyword search, returns relevant webpage titles, summaries, and links. Suitable for obtaining real-time information, news, technical documentation, etc."
+        return """Internet search tool for retrieving real-time information from the web. Returns relevant webpage titles, snippets, and URLs based on search queries.
+
+**When to use this tool:**
+- When you need current, real-time information not in the local knowledge base
+- When looking for recent news, events, or updates
+- When seeking external references, documentation, or resources
+- When the user's question requires up-to-date information beyond the system's stored context
+- When verifying facts or finding additional sources
+
+**When NOT to use this tool:**
+- For searching stored contexts or history → use text_search, filter_context
+- For entity lookups within the system → use profile_entity instead
+- When the answer can be found in local context → prioritize local tools first
+- For information that doesn't require real-time data
+
+**Key features:**
+- Keyword-based web search with natural language support
+- Returns webpage titles, summaries, and links
+- Configurable result count (1-20, default 5)
+- Language preference support (zh-cn, en, ja, etc.)
+- Uses DuckDuckGo for privacy-focused search
+- Automatic proxy support for restricted networks
+
+**Best practices:**
+- Use specific, focused search queries for better results
+- Specify language preference when appropriate
+- Combine with local search tools to provide comprehensive answers
+- Use when local context is insufficient or outdated
+
+**Use cases:**
+- "What's the latest news about AI developments?" → web_search
+- "Find documentation for library X version Y" → web_search
+- "What happened in the world today?" → web_search
+- "Current price of Bitcoin" → web_search
+"""
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:

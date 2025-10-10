@@ -34,7 +34,29 @@ class FilterContextTool(BaseRetrievalTool):
             desc_info = ContextSimpleDescriptions[context_type]
             context_descriptions.append(f"- {context_type.value}: {desc_info['description']}")
         descriptions_text = '\n'.join(context_descriptions)
-        return f"""Directly retrieve context records of specified types through precise filter conditions without semantic matching. Suitable for exact retrieval scenarios with clear query conditions, such as searching by time range, filtering by entities, retrieving by context type, and other structured queries. Supports multi-dimensional combination filtering and flexible sorting methods, efficiently locating target records from large amounts of data. Supports the following context types:\n{descriptions_text}"""
+        return f"""Direct filter-based retrieval tool that returns records matching exact criteria without semantic analysis. Uses structured filtering for precise, deterministic results.
+
+**When to use this tool:**
+- When you need records from a specific time range (e.g., "all activities from yesterday", "contexts between 10am-2pm")
+- When filtering by specific entities (e.g., "contexts mentioning person X", "all records related to project Y")
+- When you need to retrieve all records of a specific context type without searching by content
+- When combining multiple exact filters (time + entities + type)
+- When you want chronologically sorted results (newest/oldest first)
+
+**When NOT to use this tool:**
+- For semantic or conceptual searches → use text_search instead
+- When query involves understanding meaning or intent → use text_search instead
+
+**Key features:**
+- Supports precise time range filtering with flexible time types (event_time, create_time, update_time)
+- Supports entity-based filtering (find all contexts mentioning specific people/projects)
+- Configurable sort order (time ascending/descending, update time ascending/descending)
+- Returns results deterministically based on filter criteria
+- Efficient for large-scale filtering operations
+- Configurable result count (top_k: 1-100, default 20)
+
+**Supported context types:**
+{descriptions_text}"""
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:

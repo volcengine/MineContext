@@ -48,7 +48,40 @@ class DocumentRetrievalTool(BaseRetrievalTool):
     @classmethod
     def get_description(cls) -> str:
         """Get tool description - dynamically generate supported context types"""
-        return "Document retrieval tool providing document-level and chunk-level exact and semantic search. Supports raw_id retrieval, document aggregation and context expansion"
+        return """Document-level retrieval tool specialized for finding and aggregating information from structured documents. Retrieves by document identifiers or searches semantically across document chunks with intelligent aggregation.
+
+**When to use this tool:**
+- When you need to retrieve a specific document by its identifier (raw_type and raw_id)
+- When searching within document collections (e.g., "find documents about project planning")
+- When you want document-level aggregation rather than scattered chunks
+- When exploring related document chunks with context expansion
+- When retrieving from specific document types (vaults, files, etc.)
+
+**When NOT to use this tool:**
+- For general context searches across all types → use text_search or filter_context instead
+- For entity-specific lookups → use profile_entity instead
+- For simple time-based filtering → use filter_context instead
+
+**Retrieval modes:**
+- **document**: Retrieves and aggregates at document level (best for getting complete documents)
+- **chunk**: Returns individual chunks without aggregation (best for precise chunk-level results)
+- **hybrid**: Combines chunk-level precision with document-level aggregation (balanced approach)
+- **context**: Expands search to include related chunks from same document (best for comprehensive context)
+
+**Key features:**
+- Document-level aggregation (groups chunks by raw_id)
+- Supports both exact match (by raw_id) and semantic search
+- Context expansion to find related chunks within documents
+- Flexible filtering by document type (raw_type), entities, and time range
+- Configurable aggregation and result count (top_k: 1-100, default 10)
+- Returns document metadata including chunk count and relevance scores
+
+**Use cases:**
+- "Get document by vault ID 'abc123'"
+- "Find all notes about machine learning with document aggregation"
+- "Search within technical documentation with context expansion"
+- "Retrieve chunks from specific file type with high relevance scores"
+"""
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:

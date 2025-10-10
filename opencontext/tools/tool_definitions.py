@@ -9,7 +9,7 @@ from opencontext.tools.operation_tools import *
 BASIC_RETRIEVAL_TOOLS = [
     {"type": "function", "function": TextSearchTool.get_definition()},
     {"type": "function", "function": FilterContextTool.get_definition()},
-    {"type": "function", "function": DocumentRetrievalTool.get_definition()},
+    # {"type": "function", "function": DocumentRetrievalTool.get_definition()},
 ]
 
 ALL_RETRIEVAL_TOOL_DEFINITIONS = (

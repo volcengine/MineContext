@@ -31,7 +31,7 @@ dependencies = [
     "openai",
     "jinja2",
     "json-repair",
-    "duckduckgo-search",
+    "ddgs",
     "pypdf",
     "openpyxl",
     "chromadb",
