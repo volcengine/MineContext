@@ -14,9 +14,14 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# 2. Install dependencies from requirements.txt
-echo "--> Installing dependencies from requirements.txt..."
-python3 -m pip install -r requirements.txt
+# 2. Check for uv and install dependencies
+if command -v uv &> /dev/null; then
+    echo "--> Using uv to install dependencies..."
+    uv sync
+else
+    echo "--> uv not found, using pip to install from pyproject.toml..."
+    python3 -m pip install -e .
+fi
 
 # 3. Install PyInstaller if not present
 if ! python3 -c "import PyInstaller" 2>/dev/null; then
@@ -58,48 +63,14 @@ if [ -f "dist/$EXECUTABLE_NAME" ] || [ -f "dist/$EXECUTABLE_NAME.exe" ]; then
         echo "⚠️ Warning: 'config' directory not found."
     fi
 
-    # Create a start script for the packaged application
-    echo "--> Creating start script in 'dist/'..."
-    cat > dist/start.sh << 'EOF'
-#!/bin/bash
-# OpenContext Start Script
-
-# Get the directory where the script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Change to the script's directory to ensure paths are correct
-cd "$SCRIPT_DIR"
-
-# --- Configuration ---
-# Please replace 'your_api_key' with your actual API key before running.
-export CONTEXT_API_KEY='your_api_key'
-
-# --- Start Application ---
-EXECUTABLE="./main"
-if [ -f "$EXECUTABLE" ]; then
-    echo "Starting OpenContext..."
-    "$EXECUTABLE" start "$@"
-elif [ -f "$EXECUTABLE.exe" ]; then
-    echo "Starting OpenContext..."
-    "$EXECUTABLE.exe" start "$@"
-else
-    echo "❌ Error: Main executable not found in the current directory."
-    exit 1
-fi
-EOF
-
-    chmod +x dist/start.sh
-
     echo
-    echo "🚀 To run the application:"
-    echo "   cd dist/"
-    echo "   # IMPORTANT: Edit start.sh to set your CONTEXT_API_KEY"
-    echo "   ./start.sh"
+    echo "✅ Build complete!"
     echo
-    echo "Alternatively, run the executable directly:"
-    echo "   # (Make sure to set the CONTEXT_API_KEY environment variable first)"
-    echo "   ./dist/main start"
-
+    echo "To run:"
+    echo "  cd dist && ./main start"
+    echo
+    echo "Options: --port 9000 | --host 0.0.0.0 | --config config/config.yaml"
+    echo
 else
     echo "❌ Build failed. Check the PyInstaller logs above for errors."
     exit 1

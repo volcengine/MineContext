@@ -309,18 +309,28 @@ capture:
 
 ```bash
 # 使用默认配置启动
-uv run python -m opencontext.cli start
+uv run opencontext start
 
 # 使用自定义配置启动
-uv run python -m opencontext.cli start --config /path/to/config.yaml
+uv run opencontext start --config /path/to/config.yaml
+
+# 使用自定义端口启动
+uv run opencontext start --port 8000
 ```
+
+**可用选项：**
+- `--config`：配置文件路径
+- `--host`：主机地址（默认：配置文件中的值或 `localhost`）
+- `--port`：端口号（默认：配置文件中的值或 `8000`）
+
+**优先级**：命令行参数 > 配置文件 > 默认值
 
 或者，你也可以手动激活虚拟环境：
 
 ```bash
 source .venv/bin/activate  # Windows系统: .venv\Scripts\activate
 pip install -e .
-python -m opencontext.cli start
+opencontext start --port 8000
 ```
 
 ## 👥 社区
