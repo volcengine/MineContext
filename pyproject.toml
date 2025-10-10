@@ -41,6 +41,9 @@ dependencies = [
     "imagehash",
 ]
 
+[project.scripts]
+opencontext = "opencontext.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/volcengine/MineContext"
 Repository = "https://github.com/volcengine/MineContext"

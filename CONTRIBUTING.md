@@ -29,7 +29,7 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    uv sync
 
    # Run commands in the uv environment
-   uv run python -m opencontext.cli start
+   uv run opencontext start
    ```
 
    **Option 2: Using traditional venv**
@@ -44,13 +44,13 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    **If using uv:**
    ```bash
    # Start with default configuration
-   uv run python -m opencontext.cli start
+   uv run opencontext start
 
    # Start with custom config
-   uv run python -m opencontext.cli start --config /path/to/config.yaml
+   uv run opencontext start --config /path/to/config.yaml
 
    # Start with custom port (useful for avoiding conflicts)
-   uv run python -m opencontext.cli start --port 8000
+   uv run opencontext start --port 8000
    ```
 
    **If using traditional venv:**
@@ -59,13 +59,13 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    source venv/bin/activate  # On Windows: venv\Scripts\activate
 
    # Start with default configuration
-   python -m opencontext.cli start
+   opencontext start
 
    # Start with custom config
-   python -m opencontext.cli start --config /path/to/config.yaml
+   opencontext start --config /path/to/config.yaml
 
    # Start with custom port
-   python -m opencontext.cli start --port 8000
+   opencontext start --port 8000
    ```
 
    **Available startup options:**

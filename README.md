@@ -285,20 +285,20 @@ server:
   debug: false
 
 embedding_model:
-  provider: doubao  # 选项: openai, doubao
+  provider: doubao  # options: openai, doubao
   api_key: your-api-key
   model: doubao-embedding-large-text-240915
 
 vlm_model:
-  provider: doubao  # 选项: openai, doubao
+  provider: doubao  # options: openai, doubao
   api_key: your-api-key
   model: doubao-seed-1-6-flash-250828
 
 capture:
   enabled: true
   screenshot:
-    enabled: true # 开启截图捕获
-    capture_interval: 5  # 截图间隔（秒）
+    enabled: true # enable screenshot capture
+    capture_interval: 5  # capture interval in seconds
 ```
 
 2. **Prompt Templates** (`config/prompts_*.yaml`):
@@ -309,13 +309,13 @@ capture:
 
 ```bash
 # Start with default configuration
-uv run python -m opencontext.cli start
+uv run opencontext start
 
 # Start with custom config
-uv run python -m opencontext.cli start --config /path/to/config.yaml
+uv run opencontext start --config /path/to/config.yaml
 
-# Start with multiple workers for production
-uv run python -m opencontext.cli start --port 8080
+# Start with custom port (useful for avoiding conflicts)
+uv run opencontext start --port 8000
 ```
 
 **Available Options:**
@@ -330,7 +330,7 @@ Alternatively, you can activate the virtual environment manually:
 ```bash
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
-python -m opencontext.cli start --port 9000
+opencontext start --port 8000
 ```
 
 ## 👥 Community
