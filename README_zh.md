@@ -313,14 +313,24 @@ uv run python -m opencontext.cli start
 
 # 使用自定义配置启动
 uv run python -m opencontext.cli start --config /path/to/config.yaml
+
+# 使用多个工作进程启动（生产环境）
+uv run python -m opencontext.cli start --port 8080
 ```
+
+**可用选项：**
+- `--config`：配置文件路径
+- `--host`：主机地址（默认：配置文件中的值或 `localhost`）
+- `--port`：端口号（默认：配置文件中的值或 `8080`）
+
+**优先级**：命令行参数 > 配置文件 > 默认值
 
 或者，你也可以手动激活虚拟环境：
 
 ```bash
 source .venv/bin/activate  # Windows系统: .venv\Scripts\activate
 pip install -e .
-python -m opencontext.cli start
+python -m opencontext.cli start --port 9000
 ```
 
 ## 👥 社区

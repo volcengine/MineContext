@@ -134,9 +134,19 @@ def parse_args() -> argparse.Namespace:
     # Start command
     start_parser = subparsers.add_parser("start", help="Start OpenContext")
     start_parser.add_argument(
-        "-c", "--config", 
-        type=str, 
+        "-c", "--config",
+        type=str,
         help="Configuration file path"
+    )
+    start_parser.add_argument(
+        "--host",
+        type=str,
+        help="Host address (overrides config file)"
+    )
+    start_parser.add_argument(
+        "--port",
+        type=int,
+        help="Port number (overrides config file)"
     )
     start_parser.add_argument(
         "--workers",
@@ -214,10 +224,10 @@ def _run_headless_mode(lab_instance: OpenContext) -> None:
 
 def handle_start(args: argparse.Namespace) -> int:
     """Handle the start command.
-    
+
     Args:
         args: Parsed command line arguments
-        
+
     Returns:
         Exit code (0 for success, 1 for failure)
     """
@@ -231,9 +241,10 @@ def handle_start(args: argparse.Namespace) -> int:
 
     web_config = lab_instance.config.get("web", {})
     if web_config.get("enabled", True):
-        host = web_config.get("host", "localhost")
-        port = web_config.get("port", 8080)
-        
+        # Command line arguments override config file
+        host = args.host if args.host else web_config.get("host", "localhost")
+        port = args.port if args.port else web_config.get("port", 8080)
+
         try:
             logger.info(f"Starting web server on {host}:{port}")
             workers = getattr(args, 'workers', 1)
@@ -243,7 +254,7 @@ def handle_start(args: argparse.Namespace) -> int:
             lab_instance.shutdown()
     else:
         _run_headless_mode(lab_instance)
-    
+
     return 0
 def _setup_logging(config_path: Optional[str]) -> None:
     """Setup logging configuration.

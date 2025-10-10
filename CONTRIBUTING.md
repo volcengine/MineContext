@@ -48,6 +48,9 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
 
    # Start with custom config
    uv run python -m opencontext.cli start --config /path/to/config.yaml
+
+   # Start with custom port (useful for avoiding conflicts)
+   uv run python -m opencontext.cli start --port 8000
    ```
 
    **If using traditional venv:**
@@ -60,7 +63,15 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
 
    # Start with custom config
    python -m opencontext.cli start --config /path/to/config.yaml
+
+   # Start with custom port
+   python -m opencontext.cli start --port 8000
    ```
+
+   **Available startup options:**
+   - `--config`: Path to configuration file
+   - `--host`: Host address (overrides config file)
+   - `--port`: Port number (overrides config file)
 
 ## How to Contribute
 

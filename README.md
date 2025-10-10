@@ -313,14 +313,24 @@ uv run python -m opencontext.cli start
 
 # Start with custom config
 uv run python -m opencontext.cli start --config /path/to/config.yaml
+
+# Start with multiple workers for production
+uv run python -m opencontext.cli start --port 8080
 ```
+
+**Available Options:**
+- `--config`: Path to configuration file
+- `--host`: Host address (default: from config or `localhost`)
+- `--port`: Port number (default: from config or `8000`)
+
+**Priority**: Command-line arguments > Config file > Default values
 
 Alternatively, you can activate the virtual environment manually:
 
 ```bash
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
-python -m opencontext.cli start
+python -m opencontext.cli start --port 9000
 ```
 
 ## 👥 Community
