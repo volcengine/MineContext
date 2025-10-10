@@ -45,7 +45,49 @@ class ProfileEntityTool(BaseTool):
     
     @classmethod
     def get_description(cls) -> str:
-        return "Unified entity management tool, supports exact search, similar search, relationship checking, creation and update of entities"
+        return """Entity profile management tool for finding, matching, and exploring entities (people, projects, organizations, etc.) and their relationships. Provides intelligent entity resolution and relationship network analysis.
+
+**When to use this tool:**
+- When you need detailed information about a specific entity (person, project, team, organization)
+- When resolving entity names to their canonical forms (e.g., "John" → "John Smith")
+- When checking relationships between two entities (e.g., "Is Alice related to Project X?")
+- When exploring an entity's relationship network (friends, collaborators, team members)
+- When finding similar entities based on names or descriptions
+
+**When NOT to use this tool:**
+- For general content searches → use text_search instead
+- For time-based filtering → use filter_context instead
+- When searching for contexts mentioning entities → use text_search or filter_context with entity filter
+
+**Supported operations:**
+- **find_exact_entity**: Lookup entity by exact canonical name or alias
+- **find_similar_entity**: Find entities with similar names or descriptions (fuzzy matching)
+- **match_entity**: Intelligent entity resolution (exact match → semantic search → LLM-based judgment)
+- **check_entity_relationships**: Check if two entities are related and how
+- **get_entity_relationship_network**: Explore entity's relationship graph with configurable depth (1-5 hops)
+
+**Key features:**
+- Canonical name resolution with alias support
+- Intelligent fuzzy matching and entity disambiguation
+- Relationship type identification (colleague, team_member, supervisor, etc.)
+- Multi-hop relationship network traversal
+- Entity metadata enrichment (description, properties, relationships)
+- LLM-powered entity matching for ambiguous cases
+
+**Entity types supported:**
+- person (people, individuals, users)
+- project (projects, initiatives, products)
+- team (teams, groups, departments)
+- organization (companies, institutions, external entities)
+- other (generic named entities)
+
+**Use cases:**
+- "Who is Alice?" → find_exact_entity
+- "Find people similar to 'John'" → find_similar_entity
+- "Match 'XYZ Corp' to known organization" → match_entity
+- "Are Alice and Bob related?" → check_entity_relationships
+- "Show me Bob's network of collaborators" → get_entity_relationship_network
+"""
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:

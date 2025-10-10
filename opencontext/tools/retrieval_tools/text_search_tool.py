@@ -34,7 +34,28 @@ class TextSearchTool(BaseRetrievalTool):
             desc_info = ContextSimpleDescriptions[context_type]
             context_descriptions.append(f"- {context_type.value}: {desc_info['description']}")
         descriptions_text = '\n'.join(context_descriptions)
-        return f"""Intelligent semantic search using natural language queries, finding the most relevant content from specified types of context records based on vector similarity matching. Suitable for fuzzy queries, concept search, content understanding and other scenarios, capable of understanding query intent and returning semantically related results. Supports advanced features such as time range filtering and entity screening. Supports the following context types:\n{descriptions_text}"""
+        return f"""Semantic search tool for finding contextually relevant information using natural language queries. Returns ranked results based on meaning and relevance rather than exact keyword matches.
+
+**When to use this tool:**
+- When the query involves concepts, themes, or topics (e.g., "learning activities about machine learning", "discussions about project planning")
+- When looking for information semantically related to a description or question
+- When exact keywords are unknown but the general topic or meaning is clear
+- When exploring historical activities, knowledge, or discussions by topic
+- When filtering by context type (activity, intent, semantic, procedural, state, entity)
+- When time-based filtering or entity screening is needed
+
+**When NOT to use this tool:**
+- For precise entity lookups → use profile_entity instead
+- For structured data filtering → use filter_context instead
+
+**Key features:**
+- Understands query intent and finds semantically similar content
+- Supports time range filtering (start/end timestamps with timezone)
+- Supports entity-based filtering (find contexts mentioning specific people/projects)
+- Configurable result count (top_k: 1-100, default 20)
+
+**Supported context types:**
+{descriptions_text}"""
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
@@ -42,7 +63,9 @@ class TextSearchTool(BaseRetrievalTool):
         # Dynamically generate context_type description
         context_descriptions = []
         for context_type in ContextType:
-            desc_info = ContextSimpleDescriptions[context_type]
+            if context_type == ContextType.ENTITY_CONTEXT:
+                continue
+            desc_info = ContextSimpleDescriptions[context_type.value]
             context_descriptions.append(f"- {context_type.value}: {desc_info['description']}. {desc_info['purpose']}")
         context_type_desc = "Detailed description of context types:\n" + '\n'.join(context_descriptions)
 
