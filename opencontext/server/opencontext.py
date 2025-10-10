@@ -33,8 +33,7 @@ class OpenContext:
 
     def __init__(
         self,
-        config_path: Optional[str] = None,
-        config_dict: Optional[Dict[str, Any]] = None,
+        config_path: Optional[str] = None
     ):
         """
         Initialize OpenContext.
@@ -43,11 +42,6 @@ class OpenContext:
             config_path: Configuration file path
             config_dict: Configuration dictionary (unused, kept for compatibility)
         """
-        # Initialize configuration manager
-        self.config_manager = ConfigManager()
-        self.config_manager.load_config(config_path)
-        self.config = self.config_manager.get_config()
-
         # Initialize core components
         self.capture_manager = ContextCaptureManager()
         self.processor_manager = ContextProcessorManager()
@@ -57,7 +51,7 @@ class OpenContext:
         self.completion_service = None  # Smart completion service
         
         # Helper classes
-        self.component_initializer = ComponentInitializer(self.config_manager)
+        self.component_initializer = ComponentInitializer()
         self.context_operations: Optional[ContextOperations] = None
         
         # Web server state

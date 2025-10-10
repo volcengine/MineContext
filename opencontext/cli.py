@@ -209,7 +209,8 @@ def handle_start(args: argparse.Namespace) -> int:
     logger.info("Starting all modules")
     lab_instance.start_capture()
 
-    web_config = lab_instance.config.get("web", {})
+    from opencontext.config.global_config import get_config
+    web_config = get_config("web")
     if web_config.get("enabled", True):
         # Command line arguments override config file
         host = args.host if args.host else web_config.get("host", "localhost")
@@ -232,13 +233,10 @@ def _setup_logging(config_path: Optional[str]) -> None:
     Args:
         config_path: Optional path to configuration file
     """
-    config_manager = ConfigManager()
-    if config_path:
-        config_manager.load_config(config_path)
-    else:
-        config_manager.update_config(config_manager.get_default_config())
-    
-    setup_logging(config_manager.get_config().get('logging', {}))
+    from opencontext.config.global_config import GlobalConfig
+    GlobalConfig.get_instance().initialize(config_path)
+
+    setup_logging(GlobalConfig.get_instance().get_config('logging'))
 
 def main() -> int:
     """Main entry point.
