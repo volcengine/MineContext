@@ -24,7 +24,7 @@
 
 🌍 加入我们的 [Discord社区](https://discord.gg/tGj7RQ3nUR)
 
-[Mac 应用下载](https://github.com/volcengine/MineContext/releases)
+[Mac 应用下载](https://github.com/volcengine/MineContext/releases/download/0.1.1/MineContext-0.1.1.dmg)
 
 </div>
 
