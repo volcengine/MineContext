@@ -681,6 +681,8 @@ class ChromaDBBackend(IVectorStorageBackend):
             if key == 'context_type':
                 # context_type is selected through collection, skip here
                 continue
+            elif key == 'entities':
+                continue
             elif not value:
                 continue
             elif key.endswith('_ts') and isinstance(value, dict):
@@ -694,7 +696,6 @@ class ChromaDBBackend(IVectorStorageBackend):
                     where_conditions.append({key: {"$in": value}})
                 else:
                     where_conditions.append({key: value})
-
         if not where_conditions:
             return None
         elif len(where_conditions) == 1:

@@ -65,9 +65,9 @@ class BaseRetrievalTool(BaseTool):
                 unified_entities = [match.get("entity_canonical_name", match["input_entity"]) for match in matches]
                 if not unified_entities:
                     unified_entities = filters.entities
-                build_filter["entity"] = unified_entities
+                build_filter["entities"] = unified_entities
             else:
-                build_filter["entity"] = filters.entities
+                build_filter["entities"] = filters.entities
         return build_filter
     
     def _execute_search(self, 

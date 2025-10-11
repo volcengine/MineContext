@@ -164,7 +164,7 @@ class IDocumentStorageBackend(IStorageBackend):
     
     @abstractmethod
     def insert_todo(self, content: str, start_time: datetime = None, end_time: datetime = None,
-                   status: int = 0, urgency: int = 0, assignee: str = None) -> int:
+                   status: int = 0, urgency: int = 0, assignee: str = None, reason: str = None) -> int:
         """Insert todo item"""
 
     @abstractmethod

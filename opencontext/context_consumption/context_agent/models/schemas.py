@@ -155,6 +155,10 @@ class ContextCollection:
         
         summary_parts = [f"{source.value}: {count}" for source, count in source_counts.items()]
         return f"Collected {len(self.items)} context items ({', '.join(summary_parts)}), sufficiency: {self.sufficiency.value}"
+    
+    def get_chat_history(self) -> List[Dict[str, str]]:
+        """Get chat history as a list of dictionaries"""
+        return [{"role": msg.role, "content": msg.content} for msg in self.chat_history]
 
 @dataclass
 class ExecutionStep:

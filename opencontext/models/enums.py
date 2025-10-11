@@ -121,13 +121,13 @@ ContextSimpleDescriptions = {
     },
     ContextType.SEMANTIC_CONTEXT.value: {
         "name": ContextType.SEMANTIC_CONTEXT.value,
-        "description": "Semantic knowledge and concept records",
-        "purpose": "Record semantic information such as concept definitions, knowledge systems, and theoretical understanding"
+        "description": "Knowledge concepts and technical principles",
+        "purpose": "Record core knowledge points, concept definitions, and technical principles. Focus on what the knowledge is, not how it was obtained"
     },
     ContextType.PROCEDURAL_CONTEXT.value: {
         "name": ContextType.PROCEDURAL_CONTEXT.value,
-        "description": "Procedural method and operation records",
-        "purpose": "Record procedural knowledge such as operation steps, workflows, and method skills"
+        "description": "User operation flows and task procedures",
+        "purpose": "Record and learn user's operation patterns and task completion procedures based on temporal sequence"
     },
     ContextType.STATE_CONTEXT.value: {
         "name": ContextType.STATE_CONTEXT.value,
@@ -190,35 +190,35 @@ ContextDescriptions = {
     },
     ContextType.SEMANTIC_CONTEXT: {
         "name": ContextType.SEMANTIC_CONTEXT.value,
-        "description": """Semantic knowledge and concept records - Record semantic information such as concept definitions, knowledge systems, and theoretical understanding. This type of information answers the question of \"what is this concept\" and is used to build knowledge graphs and conceptual understanding.""",
+        "description": """Knowledge concepts and technical principles - Record core knowledge points, concept definitions, technical architectures, and theoretical understanding. Focus on extracting the essence of knowledge itself without describing the acquisition process. This type answers \"what is this\" and \"why it works\" questions.""",
         "key_indicators": [
-            "Contains definitions and explanations of professional terms and concepts",
-            "Describes knowledge systems and classification structures",
-            "Involves theoretical principles and academic concepts",
-            "Contains association relationships and hierarchical structures between concepts",
-            "Has educational and knowledge inheritance value"
+            "Contains definitions and explanations of technical concepts",
+            "Describes system architectures, technical stacks, and design patterns",
+            "Involves theoretical principles and technical mechanisms",
+            "Focuses on knowledge content rather than user actions",
+            "Has reusable educational and reference value"
         ],
         "examples": [
-            "Supervised learning in machine learning refers to training models using labeled data",
-            "Agile development methodology includes specific frameworks such as Scrum and Kanban",
-            "The Eisenhower matrix for time management divides tasks into four quadrants"
+            "MineContext architecture: hybrid storage supporting local privacy and cloud inference",
+            "React Hooks principle: enables state and lifecycle features in functional components",
+            "Microservices patterns: service decomposition, API gateway, service discovery, circuit breaker"
         ],
         "classification_priority": 6
     },
     ContextType.PROCEDURAL_CONTEXT: {
         "name": ContextType.PROCEDURAL_CONTEXT.value,
-        "description": """Procedural method and operation records - Record procedural knowledge such as operation steps, workflows, and method skills. This type of information answers the question of \"how to do it\" and is used to guide specific operations and process execution.""",
+        "description": """User operation flows and task procedures - Record and learn how users complete specific tasks through temporal sequences of operations. This type captures reusable operation patterns and workflows that can guide future task execution.""",
         "key_indicators": [
-            "Contains specific operation steps and execution sequences",
-            "Describes workflows and standardized procedures",
-            "Involves method skills and best practices",
-            "Contains tool usage instructions and configuration methods",
-            "Has repeatability and guiding characteristics"
+            "Contains sequential operation steps performed by the user",
+            "Describes how to complete a specific task or achieve a goal",
+            "Records user's interaction patterns with tools and interfaces",
+            "Forms learnable and repeatable operation procedures",
+            "Based on temporal order of user actions"
         ],
         "examples": [
-            "My code review process: check function -> verify test -> confirm documentation -> submit feedback",
-            "Standard operating procedures for version control using Git",
-            "Standard agenda for team meetings: opening -> topic discussion -> decision recording -> action allocation"
+            "Git merge workflow: Step 1-check status, Step 2-add files, Step 3-commit changes, Step 4-push to remote",
+            "Docker setup process: Step 1-write Dockerfile, Step 2-build image, Step 3-run container, Step 4-verify service",
+            "Debug procedure: Step 1-set breakpoints, Step 2-run debugger, Step 3-inspect variables, Step 4-locate issue, Step 5-fix code"
         ],
         "classification_priority": 5
     },

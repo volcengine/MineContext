@@ -216,7 +216,6 @@ class ConsumptionManager:
                 self._task_timers['report'].start()
         
         check_and_generate_daily_report()
-        logger.info(f"Daily report generation timer started, checking every minute, generation time: {self._daily_report_time}")
     
     def _start_activity_timer(self):
         """Start activity recording timer"""
