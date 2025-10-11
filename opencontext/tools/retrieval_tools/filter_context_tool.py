@@ -78,22 +78,22 @@ class FilterContextTool(BaseRetrievalTool):
                 "entities": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Entity list for filtering records containing specific entities (e.g., person names, project names, concept names)"
+                    "description": "Entity list for filtering records containing specific entities (e.g., person names, project names, concept names). For queries related to the current user, always use 'current_user' as the entity name (aliases: 'me', 'user', 'myself')"
                 },
                 "time_range": {
                     "type": "object",
                     "properties": {
-                        "start": {"type": "integer", "description": "Start time in seconds timestamp, leave empty if no limit"},
-                        "end": {"type": "integer", "description": "End time in seconds timestamp, leave empty if no limit"},
+                        "start": {"type": "integer", "description": "Start timestamp in seconds (Unix epoch). MUST be an integer like 1760148653, NOT a string or expression like '1760170253-86400'. Calculate the value first, then pass the integer result. Leave empty if no lower bound"},
+                        "end": {"type": "integer", "description": "End timestamp in seconds (Unix epoch). MUST be an integer like 1760170253, NOT a string or expression. Calculate the value first, then pass the integer result. Leave empty if no upper bound"},
                         # "timezone": {"type": "string", "default": "local"},
                         "time_type": {
-                            "type": "string", 
-                            "enum": ["create_time_ts", "update_time_ts", "event_time_ts"], 
+                            "type": "string",
+                            "enum": ["create_time_ts", "update_time_ts", "event_time_ts"],
                             "default": "event_time_ts",
                             "description": "Time type: create_time_ts (creation time), update_time_ts (update time), event_time_ts (event time)"
                         }
                     },
-                    "description": "Time range filter",
+                    "description": "Time range filter. **CRITICAL**: start and end MUST be calculated integers before calling this tool. Examples: (1) 'Last 24 hours' when now=1760171602: calculate start=1760085202 (=1760171602-86400), end=1760171602; (2) 'October 11th' or 'today': start=beginning of that day (00:00:00), end=end of that day (23:59:59) or current time if today. For a specific day, ALWAYS use the day's start time (00:00:00) as start, not current time. Never pass strings like '1760171602-86400'. Durations: 1h=3600s, 6h=21600s, 24h=86400s, 7d=604800s. Ensure start < end",
                 },
                 "sort_by": {
                     "type": "string",

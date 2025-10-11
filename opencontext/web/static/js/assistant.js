@@ -6,6 +6,7 @@ class AssistantChat {
         this.currentWorkflowId = null;
         this.isConnected = false;
         this.eventSource = null;
+        this.chatHistory = [];  // 添加聊天历史记录
         this.init();
     }
 
@@ -72,35 +73,40 @@ class AssistantChat {
     async sendMessage() {
         const messageInput = document.getElementById('messageInput');
         const message = messageInput.value.trim();
-        
+
         if (!message) return;
         if (!this.isConnected) {
             this.addMessage('system', '当前未连接到服务器，请稍后重试');
             return;
         }
 
-        // 清空输入框并添加用户消息
+        // 清空输入框并添加用户消息到界面
         messageInput.value = '';
         this.addMessage('user', message);
-        
+
         // 显示输入中指示器
         this.showTypingIndicator();
-        
+
         // 重置工作流状态
         this.resetWorkflowStages();
 
         try {
+            // 构建上下文（不包含当前消息，只包含之前的历史）
+            const context = this.buildContext();
+
+            const requestBody = {
+                query: message,
+                session_id: this.sessionId,
+                context: context
+            };
+
             // 发送流式请求
             const response = await window.fetch('/api/agent/chat/stream', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    query: message,
-                    session_id: this.sessionId,
-                    context: {}
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
@@ -109,11 +115,27 @@ class AssistantChat {
 
             await this.handleStreamResponse(response);
 
+            // 请求成功后，将用户消息添加到历史记录
+            this.chatHistory.push({
+                role: 'user',
+                content: message
+            });
+            console.log('📥 用户消息已添加到历史，当前历史长度:', this.chatHistory.length);
+
         } catch (error) {
-            console.error('发送消息失败:', error);
+            console.error('❌ 发送消息失败:', error);
             this.hideTypingIndicator();
             this.addMessage('system', `发送失败: ${error.message}`);
         }
+    }
+
+    buildContext() {
+        // 只保留最近 10 条消息
+        const recentHistory = this.chatHistory.slice(-10);
+
+        return {
+            chat_history: recentHistory
+        };
     }
 
     async handleStreamResponse(response) {
@@ -320,7 +342,7 @@ class AssistantChat {
 
     addMessage(type, content) {
         const messagesContainer = document.getElementById('chatMessages');
-        
+
         // 如果是第一条消息，移除欢迎消息
         const welcomeMessage = messagesContainer.querySelector('.welcome-message');
         if (welcomeMessage) {
@@ -329,31 +351,39 @@ class AssistantChat {
 
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
-        
+
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
-        
+
         if (type === 'system') {
             contentDiv.style.background = '#fff3cd';
             contentDiv.style.color = '#856404';
             contentDiv.style.border = '1px solid #ffeaa7';
         }
-        
+
         if (content) {
             contentDiv.innerHTML = this.formatMessage(content);
         }
-        
+
         const metaDiv = document.createElement('div');
         metaDiv.className = 'message-meta';
         metaDiv.textContent = new Date().toLocaleTimeString();
-        
+
         messageDiv.appendChild(contentDiv);
         messageDiv.appendChild(metaDiv);
         messagesContainer.appendChild(messageDiv);
-        
+
         // 滚动到底部
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
+
+        // 添加到历史记录（只记录 assistant 的回复，user 在发送时已经添加）
+        if (type === 'assistant' && content) {
+            this.chatHistory.push({
+                role: 'assistant',
+                content: content
+            });
+        }
+
         return messageDiv;
     }
 
@@ -438,6 +468,7 @@ class AssistantChat {
             `;
             this.resetWorkflowStages();
             this.sessionId = this.generateSessionId();
+            this.chatHistory = [];  // 清空聊天历史
         });
     }
 

@@ -33,7 +33,7 @@ class IntentNode(BaseNode):
         """Process intent analysis"""
         await self.streaming_manager.emit(StreamEvent(type=EventType.THINKING, content="Analyzing your intent...", stage=WorkflowStage.INTENT_ANALYSIS))        
         # 1. Classify query type
-        query_type = await self._classify_query(state.query.text)
+        query_type = await self._classify_query(state.query.text, state.contexts.get_chat_history())
         if not query_type:
             await self.streaming_manager.emit(StreamEvent(type=EventType.FAIL, content="Intent analysis failed", stage=WorkflowStage.INTENT_ANALYSIS,
                                           metadata={ "query": state.query.text }))
@@ -59,12 +59,12 @@ class IntentNode(BaseNode):
         # )
         return state
             
-    async def _classify_query(self, query: str) -> QueryType:
+    async def _classify_query(self, query: str, chat_history: List[Dict[str, str]]) -> QueryType:
         """Use LLM to classify query types, including confidence assessment and fallback strategies"""
         prompt_group = get_prompt_group("chat_workflow.query_classification")
         messages = [
             {"role": "system", "content": prompt_group['system']},
-            {"role": "user", "content": prompt_group['user'].format(query=query)}
+            {"role": "user", "content": prompt_group['user'].format(query=query, chat_history=json.dumps(chat_history))}
         ]
         response = await generate_with_messages_async(
             messages,

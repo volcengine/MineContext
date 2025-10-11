@@ -72,11 +72,12 @@ class EventType(str, Enum):
     
 
 class QueryType(str, Enum):
-    """Query type enumeration - four categories"""
+    """Query type enumeration - five categories"""
     SIMPLE_CHAT = "simple_chat"             # Simple chat (daily greetings, small talk, etc.)
     DOCUMENT_EDIT = "document_edit"         # Document editing and rewriting (preserving existing facts/not introducing new information)
     QA_ANALYSIS = "qa_analysis"             # Q&A (covering summarization, analysis, and dialogue based on documents and complex context)
     CONTENT_GENERATION = "content_generation"  # Document content generation/expansion (allowing new information)
+    CLARIFICATION_NEEDED = "clarification_needed"  # Query is too vague or ambiguous, needs user clarification
     
 
 class ContextSufficiency(str, Enum):

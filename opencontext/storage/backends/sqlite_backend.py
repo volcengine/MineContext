@@ -101,6 +101,10 @@ class SQLiteBackend(IDocumentStorageBackend):
             cursor.execute('''
                 ALTER TABLE todo ADD COLUMN assignee TEXT
             ''')
+        if 'reason' not in columns:
+            cursor.execute('''
+                ALTER TABLE todo ADD COLUMN reason TEXT
+            ''')
         
         # Activity table - activity records
         cursor.execute('''
@@ -388,18 +392,18 @@ class SQLiteBackend(IDocumentStorageBackend):
     
     # Todo table operations
     def insert_todo(self, content: str, start_time: datetime = None, end_time: datetime = None,
-                   status: int = 0, urgency: int = 0, assignee: str = None) -> int:
+                   status: int = 0, urgency: int = 0, assignee: str = None, reason: str = None) -> int:
         """Insert todo item"""
         if not self._initialized:
             raise RuntimeError("SQLite backend not initialized")
-        
+
         cursor = self.connection.cursor()
         try:
             cursor.execute('''
-                INSERT INTO todo (content, start_time, end_time, status, urgency, assignee, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (content, start_time or datetime.now(), end_time, status, urgency, assignee, datetime.now()))
-            
+                INSERT INTO todo (content, start_time, end_time, status, urgency, assignee, reason, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (content, start_time or datetime.now(), end_time, status, urgency, assignee, reason, datetime.now()))
+
             todo_id = cursor.lastrowid
             self.connection.commit()
             logger.info(f"Todo item inserted, ID: {todo_id}")
@@ -413,12 +417,10 @@ class SQLiteBackend(IDocumentStorageBackend):
         """Get todo item list"""
         if not self._initialized:
             return []
-        
         cursor = self.connection.cursor()
         try:
             where_conditions = []
             params = []
-            
             if start_time:
                 where_conditions.append('start_time >= ?')
                 params.append(start_time)
@@ -431,13 +433,12 @@ class SQLiteBackend(IDocumentStorageBackend):
             where_clause = ' AND '.join(where_conditions) if where_conditions else '1=1'
             params.extend([limit, offset])
             cursor.execute(f'''
-                SELECT id, content, created_at, start_time, end_time, status, urgency, assignee
+                SELECT id, content, created_at, start_time, end_time, status, urgency, assignee, reason
                 FROM todo
                 WHERE {where_clause}
                 ORDER BY urgency DESC, created_at DESC
                 LIMIT ? OFFSET ?
             ''', params)
-            
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
         except Exception as e:

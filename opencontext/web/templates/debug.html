@@ -386,6 +386,7 @@ async function loadTodos() {
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
                                 <p class="card-text ${todo.status === 1 ? 'text-decoration-line-through text-muted' : ''}">${todo.content}</p>
+                                ${todo.reason ? `<p class="mb-1"><small class="text-secondary"><i class="bi bi-info-circle-fill"></i> 原因: ${todo.reason}</small></p>` : ''}
                                 ${todo.assignee ? `<p class="mb-1"><small class="text-info"><i class="bi bi-person-fill"></i> 参与人: ${todo.assignee}</small></p>` : ''}
                                 <small class="text-muted">
                                     创建: ${new Date(todo.created_at).toLocaleString()}
@@ -396,7 +397,7 @@ async function loadTodos() {
                                 <span class="badge bg-${todo.urgency === 2 ? 'danger' : todo.urgency === 1 ? 'warning' : 'secondary'} me-2">
                                     ${todo.urgency === 2 ? '高' : todo.urgency === 1 ? '中' : '低'}
                                 </span>
-                                <button class="btn btn-sm ${todo.status === 1 ? 'btn-outline-warning' : 'btn-outline-success'}" 
+                                <button class="btn btn-sm ${todo.status === 1 ? 'btn-outline-warning' : 'btn-outline-success'}"
                                         onclick="toggleTodoStatus(${todo.id}, ${todo.status === 1 ? 0 : 1})">
                                     ${todo.status === 1 ? '重新开启' : '完成'}
                                 </button>

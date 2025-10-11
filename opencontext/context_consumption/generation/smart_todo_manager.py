@@ -37,6 +37,9 @@ class TodoTask:
     assignee: Optional[str] = None
     participants: List[str] = field(default_factory=list)
     context_reference: Optional[str] = None
+    reason: Optional[str] = None
+    created_at: Optional[str] = None
+
 
 
 class SmartTodoManager:
@@ -79,13 +82,12 @@ class SmartTodoManager:
             # 2. Get regular context data
             contexts = self._get_task_relevant_contexts(start_time, end_time, activity_insights)
             # 3. Get historical todo completion status
-            historical_todos = self._get_historical_todos(days=1)
+            historical_todos = self._get_historical_todos()
             # 4. Synthesize all information to generate high-quality todos
             tasks = self._extract_tasks_from_contexts_enhanced(
                 contexts, start_time, end_time, activity_insights, historical_todos)
             
             if not tasks:
-                logger.info("No clear tasks were identified from the activity.")
                 return None
             # Store in the SQLite todo table
             todo_ids = []
@@ -93,8 +95,10 @@ class SmartTodoManager:
                 participants_str = ""
                 if task.get('participants') and len(task['participants']) > 0:
                     participants_str = ",".join(task['participants'])
-                
+
                 content = task.get('description', '')
+                reason = task.get('reason', '')
+                logger.info(f"Generated Todo Task: {task}")
                 urgency = self._map_priority_to_urgency(task.get('priority', 'normal'))
 
                 deadline = None
@@ -107,12 +111,13 @@ class SmartTodoManager:
                             deadline = datetime.datetime.strptime(task['due_date'], '%Y-%m-%d')
                     except:
                         pass
-                
+
                 todo_id = self.storage.insert_todo(
                     content=content,
                     urgency=urgency,
                     end_time=deadline,
-                    assignee=participants_str
+                    assignee=participants_str,
+                    reason=reason
                 )
                 todo_ids.append(todo_id)
             
@@ -172,12 +177,12 @@ class SmartTodoManager:
             logger.exception(f"Failed to get activity insights: {e}")
             return {}
     
-    def _get_historical_todos(self, days: int = 7) -> List[Dict[str, Any]]:
+    def _get_historical_todos(self, days: int = 7, limit: int = 50) -> List[Dict[str, Any]]:
         """Get historical todo records.
         """
         try:
             start_time = datetime.datetime.now() - datetime.timedelta(days=days)
-            todos = self.storage.get_todos(limit=50, start_time=start_time)
+            todos = self.storage.get_todos(limit=limit, start_time=start_time)
             return todos
         except Exception as e:
             logger.exception(f"Failed to get historical todos: {e}")
@@ -291,7 +296,8 @@ class SmartTodoManager:
                     'assignee': task.get('assignee', ''),  # Task assignee
                     'participants': task.get('participants', []),  # List of participants
                     'context_reference': task.get('context_reference', ''),
-                    'created_at': datetime.datetime.now().isoformat()
+                    'created_at': datetime.datetime.now().isoformat(),
+                    'reason': task.get('reason', '')
                 }
                 
                 # Process the deadline

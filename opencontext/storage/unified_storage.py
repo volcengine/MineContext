@@ -402,7 +402,7 @@ class UnifiedStorage:
         return self._document_backend.get_vault(vault_id)
 
     def insert_todo(self, content: str, start_time: datetime = None, end_time: datetime = None,
-                   status: int = 0, urgency: int = 0, assignee: str = None) -> int:
+                   status: int = 0, urgency: int = 0, assignee: str = None, reason: str = None) -> int:
         """Insert todo item"""
         if not self._initialized:
             logger.error("Unified storage system not initialized")
@@ -410,7 +410,7 @@ class UnifiedStorage:
 
         if not self._document_backend:
             return None
-        return self._document_backend.insert_todo(content, start_time, end_time, status, urgency, assignee)
+        return self._document_backend.insert_todo(content, start_time, end_time, status, urgency, assignee, reason)
     
     def get_todos(self, status: int = None, limit: int = 100, offset: int = 0, start_time: datetime = None, end_time: datetime = None) -> List[Dict]:
         """Get todo items"""

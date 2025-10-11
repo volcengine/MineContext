@@ -102,7 +102,7 @@ class ProfileEntityTool(BaseTool):
                 },
                 "entity_name": {
                     "type": "string",
-                    "description": "Entity name to search"
+                    "description": "Entity name to search. For queries related to the current user, always use 'current_user' as the entity name (aliases: 'me', 'user', 'myself')"
                 },
                 "entity_data": {
                     "type": "object",
