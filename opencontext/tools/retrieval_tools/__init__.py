@@ -8,14 +8,38 @@ OpenContext retrieval_tools module initialization
 重构后的基于 context_type 的专门化检索工具
 """
 
-# 基础检索工具
-from .text_search_tool import TextSearchTool
-from .filter_context_tool import FilterContextTool
-from .document_retrieval_tool import DocumentRetrievalTool
+# Base classes
+from .base_context_retrieval_tool import BaseContextRetrievalTool
+from .base_document_retrieval_tool import BaseDocumentRetrievalTool
+
+# Context retrieval tools (ChromaDB-based)
+from .activity_context_tool import ActivityContextTool
+from .intent_context_tool import IntentContextTool
+from .semantic_context_tool import SemanticContextTool
+from .procedural_context_tool import ProceduralContextTool
+from .state_context_tool import StateContextTool
+
+# Document retrieval tools (SQLite-based)
+from .get_daily_reports_tool import GetDailyReportsTool
+from .get_activities_tool import GetActivitiesTool
+from .get_tips_tool import GetTipsTool
+from .get_todos_tool import GetTodosTool
 
 __all__ = [
-    # 基础工具
-    "TextSearchTool",
-    "FilterContextTool",
-    "DocumentRetrievalTool",
+    # Base classes
+    "BaseContextRetrievalTool",
+    "BaseDocumentRetrievalTool",
+
+    # Context retrieval tools
+    "ActivityContextTool",
+    "IntentContextTool",
+    "SemanticContextTool",
+    "ProceduralContextTool",
+    "StateContextTool",
+
+    # Document retrieval tools
+    "GetDailyReportsTool",
+    "GetActivitiesTool",
+    "GetTipsTool",
+    "GetTodosTool",
 ]

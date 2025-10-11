@@ -21,7 +21,7 @@ from opencontext.config.global_config import get_prompt_manager
 from opencontext.context_consumption.completion.completion_cache import get_completion_cache
 from opencontext.utils.logging_utils import get_logger
 from opencontext.models.enums import CompletionType
-from opencontext.tools.retrieval_tools.text_search_tool import TextSearchTool
+from opencontext.tools.retrieval_tools.semantic_context_tool import SemanticContextTool
 
 logger = get_logger(__name__)
 
@@ -56,7 +56,7 @@ class CompletionService:
         self.chat_client = None
         self.cache = get_completion_cache()  # Use a dedicated cache manager
         self.prompt_manager = None  # Prompt manager
-        self.text_search_tool = None  # TextSearchTool instance
+        self.semantic_search_tool = None  # SemanticContextTool instance
         
         # Completion configuration
         self.max_context_length = 500  # Maximum context length
@@ -73,9 +73,9 @@ class CompletionService:
             self.storage = get_storage()
 
             self.prompt_manager = get_prompt_manager()
-            
-            # Initialize TextSearchTool
-            self.text_search_tool = TextSearchTool()
+
+            # Initialize SemanticContextTool
+            self.semantic_search_tool = SemanticContextTool()
             
             logger.info("CompletionService initialized successfully")
             
@@ -330,18 +330,17 @@ class CompletionService:
         suggestions = []
         
         try:
-            if not self.text_search_tool:
+            if not self.semantic_search_tool:
                 return suggestions
-            
+
             # Use context for vector search
             search_text = context.get('context_before', '')
             if len(search_text) < 10:
                 return suggestions
-            
-            # Use TextSearchTool for semantic search
-            search_results = self.text_search_tool.execute(
+
+            # Use SemanticContextTool for semantic search
+            search_results = self.semantic_search_tool.execute(
                 query=search_text,
-                context_type='vault',  # Only search note content
                 top_k=5
             )
             

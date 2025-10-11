@@ -9,18 +9,27 @@ from opencontext.tools.operation_tools import *
 from opencontext.tools.base import BaseTool
 import asyncio, json
 
-from opencontext.tools.retrieval_tools.document_retrieval_tool import DocumentRetrievalTool
-
 
 class ToolsExecutor:
     def __init__(self):
         self._tools_map: Dict[str, Union[BaseTool]] = {
-            TextSearchTool.get_name(): TextSearchTool(),
-            FilterContextTool.get_name(): FilterContextTool(),
-            DocumentRetrievalTool.get_name(): DocumentRetrievalTool(),
+            # Context retrieval tools
+            ActivityContextTool.get_name(): ActivityContextTool(),
+            IntentContextTool.get_name(): IntentContextTool(),
+            SemanticContextTool.get_name(): SemanticContextTool(),
+            ProceduralContextTool.get_name(): ProceduralContextTool(),
+            StateContextTool.get_name(): StateContextTool(),
 
+            # Document retrieval tools
+            GetDailyReportsTool.get_name(): GetDailyReportsTool(),
+            GetActivitiesTool.get_name(): GetActivitiesTool(),
+            GetTipsTool.get_name(): GetTipsTool(),
+            GetTodosTool.get_name(): GetTodosTool(),
+
+            # Profile tools
             ProfileEntityTool.get_name(): ProfileEntityTool(),
 
+            # Operation tools
             WebSearchTool.get_name(): WebSearchTool(),
         }
     

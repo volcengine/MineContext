@@ -38,20 +38,23 @@ class WorkflowState:
     # Core data
     query: Query
     stage: WorkflowStage = WorkflowStage.INIT
-    
+
     # Results of each stage
     intent: Optional[Intent] = None
     contexts: ContextCollection = field(default_factory=ContextCollection)
     execution_plan: Optional[ExecutionPlan] = None
     execution_result: Optional[ExecutionResult] = None
     reflection: Optional[ReflectionResult] = None
-    
+
+    # Tool call history - track all tool calls and validations
+    tool_history: List[Dict[str, Any]] = field(default_factory=list)
+
     # Streaming processing
     event_buffer: EventBuffer = field(default_factory=EventBuffer)
     streaming_enabled: bool = True
     final_content: str = ""
     final_method: str = ""
-    
+
     # Metadata
     metadata: WorkflowMetadata = field(default_factory=WorkflowMetadata)
 
@@ -65,7 +68,33 @@ class WorkflowState:
         """Update the workflow stage."""
         self.stage = new_stage
         self.metadata.updated_at = datetime.now()
-        
+
+    def add_tool_history_entry(self, entry: Dict[str, Any]):
+        """Add a tool history entry."""
+        entry["timestamp"] = datetime.now().isoformat()
+        self.tool_history.append(entry)
+        self.metadata.updated_at = datetime.now()
+
+    def get_tool_history_summary(self) -> str:
+        """Get a summary of tool history for LLM context."""
+        if not self.tool_history:
+            return "No tool calls yet."
+
+        summary_lines = []
+        for i, entry in enumerate(self.tool_history, 1):
+            entry_type = entry.get("type", "unknown")
+            if entry_type == "tool_call":
+                tool_calls = entry.get("tool_calls", [])
+                tool_names = [call.get("function", {}).get("name", "unknown") for call in tool_calls]
+                summary_lines.append(f"Round {i}: Called {len(tool_calls)} tools - {', '.join(tool_names)}")
+            elif entry_type == "validation":
+                result_count = entry.get("result_count", 0)
+                filtered_count = entry.get("filtered_count", 0)
+                feedback = entry.get("feedback", "")
+                summary_lines.append(f"  Validation: {filtered_count}/{result_count} results kept. {feedback}")
+
+        return "\n".join(summary_lines)
+
     def add_event(self, event: StreamEvent):
         """Add an event to the buffer."""
         if self.streaming_enabled:
