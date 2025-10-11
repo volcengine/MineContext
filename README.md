@@ -337,9 +337,9 @@ opencontext start --port 8000
 
 ### Community and Support
 
-- [GitHub Issues](https://github.com/bytedance/MineContext/issues): Errors and issues encountered while using MineContext.
+- [GitHub Issues](https://github.com/volcengine/MineContext/issues): Errors and issues encountered while using MineContext.
 - [Email Support](mailto:minecontext@bytedance.com): Feedback and questions about using MineContext.
-- <a href="Online Supportl">WeChat Group</a>: Discuss SwanLab usage and share the latest AI technologies.
+- <a href="https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg">WeChat Group</a>: Discuss SwanLab usage and share the latest AI technologies.
 
 ## Star History
 
