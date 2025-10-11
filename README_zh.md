@@ -337,9 +337,9 @@ opencontext start --port 8000
 
 ### 社区与支持
 
-- [GitHub Issues](https://github.com/bytedance/MineContext/issues)：使用MineContext时遇到的错误和问题。
+- [GitHub Issues](https://github.com/volcengine/MineContext/issues)：使用MineContext时遇到的错误和问题。
 - [邮件支持](mailto:minecontext@bytedance.com)：关于使用MineContext的反馈和问题。
-- <a href="Online Supportl">微信群</a>：讨论MineContext使用并分享最新AI技术。
+- <a href="https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg">微信群</a>：讨论MineContext使用并分享最新AI技术。
 
 ## Star History
 
