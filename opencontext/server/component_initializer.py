@@ -49,15 +49,10 @@ CONSUMPTION_COMPONENTS = {
 class ComponentInitializer:
     """Handles initialization of various OpenContext components."""
     
-    def __init__(self, config_manager: ConfigManager = None):
-        # Backward compatibility: if config_manager is passed, use it; otherwise use global config
-        if config_manager:
-            self.config_manager = config_manager
-            GlobalConfig.get_instance().set_config_manager(config_manager)
-        else:
-            # Use global config
-            global_config = GlobalConfig.get_instance()
-            self.config_manager = global_config.get_config_manager()
+    def __init__(self):
+        # Use global config
+        global_config = GlobalConfig.get_instance()
+        self.config_manager = global_config.get_config_manager()
         
         self.config = self.config_manager.get_config() if self.config_manager else GlobalConfig.get_instance().get_config()
         self.global_config = GlobalConfig.get_instance()

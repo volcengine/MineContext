@@ -280,7 +280,7 @@ class ConfigManager:
             if not user_settings:
                 return False
             self._config = self.deep_merge(self._config, user_settings)
-            logger.info(f"User settings loaded successfully: {user_settings}")
+            # logger.info(f"User settings loaded successfully: {user_settings}")
             return True
         except Exception as e:
             logger.error(f"Failed to load user settings: {e}")
