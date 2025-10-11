@@ -67,7 +67,7 @@ class LLMContextStrategy:
         response = await generate_for_agent_async(
             messages=messages,
             tools=self.all_tools,
-            thinking="disabled",
+            # thinking="disabled",
         )
 
         # Extract tool calls from the response
@@ -231,7 +231,7 @@ class LLMContextStrategy:
         for call in tool_calls:
             function_name = call.get("function", {}).get("name")
             function_args = call.get("function", {}).get("arguments", {})
-            
+            # self.logger.info(f"Tool call {function_name} args {function_args}")
             if function_name:
                 task = self.tools_executor.run_async(function_name, function_args)
                 tasks.append((function_name, task))
@@ -358,12 +358,12 @@ class LLMContextStrategy:
         user_template = prompts.get("user", "")
 
         # Format tool calls summary
-        tool_calls_summary = []
-        for call in tool_calls:
-            tool_calls_summary.append({
-                "tool_name": call.get("function", {}).get("name"),
-                "parameters": call.get("function", {}).get("arguments", {})
-            })
+        # tool_calls_summary = []
+        # for call in tool_calls:
+        #     tool_calls_summary.append({
+        #         "tool_name": call.get("function", {}).get("name"),
+        #         "parameters": call.get("function", {}).get("arguments", {})
+        #     })
 
         # Format tool results summary
         results_summary = []
@@ -378,7 +378,7 @@ class LLMContextStrategy:
         user_prompt = user_template.format(
             original_query=intent.original_query,
             enhanced_query=intent.enhanced_query,
-            tool_calls=json.dumps(tool_calls_summary, ensure_ascii=False, indent=2),
+            # tool_calls=json.dumps(tool_calls_summary, ensure_ascii=False, indent=2),
             tool_results=json.dumps(results_summary, ensure_ascii=False, indent=2),
         )
 
@@ -387,10 +387,10 @@ class LLMContextStrategy:
         messages = [{"role": "system", "content": system_prompt}]
 
         # Add user's chat history to give LLM context awareness
-        if existing_context.chat_history:
-            recent_messages = existing_context.chat_history[-10:]  # Last 10 messages
-            for msg in recent_messages:
-                messages.append({"role": msg.role, "content": msg.content})
+        # if existing_context.chat_history:
+        #     recent_messages = existing_context.chat_history[-10:]  # Last 10 messages
+        #     for msg in recent_messages:
+        #         messages.append({"role": msg.role, "content": msg.content})
 
         messages.append({"role": "user", "content": user_prompt})
 
@@ -405,17 +405,27 @@ class LLMContextStrategy:
             validation_result = parse_json_from_response(response)
 
             # Extract relevant result IDs
-            relevant_ids = set(validation_result.get("relevant_result_ids", []))
 
-            # Filter relevant context items
-            relevant_items = [
-                item for item in tool_results
-                if item.id in relevant_ids
-            ]
+            # Fallback: if no valid IDs found, return all results to avoid data loss
+            if 'relevant_result_ids' not in validation_result:
+                self.logger.warning(
+                    "No relevant_result_ids found in validation response. "
+                    "Returning all results as fallback."
+                )
+                relevant_items = tool_results
+            else:
+                relevant_ids = set(validation_result.get("relevant_result_ids", []))
+                # Filter relevant context items
+                relevant_items = [
+                    item for item in tool_results
+                    if item.id in relevant_ids
+                ]
+                # self.logger.info(f"Filtered to {len(relevant_items)}/{len(tool_results)} relevant items")
+
             # Build validation message for conversation history
             validation_message = {
                 "role": "assistant",
-                "content": f"Tool validation result:\n{json.dumps(validation_result, ensure_ascii=False, indent=2)}"
+                "content": f"Filtered {len(relevant_items)}/{len(tool_results)} relevant results"
             }
 
             return relevant_items, validation_message

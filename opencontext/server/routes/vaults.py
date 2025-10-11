@@ -386,11 +386,11 @@ async def cleanup_document_context(doc_id: int):
         doc_id: Document ID
     """
     try:
-        from opencontext.tools.retrieval_tools.document_retrieval_tool import DocumentRetrievalTool
+        from opencontext.tools.retrieval_tools.document_management_tool import DocumentManagementTool
 
-        # Use DocumentRetrievalTool to delete related chunks
-        retrieval_tool = DocumentRetrievalTool()
-        result = retrieval_tool.delete_document_chunks(
+        # Use DocumentManagementTool to delete related chunks
+        management_tool = DocumentManagementTool()
+        result = management_tool.delete_document_chunks(
             raw_type="vaults",
             raw_id=str(doc_id)
         )
@@ -415,10 +415,10 @@ def get_document_context_info(doc_id: int) -> dict:
         Context information dictionary
     """
     try:
-        from opencontext.tools.retrieval_tools.document_retrieval_tool import DocumentRetrievalTool
+        from opencontext.tools.retrieval_tools.document_management_tool import DocumentManagementTool
 
-        retrieval_tool = DocumentRetrievalTool()
-        result = retrieval_tool.get_document_by_id(
+        management_tool = DocumentManagementTool()
+        result = management_tool.get_document_by_id(
             raw_type="vaults",
             raw_id=str(doc_id),
             return_chunks=False

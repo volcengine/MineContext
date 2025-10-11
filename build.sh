@@ -14,10 +14,12 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
+USE_UV=false
 # 2. Check for uv and install dependencies
 if command -v uv &> /dev/null; then
     echo "--> Using uv to install dependencies..."
     uv sync
+    USE_UV=true
 else
     echo "--> uv not found, using pip to install from pyproject.toml..."
     python3 -m pip install -e .
@@ -26,7 +28,11 @@ fi
 # 3. Install PyInstaller if not present
 if ! python3 -c "import PyInstaller" 2>/dev/null; then
     echo "--> PyInstaller not found. Installing..."
-    python3 -m pip install pyinstaller
+    if [ "$USE_UV" = true ]; then
+        uv pip install pyinstaller
+    else
+        python3 -m pip install pyinstaller
+    fi
 fi
 
 # 4. Clean up previous builds

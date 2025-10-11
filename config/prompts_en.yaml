@@ -76,8 +76,8 @@ chat_workflow:
          Criteria: Query suggests need to access information already stored in the system
 
       ## Classification Decision Flow
-      1. Determine if it involves historically stored data/memory in the system ’ qa_analysis
-      2. Determine if it is simple social interaction ’ simple_chat
+      1. Determine if it involves historically stored data/memory in the system ï¿½ qa_analysis
+      2. Determine if it is simple social interaction ï¿½ simple_chat
       ## Pattern Recognition Guidance
       - **Time pattern**: Containing time words usually points to qa_analysis
       - **Subject pattern**: First-person queries (I, my) usually involve personal historical data
@@ -312,68 +312,38 @@ chat_workflow:
     # Tool result validation and filtering
     tool_result_validation:
       system: |
-        You are the tool result validation expert of the OpenContext intelligent context management system, responsible for evaluating the quality and relevance of tool call results.
+        You are the tool result filtering expert of the OpenContext intelligent context management system. Your task is simple: filter results that are relevant to the user's question from tool-returned results.
 
-        ## Core Tasks
-        Evaluate the tool call results just executed, determining:
-        1. Which results are valuable for answering user questions (relevance)
-        2. Whether tool parameters are correct (validity)
-        3. Whether certain tools need to be retried with different parameters (improvement suggestions)
-
-        ## Evaluation Dimensions
-
-        ### Relevance Judgment
+        ## Relevance Judgment Criteria
         - **High relevance**: Directly contains information needed to answer the question
-        - **Medium relevance**: Contains some useful information, but not sufficient
+        - **Medium relevance**: Contains some useful information, helpful for answering
         - **Low relevance**: Related to the question but not very useful
         - **Not relevant**: Completely unrelated information
 
         **Only keep high and medium relevance results**
 
-        ### Parameter Validity
-        - Whether tool parameters are reasonable (query terms, time range, etc.)
-        - Whether returned results meet expectations
-        - Whether results are useless due to incorrect parameters
-
-        ### Improvement Suggestions
-        - If a tool parameter is inappropriate, suggest how to adjust
-        - If information is insufficient, suggest what tool should be called in the next round
-        - Avoid repeatedly calling the same tool with the same parameters
-
-        ## Output Format
-        Strictly output in JSON format:
+        ## Output Format (Strictly Follow)
+        Must strictly output in the following JSON format:
         ```json
         {
-          "relevant_result_ids": ["result_id_1", "result_id_3", "result_id_5"],
-          "feedback": "Brief feedback explanation",
-          "retry_suggestions": [
-            {
-              "tool_name": "Tool name",
-              "reason": "Why retry is needed",
-              "suggested_params": {"param": "Suggested parameter value"}
-            }
-          ]
+          "relevant_result_ids": ["result_id_1", "result_id_2", "result_id_3"]
         }
         ```
 
-        **Important Principles**:
-        - relevant_result_ids only includes IDs of high and medium relevance results
-        - feedback summarizes overall quality in 1-2 sentences
-        - retry_suggestions are only provided when retry is really needed
-        - If all results are not relevant, return empty relevant_result_ids: []
+        **Important Requirements**:
+        - Field name must be `relevant_result_ids` (not relevant_results)
+        - Value must be a string array, containing only result_id values
+        - Do not add other fields
+        - If all results are not relevant, return empty array: `{"relevant_result_ids": []}`
       user: |
-        Please evaluate the following tool call results:
+        Please filter results that are relevant to the user's question from the following tool results.
 
         **User Question**: {original_query}
         **Enhanced Query**: {enhanced_query}
 
-        **Tool Call Situation**:
-        {tool_calls}
-
-        **Tool Return Results**:
+        **Tool Results**:
         {tool_results}
-
-        Please analyze the relevance of each result and return JSON format evaluation results.
+        ```
 
     sufficiency_evaluation:
       system: |
@@ -890,7 +860,7 @@ generation:
          - Keep general activities concise but complete overview, ensure all activities are reflected
          - Explain user's specific operations and goals
          - Use natural friendly tone, avoid excessive emoji use, maximum 1-2
-         - Reflect activity coherence and logic, description in three layers: Main activity ’ Specific operation ’ Goal result
+         - Reflect activity coherence and logic, description in three layers: Main activity ï¿½ Specific operation ï¿½ Goal result
 
       3. **Context ID Requirements**:
          - Select at most 5 most valuable context IDs to return
