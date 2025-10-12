@@ -9,18 +9,17 @@ Model settings API routes
 """
 
 import threading
-from typing import Dict, Any
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter
 
 from opencontext.config.global_config import GlobalConfig
 from opencontext.llm.global_vlm_client import GlobalVLMClient
 from opencontext.llm.global_embedding_client import GlobalEmbeddingClient
+from opencontext.llm.llm_client import LLMClient, LLMType
 from opencontext.server.utils import convert_resp
 from opencontext.server.middleware.auth import auth_dependency
 from opencontext.utils.logging_utils import get_logger
 from pydantic import BaseModel, Field
-from typing import Optional
 
 logger = get_logger(__name__)
 router = APIRouter(tags=["model-settings"])
@@ -61,6 +60,24 @@ class UpdateModelSettingsResponse(BaseModel):
     success: bool
     message: str
 
+
+class ValidateLLMRequest(BaseModel):
+    """Request body for validating LLM configuration."""
+    baseUrl: str = Field(..., description="API base URL")
+    apiKey: str = Field(..., description="API key")
+    modelId: str = Field(..., description="Model ID to test")
+    embeddingModelId: str = Field(..., description="Embedding model ID to test")
+    provider: str = Field(..., description="Model platform: doubao | openai")
+
+
+class ValidateLLMResponse(BaseModel):
+    """Response body for LLM validation."""
+    vlm_valid: bool
+    vlm_message: str
+    embedding_valid: bool
+    embedding_message: str
+    overall_success: bool
+
 @router.get("/api/model_settings/get")
 async def get_model_settings(
     _auth: str = auth_dependency
@@ -80,8 +97,8 @@ async def get_model_settings(
         global_config = GlobalConfig.get_instance()
         config = global_config.get_config()
         if not config:
-            raise HTTPException(status_code=500, detail="配置未初始化")
-        
+            return convert_resp(code=500, status=500, message="配置未初始化")
+
         # Get VLM and embedding model configs
         vlm_config = config.get("vlm_model", {})
         embedding_config = config.get("embedding_model", {})
@@ -102,10 +119,8 @@ async def get_model_settings(
         )
         
         response = GetModelSettingsResponse(config=model_settings)
-        return convert_resp(data=response.dict())
-        
-    except HTTPException:
-        raise
+        return convert_resp(data=response.model_dump())
+
     except Exception as e:
         logger.exception(f"Failed to get model settings: {e}")
         return convert_resp(code=500, status=500, message=f"获取模型设置失败: {str(e)}")
@@ -134,22 +149,72 @@ async def update_model_settings(
 
             if not incoming_key and not current_vlm_key:
                 # No valid key provided
-                raise HTTPException(status_code=400, detail="api key cannot be empty")
+                return convert_resp(code=400, status=400, message="api key cannot be empty")
 
             # If masked -> keep original; else use new key
             final_api_key = current_vlm_key if keep_original else incoming_key
 
             if not final_api_key:
-                raise HTTPException(status_code=400, detail="api key cannot be empty")
+                return convert_resp(code=400, status=400, message="api key cannot be empty")
             if not request.config.modelId:
-                raise HTTPException(status_code=400, detail="vlm model cannot be empty")
+                return convert_resp(code=400, status=400, message="vlm model cannot be empty")
             if not request.config.embeddingModelId:
-                raise HTTPException(status_code=400, detail="embedding model cannot be empty")
+                return convert_resp(code=400, status=400, message="embedding model cannot be empty")
             if not request.config.modelPlatform:
-                raise HTTPException(status_code=400, detail="vlm model platform cannot be empty")
+                return convert_resp(code=400, status=400, message="vlm model platform cannot be empty")
             if not request.config.baseUrl:
-                raise HTTPException(status_code=400, detail="vlm model base url cannot be empty")
-            
+                return convert_resp(code=400, status=400, message="vlm model base url cannot be empty")
+
+            # Validate the configuration before saving
+            logger.info("Validating LLM configuration before saving...")
+            try:
+                # Validate VLM
+                vlm_config = {
+                    "base_url": request.config.baseUrl,
+                    "api_key": final_api_key,
+                    "model": request.config.modelId,
+                    "provider": request.config.modelPlatform,
+                    "temperature": 0.7
+                }
+                vlm_client = LLMClient(llm_type=LLMType.CHAT, config=vlm_config)
+                vlm_valid, vlm_message = vlm_client.validate()
+
+                if not vlm_valid:
+                    logger.warning(f"VLM validation failed: {vlm_message}")
+                    return convert_resp(
+                        code=400,
+                        status=400,
+                        message=f"VLM validation failed: {vlm_message}"
+                    )
+
+                # Validate Embedding model
+                embedding_config = {
+                    "base_url": request.config.baseUrl,
+                    "api_key": final_api_key,
+                    "model": request.config.embeddingModelId,
+                    "provider": request.config.modelPlatform,
+                    "output_dim": 2048
+                }
+                embedding_client = LLMClient(llm_type=LLMType.EMBEDDING, config=embedding_config)
+                embedding_valid, embedding_message = embedding_client.validate()
+
+                if not embedding_valid:
+                    logger.warning(f"Embedding model validation failed: {embedding_message}")
+                    return convert_resp(
+                        code=400,
+                        status=400,
+                        message=f"Embedding model validation failed: {embedding_message}"
+                    )
+
+                logger.info("LLM configuration validation successful")
+            except Exception as e:
+                logger.error(f"LLM configuration validation error: {e}")
+                return convert_resp(
+                    code=400,
+                    status=400,
+                    message=f"Validation error: {str(e)}"
+                )
+
             # Construct new settings dict
             new_settings = {
                 "vlm_model": {
@@ -170,12 +235,12 @@ async def update_model_settings(
             
             # Get config manager
             config_manager = GlobalConfig.get_instance().get_config_manager()
-            
+
             if not config_manager:
-                raise HTTPException(status_code=500, detail="internal error: config not initialized")
+                return convert_resp(code=500, status=500, message="internal error: config not initialized")
 
             if not config_manager.save_user_settings(new_settings):
-                raise HTTPException(status_code=500, detail="internal error: save user settings failed")
+                return convert_resp(code=500, status=500, message="internal error: save user settings failed")
 
             current_config_path = config_manager.get_config_path()
             config_manager.load_config(current_config_path)
@@ -187,8 +252,12 @@ async def update_model_settings(
                 embedding_success = GlobalEmbeddingClient.get_instance().reinitialize()
                 logger.info("Embedding client reinitialized successfully")
                 if not vlm_success or not embedding_success:
-                    raise HTTPException(status_code=500, detail="internal error: reinitialize LLM clients failed")
-                
+                    return convert_resp(
+                        code=500,
+                        status=500,
+                        message="internal error: reinitialize LLM clients failed"
+                    )
+
             except Exception as e:
                 logger.error(f"Failed to reinitialize LLM client: {e}")
                 return convert_resp(
@@ -201,10 +270,8 @@ async def update_model_settings(
                 success=True,
                 message="model settings updated successfully"
             )
-            return convert_resp(data=response.dict())
-            
-        except HTTPException:
-            raise
+            return convert_resp(data=response.model_dump())
+
         except Exception as e:
             logger.error(f"Failed to update model settings: {e}")
             return convert_resp(
@@ -212,3 +279,69 @@ async def update_model_settings(
                 status=500,
                 message="internal error: update model settings failed"
             )
+
+
+@router.post("/api/model_settings/validate")
+async def validate_llm_config(
+    request: ValidateLLMRequest,
+    _auth: str = auth_dependency
+):
+    """
+    Validate LLM configuration by testing the API connections.
+    This endpoint creates temporary LLM clients to test the configuration without saving it.
+    """
+    try:
+        # Validate VLM (chat model)
+        vlm_valid = False
+        vlm_message = ""
+        try:
+            vlm_config = {
+                "base_url": request.baseUrl,
+                "api_key": request.apiKey,
+                "model": request.modelId,
+                "provider": request.provider,
+                "temperature": 0.7
+            }
+            vlm_client = LLMClient(llm_type=LLMType.CHAT, config=vlm_config)
+            vlm_valid, vlm_message = vlm_client.validate()
+        except Exception as e:
+            vlm_message = f"VLM client creation failed: {str(e)}"
+            logger.error(f"VLM validation error: {e}")
+
+        # Validate Embedding model
+        embedding_valid = False
+        embedding_message = ""
+        try:
+            embedding_config = {
+                "base_url": request.baseUrl,
+                "api_key": request.apiKey,
+                "model": request.embeddingModelId,
+                "provider": request.provider,
+                "output_dim": 2048
+            }
+            embedding_client = LLMClient(llm_type=LLMType.EMBEDDING, config=embedding_config)
+            embedding_valid, embedding_message = embedding_client.validate()
+        except Exception as e:
+            embedding_message = f"Embedding client creation failed: {str(e)}"
+            logger.error(f"Embedding validation error: {e}")
+
+        # Overall success if both validations passed
+        overall_success = vlm_valid and embedding_valid
+
+        response = ValidateLLMResponse(
+            vlm_valid=vlm_valid,
+            vlm_message=vlm_message,
+            embedding_valid=embedding_valid,
+            embedding_message=embedding_message,
+            overall_success=overall_success
+        )
+
+        return convert_resp(data=response.model_dump())
+
+    except Exception as e:
+        logger.exception(f"Failed to validate LLM configuration: {e}")
+        return convert_resp(
+            code=500,
+            status=500,
+            message=f"Validation failed: {str(e)}"
+        )
