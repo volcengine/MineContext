@@ -26,11 +26,15 @@ else
 fi
 
 # 3. Install PyInstaller if not present
-if ! python3 -c "import PyInstaller" 2>/dev/null; then
-    echo "--> PyInstaller not found. Installing..."
-    if [ "$USE_UV" = true ]; then
+if [ "$USE_UV" = true ]; then
+    # Use uv run to ensure detection within the uv-managed virtual environment
+    if ! uv run python -c "import PyInstaller" 2>/dev/null; then
+        echo "--> PyInstaller not found (uv env). Installing..."
         uv pip install pyinstaller
-    else
+    fi
+else
+    if ! python3 -c "import PyInstaller" 2>/dev/null; then
+        echo "--> PyInstaller not found. Installing..."
         python3 -m pip install pyinstaller
     fi
 fi
@@ -41,7 +45,11 @@ rm -rf dist/ build/
 
 # 5. Run PyInstaller build
 echo "--> Starting application build with PyInstaller..."
-pyinstaller --clean --noconfirm --log-level INFO opencontext.spec
+if [ "$USE_UV" = true ]; then
+    uv run pyinstaller --clean --noconfirm --log-level INFO opencontext.spec
+else
+    pyinstaller --clean --noconfirm --log-level INFO opencontext.spec
+fi
 
 # 6. Verify build and package
 echo "--> Verifying build output..."
