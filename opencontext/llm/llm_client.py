@@ -30,7 +30,7 @@ class LLMClient:
         self.model = config.get("model")
         self.api_key = config.get("api_key")
         self.base_url = config.get("base_url")
-        self.timeout = config.get("timeout", 60)
+        self.timeout = config.get("timeout", 300)
         self.provider = config.get("provider", LLMProvider.OPENAI.value)
         if not self.api_key or not self.base_url or not self.model:
             raise ValueError("API key, base URL, and model must be provided")
@@ -286,3 +286,47 @@ class LLMClient:
             return
         vectorize.vector = self.generate_embedding(vectorize.get_vectorize_content(), **kwargs)
         return
+
+    def validate(self) -> tuple[bool, str]:
+        """
+        Validate LLM configuration by making a simple API call.
+
+        Returns:
+            tuple[bool, str]: (success, message)
+        """
+        try:
+            if self.llm_type == LLMType.CHAT:
+                # Test with a simple message
+                messages = [{"role": "user", "content": "Hi"}]
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    max_tokens=10,
+                    temperature=0.7
+                )
+                if response.choices and len(response.choices) > 0:
+                    return True, "Chat model validation successful"
+                else:
+                    return False, "Chat model returned empty response"
+
+            elif self.llm_type == LLMType.EMBEDDING:
+                # Test with a simple text
+                response = self.client.embeddings.create(
+                    model=self.model,
+                    input=["test"]
+                )
+                if response.data and len(response.data) > 0 and response.data[0].embedding:
+                    return True, "Embedding model validation successful"
+                else:
+                    return False, "Embedding model returned empty response"
+            else:
+                return False, f"Unsupported LLM type: {self.llm_type}"
+
+        except APIError as e:
+            error_msg = str(e)
+            logger.error(f"LLM validation failed with API error: {error_msg}")
+            return False, f"API error: {error_msg}"
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"LLM validation failed with unexpected error: {error_msg}")
+            return False, f"Validation error: {error_msg}"
