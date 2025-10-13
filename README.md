@@ -35,7 +35,7 @@ Table of Contents
 - [🏁 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
   - [2. Disable the quarantine attribute](#2-disable-the-quarantine-attribute)
-  - [3. Enter Your API-Key](#3-enter-your-api-key)
+  - [3. Enter Your API Key](#3-enter-your-api-key)
   - [4. Start Recording](#4-start-recording)
   - [5. Forget it](#5-forget-it)
 - [💎 The Philosophy Behind the Name](#-the-philosophy-behind-the-name)
@@ -96,11 +96,23 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 ```
 ![Quarantine](src/Quarantine.gif)
 
-### 3. Enter Your API-Key
+### 3. Enter Your API Key
 
-After the application loads（initial run may require installation of some backend environments, which may take a few minutes）, follow the instructions to enter your API-Key. We currently support Doubao and OpenAI, with more platforms and local Ollama models to be added in the future.
+After the application loads（initial run may require installation of some backend environments, which may take a few minutes）, follow the instructions to enter your API. We currently support Doubao and OpenAI, with more platforms and local Ollama models to be added in the future.
 
-![Enter API-Key](src/Enter-API-Key.gif)
+**Considering both cost and performance, we recommend using the Doubao model.** The Doubao API Key can be generated in the [API Management Interface](https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey).
+
+After obtaining the Doubao API Key, you need to activate two models in the [Model Activation Management Interface](https://console.volcengine.com/ark/region:ark+cn-beijing/model): the Visual Language Model and the Embedding Model.
+
+- Visual Language Model: Doubao-Seed-1.6-flash
+![doubao-vlm-model](src/doubao-vlm-model.png)
+
+- Embedding Model: Doubao-embedding-large
+![doubao-emb-model](src/doubao-emb-model.png)
+
+The following is the filling process after obtaining the API Key:
+
+![Enter API Key](src/Enter-API-Key.gif)
 
 ### 4. Start Recording
 
