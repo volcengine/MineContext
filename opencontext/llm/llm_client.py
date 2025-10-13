@@ -294,6 +294,47 @@ class LLMClient:
         Returns:
             tuple[bool, str]: (success, message)
         """
+        def _extract_error_summary(error_msg: str) -> str:
+            """
+            Extract a concise error summary from API error messages.
+            Removes verbose API error details and keeps only the essential information.
+            """
+            if not error_msg:
+                return "Unknown error"
+
+            # If it's an API error with detailed JSON response, extract key info
+            if "Error code:" in error_msg:
+                parts = error_msg.split("Error code:", 1)
+                if len(parts) > 1:
+                    code_part = parts[1].strip()
+                    # Get just the code number and basic message
+                    if "-" in code_part:
+                        code = code_part.split("-", 1)[0].strip()
+                        # Try to extract the error type/message from the dict
+                        if "'message':" in code_part:
+                            try:
+                                msg_start = code_part.find("'message':") + len("'message':")
+                                msg_part = code_part[msg_start:].strip()
+                                if msg_part.startswith("'") or msg_part.startswith('"'):
+                                    quote_char = msg_part[0]
+                                    msg_end = msg_part.find(quote_char, 1)
+                                    if msg_end > 0:
+                                        actual_msg = msg_part[1:msg_end]
+                                        # Remove Request id and everything after it
+                                        if ". Request id:" in actual_msg:
+                                            actual_msg = actual_msg.split(". Request id:")[0]
+                                        return actual_msg
+                            except:
+                                pass
+                        return f"Error {code}"
+
+            # If the message is already concise (< 150 chars), return as-is
+            if len(error_msg) < 150:
+                return error_msg
+
+            # Otherwise, truncate with ellipsis
+            return error_msg[:147] + "..."
+
         try:
             if self.llm_type == LLMType.CHAT:
                 # Test with a simple message
@@ -325,8 +366,12 @@ class LLMClient:
         except APIError as e:
             error_msg = str(e)
             logger.error(f"LLM validation failed with API error: {error_msg}")
-            return False, f"API error: {error_msg}"
+            # Extract concise error summary before returning
+            concise_error = _extract_error_summary(error_msg)
+            return False, concise_error
         except Exception as e:
             error_msg = str(e)
             logger.error(f"LLM validation failed with unexpected error: {error_msg}")
-            return False, f"Validation error: {error_msg}"
+            # Extract concise error summary before returning
+            concise_error = _extract_error_summary(error_msg)
+            return False, concise_error
