@@ -178,16 +178,14 @@
         </div>
 
         <div class="row mt-4">
-            <!-- 处理器性能 -->
+            <!-- 处理错误日志 -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5>处理器平均耗时</h5>
+                        <h5>处理错误日志</h5>
                     </div>
                     <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="processingChart"></canvas>
-                        </div>
+                        <div id="processingErrorsChart">加载中...</div>
                     </div>
                 </div>
             </div>
@@ -225,6 +223,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" href="#contextDetails">上下文详情</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#errorDetails">处理错误</a>
+                            </li>
                         </ul>
                         <div class="tab-content mt-3">
                             <div class="tab-pane fade show active" id="tokenDetails">
@@ -236,6 +237,9 @@
                             <div class="tab-pane fade" id="contextDetails">
                                 <div id="contextDetailsContent">加载中...</div>
                             </div>
+                            <div class="tab-pane fade" id="errorDetails">
+                                <div id="errorDetailsContent">加载中...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,12 +249,10 @@
 
     <script>
         let charts = {};
-        
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
-            // 每30秒自动刷新一次
-            setInterval(loadAllData, 30000);
         });
 
         async function refreshAllData() {
@@ -272,35 +274,38 @@
                 // 获取系统概览
                 const overview = await fetchData('/api/monitoring/overview');
                 updateOverview(overview.data);
-                
+
                 // 获取上下文类型统计
                 const contextTypes = await fetchData('/api/monitoring/context-types');
                 updateContextTypeChart(contextTypes.data);
                 updateContextStatsChart(contextTypes.data);
-                
+
                 // 获取Token使用统计
                 const tokenUsage = await fetchData('/api/monitoring/token-usage');
                 updateTokenUsageChart(tokenUsage.data);
-                
+
                 // 获取处理性能
                 const processing = await fetchData('/api/monitoring/processing');
-                updateProcessingChart(processing.data);
-                
+
                 // 获取TODO统计
                 const todoStats = await fetchData('/api/monitoring/todo-stats');
                 updateTodoStats(todoStats.data);
-                
+
                 // 获取Tips数量
                 const tipsCount = await fetchData('/api/monitoring/tips-count');
                 updateTipsCount(tipsCount.data);
-                
+
                 // 获取Activity数量
                 const activityCount = await fetchData('/api/monitoring/activity-count');
                 updateActivityCount(activityCount.data);
 
+                // 获取处理错误
+                const processingErrors = await fetchData('/api/monitoring/processing-errors?hours=1&top=5');
+                updateProcessingErrorsChart(processingErrors.data);
+
                 // 更新详细信息
-                updateDetailTables(tokenUsage.data, processing.data, contextTypes.data);
-                
+                updateDetailTables(tokenUsage.data, processing.data, contextTypes.data, processingErrors.data);
+
             } catch (error) {
                 console.error('Failed to load monitoring data:', error);
                 showError('加载监控数据失败: ' + error.message);
@@ -332,6 +337,31 @@
 
         function updateActivityCount(data) {
             document.getElementById('totalActivities').textContent = data.total || '0';
+        }
+
+        function updateProcessingErrorsChart(data) {
+            let errorHtml = '<div class="table-responsive"><table class="table table-striped table-hover"><thead><tr><th width="20%">时间</th><th width="15%">处理器</th><th width="50%">错误信息</th><th width="15%">上下文数</th></tr></thead><tbody>';
+
+            if (data.errors && data.errors.length > 0) {
+                for (const error of data.errors) {
+                    const timestamp = new Date(error.timestamp).toLocaleString();
+                    const processorName = error.processor_name || '-';
+                    errorHtml += `<tr>
+                        <td><small>${timestamp}</small></td>
+                        <td><small>${processorName}</small></td>
+                        <td><small class="text-break">${error.error_message}</small></td>
+                        <td class="text-center">${error.context_count}</td>
+                    </tr>`;
+                }
+            } else {
+                errorHtml += '<tr><td colspan="4" class="text-center text-muted">近1小时内无处理错误 ✓</td></tr>';
+            }
+
+            errorHtml += '</tbody></table></div>';
+            if (data.total_errors > 0) {
+                errorHtml += `<div class="text-end text-muted mt-2"><small>近1小时共 ${data.total_errors} 条错误</small></div>`;
+            }
+            document.getElementById('processingErrorsChart').innerHTML = errorHtml;
         }
 
         function updateContextTypeChart(data) {
@@ -429,38 +459,7 @@
             });
         }
 
-        function updateProcessingChart(data) {
-            const ctx = document.getElementById('processingChart').getContext('2d');
-            const processors = Object.keys(data.by_processor || {});
-            const avgDurations = processors.map(proc => data.by_processor[proc].avg_duration);
-            
-            if (charts.processing) {
-                charts.processing.destroy();
-            }
-            
-            charts.processing = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: processors,
-                    datasets: [{
-                        label: '平均耗时 (ms)',
-                        data: avgDurations,
-                        backgroundColor: '#4BC0C0'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateDetailTables(tokenData, processingData, contextData) {
+        function updateDetailTables(tokenData, processingData, contextData, errorData) {
             // Token详情
             let tokenHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>模型</th><th>调用次数</th><th>总Token</th><th>输入Token</th><th>输出Token</th></tr></thead><tbody>';
             for (const [model, stats] of Object.entries(tokenData.by_model || {})) {
@@ -501,6 +500,28 @@
             }
             contextHtml += '</tbody></table></div>';
             document.getElementById('contextDetailsContent').innerHTML = contextHtml;
+
+            // 处理错误详情（Tab页）
+            let errorHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>时间</th><th>处理器</th><th>错误信息</th><th>上下文数</th></tr></thead><tbody>';
+
+            if (errorData.errors && errorData.errors.length > 0) {
+                for (const error of errorData.errors) {
+                    const timestamp = new Date(error.timestamp).toLocaleString();
+                    const processorName = error.processor_name || '-';
+                    errorHtml += `<tr>
+                        <td>${timestamp}</td>
+                        <td>${processorName}</td>
+                        <td class="text-break">${error.error_message}</td>
+                        <td class="text-center">${error.context_count}</td>
+                    </tr>`;
+                }
+            } else {
+                errorHtml += '<tr><td colspan="4" class="text-center text-muted">近1小时内无处理错误 ✓</td></tr>';
+            }
+
+            errorHtml += '</tbody></table></div>';
+            errorHtml += `<div class="text-end text-muted mt-2"><small>共 ${errorData.total_errors || 0} 条错误</small></div>`;
+            document.getElementById('errorDetailsContent').innerHTML = errorHtml;
         }
 
         function showError(message) {

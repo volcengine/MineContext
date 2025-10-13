@@ -170,3 +170,20 @@ async def monitoring_health(
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+@router.get("/processing-errors")
+async def get_processing_errors(
+    hours: int = Query(1, ge=1, le=24, description="Statistics time range (hours)"),
+    top: int = Query(5, ge=1, le=20, description="Number of top errors to return"),
+    _auth: str = auth_dependency
+):
+    """
+    Get processing errors Top N
+    """
+    try:
+        monitor = get_monitor()
+        errors = monitor.get_processing_errors(hours=hours, top_n=top)
+        return {"success": True, "data": errors}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get processing errors: {str(e)}")

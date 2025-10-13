@@ -228,10 +228,7 @@ class ConsumptionManager:
                         last_generation_time = self._last_generation_time('activity')
                         start_time = last_generation_time.timestamp() if last_generation_time else end_time - self._task_intervals.get('activity', 15*60)
                         result = self._real_activity_monitor.generate_realtime_activity_summary(start_time, end_time)
-                        if result:
-                            logger.info(f"Activity record generated, ID: {result.get('doc_id')}")
-                            # Update last successful generation time
-                            self._last_generation_times['activity'] = datetime.now()
+                        self._last_generation_times['activity'] = datetime.now()
                 except Exception as e:
                     logger.exception(f"Failed to generate activity record: {e}")
                 
@@ -259,12 +256,7 @@ class ConsumptionManager:
                         last_generation_time = self._last_generation_time('tips')
                         start_time = last_generation_time.timestamp() if last_generation_time else end_time - self._task_intervals.get('tips', 60*60)
                         result = self._smart_tip_generator.generate_smart_tip(start_time, end_time)
-                        if result:
-                            logger.info(f"Smart tip generated, ID: {result.get('doc_id')}")
-                            # Update last successful generation time
-                            self._last_generation_times['tips'] = datetime.now()
-                    else:
-                        logger.debug("Not time for smart tip generation, skipping")
+                        self._last_generation_times['tips'] = datetime.now()
                 except Exception as e:
                     logger.exception(f"Failed to generate smart tip: {e}")
                 
@@ -297,12 +289,7 @@ class ConsumptionManager:
                         result = self._smart_todo_manager.generate_todo_tasks(
                             start_time=start_time, end_time=end_time
                         )
-                        if result:
-                            logger.info(f"Smart todo generated, ID: {result.get('doc_id')}")
-                            # Update last successful generation time
-                            self._last_generation_times['todos'] = datetime.now()
-                    else:
-                        logger.debug("Not time for smart todo generation, skipping")
+                        self._last_generation_times['todos'] = datetime.now()
                 except Exception as e:
                     logger.exception(f"Failed to generate smart todo: {e}")
                 
