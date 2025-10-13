@@ -27,6 +27,7 @@ from opencontext.storage.global_storage import get_storage
 from opencontext.utils.logging_utils import get_logger
 from opencontext.utils.image import resize_image, calculate_phash
 from opencontext.tools.tool_definitions import  ALL_TOOL_DEFINITIONS
+from opencontext.monitoring.monitor import record_processing_error
 import heapq
 
 logger = get_logger(__name__)
@@ -250,17 +251,26 @@ class ScreenshotProcessor(BaseContextProcessor):
         try:
             raw_llm_response = await generate_with_messages_async(messages, tools=ALL_TOOL_DEFINITIONS)
         except Exception as e:
-            logger.error(f"Failed to get raw LLM response for batch of screenshots. Error: {e}")
+            error_msg = f"Failed to get raw LLM response for batch of screenshots. Error: {e}"
+            logger.error(error_msg)
+            # Record processing error
+            record_processing_error(error_msg, processor_name=self.get_name(), context_count=len(raw_contexts))
             return False
 
         if not raw_llm_response:
-            logger.error(f"Empty LLM response for batch of {len(raw_contexts)} screenshots. Please check LLM configuration and API status.")
+            error_msg = f"Empty LLM response for batch of {len(raw_contexts)} screenshots. Please check LLM configuration and API status."
+            logger.error(error_msg)
+            # Record processing error
+            record_processing_error(error_msg, processor_name=self.get_name(), context_count=len(raw_contexts))
             return False
 
         raw_resp = parse_json_from_response(raw_llm_response)
 
         if not raw_resp:
-            logger.error(f"Failed to parse JSON from Vision LLM response. Raw response: {raw_llm_response}")
+            error_msg = f"Failed to parse JSON from Vision LLM response. Raw response: {raw_llm_response}"
+            logger.error(error_msg)
+            # Record processing error
+            record_processing_error(error_msg, processor_name=self.get_name(), context_count=len(raw_contexts))
             return False
 
         newly_processed_contexts, removed_context_ids = await self._create_processed_contexts(raw_resp, raw_contexts)
@@ -271,7 +281,7 @@ class ScreenshotProcessor(BaseContextProcessor):
         logger.debug(f"Written {len(newly_processed_contexts)} contexts, removed {len(removed_context_ids)} contexts")
         self.storage.batch_upsert_processed_context(newly_processed_contexts)
         # self.storage.delete(removed_context_ids)
-        
+
         # Record successful processing metrics
         try:
             from opencontext.monitoring import record_processing_metrics
