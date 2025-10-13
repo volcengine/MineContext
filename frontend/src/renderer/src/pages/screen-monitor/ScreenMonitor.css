@@ -1,0 +1,304 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* 主容器样式 - 添加渐变边框和圆角 */
+.screen-monitor-container {
+  display: fixed;
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: hidden;
+  padding: 8px 8px 8px 0px;
+  border-radius: 20px;
+  position: relative;
+}
+
+/* 内部内容容器添加白色背景和内边距 */
+.monitor-content-wrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  height: calc(100% - 8px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.monitor-header-left {
+  width: 80%;
+}
+
+.monitor-header-right {
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+}
+
+/* 响应式设计，移动端适配 */
+@media (max-width: 768px) {
+  .monitor-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .monitor-header-right {
+    margin-left: 0;
+    margin-top: 16px;
+    justify-content: flex-end;
+  }
+}
+
+.monitor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 卡片样式更新 - 添加更明显的圆角和阴影 */
+.control-panel {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.control-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.capture-settings {
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.session-status {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.session-stats {
+  padding: 16px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.screenshots-preview {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.screenshots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.screenshot-item {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.screenshot-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.screenshot-info {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-records {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+/* 添加发光效果 */
+.monitor-content > * {
+  transition: box-shadow 0.3s ease;
+}
+
+.monitor-content > *:hover {
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .screen-monitor-container {
+    padding: 12px;
+  }
+
+  .monitor-content-wrapper {
+    padding: 16px;
+    margin: 2px;
+    height: calc(100% - 4px);
+  }
+
+  .screenshots-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-buttons {
+    flex-direction: column;
+  }
+
+  .session-stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.screen-monitor-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* 虚线框录制区域样式 - 更新为占满屏幕底部 */
+.recording-area-container {
+  width: 100%;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.recording-area-dashed {
+  border: 2px dashed #DBE2EB;
+  border-radius: 12px;
+  padding: 30px;
+  background: #FAFBFD;
+  /* background: var(--background-hover-color-bg-3); */
+  /* background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); */
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* .recording-area-dashed:hover {
+  border-color: rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+} */
+
+.recording-area-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 300px;
+}
+
+.recording-placeholder {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 更新monitor-content样式以支持flex布局 */
+.monitor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+  flex: 1;
+}
+
+.screenshots-container {
+  .arco-image-img {
+    height: 100% !important;
+    object-fit: cover;
+  }
+}
+
+.screen-monitor-container .arco-timeline-item-content {
+  margin-bottom: 0px !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .recording-area-dashed {
+    padding: 24px;
+    min-height: 300px;
+    max-height: 500px;
+  }
+
+  .recording-area-content {
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recording-area-dashed {
+    min-height: 250px;
+    max-height: 400px;
+  }
+}
+
+.recording-timeline {
+  margin-top: 20px;
+}
+
+.previous-button {
+  background: #FFFFFF;
+  border: #F0F2FA;
+}
+
+.arco-modal-title {
+  color: #000;
+}
+
+.arco-radio-checked .arco-radio-mask {
+  background: #000;
+}
+
+.arco-slider-bar {
+  background: #000;
+}
+
+.arco-form-label-item > label {
+  color: #AEAFC2;
+}
+

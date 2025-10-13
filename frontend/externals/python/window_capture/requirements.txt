@@ -1,0 +1,11 @@
+# PyObjC 核心库
+pyobjc-core>=10.0
+pyobjc-framework-Cocoa>=10.0
+pyobjc>=10.0
+# Quartz 框架 (CoreGraphics + 窗口 API)
+pyobjc-framework-Quartz>=10.0
+
+# 其他常用的 macOS 框架（可选，但建议一起装，避免后续扩展时报错）
+pyobjc-framework-CoreServices>=10.0
+pyobjc-framework-LaunchServices>=10.0
+pyobjc-framework-ApplicationServices>=10.0

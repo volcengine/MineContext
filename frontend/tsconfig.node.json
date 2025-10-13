@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "paths": {
+      "@interface/*": ["src/interface/*"],
+      "@logger": ["src/main/services/LoggerService"],
+      "@main/*": ["src/main/*"],
+      "@shared/*": ["packages/shared/*"],
+      "@types": ["src/renderer/src/types/index.ts"]
+    },
+    "types": ["electron-vite/node"],
+    "useDefineForClassFields": true
+  },
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
+  "include": [
+    "electron.vite.config.*",
+    "src/main/**/*",
+    "src/preload/**/*",
+    "src/renderer/src/types/*",
+    "packages/shared/**/*",
+    "src/interface/**/*"
+  ]
+}
