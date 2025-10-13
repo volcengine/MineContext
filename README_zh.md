@@ -100,6 +100,18 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 应用程序加载后(初次运行时需要安装一些后端环境，可能需要等待两分钟左右)，按照引导输入您的API密钥。我们目前支持豆包和OpenAI，未来将添加更多平台和本地Ollama模型。
 
+**综合成本和性能，我们推荐使用豆包模型**，豆包模型的 API-Key 可以在[API管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey)生成。
+
+
+获取豆包 API之后需要在[模型开通管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/model)开通视觉语言模型和向量化两个模型。
+
+- 视觉语言模型: Doubao-Seed-1.6-flash
+![doubao-vlm-model](src/doubao-vlm-model.png)
+
+- 向量化模型: Doubao-embedding-large
+![doubao-emb-model](src/doubao-emb-model.png)
+
+以下是获取了API Key后的填写流程:
 ![Enter API-Key](src/Enter-API-Key.gif)
 
 
