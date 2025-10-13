@@ -9,6 +9,7 @@ enabled: true
 # Logging configuration
 logging:
   level: DEBUG  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_path: "${CONTEXT_PATH:.}/logs/opencontext.log"  # Log file path
 
 user_setting_path: "${CONTEXT_PATH:.}/config/user_setting.yaml"
 

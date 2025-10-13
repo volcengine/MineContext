@@ -31,39 +31,36 @@ class LogManager:
     def configure(self, config: Dict[str, Any]) -> None:
         """
         Configure logging
-        
+
         Args:
             config (Dict[str, Any]): Logging configuration
         """
-        # Get log level
         level = config.get("level", "INFO")
-        
-        # Configure console logging
-        console_config = config.get("console", {})
-        if console_config.get("enabled", True):
-            console_format = console_config.get(
-                "format",
-                "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <cyan>{message}</cyan>"
-            )
-            logger.add(sys.stderr, level=level, format=console_format)
-        
-        # Configure file logging
-        file_config = config.get("file", {})
-        if file_config.get("enabled", True):
-            file_path = file_config.get("path", "logs/opencontext.log")
-            
-            # Create log directory if it doesn't exist
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            
-            file_format = file_config.get(
-                "format",
-                "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
-            )
-            rotation = file_config.get("rotation", "500 MB")
-            retention = file_config.get("retention", "10 days")
-            
+
+        # Console logging
+        console_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <cyan>{message}</cyan>"
+        logger.add(sys.stderr, level=level, format=console_format)
+
+        # File logging
+        log_path = config.get("log_path")
+        if log_path:
+            log_dir = os.path.dirname(log_path)
+            if log_dir:
+                os.makedirs(log_dir, exist_ok=True)
+
+            # Add date to log filename: opentext_2025-10-13.log
+            # When rotated, it becomes: opentext_2025-10-13.log.2025-10-13_14-30-00
+            base_name = os.path.basename(log_path)
+            name_without_ext = os.path.splitext(base_name)[0]
+            ext = os.path.splitext(base_name)[1]
+            dated_log_path = os.path.join(log_dir, f"{name_without_ext}_{{time:YYYY-MM-DD}}{ext}")
+
+            file_format = "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+            rotation = "100 MB"
+            retention = 2  # Keep only the 2 most recent files
+
             logger.add(
-                file_path,
+                dated_log_path,
                 level=level,
                 format=file_format,
                 rotation=rotation,
