@@ -177,12 +177,10 @@ class ComponentInitializer:
     
     def initialize_consumption_components(self) -> ConsumptionManager:
         consumption_manager = ConsumptionManager()
-        
-        # Start scheduled tasks if configured
+
+        # Start scheduled tasks (individual tasks controlled by their enabled flags)
         content_generation_config = self.config.get("content_generation", {})
-        if content_generation_config.get("enabled", True) and content_generation_config.get("auto_start", True):
-            consumption_manager.start_scheduled_tasks(content_generation_config)
-            logger.info("Content generation scheduled tasks auto-started")
+        consumption_manager.start_scheduled_tasks(content_generation_config)
 
         logger.info("Context consumption components initialization complete")
         return consumption_manager
