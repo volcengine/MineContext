@@ -33,7 +33,7 @@ capture:
   enabled: true
   # Screenshot capture
   screenshot:
-    enabled: true
+    enabled: false
     capture_interval: 5  # Screenshot interval (seconds)
     storage_path: "${CONTEXT_PATH:.}/screenshots" # Screenshot save directory
 
