@@ -293,7 +293,7 @@ class ConfigManager:
         if not self._config:
             logger.error("Main configuration not loaded")
             return False
-            
+
         # Get user settings path
         user_setting_path = self._config.get("user_setting_path")
         if not user_setting_path:
@@ -303,15 +303,30 @@ class ConfigManager:
             dir_name = os.path.dirname(user_setting_path)
             if dir_name:
                 os.makedirs(dir_name, exist_ok=True)
-  
+
+            # Load existing user settings
             user_settings = {}
+            if os.path.exists(user_setting_path):
+                with open(user_setting_path, 'r', encoding='utf-8') as f:
+                    existing_settings = yaml.safe_load(f)
+                    if existing_settings:
+                        user_settings = existing_settings
+
+            # Update with new settings
             if "vlm_model" in settings:
                 user_settings["vlm_model"] = settings["vlm_model"]
             if "embedding_model" in settings:
                 user_settings["embedding_model"] = settings["embedding_model"]
+            if "content_generation" in settings:
+                user_settings["content_generation"] = settings["content_generation"]
+
+            # Save to file
             with open(user_setting_path, 'w', encoding='utf-8') as f:
                 yaml.dump(user_settings, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+
             logger.info(f"User settings saved successfully: {user_setting_path}")
+
+            # Merge into current config
             self._config = self.deep_merge(self._config, user_settings)
             return True
         except Exception as e:

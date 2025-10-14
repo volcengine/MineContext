@@ -77,7 +77,6 @@ class ContextOperations:
         context_processor_callback
     ) -> Optional[str]:
         """Add a screenshot to the system."""
-        logger.info(f"Adding screenshot: path={path}, window={window}, create_time={create_time}, app={app}")
         
         # Validate inputs
         if not path:

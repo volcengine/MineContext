@@ -33,7 +33,7 @@ class ConsumptionManager:
     """
     
     def __init__(self):
-        """Initialize context consumption manager - parameters retained for backward compatibility but not used"""        
+        """Initialize context consumption manager - parameters retained for backward compatibility but not used"""
         # Statistics
         self._statistics: Dict[str, Any] = {
             "total_queries": 0,
@@ -46,24 +46,36 @@ class ConsumptionManager:
         self._real_activity_monitor: Optional[RealtimeActivityMonitor] = None
         self._smart_tip_generator: Optional[SmartTipGenerator] = None
         self._smart_todo_manager: Optional[SmartTodoManager] = None
-        
-        # Scheduled task configuration
+
+        # Load configuration from GlobalConfig
+        from opencontext.config.global_config import GlobalConfig
+        config = GlobalConfig.get_instance().get_config()
+        content_gen_config = config.get('content_generation', {}) if config else {}
+
+        # Scheduled task configuration (load from config)
         self._scheduled_tasks_enabled = False
         self._task_timers: Dict[str, threading.Timer] = {}
         self._task_intervals = {
-            'activity': 15 * 60,
-            'tips': 60 * 60,
-            'todos': 30 * 60,
+            'activity': content_gen_config.get('activity', {}).get('interval', 900),
+            'tips': content_gen_config.get('tips', {}).get('interval', 3600),
+            'todos': content_gen_config.get('todos', {}).get('interval', 1800),
         }
-        
+        self._task_enabled = {
+            'activity': content_gen_config.get('activity', {}).get('enabled', True),
+            'tips': content_gen_config.get('tips', {}).get('enabled', True),
+            'todos': content_gen_config.get('todos', {}).get('enabled', True),
+            'report': content_gen_config.get('report', {}).get('enabled', True),
+        }
+
         # Maintain local last successful generation time
         self._last_generation_times = {
             'activity': None,
             'tips': None,
             'todos': None,
         }
-        
-        self._daily_report_time = "08:00"
+
+        self._daily_report_time = content_gen_config.get('report', {}).get('time', "08:00")
+        self._config_lock = threading.Lock()
         self._activity_generator = ReportGenerator()
         self._real_activity_monitor = RealtimeActivityMonitor()
         self._smart_tip_generator = SmartTipGenerator()
@@ -180,16 +192,21 @@ class ConsumptionManager:
                 if created_at_str:
                     return datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
             return datetime.now()
-        except Exception as e:
+        except Exception:
             return datetime.now()
     
     def _start_report_timer(self):
+        """Start daily report timer"""
+        if not self._task_enabled.get('report', True):
+            logger.info("Report task is disabled, skipping timer start")
+            return
+
         # Get last daily report time from database
         last_report_time = self._get_last_report_time()
         self._last_report_date = last_report_time.date()  # Record date of last daily report generation
-        
+
         def check_and_generate_daily_report():
-            if not self._activity_generator:
+            if not self._activity_generator or not self._task_enabled.get('report', True):
                 return
             try:
                 now = datetime.now()
@@ -203,111 +220,114 @@ class ConsumptionManager:
                         end_time = int(now.timestamp())
                         start_time = int((now - timedelta(days=1)).timestamp())
 
-                        report_content = asyncio.run(self._activity_generator.generate_report(start_time, end_time))
+                        asyncio.run(self._activity_generator.generate_report(start_time, end_time))
                         # Update last report date to prevent duplicate generation on the same day
                         self._last_report_date = today
                     except Exception as e:
                         logger.exception(f"Failed to generate daily report: {e}")
             except Exception as e:
                 logger.error(f"Failed to check daily report generation time: {e}")
-            
-            if self._scheduled_tasks_enabled:
+
+            if self._scheduled_tasks_enabled and self._task_enabled.get('report', True):
                 self._task_timers['report'] = threading.Timer(60*30, check_and_generate_daily_report)
                 self._task_timers['report'].start()
-        
+
         check_and_generate_daily_report()
     
     def _start_activity_timer(self):
         """Start activity recording timer"""
-        def generate_activity():
-            if self._scheduled_tasks_enabled and self._real_activity_monitor:
-                try:
-                    # Check if generation time has arrived
-                    if self._should_generate('activity'):
-                        end_time = int(datetime.now().timestamp())
-                        last_generation_time = self._last_generation_time('activity')
-                        start_time = last_generation_time.timestamp() if last_generation_time else end_time - self._task_intervals.get('activity', 15*60)
-                        result = self._real_activity_monitor.generate_realtime_activity_summary(start_time, end_time)
-                        self._last_generation_times['activity'] = datetime.now()
-                except Exception as e:
-                    logger.exception(f"Failed to generate activity record: {e}")
-                
-                if self._scheduled_tasks_enabled:
-                    check_interval = min(180, self._task_intervals['activity'] // 4)  # 3 minutes or 1/4 of interval
-                    self._task_timers['activity'] = threading.Timer(
-                        check_interval, generate_activity
-                    )
-                    self._task_timers['activity'].start()
+        if not self._task_enabled.get('activity', True):
+            logger.info("Activity task is disabled, skipping timer start")
+            return
 
-        check_interval = min(180, self._task_intervals['activity'] // 4)
-        self._task_timers['activity'] = threading.Timer(
-            check_interval, generate_activity
-        )
+        def generate_activity():
+            if not (self._scheduled_tasks_enabled and self._real_activity_monitor and self._task_enabled.get('activity', True)):
+                return
+
+            try:
+                if self._should_generate('activity'):
+                    end_time = int(datetime.now().timestamp())
+                    last_generation_time = self._last_generation_time('activity')
+                    start_time = int(last_generation_time.timestamp()) if last_generation_time else end_time - self._task_intervals.get('activity', 15*60)
+                    self._real_activity_monitor.generate_realtime_activity_summary(start_time, end_time)
+                    self._last_generation_times['activity'] = datetime.now()
+            except Exception as e:
+                logger.exception(f"Failed to generate activity record: {e}")
+
+            self._schedule_next_check('activity', generate_activity)
+
+        check_interval = self._calculate_check_interval('activity')
+        self._task_timers['activity'] = threading.Timer(check_interval, generate_activity)
         self._task_timers['activity'].start()
-        logger.info(f"Activity recording timer started, check interval: {check_interval} seconds, generation interval: {self._task_intervals['activity']} seconds")
-    
+        logger.info(f"Activity timer started, check interval: {check_interval}s, generation interval: {self._task_intervals['activity']}s")
+
     def _start_tips_timer(self):
         """Start smart tips timer"""
+        if not self._task_enabled.get('tips', True):
+            logger.info("Tips task is disabled, skipping timer start")
+            return
+
         def generate_tips():
-            if self._scheduled_tasks_enabled and self._smart_tip_generator:
-                try:
-                    if self._should_generate('tips'):
-                        end_time = int(datetime.now().timestamp())
-                        last_generation_time = self._last_generation_time('tips')
-                        start_time = last_generation_time.timestamp() if last_generation_time else end_time - self._task_intervals.get('tips', 60*60)
-                        result = self._smart_tip_generator.generate_smart_tip(start_time, end_time)
-                        self._last_generation_times['tips'] = datetime.now()
-                except Exception as e:
-                    logger.exception(f"Failed to generate smart tip: {e}")
-                
-                if self._scheduled_tasks_enabled:
-                    # Use shorter check interval instead of generation interval
-                    check_interval = min(200, self._task_intervals['tips'] // 4)  # 3.3 minutes or 1/4 of interval
-                    self._task_timers['tips'] = threading.Timer(
-                        check_interval, generate_tips
-                    )
-                    self._task_timers['tips'].start()
-        
-        # Initial startup also uses check interval
-        check_interval = min(200, self._task_intervals['tips'] // 4)
-        self._task_timers['tips'] = threading.Timer(
-            check_interval, generate_tips
-        )
+            if not (self._scheduled_tasks_enabled and self._smart_tip_generator and self._task_enabled.get('tips', True)):
+                return
+
+            try:
+                if self._should_generate('tips'):
+                    end_time = int(datetime.now().timestamp())
+                    last_generation_time = self._last_generation_time('tips')
+                    start_time = int(last_generation_time.timestamp()) if last_generation_time else end_time - self._task_intervals.get('tips', 60*60)
+                    self._smart_tip_generator.generate_smart_tip(start_time, end_time)
+                    self._last_generation_times['tips'] = datetime.now()
+            except Exception as e:
+                logger.exception(f"Failed to generate smart tip: {e}")
+
+            self._schedule_next_check('tips', generate_tips)
+
+        check_interval = self._calculate_check_interval('tips')
+        self._task_timers['tips'] = threading.Timer(check_interval, generate_tips)
         self._task_timers['tips'].start()
-        logger.info(f"Smart tip timer started, check interval: {check_interval} seconds, generation interval: {self._task_intervals['tips']} seconds")
-    
+        logger.info(f"Tips timer started, check interval: {check_interval}s, generation interval: {self._task_intervals['tips']}s")
+
     def _start_todos_timer(self):
         """Start smart todo timer"""
+        if not self._task_enabled.get('todos', True):
+            logger.info("Todos task is disabled, skipping timer start")
+            return
+
         def generate_todos():
-            if self._scheduled_tasks_enabled and self._smart_todo_manager:
-                try:
-                    # Check if generation time has arrived
-                    if self._should_generate('todos'):
-                        end_time = int(datetime.now().timestamp())
-                        last_generation_time = self._last_generation_time('todos')
-                        start_time = last_generation_time.timestamp() if last_generation_time else end_time - self._task_intervals.get('todos', 30*60)
-                        result = self._smart_todo_manager.generate_todo_tasks(
-                            start_time=start_time, end_time=end_time
-                        )
-                        self._last_generation_times['todos'] = datetime.now()
-                except Exception as e:
-                    logger.exception(f"Failed to generate smart todo: {e}")
-                
-                if self._scheduled_tasks_enabled:
-                    # Use shorter check interval instead of generation interval
-                    check_interval = min(250, self._task_intervals['todos'] // 4)  # 4.2 minutes or 1/4 of interval
-                    self._task_timers['todos'] = threading.Timer(
-                        check_interval, generate_todos
-                    )
-                    self._task_timers['todos'].start()
-        
-        # Initial startup also uses check interval
-        check_interval = min(250, self._task_intervals['todos'] // 4)
-        self._task_timers['todos'] = threading.Timer(
-            check_interval, generate_todos
-        )
+            if not (self._scheduled_tasks_enabled and self._smart_todo_manager and self._task_enabled.get('todos', True)):
+                return
+
+            try:
+                if self._should_generate('todos'):
+                    end_time = int(datetime.now().timestamp())
+                    last_generation_time = self._last_generation_time('todos')
+                    start_time = int(last_generation_time.timestamp()) if last_generation_time else end_time - self._task_intervals.get('todos', 30*60)
+                    self._smart_todo_manager.generate_todo_tasks(start_time=start_time, end_time=end_time)
+                    self._last_generation_times['todos'] = datetime.now()
+            except Exception as e:
+                logger.exception(f"Failed to generate smart todo: {e}")
+
+            self._schedule_next_check('todos', generate_todos)
+
+        check_interval = self._calculate_check_interval('todos')
+        self._task_timers['todos'] = threading.Timer(check_interval, generate_todos)
         self._task_timers['todos'].start()
-        logger.info(f"Smart todo timer started, check interval: {check_interval} seconds, generation interval: {self._task_intervals['todos']} seconds")
+        logger.info(f"Todos timer started, check interval: {check_interval}s, generation interval: {self._task_intervals['todos']}s")
+
+    def _calculate_check_interval(self, task_name: str) -> int:
+        """Calculate check interval for a task (1/4 of generation interval with limits)"""
+        interval = self._task_intervals.get(task_name, 900)
+        limits = {'activity': 180, 'tips': 200, 'todos': 250}
+        max_check = limits.get(task_name, 180)
+        return min(max_check, interval // 4)
+
+    def _schedule_next_check(self, task_name: str, callback) -> None:
+        """Schedule next check for a task"""
+        if self._scheduled_tasks_enabled and self._task_enabled.get(task_name, True):
+            check_interval = self._calculate_check_interval(task_name)
+            self._task_timers[task_name] = threading.Timer(check_interval, callback)
+            self._task_timers[task_name].start()
 
     def get_scheduled_tasks_status(self) -> Dict[str, Any]:
         return {
@@ -316,6 +336,140 @@ class ConsumptionManager:
             "intervals": self._task_intervals.copy(),
             "active_timers": list(self._task_timers.keys())
         }
+
+    def get_task_config(self) -> Dict[str, Any]:
+        """Get detailed task configuration
+        """
+        with self._config_lock:
+            return {
+                "activity": {
+                    "enabled": self._task_enabled.get('activity', True),
+                    "interval": self._task_intervals.get('activity', 15 * 60)
+                },
+                "tips": {
+                    "enabled": self._task_enabled.get('tips', True),
+                    "interval": self._task_intervals.get('tips', 60 * 60)
+                },
+                "todos": {
+                    "enabled": self._task_enabled.get('todos', True),
+                    "interval": self._task_intervals.get('todos', 30 * 60)
+                },
+                "report": {
+                    "enabled": self._task_enabled.get('report', True),
+                    "time": self._daily_report_time
+                }
+            }
+
+    def update_task_config(self, config: Dict[str, Any]) -> bool:
+        """
+        Update task configuration dynamically
+        """
+        try:
+            with self._config_lock:
+                for task_name in ['activity', 'tips', 'todos']:
+                    if task_name in config:
+                        self._update_interval_task(task_name, config[task_name])
+                if 'report' in config:
+                    self._update_report_task(config['report'])
+
+                return True
+        except Exception as e:
+            logger.exception(f"Failed to update task config: {e}")
+            return False
+
+    def _update_interval_task(self, task_name: str, task_cfg: Dict[str, Any]) -> None:
+        """Update configuration for interval-based tasks (activity/tips/todos)"""
+        need_restart = False
+
+        if 'enabled' in task_cfg:
+            old_enabled = self._task_enabled.get(task_name, True)
+            new_enabled = task_cfg['enabled']
+            self._task_enabled[task_name] = new_enabled
+
+            if old_enabled != new_enabled:
+                action = "Enabling" if new_enabled else "Disabling"
+                logger.info(f"{action} {task_name} task")
+                if new_enabled:
+                    need_restart = True
+                else:
+                    self._stop_task_timer(task_name)
+                    return
+
+        # Update interval
+        if 'interval' in task_cfg:
+            old_interval = self._task_intervals.get(task_name)
+            new_interval = task_cfg['interval']
+            self._task_intervals[task_name] = new_interval
+
+            if old_interval != new_interval and self._task_enabled.get(task_name, True):
+                logger.info(f"Updating {task_name} interval to {new_interval}s")
+                need_restart = True
+
+        if need_restart:
+            self._restart_task_timer(task_name)
+
+    def _update_report_task(self, report_cfg: Dict[str, Any]) -> None:
+        """Update configuration for report task"""
+        need_restart = False
+
+        # Update enabled status
+        if 'enabled' in report_cfg:
+            old_enabled = self._task_enabled.get('report', True)
+            new_enabled = report_cfg['enabled']
+            self._task_enabled['report'] = new_enabled
+
+            if old_enabled != new_enabled:
+                action = "Enabling" if new_enabled else "Disabling"
+                logger.info(f"{action} report task")
+                if new_enabled:
+                    need_restart = True
+                else:
+                    self._stop_task_timer('report')
+                    return  # Don't process time if disabling
+
+        # Update time
+        if 'time' in report_cfg:
+            old_time = self._daily_report_time
+            new_time = report_cfg['time']
+            self._daily_report_time = new_time
+
+            if old_time != new_time and self._task_enabled.get('report', True):
+                logger.info(f"Updating report time to {new_time}")
+                need_restart = True
+
+        # Restart timer if needed
+        if need_restart:
+            self._restart_task_timer('report')
+
+    def _stop_task_timer(self, task_name: str) -> None:
+        """Stop a specific task timer"""
+        if task_name in self._task_timers:
+            timer = self._task_timers[task_name]
+            if timer:
+                timer.cancel()
+            del self._task_timers[task_name]
+            logger.info(f"Stopped {task_name} timer")
+
+    def _restart_task_timer(self, task_name: str) -> None:
+        """Restart a specific task timer"""
+        if not self._scheduled_tasks_enabled:
+            logger.warning(f"Cannot restart {task_name} timer: scheduled tasks not enabled")
+            return
+
+        # Stop existing timer
+        self._stop_task_timer(task_name)
+
+        # Start new timer based on task type
+        if task_name == 'activity':
+            self._start_activity_timer()
+        elif task_name == 'tips':
+            self._start_tips_timer()
+        elif task_name == 'todos':
+            self._start_todos_timer()
+        elif task_name == 'report':
+            self._start_report_timer()
+
+        logger.info(f"Restarted {task_name} timer")
     
     def reset_statistics(self) -> None:
         """Reset statistics"""

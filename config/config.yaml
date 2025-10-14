@@ -184,14 +184,22 @@ prompts:
 
 # Content generation service configuration
 content_generation:
-  enabled: true
-  auto_start: true
+  # Task configurations
+  activity:
+    enabled: true
+    interval: 900  # Seconds, minimum 600 (10 minutes), recommended 900-1800 (15-30 minutes)
 
-  # Generation switches
-  enable_report_generation: true
-  enable_activity_generation: true
-  enable_todo_generation: true
-  enable_tips_generation: true
+  tips:
+    enabled: true
+    interval: 3600  # Seconds, minimum 1800 (30 minutes), recommended 3600-7200 (1-2 hours)
+
+  todos:
+    enabled: true
+    interval: 1800  # Seconds, minimum 1800 (30 minutes), recommended 1800-3600 (30-60 minutes)
+
+  report:
+    enabled: true
+    time: "08:00"  # Daily report generation time (HH:MM)
 
 
 tools:

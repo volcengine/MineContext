@@ -5,34 +5,100 @@
     <h1 class="h2">调试面板</h1>
 </div>
 
-<!-- 内容生成控制 -->
+<!-- 内容生成配置 -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">内容生成控制</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">内容生成配置</h5>
+                <button id="save-config" class="btn btn-primary btn-sm">保存配置</button>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div id="generation-status" class="mb-3">
-                            <span class="badge bg-secondary">加载中...</span>
+                <!-- Activity 配置 -->
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-md-3">
+                        <h6>Activity 活动记录</h6>
+                        <small class="text-muted">实时活动跟踪</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="activity-enabled" checked>
+                            <label class="form-check-label" for="activity-enabled">启用</label>
                         </div>
                     </div>
-                    <div class="col-md-4 text-end">
-                        <button id="start-generation" class="btn btn-success btn-sm me-2">启动定时任务</button>
-                        <button id="stop-generation" class="btn btn-danger btn-sm">停止定时任务</button>
+                    <div class="col-md-4">
+                        <label class="form-label">生成间隔(秒)</label>
+                        <input type="number" class="form-control form-control-sm" id="activity-interval" value="900" min="600">
+                        <small class="text-muted">最小: 600 (10分钟) | 推荐: 900-1800 (15-30分钟)</small>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="generate-activity" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('activity')">手动生成</button>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-12">
-                        <h6>手动生成</h6>
-                        <div class="btn-group" role="group">
-                            <button id="generate-report" class="btn btn-outline-primary btn-sm">生成日报</button>
-                            <button id="generate-activity" class="btn btn-outline-primary btn-sm">生成活动</button>
-                            <button id="generate-tips" class="btn btn-outline-primary btn-sm">生成提示</button>
-                            <button id="generate-todos" class="btn btn-outline-primary btn-sm">生成待办</button>
+
+                <!-- Tips 配置 -->
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-md-3">
+                        <h6>Tips 智能提示</h6>
+                        <small class="text-muted">AI 智能建议</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="tips-enabled" checked>
+                            <label class="form-check-label" for="tips-enabled">启用</label>
                         </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">生成间隔(秒)</label>
+                        <input type="number" class="form-control form-control-sm" id="tips-interval" value="3600" min="1800">
+                        <small class="text-muted">最小: 1800 (30分钟) | 推荐: 3600-7200 (1-2小时)</small>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="generate-tips" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('tips')">手动生成</button>
+                    </div>
+                </div>
+
+                <!-- Todos 配置 -->
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-md-3">
+                        <h6>Todos 待办事项</h6>
+                        <small class="text-muted">任务提取</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="todos-enabled" checked>
+                            <label class="form-check-label" for="todos-enabled">启用</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">生成间隔(秒)</label>
+                        <input type="number" class="form-control form-control-sm" id="todos-interval" value="1800" min="1800">
+                        <small class="text-muted">最小: 1800 (30分钟) | 推荐: 1800-3600 (30-60分钟)</small>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="generate-todos" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('todos')">手动生成</button>
+                    </div>
+                </div>
+
+                <!-- Report 配置 -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <h6>Report 日报</h6>
+                        <small class="text-muted">每日总结</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="report-enabled" checked>
+                            <label class="form-check-label" for="report-enabled">启用</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">生成时间</label>
+                        <input type="time" class="form-control form-control-sm" id="report-time" value="08:00">
+                        <small class="text-muted">每天固定时间生成</small>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="generate-report" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('report')">手动生成</button>
                     </div>
                 </div>
             </div>
@@ -229,81 +295,100 @@
 <script>
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', function() {
-    loadGenerationStatus();
+    loadConfig();
     loadReports();
-    
+
     // 事件监听
-    document.getElementById('start-generation').addEventListener('click', startGeneration);
-    document.getElementById('stop-generation').addEventListener('click', stopGeneration);
-    document.getElementById('generate-report').addEventListener('click', () => manualGenerate('report'));
-    document.getElementById('generate-activity').addEventListener('click', () => manualGenerate('activity'));
-    document.getElementById('generate-tips').addEventListener('click', () => manualGenerate('tips'));
-    document.getElementById('generate-todos').addEventListener('click', () => manualGenerate('todos'));
-    
+    document.getElementById('save-config').addEventListener('click', saveConfig);
+
     // 标签页切换时加载数据
     document.getElementById('todos-tab').addEventListener('shown.bs.tab', loadTodos);
     document.getElementById('activities-tab').addEventListener('shown.bs.tab', loadActivities);
     document.getElementById('tips-tab').addEventListener('shown.bs.tab', loadTips);
     document.getElementById('prompts-tab').addEventListener('shown.bs.tab', loadPromptEditor);
-    
+
     // 待办状态过滤
     document.getElementById('todo-status-filter').addEventListener('change', loadTodos);
 });
 
-// 加载生成状态
-async function loadGenerationStatus() {
+// 加载配置
+async function loadConfig() {
     try {
-        const response = await fetch('/api/content_generation/status');
+        const response = await fetch('/api/content_generation/config');
         const data = await response.json();
-        
-        const statusEl = document.getElementById('generation-status');
-        if (data.data && data.data.enabled) {
-            statusEl.innerHTML = `
-                <span class="badge bg-success">运行中</span>
-                <small class="text-muted ms-2">
-                    定时器: ${data.data.active_timers ? data.data.active_timers.join(', ') : '无'}
-                </small>
-            `;
-        } else {
-            statusEl.innerHTML = '<span class="badge bg-secondary">已停止</span>';
+
+        if (data.code === 0 && data.data) {
+            const config = data.data;
+
+            // 填充 Activity 配置
+            document.getElementById('activity-enabled').checked = config.activity.enabled;
+            document.getElementById('activity-interval').value = config.activity.interval;
+
+            // 填充 Tips 配置
+            document.getElementById('tips-enabled').checked = config.tips.enabled;
+            document.getElementById('tips-interval').value = config.tips.interval;
+
+            // 填充 Todos 配置
+            document.getElementById('todos-enabled').checked = config.todos.enabled;
+            document.getElementById('todos-interval').value = config.todos.interval;
+
+            // 填充 Report 配置
+            document.getElementById('report-enabled').checked = config.report.enabled;
+            document.getElementById('report-time').value = config.report.time;
         }
     } catch (error) {
-        console.error('加载生成状态失败:', error);
-        document.getElementById('generation-status').innerHTML = '<span class="badge bg-danger">错误</span>';
+        console.error('加载配置失败:', error);
+        showAlert('加载配置失败: ' + error.message, 'danger');
     }
 }
 
-// 启动生成任务
-async function startGeneration() {
-    try {
-        const response = await fetch('/api/content_generation/start', { method: 'POST' });
-        const data = await response.json();
-        
-        if (data.code === 0) {
-            showAlert('定时任务已启动', 'success');
-            loadGenerationStatus();
-        } else {
-            showAlert('启动失败: ' + data.message, 'danger');
-        }
-    } catch (error) {
-        showAlert('启动失败: ' + error.message, 'danger');
-    }
-}
+// 保存配置
+async function saveConfig() {
+    const button = document.getElementById('save-config');
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = '保存中...';
 
-// 停止生成任务
-async function stopGeneration() {
     try {
-        const response = await fetch('/api/content_generation/stop', { method: 'POST' });
+        const config = {
+            activity: {
+                enabled: document.getElementById('activity-enabled').checked,
+                interval: parseInt(document.getElementById('activity-interval').value)
+            },
+            tips: {
+                enabled: document.getElementById('tips-enabled').checked,
+                interval: parseInt(document.getElementById('tips-interval').value)
+            },
+            todos: {
+                enabled: document.getElementById('todos-enabled').checked,
+                interval: parseInt(document.getElementById('todos-interval').value)
+            },
+            report: {
+                enabled: document.getElementById('report-enabled').checked,
+                time: document.getElementById('report-time').value
+            }
+        };
+
+        const response = await fetch('/api/content_generation/config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(config)
+        });
+
         const data = await response.json();
-        
+
         if (data.code === 0) {
-            showAlert('定时任务已停止', 'success');
-            loadGenerationStatus();
+            showAlert('配置保存成功!', 'success');
         } else {
-            showAlert('停止失败: ' + data.message, 'danger');
+            showAlert('配置保存失败: ' + data.message, 'danger');
         }
     } catch (error) {
-        showAlert('停止失败: ' + error.message, 'danger');
+        showAlert('配置保存失败: ' + error.message, 'danger');
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
     }
 }
 
