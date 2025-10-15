@@ -1,4 +1,4 @@
-# vikingdb-open
+# MineContext
 
 An Electron application with React and TypeScript
 
@@ -23,16 +23,12 @@ $ pnpm dev
 ### Build
 
 ```bash
-# For windows
-$ pnpm build:win
 
 # For macOS
 $ pnpm build:mac
 
-# For Linux
-$ pnpm build:linux
 ```
 
 ### data
 
-/Users/bytedance/Library/Application\ Support/VikingdbAtlasDev
+~/Library/Application\ Support/MineContext
