@@ -210,8 +210,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
               Try asking me
             </Text>
             <div className="ai-assistant-suggestions">
-              <div className="suggestion-item" onClick={() => setMessage('Summarize my recent growth')}>
-                Summarize my recent growth
+              <div className="suggestion-item" onClick={() => setMessage('Summarize my growth over the past day')}>
+                Summarize my growth over the past day
               </div>
               <div
                 className="suggestion-item"
