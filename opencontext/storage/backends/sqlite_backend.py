@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from opencontext.storage.base_storage import (
     IDocumentStorageBackend, StorageType, DataType, DocumentData, QueryResult
+from sqlalchemy import select
 )
 from opencontext.utils.logging_utils import get_logger
 
