@@ -3,7 +3,7 @@
 
 import { Modal, Button } from '@arco-design/web-react'
 import { FC, ReactNode } from 'react'
-import { MarkdownContent } from '../AIAssistant'
+import { MarkdownContent } from '../ai-assistant'
 import titleBg from './assets/bg.png'
 interface ProactiveFeedModalProps {
   visible: boolean

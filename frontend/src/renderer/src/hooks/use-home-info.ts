@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useState, useEffect } from 'react'
+import dayjs from 'dayjs'
 
 interface Vault {
   id: number
@@ -103,9 +104,8 @@ export const useHomeInfo = () => {
         const weekly = await window.dbAPI.getAllVaults('weekly')
         setWeeklySummary(weekly)
 
-        const today = new Date()
-        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0)
-        const tasks = await window.dbAPI.getTasks(startOfDay.toISOString())
+        const startOfDay = dayjs().startOf('day').toISOString()
+        const tasks = await window.dbAPI.getTasks(startOfDay)
         setTasks(tasks)
         const allTips = await window.dbAPI.getAllTips()
         setTips(allTips.sort((a, b) => b.id - a.id))

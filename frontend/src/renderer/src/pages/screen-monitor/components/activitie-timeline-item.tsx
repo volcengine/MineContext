@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { FC } from 'react'
-import { Activity } from '../ScreenMonitor'
+import { Activity } from '../screen-monitor'
 import { Popover, Image } from '@arco-design/web-react'
 export interface ActivityTimelineItemProps {
   activity: Activity
