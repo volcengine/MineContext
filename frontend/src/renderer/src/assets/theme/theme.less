@@ -1,0 +1,2409 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.getColorRgbStr(@color) {
+  @str: red(@color), green(@color), blue(@color);
+  @result: @str;
+}
+
+@gray-10: #1d2129;
+@gray-9: #272e3b;
+@gray-8: #4e5969;
+@gray-7: #6b7785;
+@gray-6: #86909c;
+@gray-5: #a9aeb8;
+@gray-4: #c9cdd4;
+@gray-3: #e5e6eb;
+@gray-2: #f2f3f5;
+@gray-1: #f7f8fa;
+@gold-6: #f7ba1e;
+@gold-5: #f9cc45;
+@gold-7: #cc9213;
+@gold-4: #fadc6d;
+@gold-3: #fce996;
+@gold-2: #fdf4bf;
+@gold-1: #fffce8;
+@yellow-6: #fadc19;
+@yellow-7: #cfaf0f;
+@yellow-5: #fbe842;
+@yellow-4: #fcf26b;
+@yellow-3: #fdfa94;
+@yellow-2: #fefebe;
+@yellow-1: #feffe8;
+@lime-6: #9fdb1d;
+@lime-7: #7eb712;
+@lime-5: #b5e241;
+@lime-4: #c9e968;
+@lime-3: #dcf190;
+@lime-2: #edf8bb;
+@lime-1: #fcffe8;
+@cyan-6: #14c9c9;
+@cyan-7: #0da5aa;
+@cyan-5: #37d4cf;
+@cyan-4: #5edfd6;
+@cyan-3: #89e9e0;
+@cyan-2: #b7f4ec;
+@cyan-1: #e8fffb;
+@blue-6: #3491fa;
+@blue-5: #57a9fb;
+@blue-4: #7bc0fc;
+@blue-3: #9fd4fd;
+@blue-2: #c3e7fe;
+@blue-1: #e8f7ff;
+@purple-6: #722ed1;
+@purple-7: #551db0;
+@purple-5: #8d4eda;
+@purple-4: #a871e3;
+@purple-3: #c396ed;
+@purple-2: #ddbef6;
+@purple-1: #f5e8ff;
+@pinkpurple-6: #d91ad9;
+@pinkpurple-7: #b010b6;
+@pinkpurple-5: #e13edb;
+@pinkpurple-4: #e865df;
+@pinkpurple-3: #f08ee6;
+@pinkpurple-2: #f7baef;
+@pinkpurple-1: #ffe8fb;
+@magenta-6: #f5319d;
+@magenta-7: #cb1e83;
+@magenta-5: #f754a8;
+@magenta-4: #f979b7;
+@magenta-3: #fb9dc7;
+@magenta-2: #fdc2db;
+@magenta-1: #ffe8f1;
+@border-radius-none: 0;
+@border-radius-small: 4px;
+@border-radius-medium: 6px;
+@border-radius-large: 12px;
+@border-radius-circle: 50%;
+@border-none: 0;
+@border-1: 1px;
+@border-2: 2px;
+@border-3: 3px;
+@border-solid: solid;
+@border-dashed: dashed;
+@border-dotted: dotted;
+@color-menu-light-bg: #ffffff;
+@color-menu-dark-bg: #232324;
+@shadow-none: none;
+@shadow-special: 0 0 1px rgba(0, 0, 0, 0.3);
+@shadow1-center: 0 0 6px rgba(0, 0, 0, 0.05);
+@shadow1-up: 0 -2px 6px rgba(0, 0, 0, 0.05);
+@shadow1-down: 0 2px 6px rgba(0, 0, 0, 0.1);
+@shadow1-left: -2px 0 6px rgba(0, 0, 0, 0.05);
+@shadow1-right: 2px 0 5px rgba(0, 0, 0, 0.05);
+@shadow1-left-up: -2px -2px 5px rgba(0, 0, 0, 0.05);
+@shadow1-left-down: -2px 2px 6px rgba(0, 0, 0, 0.1);
+@shadow1-right-up: 2px -2px 5px rgba(0, 0, 0, 0.05);
+@shadow1-right-down: 2px 2px 5px rgba(0, 0, 0, 0.05);
+@shadow2-center: 0 0 10px rgba(0, 0, 0, 0.1);
+@shadow2-up: 0 -4px 10px rgba(0, 0, 0, 0.1);
+@shadow2-down: 0 4px 10px rgba(0, 0, 0, 0.1);
+@shadow2-left: -4px 0 10px rgba(0, 0, 0, 0.1);
+@shadow2-right: 4px 0 10px rgba(0, 0, 0, 0.1);
+@shadow2-left-up: -4px -4px 10px rgba(0, 0, 0, 0.1);
+@shadow2-left-down: -4px 4px 10px rgba(0, 0, 0, 0.1);
+@shadow2-right-up: 4px -4px 10px rgba(0, 0, 0, 0.1);
+@shadow2-right-down: 4px 4px 10px rgba(0, 0, 0, 0.1);
+@shadow3-center: 0 0 20px rgba(0, 0, 0, 0.1);
+@shadow3-up: 0 -8px 20px rgba(0, 0, 0, 0.1);
+@shadow3-down: 0 8px 20px rgba(0, 0, 0, 0.1);
+@shadow3-left: -8px 0 20px rgba(0, 0, 0, 0.1);
+@shadow3-right: 8px 0 20px rgba(0, 0, 0, 0.1);
+@shadow3-left-up: -8px -8px 20px rgba(0, 0, 0, 0.1);
+@shadow3-left-down: -8px 8px 20px rgba(0, 0, 0, 0.1);
+@shadow3-right-up: 8px -8px 20px rgba(0, 0, 0, 0.1);
+@shadow3-right-down: 8px 8px 20px rgba(0, 0, 0, 0.1);
+@shadow-distance-none: 0;
+@shadow-distance-1: 1px;
+@shadow-distance-2: 2px;
+@shadow-distance-3: 3px;
+@shadow-distance-4: 4px;
+@font-family:
+  Roboto,
+  Helvetica,
+  PingFang SC,
+  Hiragino Sans GB,
+  Microsoft YaHei,
+  Arial,
+  sans-serif,
+  Helvetica Neue,
+  -apple-system,
+  BlinkMacSystemFont,
+  noto sans;
+@font-size-display-3: 36px;
+@font-size-display-2: 30px;
+@font-size-display-1: 24px;
+@font-size-title-3: 20px;
+@font-size-title-2: 18px;
+@font-size-title-1: 16px;
+@font-size-body-3: 14px;
+@font-size-body-2: 13px;
+@font-size-body-1: 12px;
+@font-size-caption: 12px;
+@font-weight-900: 900;
+@font-weight-800: 800;
+@font-weight-700: 700;
+@font-weight-600: 600;
+@font-weight-500: 500;
+@font-weight-400: 400;
+@font-weight-300: 300;
+@font-weight-200: 200;
+@font-weight-100: 100;
+@size-1: 4px;
+@size-2: 8px;
+@size-3: 12px;
+@size-4: 16px;
+@size-5: 20px;
+@size-6: 24px;
+@size-7: 28px;
+@size-8: 32px;
+@size-9: 36px;
+@size-10: 40px;
+@size-11: 44px;
+@size-12: 48px;
+@size-13: 52px;
+@size-14: 56px;
+@size-15: 60px;
+@size-16: 64px;
+@size-17: 68px;
+@size-18: 72px;
+@size-19: 76px;
+@size-20: 80px;
+@size-21: 84px;
+@size-22: 88px;
+@size-23: 92px;
+@size-24: 96px;
+@size-25: 100px;
+@size-26: 104px;
+@size-27: 108px;
+@size-28: 112px;
+@size-29: 116px;
+@size-30: 120px;
+@size-31: 124px;
+@size-32: 128px;
+@size-33: 132px;
+@size-34: 136px;
+@size-35: 140px;
+@size-36: 144px;
+@size-37: 148px;
+@size-38: 152px;
+@size-39: 156px;
+@size-40: 160px;
+@size-41: 164px;
+@size-42: 168px;
+@size-43: 172px;
+@size-44: 176px;
+@size-45: 180px;
+@size-46: 184px;
+@size-47: 188px;
+@size-48: 192px;
+@size-49: 196px;
+@size-50: 200px;
+@spacing-none: 0;
+@spacing-1: 2px;
+@spacing-2: 4px;
+@spacing-3: 6px;
+@spacing-4: 8px;
+@spacing-5: 10px;
+@spacing-6: 12px;
+@spacing-7: 16px;
+@spacing-8: 20px;
+@spacing-9: 24px;
+@spacing-10: 32px;
+@spacing-11: 36px;
+@spacing-12: 40px;
+@spacing-13: 48px;
+@spacing-14: 56px;
+@spacing-15: 60px;
+@spacing-16: 64px;
+@spacing-17: 72px;
+@spacing-18: 80px;
+@spacing-19: 84px;
+@spacing-20: 96px;
+@spacing-21: 100px;
+@spacing-22: 120px;
+@size-mini: @size-6;
+@size-small: @size-7;
+@size-default: @size-8;
+@size-large: @size-9;
+@upload-prefix-cls: ~'@{prefix}-upload';
+@steps-prefix-cls: ~'@{prefix}-steps';
+@image-prefix-cls: ~'@{prefix}-image';
+@resizebox-prefix-cls: ~'@{prefix}-resizebox';
+@card-prefix-cls: ~'@{prefix}-card';
+@breadcrumb-prefix-cls: ~'@{prefix}-breadcrumb';
+@avatar-prefix-cls: ~'@{prefix}-avatar';
+@dropdown-prefix-cls: ~'@{prefix}-dropdown';
+@list-prefix-cls: ~'@{prefix}-list';
+@page-header-prefix-cls: ~'@{prefix}-page-header';
+@table-prefix-cls: ~'@{prefix}-table';
+@spin-prefix-cls: ~'@{prefix}-spin';
+@statistic-prefix-cls: ~'@{prefix}-statistic';
+@descriptions-prefix-cls: ~'@{prefix}-descriptions';
+@timeline-prefix-cls: ~'@{prefix}-timeline';
+@tag-prefix-cls: ~'@{prefix}-tag';
+@switch-prefix-cls: ~'@{prefix}-switch';
+@collapse-prefix-cls: ~'@{prefix}-collapse';
+@input-tag-prefix-cls: ~'@{prefix}-input-tag';
+@comment-prefix-cls: ~'@{prefix}-comment';
+@input-prefix-cls: ~'@{prefix}-input';
+@result-prefix-cls: ~'@{prefix}-result';
+@input-number-prefix-cls: ~'@{prefix}-input-number';
+@tree-select-prefix-cls: ~'@{prefix}-tree-select';
+@btn-prefix-cls: ~'@{prefix}-btn';
+@cascader-prefix-cls: ~'@{prefix}-cascader';
+@select-prefix-cls: ~'@{prefix}-select';
+@menu-prefix-cls: ~'@{prefix}-menu';
+@transfer-prefix-cls: ~'@{prefix}-transfer';
+@anchor-prefix-cls: ~'@{prefix}-anchor';
+@picker-prefix-cls: ~'@{prefix}-picker';
+@date-panel-prefix-cls: ~'@{prefix}-panel-date';
+@time-picker-prefix-cls: ~'@{prefix}-timepicker';
+@quarter-panel-prefix-cls: ~'@{prefix}-panel-quarter';
+@year-panel-prefix-cls: ~'@{prefix}-panel-year';
+@week-panel-prefix-cls: ~'@{prefix}-panel-week';
+@range-picker-prefix-cls: ~'@{prefix}-picker-range';
+@date-picker-prefix-cls: ~'@{prefix}-datepicker';
+@modal-prefix-cls: ~'@{prefix}-modal';
+@drawer-prefix-cls: ~'@{prefix}-drawer';
+@auto-complete-prefix-cls: ~'@{prefix}-autocomplete';
+@tabs-prefix-cls: ~'@{prefix}-tabs';
+@checkbox-prefix-cls: ~'@{prefix}-checkbox';
+@form-prefix-cls: ~'@{prefix}-form';
+@radio-prefix-cls: ~'@{prefix}-radio';
+@link-prefix-cls: ~'@{prefix}-link';
+@divider-prefix-cls: ~'@{prefix}-divider';
+@tooltip-prefix-cls: ~'@{prefix}-tooltip';
+@popover-prefix-cls: ~'@{prefix}-popover';
+@popconfirm-prefix-cls: ~'@{prefix}-popconfirm';
+@message-prefix-cls: ~'@{prefix}-message';
+@notification-prefix-cls: ~'@{prefix}-notification';
+@tree-prefix-cls: ~'@{prefix}-tree';
+@alert-prefix-cls: ~'@{prefix}-alert';
+@pagination-prefix-cls: ~'@{prefix}-pagination';
+@progress-prefix-cls: ~'@{prefix}-progress';
+@empty-prefix-cls: ~'@{prefix}-empty';
+@slider-prefix: ~'@{prefix}-slider';
+@typography-prefix-cls: ~'@{prefix}-typography';
+@month-panel-prefix-cls: ~'@{prefix}-panel-month';
+@red-4: #f98981;
+@red-1: #ffece8;
+@orange-2: #ffe4ba;
+@orangered-10: #4d0e00;
+@red-2: #fdcdc5;
+@orange-8: #a64500;
+@orange-9: #792e00;
+@orange-7: #d25f00;
+@red-9: #770813;
+@orange-6: #ff7d00;
+@orangered-6: #f77234;
+@orangered-7: #cc5120;
+@orangered-2: #fdddc3;
+@orange-3: #ffcf8b;
+@red-3: #fbaca3;
+@orange-10: #4d1b00;
+@orangered-4: #faac7b;
+@red-7: #cb272d;
+@red-10: #4d000a;
+@red-5: #f76560;
+@gold-10: #4d2d00;
+@yellow-10: #4d3800;
+@red-6: #f53f3f;
+@orangered-3: #fcc59f;
+@orange-1: #fff7e8;
+@orange-5: #ff9a2e;
+@orangered-1: #fff3e8;
+@orangered-8: #a23511;
+@red-8: #a1151e;
+@yellow-8: #a38408;
+@orangered-9: #771f06;
+@gold-9: #774b04;
+@gold-8: #a26d0a;
+@lime-8: #5f940a;
+@green-6: #00b42a;
+@yellow-9: #785d03;
+@lime-9: #437004;
+@cyan-8: #07828b;
+@green-4: #4cd263;
+@green-9: #006622;
+@cyan-9: #03616c;
+@orangered-5: #f99057;
+@green-3: #7be188;
+@lime-10: #2a4d00;
+@green-10: #004d1c;
+@green-7: #009a29;
+@green-5: #23c343;
+@green-1: #e8ffea;
+@green-8: #008026;
+@cyan-10: #00424d;
+@green-2: #aff0b5;
+@arcoblue-1: #e8f3ff;
+@arcoblue-6: #165dff;
+@blue-9: #063078;
+@arcoblue-2: #bedaff;
+@arcoblue-4: #6aa1ff;
+@arcoblue-3: #94bfff;
+@blue-8: #114ba3;
+@blue-10: #001a4d;
+@blue-7: #206ccf;
+@arcoblue-8: #072ca6;
+@purple-10: #16004d;
+@arcoblue-9: #031a79;
+@pinkpurple-8: #8a0993;
+@pinkpurple-10: #42004d;
+@purple-8: #3c108f;
+@magenta-9: #77064f;
+@magenta-8: #a11069;
+@arcoblue-5: #4080ff;
+@arcoblue-7: #0e42d2;
+@arcoblue-10: #000d4d;
+@purple-9: #27066e;
+@pinkpurple-9: #650370;
+@dark-red-10: #fff0ec;
+@dark-orangered-9: #fddec5;
+@dark-orange-4: #d26913;
+@dark-green-1: #004d1c;
+@dark-blue-9: #c6e8fe;
+@dark-purple-6: #8e51da;
+@dark-pinkpurple-5: #d92ed9;
+@dark-green-4: #129a37;
+@magenta-10: #4d0034;
+@dark-lime-7: #cbe970;
+@dark-yellow-3: #a38614;
+@dark-orangered-1: #4d0e00;
+@dark-gold-3: #a26f0f;
+@dark-orange-7: #ffb357;
+@dark-cyan-4: #1fa6aa;
+@dark-yellow-6: #fbe94b;
+@dark-red-5: #f54e4e;
+@dark-purple-9: #dfc2f6;
+@dark-magenta-10: #ffe8f1;
+@dark-orangered-8: #fcc6a1;
+@dark-red-2: #770611;
+@dark-gold-2: #774b04;
+@dark-orangered-7: #faad7d;
+@dark-arcoblue-9: #bedaff;
+@dark-gold-7: #fadc6c;
+@dark-lime-2: #447006;
+@dark-gold-1: #4d2d00;
+@dark-orangered-3: #a23714;
+@dark-cyan-5: #30c9c9;
+@dark-red-3: #a1161f;
+@dark-orange-1: #4d1b00;
+@dark-red-7: #f98d86;
+@dark-lime-9: #eef8c2;
+@dark-cyan-2: #06616c;
+@dark-purple-2: #27066e;
+@dark-pinkpurple-9: #f7c1f0;
+@dark-arcoblue-7: #689fff;
+@dark-red-6: #f76965;
+@dark-arcoblue-4: #1d4dd2;
+@dark-yellow-7: #fcf374;
+@dark-red-9: #fdd1ca;
+@dark-yellow-9: #fefec6;
+@dark-magenta-1: #4d0034;
+@dark-gray-4: #5f5f60;
+@dark-yellow-2: #785e07;
+@dark-pinkpurple-3: #8a0d93;
+@dark-gold-5: #f7c034;
+@dark-primary-6: rgb(120, 125, 255);
+@dark-arcoblue-8: #93beff;
+@dark-green-8: #7ee18b;
+@dark-arcoblue-3: #0e32a6;
+@success-6: rgb(9, 146, 80);
+@dark-gray-1: #17171a;
+@dark-yellow-4: #cfb325;
+@dark-primary-8: rgb(176, 184, 255);
+@dark-purple-10: #f7edff;
+@success-10: rgb(var(~'@{arco-cssvars-prefix}-green-10'));
+@dark-orange-3: #a64b0a;
+@dark-gray-6: #929293;
+@dark-yellow-1: #4d3800;
+@dark-orange-2: #793004;
+@dark-orange-10: #fff7e8;
+@dark-pinkpurple-7: #e866df;
+@dark-gold-9: #fdf4be;
+@dark-orange-5: #ff8d1f;
+@dark-blue-8: #a1d5fd;
+@dark-orangered-10: #fff4eb;
+@primary-1: rgb(245, 247, 255);
+@dark-red-8: #fbb0a7;
+@success-9: rgb(var(~'@{arco-cssvars-prefix}-green-9'));
+@primary-4: rgb(142, 150, 255);
+@dark-lime-10: #fdffee;
+@dark-gray-5: #78787a;
+@dark-yellow-5: #fae13c;
+@dark-magenta-3: #a1176c;
+@dark-arcoblue-5: #306fff;
+@success-5: rgb(22, 179, 100);
+@dark-lime-4: #84b723;
+@dark-magenta-7: #f97ab8;
+@dark-yellow-8: #fdfa9d;
+@dark-magenta-2: #770850;
+@dark-green-7: #50d266;
+@dark-success-1: rgb(7, 72, 36);
+@dark-blue-3: #134ca3;
+@dark-blue-1: #001a4d;
+@dark-pinkpurple-1: #42004d;
+@dark-primary-2: rgb(20, 9, 121);
+@dark-pinkpurple-2: #650370;
+@dark-green-5: #1db440;
+@dark-purple-1: #16004d;
+@dark-magenta-6: #f756a9;
+@dark-pinkpurple-8: #f092e6;
+@dark-red-1: #4d000a;
+@dark-purple-4: #5a25b0;
+@dark-green-9: #b2f0b7;
+@primary-6: rgb(82, 82, 255);
+@dark-pinkpurple-6: #e13ddb;
+@dark-cyan-6: #3fd4cf;
+@dark-primary-10: rgb(232, 236, 255);
+@dark-primary-1: rgb(10, 0, 77);
+@dark-cyan-8: #90e9e1;
+@dark-cyan-3: #11838b;
+@danger-6: rgb(227, 27, 84);
+@dark-lime-1: #2a4d00;
+@dark-primary-4: rgb(62, 57, 210);
+@dark-success-3: rgb(35, 112, 64);
+@dark-orange-8: #ffcd87;
+@success-4: rgb(60, 203, 127);
+@dark-cyan-7: #66dfd7;
+@success-2: rgb(225, 249, 233);
+@success-1: rgb(237, 252, 242);
+@success-8: rgb(9, 92, 55);
+@dark-cyan-1: #00424d;
+@dark-gray-2: #2e2e30;
+@dark-lime-3: #629412;
+@success-3: rgb(120, 221, 164);
+@dark-primary-3: rgb(37, 28, 166);
+@dark-gold-8: #fce995;
+@dark-arcoblue-1: #000d4d;
+@dark-blue-6: #5aaafb;
+@dark-orangered-5: #f77e45;
+@dark-red-4: #cb2e34;
+@dark-purple-7: #a974e3;
+@dark-primary-9: rgb(204, 211, 255);
+@warning-4: rgb(255, 188, 122);
+@dark-success-2: rgb(28, 94, 53);
+@dark-lime-5: #a8db39;
+@danger-1: rgb(255, 245, 246);
+@dark-primary-7: rgb(148, 156, 255);
+@dark-success-5: rgb(124, 205, 148);
+@dark-blue-5: #469afa;
+@dark-purple-8: #c59aed;
+@dark-arcoblue-6: #3c7eff;
+@dark-gold-6: #f9cc44;
+@dark-gray-9: #dfdfdf;
+@dark-warning-7: rgb(208, 141, 6);
+@dark-pinkpurple-10: #fff2fd;
+@dark-yellow-10: #fefff0;
+@dark-green-10: #ebffec;
+@dark-green-3: #0a802d;
+@dark-orangered-2: #771e05;
+@warning-5: rgb(255, 149, 43);
+@primary-7: rgb(56, 51, 210);
+@primary-9: rgb(21, 10, 121);
+@dark-cyan-9: #bef4ed;
+@link-3: rgb(172, 180, 255);
+@dark-magenta-4: #cb2b88;
+@warning-1: rgb(254, 248, 235);
+@dark-success-10: rgb(var(~'@{arco-cssvars-prefix}-green-10'));
+@success-7: rgb(8, 116, 67);
+@dark-warning-4: rgb(189, 126, 0);
+@dark-primary-5: rgb(95, 95, 255);
+@dark-gold-10: #fffce8;
+@dark-danger-2: rgb(159, 33, 28);
+@warning-9: rgb(var(~'@{arco-cssvars-prefix}-orange-9'));
+@dark-magenta-9: #fdc3db;
+@danger-5: rgb(246, 61, 104);
+@dark-danger-6: rgb(255, 112, 109);
+@link-8: rgb(36, 27, 166);
+@primary-2: rgb(237, 239, 252);
+@dark-cyan-10: #f0fffc;
+@dark-gray-10: #f6f6f6;
+@dark-warning-3: rgb(149, 99, 0);
+@link-2: rgb(235, 237, 255);
+@dark-green-2: #046625;
+@dark-danger-5: rgb(255, 163, 160);
+@link-10: rgb(10, 0, 77);
+@dark-danger-9: rgb(var(~'@{arco-cssvars-prefix}-red-9'));
+@dark-gray-8: #c5c5c5;
+@dark-magenta-8: #fb9ec8;
+@dark-success-4: rgb(42, 129, 75);
+@dark-danger-7: rgb(238, 63, 56);
+@dark-lime-8: #def198;
+@dark-arcoblue-10: #eaf4ff;
+@link-9: rgb(21, 10, 121);
+@danger-9: rgb(var(~'@{arco-cssvars-prefix}-red-9'));
+@dark-link-8: rgb(176, 184, 255);
+@link-5: rgb(112, 117, 255);
+@dark-gray-7: #ababac;
+@dark-danger-8: rgb(255, 236, 236);
+@link-4: rgb(142, 150, 255);
+@dark-warning-5: rgb(249, 199, 109);
+@dark-magenta-5: #f545a6;
+@dark-success-6: rgb(92, 174, 119);
+@dark-lime-6: #b8e24b;
+@warning-6: rgb(235, 125, 0);
+@link-6: rgb(82, 82, 255);
+@dark-danger-3: rgb(189, 41, 35);
+@primary-5: rgb(112, 117, 255);
+@dark-orange-9: #ffe3b8;
+@dark-warning-9: rgb(var(~'@{arco-cssvars-prefix}-orange-9'));
+@primary-3: rgb(172, 180, 255);
+@warning-3: rgb(255, 188, 122);
+@dark-orange-6: #ff9626;
+@dark-purple-5: #7b3dd1;
+@dark-orangered-4: #cc5729;
+@dark-link-2: rgb(20, 9, 121);
+@primary-10: rgb(10, 0, 77);
+@dark-blue-2: #052f78;
+@dark-success-7: rgb(48, 146, 86);
+@warning-8: rgb(137, 69, 0);
+@danger-3: rgb(254, 163, 180);
+@dark-link-4: rgb(62, 57, 210);
+@dark-link-7: rgb(148, 156, 255);
+@warning-7: rgb(168, 84, 0);
+@dark-blue-4: #2971cf;
+@dark-gray-3: #484849;
+@dark-warning-6: rgb(240, 165, 15);
+@dark-warning-10: rgb(var(~'@{arco-cssvars-prefix}-orange-10'));
+@dark-pinkpurple-4: #b01bb6;
+@warning-2: rgb(255, 243, 220);
+@danger-7: rgb(192, 16, 72);
+@dark-warning-2: rgb(112, 75, 0);
+@dark-purple-3: #3e138f;
+@dark-link-1: rgb(10, 0, 77);
+@dark-green-6: #27c346;
+@dark-danger-4: rgb(215, 49, 42);
+@dark-link-3: rgb(37, 28, 166);
+@dark-warning-1: rgb(83, 57, 0);
+@primary-8: rgb(36, 27, 166);
+@dark-arcoblue-2: #041b79;
+@danger-4: rgb(253, 111, 142);
+@link-7: rgb(56, 51, 210);
+@link-1: rgb(245, 247, 255);
+@dark-blue-7: #7dc1fc;
+@dark-orangered-6: #f9925a;
+@danger-8: rgb(161, 16, 67);
+@danger-10: rgb(var(~'@{arco-cssvars-prefix}-red-10'));
+@dark-link-6: rgb(120, 125, 255);
+@dark-danger-10: rgb(var(~'@{arco-cssvars-prefix}-red-10'));
+@warning-10: rgb(var(~'@{arco-cssvars-prefix}-orange-10'));
+@dark-link-10: rgb(232, 236, 255);
+@dark-blue-10: #eaf8ff;
+@dark-warning-8: rgb(255, 243, 220);
+@dark-gold-4: #cc961f;
+@dark-success-9: rgb(var(~'@{arco-cssvars-prefix}-green-9'));
+@dark-link-9: rgb(204, 211, 255);
+@dark-success-8: rgb(225, 246, 230);
+@danger-2: rgb(255, 236, 236);
+@dark-link-5: rgb(95, 95, 255);
+@dark-danger-1: rgb(126, 13, 7);
+@orange-4: #ffb65d;
+@dark-color-text-1: rgb(199, 204, 214);
+@color-text-1: rgb(11, 11, 15);
+@color-bg-white: #ffffff;
+@color-white: #ffffff;
+@dark-color-text-2: rgb(157, 163, 175);
+@dark-color-white: rgb(255, 255, 255);
+@color-text-3: rgb(110, 113, 140);
+@color-text-2: rgb(63, 63, 81);
+@color-text-4: rgb(201, 201, 212);
+@dark-color-text-3: rgb(115, 122, 135);
+@color-border-2: rgb(225, 227, 239);
+@color-fill-4: rgb(11, 11, 15);
+@color-fill-2: rgb(110, 113, 140);
+@color-fill-3: rgb(63, 63, 81);
+@dark-color-bg-1: rgb(19, 20, 22);
+@dark-color-fill-4: rgb(199, 204, 214);
+@dark-color-bg-white: rgba(255, 255, 255, 0.001);
+@dark-color-border-1: rgb(53, 53, 53);
+@color-bg-1: #ffffff;
+@color-border-1: rgb(235, 237, 244);
+@dark-color-border-2: rgba(234, 237, 241, 0.05);
+@color-fill-1: rgb(201, 201, 212);
+@dark-color-border-4: rgb(109, 109, 109);
+@dark-color-fill-1: rgb(66, 70, 78);
+@color-border-4: rgb(172, 176, 197);
+@dark-color-fill-2: rgb(115, 122, 135);
+@dark-color-border-3: rgba(221, 226, 233, 0.15);
+@dark-color-fill-3: rgb(157, 163, 175);
+@color-bg-3: rgb(247, 248, 253);
+@dark-color-bg-2: rgba(252, 253, 254, 0.01);
+@dark-color-bg-4: rgba(246, 248, 250, 0.06);
+@dark-color-bg-5: rgba(241, 243, 245, 0.08);
+@color-bg-5: rgb(240, 242, 250);
+@color-bg-4: rgb(246, 247, 250);
+@dark-color-bg-3: rgba(250, 251, 252, 0.04);
+@color-bg-2: rgb(250, 251, 253);
+@color-border-3: rgb(215, 218, 234);
+@textarea-prefix-cls: ~'@{prefix}-textarea';
+@color-primary-1: rgb(var(~'@{arco-cssvars-prefix}-primary-1'));
+@color-primary-5: rgb(var(~'@{arco-cssvars-prefix}-primary-5'));
+@color-link-10: rgb(var(~'@{arco-cssvars-prefix}-link-10'));
+@color-primary-3: rgb(var(~'@{arco-cssvars-prefix}-primary-3'));
+@color-primary-4: rgb(var(~'@{arco-cssvars-prefix}-primary-4'));
+@color-link-5: rgb(var(~'@{arco-cssvars-prefix}-link-5'));
+@color-danger-2: rgb(var(~'@{arco-cssvars-prefix}-danger-2'));
+@color-link-4: rgb(var(~'@{arco-cssvars-prefix}-link-4'));
+@color-link-8: rgb(var(~'@{arco-cssvars-prefix}-link-8'));
+@color-warning-3: rgb(var(~'@{arco-cssvars-prefix}-warning-3'));
+@color-warning-7: rgb(var(~'@{arco-cssvars-prefix}-warning-7'));
+@color-link-9: rgb(var(~'@{arco-cssvars-prefix}-link-9'));
+@color-primary-2: rgb(var(~'@{arco-cssvars-prefix}-primary-2'));
+@color-danger-10: rgb(var(~'@{arco-cssvars-prefix}-danger-10'));
+@color-success-9: rgb(var(~'@{arco-cssvars-prefix}-success-9'));
+@color-success-8: rgb(var(~'@{arco-cssvars-prefix}-success-8'));
+@color-danger-8: rgb(var(~'@{arco-cssvars-prefix}-danger-8'));
+@color-success-5: rgb(var(~'@{arco-cssvars-prefix}-success-5'));
+@color-warning-8: rgb(var(~'@{arco-cssvars-prefix}-warning-8'));
+@color-success-3: rgb(var(~'@{arco-cssvars-prefix}-success-3'));
+@color-link-6: rgb(var(~'@{arco-cssvars-prefix}-link-6'));
+@color-warning-9: rgb(var(~'@{arco-cssvars-prefix}-warning-9'));
+@color-danger-1: rgb(var(~'@{arco-cssvars-prefix}-danger-1'));
+@color-primary-6: rgb(var(~'@{arco-cssvars-prefix}-primary-6'));
+@color-warning-2: rgb(var(~'@{arco-cssvars-prefix}-warning-2'));
+@color-primary-7: rgb(var(~'@{arco-cssvars-prefix}-primary-7'));
+@color-warning-4: rgb(var(~'@{arco-cssvars-prefix}-warning-4'));
+@color-danger-5: rgb(var(~'@{arco-cssvars-prefix}-danger-5'));
+@color-primary-8: rgb(var(~'@{arco-cssvars-prefix}-primary-8'));
+@color-warning-6: rgb(var(~'@{arco-cssvars-prefix}-warning-6'));
+@color-danger-9: rgb(var(~'@{arco-cssvars-prefix}-danger-9'));
+@color-success-4: rgb(var(~'@{arco-cssvars-prefix}-success-4'));
+@color-success-2: rgb(var(~'@{arco-cssvars-prefix}-success-2'));
+@color-danger-7: rgb(var(~'@{arco-cssvars-prefix}-danger-7'));
+@color-warning-1: rgb(var(~'@{arco-cssvars-prefix}-warning-1'));
+@color-warning-5: rgb(var(~'@{arco-cssvars-prefix}-warning-5'));
+@color-link-3: rgb(var(~'@{arco-cssvars-prefix}-link-3'));
+@color-danger-3: rgb(var(~'@{arco-cssvars-prefix}-danger-3'));
+@color-link-7: rgb(var(~'@{arco-cssvars-prefix}-link-7'));
+@color-primary-9: rgb(var(~'@{arco-cssvars-prefix}-primary-9'));
+@color-link-2: rgb(var(~'@{arco-cssvars-prefix}-link-2'));
+@color-warning-10: rgb(var(~'@{arco-cssvars-prefix}-warning-10'));
+@color-success-7: rgb(var(~'@{arco-cssvars-prefix}-success-7'));
+@color-primary-10: rgb(var(~'@{arco-cssvars-prefix}-primary-10'));
+@color-danger-4: rgb(var(~'@{arco-cssvars-prefix}-danger-4'));
+@color-success-10: rgb(var(~'@{arco-cssvars-prefix}-success-10'));
+@color-link-1: rgb(var(~'@{arco-cssvars-prefix}-link-1'));
+@color-success-1: rgb(var(~'@{arco-cssvars-prefix}-success-1'));
+@color-danger-6: rgb(var(~'@{arco-cssvars-prefix}-danger-6'));
+@color-success-6: rgb(var(~'@{arco-cssvars-prefix}-success-6'));
+@dark-color-menu-dark-hover: var(~'@{arco-cssvars-prefix}-color-fill-2');
+@color-black: #000000;
+@color-primary-light-2: rgb(var(~'@{arco-cssvars-prefix}-primary-2'));
+@color-spin-layer-bg: rgba(255, 255, 255, 0.6);
+@color-tooltip-bg: rgb(var(~'@{arco-cssvars-prefix}-gray-10'));
+@color-primary-light-3: rgb(var(~'@{arco-cssvars-prefix}-primary-3'));
+@dark-color-tooltip-bg: #373739;
+@color-bg-popup: var(~'@{arco-cssvars-prefix}-color-bg-5');
+@color-secondary: var(~'@{arco-cssvars-prefix}-color-neutral-2');
+@dark-mask-color-bg: rgba(23, 23, 26, 0.6);
+@color-primary-light-1: rgb(var(~'@{arco-cssvars-prefix}-primary-1'));
+@dark-color-spin-layer-bg: rgba(51, 51, 51, 0.6);
+@dark-color-black: #000000;
+@color-secondary-hover: var(~'@{arco-cssvars-prefix}-color-neutral-3');
+@color-primary-light-4: rgb(var(~'@{arco-cssvars-prefix}-primary-4'));
+@color-border: rgb(var(~'@{arco-cssvars-prefix}-gray-3'));
+@color-menu-dark-hover: rgba(255, 255, 255, 0.04);
+@mask-color-bg: rgba(29, 33, 41, 0.6);
+@color-secondary-active: var(~'@{arco-cssvars-prefix}-color-neutral-4');
+@color-danger-light-3: rgb(var(~'@{arco-cssvars-prefix}-danger-3'));
+@color-danger-light-1: rgb(var(~'@{arco-cssvars-prefix}-danger-1'));
+@color-secondary-disabled: var(~'@{arco-cssvars-prefix}-color-neutral-1');
+@color-danger-light-2: rgb(var(~'@{arco-cssvars-prefix}-danger-2'));
+@color-success-light-1: rgb(var(~'@{arco-cssvars-prefix}-success-1'));
+@color-danger-light-4: rgb(var(~'@{arco-cssvars-prefix}-danger-4'));
+@color-success-light-2: rgb(var(~'@{arco-cssvars-prefix}-success-2'));
+@color-success-light-4: rgb(var(~'@{arco-cssvars-prefix}-success-4'));
+@color-success-light-3: rgb(var(~'@{arco-cssvars-prefix}-success-3'));
+@color-warning-light-1: rgb(var(~'@{arco-cssvars-prefix}-warning-1'));
+@color-warning-light-3: rgb(var(~'@{arco-cssvars-prefix}-warning-3'));
+@color-warning-light-2: rgb(var(~'@{arco-cssvars-prefix}-warning-2'));
+@dark-color-border: #333335;
+@color-warning-light-4: rgb(var(~'@{arco-cssvars-prefix}-warning-4'));
+@dark-color-primary-light-1: rgba(var(~'@{arco-cssvars-prefix}-primary-6'), 0.2);
+@dark-color-primary-light-4: rgba(var(~'@{arco-cssvars-prefix}-primary-6'), 0.65);
+@dark-color-secondary: rgba(var(~'@{arco-cssvars-prefix}-gray-9'), 0.08);
+@dark-color-primary-light-2: rgba(var(~'@{arco-cssvars-prefix}-primary-6'), 0.35);
+@dark-color-secondary-disabled: rgba(var(~'@{arco-cssvars-prefix}-gray-9'), 0.08);
+@dark-color-secondary-active: rgba(var(~'@{arco-cssvars-prefix}-gray-7'), 0.24);
+@dark-color-secondary-hover: rgba(var(~'@{arco-cssvars-prefix}-gray-8'), 0.16);
+@dark-color-text-4: rgb(66, 70, 78);
+@dark-color-primary-light-3: rgba(var(~'@{arco-cssvars-prefix}-primary-6'), 0.5);
+@dark-color-danger-light-1: rgba(var(~'@{arco-cssvars-prefix}-danger-6'), 0.2);
+@dark-color-danger-light-2: rgba(var(~'@{arco-cssvars-prefix}-danger-6'), 0.35);
+@dark-color-danger-light-3: rgba(var(~'@{arco-cssvars-prefix}-danger-6'), 0.5);
+@dark-color-danger-light-4: rgba(var(~'@{arco-cssvars-prefix}-danger-6'), 0.65);
+@dark-color-success-light-1: rgb(var(~'@{arco-cssvars-prefix}-success-6'), 0.2);
+@dark-color-success-light-2: rgb(var(~'@{arco-cssvars-prefix}-success-6'), 0.35);
+@dark-color-success-light-3: rgb(var(~'@{arco-cssvars-prefix}-success-6'), 0.5);
+@dark-color-success-light-4: rgb(var(~'@{arco-cssvars-prefix}-success-6'), 0.65);
+@dark-color-warning-light-1: rgb(var(~'@{arco-cssvars-prefix}-warning-6'), 0.2);
+@dark-color-warning-light-2: rgb(var(~'@{arco-cssvars-prefix}-warning-6'), 0.35);
+@dark-color-warning-light-3: rgb(var(~'@{arco-cssvars-prefix}-warning-6'), 0.5);
+@dark-color-warning-light-4: rgb(var(~'@{arco-cssvars-prefix}-warning-6'), 0.65);
+@color-link-light-1: rgb(var(~'@{arco-cssvars-prefix}-link-1'));
+@color-link-light-2: rgb(var(~'@{arco-cssvars-prefix}-link-2'));
+@color-link-light-3: rgb(var(~'@{arco-cssvars-prefix}-link-3'));
+@color-link-light-4: rgb(var(~'@{arco-cssvars-prefix}-link-4'));
+@dark-color-link-light-1: rgba(var(~'@{arco-cssvars-prefix}-link-6'), 0.2);
+@dark-color-link-light-2: rgba(var(~'@{arco-cssvars-prefix}-link-6'), 0.35);
+@dark-color-link-light-3: rgba(var(~'@{arco-cssvars-prefix}-link-6'), 0.5);
+@dark-color-link-light-4: rgba(var(~'@{arco-cssvars-prefix}-link-6'), 0.65);
+@opacity-none: 0;
+@opacity-1: 10%;
+@opacity-2: 20%;
+@opacity-3: 30%;
+@opacity-4: 40%;
+@opacity-5: 50%;
+@opacity-6: 60%;
+@opacity-7: 70%;
+@opacity-8: 80%;
+@opacity-9: 90%;
+@opacity-10: 100%;
+@mask-bg-opacity: 60%;
+@transition-duration-1: 0.1s;
+@transition-duration-2: 0.2s;
+@transition-duration-3: 0.3s;
+@transition-duration-4: 0.4s;
+@transition-duration-5: 0.5s;
+@transition-duration-loading: 1s;
+@transition-timing-function-linear: cubic-bezier(0, 0, 1, 1);
+@transition-timing-function-standard: cubic-bezier(0.34, 0.69, 0.1, 1);
+@transition-timing-function-overshoot: cubic-bezier(0.3, 1.3, 0.3, 1);
+@transition-timing-function-decelerate: cubic-bezier(0.4, 0.8, 0.74, 1);
+@transition-timing-function-accelerate: cubic-bezier(0.26, 0, 0.6, 0.2);
+@icon-hover-border-radius: @border-radius-medium;
+@icon-hover-color-bg: var(~'@{arco-cssvars-prefix}-color-bg-6');
+@icon-hover-size-default-height: 20px;
+@icon-hover-size-small-height: 20px;
+@icon-hover-size-mini-height: 20px;
+@icon-hover-size-large-height: 24px;
+@icon-hover-size-huge-height: 24px;
+@icon-hover-size-small-icon: 12px;
+@icon-hover-size-mini-icon: 12px;
+@icon-hover-size-default-icon: 12px;
+@icon-hover-size-large-icon: 12px;
+@icon-hover-size-huge-icon: 12px;
+@radius-none: var(~'@{arco-cssvars-prefix}-border-radius-none');
+@radius-small: var(~'@{arco-cssvars-prefix}-border-radius-small');
+@radius-medium: var(~'@{arco-cssvars-prefix}-border-radius-medium');
+@radius-large: var(~'@{arco-cssvars-prefix}-border-radius-large');
+@radius-circle: var(~'@{arco-cssvars-prefix}-border-radius-circle');
+@code-family: Consolas, Menlo;
+@z-index-popup-base: 1000;
+@z-index-affix: 999;
+@z-index-popup: 1000;
+@z-index-drawer: 1001;
+@z-index-modal: 1001;
+@z-index-message: 1003;
+@z-index-notification: 1003;
+@z-index-image-preview: 1001;
+@line-height-base: 1.53846154;
+@popup-box-shadow-base: 0 2px 5px rgba(0, 0, 0, 0.1);
+@color-transparent: transparent;
+@prefix: arco;
+@badge-prefix-cls: ~'@{prefix}-badge';
+@calendar-prefix-cls: ~'@{prefix}-calendar';
+@rate-prefix-cls: ~'@{prefix}-rate';
+@font-size-body: @font-size-body-3;
+@size-none: 0;
+@border-4: 4px;
+@border-5: 5px;
+@arco-theme-tag: body;
+@skeleton-prefix-cls: ~'@{prefix}-skeleton';
+@arco-vars-prefix: ~'';
+@arco-cssvars-prefix: if(@arco-vars-prefix = ~'', -, ~'--@{arco-vars-prefix}');
+@watermark-prefix-cls: ~'@{prefix}-watermark';
+@verification-code-prefix-cls: ~'@{prefix}-verification-code';
+@color-prefix-cls: ~'@{prefix}-color';
+@base-grey-3: rgb(236, 237, 237);
+@base-grey-6: rgb(65, 70, 79);
+@color-fill-5: #ffffff;
+@dark-base-grey-8: rgb(65, 65, 65);
+@color-alpha-link1: #f4f7ff;
+@dark-color-alpha-danger1: rgba(126, 13, 7, 0.5);
+@dark-color-alpha-link2: rgba(17, 74, 185, 0.2);
+@color-base-grey-8: rgb(var(~'@{arco-cssvars-prefix}-base-grey-8'));
+@color-alpha-danger3: #ffa3a0;
+@color-base-grey-5: rgb(var(~'@{arco-cssvars-prefix}-base-grey-5'));
+@color-bg-6: rgba(26, 27, 30, 0.05);
+@color-alpha-danger2: #ffecec;
+@color-alpha-oranged1: #fff2e8;
+@oranged-7: rgb(168, 68, 0);
+@color-grey-5: #676b72;
+@dark-base-grey-7: rgb(45, 45, 45);
+@base-grey-1: rgb(246, 248, 250);
+@color-base-grey-2: rgb(var(~'@{arco-cssvars-prefix}-base-grey-2'));
+@dark-color-alpha-success1: rgba(7, 72, 36, 0.5);
+@color-teal-3: rgb(var(~'@{arco-cssvars-prefix}-teal-3'));
+@dark-teal-5: rgb(128, 197, 224);
+@teal-6: rgb(13, 163, 158);
+@teal-5: rgb(20, 192, 180);
+@base-grey-9: #031a79;
+@dark-color-bg-9: rgb(33, 35, 39);
+@dark-base-grey-10: #eaf4ff;
+@teal-2: rgb(231, 249, 245);
+@base-grey-4: rgb(160, 162, 167);
+@base-grey-5: rgb(103, 107, 114);
+@oranged-6: rgb(192, 79, 0);
+@dark-oranged-3: rgb(168, 68, 0);
+@dark-color-bg-6: rgba(199, 204, 214, 0.1);
+@teal-3: rgb(93, 217, 201);
+@dark-oranged-1: rgb(104, 44, 0);
+@teal-4: rgb(51, 214, 189);
+@color-base-grey-10: rgb(var(~'@{arco-cssvars-prefix}-base-grey-10'));
+@color-teal-1: rgb(var(~'@{arco-cssvars-prefix}-teal-1'));
+@color-bg-9: #ffffff;
+@dark-base-grey-9: #bedaff;
+@dark-color-alpha-success2: rgba(28, 94, 53, 0.2);
+@color-grey-4: #a0a2a7;
+@color-alpha-success1: #eef9f1;
+@color-alpha-warning3: #f9c76d;
+@color-oranged-6: rgb(var(~'@{arco-cssvars-prefix}-oranged-6'));
+@dark-color-alpha-success3: rgba(92, 174, 119, 0.3);
+@color-oranged-3: rgb(var(~'@{arco-cssvars-prefix}-oranged-3'));
+@dark-teal-1: rgb(0, 68, 85);
+@color-oranged-5: rgb(var(~'@{arco-cssvars-prefix}-oranged-5'));
+@color-teal-4: rgb(var(~'@{arco-cssvars-prefix}-teal-4'));
+@dark-base-grey-6: rgb(56, 56, 56);
+@color-alpha-danger1: #fdf5f5;
+@color-base-grey-3: rgb(var(~'@{arco-cssvars-prefix}-base-grey-3'));
+@dark-color-grey-3: #c7ccd6;
+@color-alpha-warning1: #fef8eb;
+@color-grey-1: #f6f8fa;
+@teal-7: rgb(7, 134, 134);
+@color-fill-6: rgb(247, 248, 253);
+@color-base-grey-9: rgb(var(~'@{arco-cssvars-prefix}-base-grey-9'));
+@dark-color-alpha-warning3: rgba(240, 165, 15, 0.3);
+@color-grey-2: #f6f6f6;
+@dark-color-alpha-danger3: rgba(255, 112, 109, 0.3);
+@color-alpha-success3: #7ccd94;
+@color-base-grey-6: rgb(var(~'@{arco-cssvars-prefix}-base-grey-6'));
+@color-oranged-9: rgb(var(~'@{arco-cssvars-prefix}-oranged-9'));
+@color-oranged-1: rgb(var(~'@{arco-cssvars-prefix}-oranged-1'));
+@color-grey-6: #41464f;
+@dark-color-alpha-warning2: rgba(112, 75, 0, 0.2);
+@color-base-grey-1: rgb(var(~'@{arco-cssvars-prefix}-base-grey-1'));
+@color-functional-icon-1: rgb(110, 113, 140);
+@base-grey-2: rgb(246, 246, 246);
+@dark-color-functional-icon-2: #1664ff;
+@dark-color-grey-4: #9da3af;
+@color-grey-7: #343840;
+@color-alpha-link3: rgb(151, 174, 255);
+@color-oranged-10: rgb(var(~'@{arco-cssvars-prefix}-oranged-10'));
+@dark-oranged-9: #bedaff;
+@dark-oranged-2: rgb(137, 60, 0);
+@base-grey-7: rgb(52, 56, 64);
+@oranged-2: rgb(255, 234, 219);
+@dark-oranged-5: rgb(255, 179, 122);
+@dark-teal-8: rgb(228, 243, 252);
+@dark-oranged-8: rgb(255, 234, 219);
+@color-base-grey-4: rgb(var(~'@{arco-cssvars-prefix}-base-grey-4'));
+@dark-color-fill-6: rgba(0, 0, 0, 0.2);
+@color-alpha-oranged3: #ffb37a;
+@teal-8: rgb(8, 109, 109);
+@dark-base-grey-5: rgb(51, 51, 51);
+@teal-1: rgb(239, 251, 248);
+@color-alpha-oranged2: #ffeadb;
+@dark-oranged-4: rgb(192, 79, 0);
+@dark-base-grey-4: rgb(46, 46, 46);
+@dark-color-grey-8: rgb(47, 50, 55);
+@dark-teal-6: rgb(88, 168, 196);
+@color-base-grey-7: rgb(var(~'@{arco-cssvars-prefix}-base-grey-7'));
+@dark-color-alpha-warning1: rgba(83, 57, 0, 0.5);
+@oranged-1: rgb(255, 242, 232);
+@dark-color-alpha-danger2: rgba(159, 33, 28, 0.2);
+@dark-teal-3: rgb(7, 108, 133);
+@dark-base-grey-3: rgb(42, 42, 42);
+@dark-teal-9: #bedaff;
+@oranged-4: rgb(255, 131, 43);
+@dark-color-grey-6: #41464f;
+@dark-oranged-7: rgb(235, 98, 0);
+@teal-9: #031a79;
+@color-teal-6: rgb(var(~'@{arco-cssvars-prefix}-teal-6'));
+@color-alpha-warning2: #fff3dc;
+@color-oranged-2: rgb(var(~'@{arco-cssvars-prefix}-oranged-2'));
+@color-alpha-link2: #ebf1ff;
+@dark-color-bg-7: rgb(26, 27, 30);
+@dark-color-alpha-oranged1: rgba(104, 44, 0, 0.5);
+@color-oranged-7: rgb(var(~'@{arco-cssvars-prefix}-oranged-7'));
+@color-oranged-4: rgb(var(~'@{arco-cssvars-prefix}-oranged-4'));
+@dark-color-alpha-oranged3: rgba(168, 68, 0, 0.3);
+@color-grey-8: #292a2e;
+@dark-color-functional-icon-1: #5e6673;
+@dark-oranged-6: rgb(255, 131, 43);
+@dark-teal-7: rgb(56, 136, 163);
+@color-teal-10: rgb(var(~'@{arco-cssvars-prefix}-teal-10'));
+@dark-base-grey-2: rgb(37, 37, 37);
+@dark-color-alpha-oranged2: rgba(137, 60, 0, 0.2);
+@color-alpha-success2: #e1f6e6;
+@color-teal-7: rgb(var(~'@{arco-cssvars-prefix}-teal-7'));
+@color-teal-5: rgb(var(~'@{arco-cssvars-prefix}-teal-5'));
+@teal-10: #000d4d;
+@oranged-3: rgb(255, 179, 122);
+@base-grey-8: rgb(43, 48, 58);
+@dark-teal-2: rgb(0, 90, 112);
+@color-bg-8: #ffffff;
+@oranged-8: rgb(137, 60, 0);
+@dark-teal-10: #eaf4ff;
+@dark-color-grey-2: rgba(246, 248, 250, 0.2);
+@dark-oranged-10: #eaf4ff;
+@dark-color-grey-1: rgba(246, 248, 250, 0.12);
+@dark-base-grey-1: #000d4d;
+@color-teal-9: rgb(var(~'@{arco-cssvars-prefix}-teal-9'));
+@dark-color-grey-5: #6e7687;
+@color-bg-7: rgb(240, 242, 250);
+@color-grey-3: #eceded;
+@oranged-9: #031a79;
+@dark-color-fill-5: #ffffff;
+@oranged-5: rgb(235, 98, 0);
+@dark-teal-4: rgb(36, 117, 142);
+@color-oranged-8: rgb(var(~'@{arco-cssvars-prefix}-oranged-8'));
+@color-teal-8: rgb(var(~'@{arco-cssvars-prefix}-teal-8'));
+@dark-color-alpha-link1: rgba(13, 55, 141, 0.5);
+@oranged-10: #000d4d;
+@dark-color-bg-8: rgb(40, 42, 47);
+@base-grey-10: #000d4d;
+@color-teal-2: rgb(var(~'@{arco-cssvars-prefix}-teal-2'));
+@dark-color-grey-7: #343840;
+@dark-color-alpha-link3: rgb(110, 159, 255);
+@color-functional-icon-2: rgb(82, 82, 255);
+@dark-color-bg-10: #131416;
+@color-bg-10: #f7f8fd;
+@color-bg-11: rgb(225, 227, 239);
+@dark-color-bg-11: #1e2023;
+@color-text-5: #a5a7bb;
+@dark-color-text-5: #e1e3ef;
+
+@arco-theme-tag: body;
+@arco-vars-prefix: ~'';
+@arco-cssvars-prefix: if(@arco-vars-prefix = ~'', -, ~'--@{arco-vars-prefix}');
+
+@color-border: rgb(var(~'@{arco-cssvars-prefix}-gray-3'));
+@color-bg-popup: var(~'@{arco-cssvars-prefix}-color-bg-5');
+@color-bg-1: #fff;
+@color-bg-2: #fff;
+@color-bg-3: #fff;
+@color-bg-4: #fff;
+@color-bg-5: #fff;
+@color-bg-white: #fff;
+@color-text-1: var(~'@{arco-cssvars-prefix}-color-neutral-10'); // 标题，正文
+@color-text-2: var(~'@{arco-cssvars-prefix}-color-neutral-8'); // 语句
+@color-text-3: var(~'@{arco-cssvars-prefix}-color-neutral-6'); // 次要信息
+@color-text-4: var(~'@{arco-cssvars-prefix}-color-neutral-4'); // 次要信息
+@color-fill-1: var(~'@{arco-cssvars-prefix}-color-neutral-1');
+@color-fill-2: var(~'@{arco-cssvars-prefix}-color-neutral-2');
+@color-fill-3: var(~'@{arco-cssvars-prefix}-color-neutral-3');
+@color-fill-4: var(~'@{arco-cssvars-prefix}-color-neutral-4');
+@color-border-1: var(~'@{arco-cssvars-prefix}-color-neutral-2');
+@color-border-2: var(~'@{arco-cssvars-prefix}-color-neutral-3');
+@color-border-3: var(~'@{arco-cssvars-prefix}-color-neutral-4');
+@color-border-4: var(~'@{arco-cssvars-prefix}-color-neutral-6');
+@color-primary-light-1: @color-primary-1;
+@color-primary-light-2: @color-primary-2;
+@color-primary-light-3: @color-primary-3;
+@color-primary-light-4: @color-primary-4;
+@color-secondary: var(~'@{arco-cssvars-prefix}-color-neutral-2');
+@color-secondary-hover: var(~'@{arco-cssvars-prefix}-color-neutral-3');
+@color-secondary-active: var(~'@{arco-cssvars-prefix}-color-neutral-4');
+@color-secondary-disabled: var(~'@{arco-cssvars-prefix}-color-neutral-1');
+@color-danger-light-1: @color-danger-1;
+@color-danger-light-2: @color-danger-2;
+@color-danger-light-3: @color-danger-3;
+@color-danger-light-4: @color-danger-4;
+@color-success-light-1: @color-success-1;
+@color-success-light-2: @color-success-2;
+@color-success-light-3: @color-success-3;
+@color-success-light-4: @color-success-4;
+@color-warning-light-1: @color-warning-1;
+@color-warning-light-2: @color-warning-2;
+@color-warning-light-3: @color-warning-3;
+@color-warning-light-4: @color-warning-4;
+@color-link-light-1: @color-link-1;
+@color-link-light-2: @color-link-2;
+@color-link-light-3: @color-link-3;
+@color-link-light-4: @color-link-4;
+
+@dark-color-border: #333335;
+@dark-color-bg-1: #17171a;
+@dark-color-bg-2: #232324;
+@dark-color-bg-3: #2a2a2b;
+@dark-color-bg-4: #313132;
+@dark-color-bg-5: #373739;
+@dark-color-bg-white: #f6f6f6;
+@dark-color-text-1: fade(#fff, 90%);
+@dark-color-text-2: fade(#fff, 70%);
+@dark-color-text-3: fade(#fff, 50%);
+@dark-color-text-4: fade(#fff, 30%);
+@dark-color-fill-1: fade(#fff, 4%);
+@dark-color-fill-2: fade(#fff, 8%);
+@dark-color-fill-3: fade(#fff, 12%);
+@dark-color-fill-4: fade(#fff, 16%);
+@dark-color-border-1: var(~'@{arco-cssvars-prefix}-color-neutral-2');
+@dark-color-border-2: var(~'@{arco-cssvars-prefix}-color-neutral-3');
+@dark-color-border-3: var(~'@{arco-cssvars-prefix}-color-neutral-4');
+@dark-color-border-4: var(~'@{arco-cssvars-prefix}-color-neutral-6');
+@dark-color-secondary: rgba(var(~'@{arco-cssvars-prefix}-gray-9'), 0.08);
+@dark-color-secondary-hover: rgba(var(~'@{arco-cssvars-prefix}-gray-8'), 0.16);
+@dark-color-secondary-active: rgba(var(~'@{arco-cssvars-prefix}-gray-7'), 0.24);
+@dark-color-secondary-disabled: rgba(var(~'@{arco-cssvars-prefix}-gray-9'), 0.08);
+@dark-color-primary-light-1: replace(~'@{color-primary-6}', 'rgb\((.*)\)$', 'rgba($1, 0.2)');
+@dark-color-primary-light-2: replace(~'@{color-primary-6}', 'rgb\((.*)\)$', 'rgba($1, 0.35)');
+@dark-color-primary-light-3: replace(~'@{color-primary-6}', 'rgb\((.*)\)$', 'rgba($1, 0.5)');
+@dark-color-primary-light-4: replace(~'@{color-primary-6}', 'rgb\((.*)\)$', 'rgba($1, 0.65)');
+@dark-color-danger-light-1: replace(~'@{color-danger-6}', 'rgb\((.*)\)$', 'rgba($1, 0.2)');
+@dark-color-danger-light-2: replace(~'@{color-danger-6}', 'rgb\((.*)\)$', 'rgba($1, 0.35)');
+@dark-color-danger-light-3: replace(~'@{color-danger-6}', 'rgb\((.*)\)$', 'rgba($1, 0.5)');
+@dark-color-danger-light-4: replace(~'@{color-danger-6}', 'rgb\((.*)\)$', 'rgba($1, 0.65)');
+@dark-color-success-light-1: replace(~'@{color-success-6}', 'rgb\((.*)\)$', 'rgba($1, 0.2)');
+@dark-color-success-light-2: replace(~'@{color-success-6}', 'rgb\((.*)\)$', 'rgba($1, 0.35)');
+@dark-color-success-light-3: replace(~'@{color-success-6}', 'rgb\((.*)\)$', 'rgba($1, 0.5)');
+@dark-color-success-light-4: replace(~'@{color-success-6}', 'rgb\((.*)\)$', 'rgba($1, 0.65)');
+@dark-color-warning-light-1: replace(~'@{color-warning-6}', 'rgb\((.*)\)$', 'rgba($1, 0.2)');
+@dark-color-warning-light-2: replace(~'@{color-warning-6}', 'rgb\((.*)\)$', 'rgba($1, 0.35)');
+@dark-color-warning-light-3: replace(~'@{color-warning-6}', 'rgb\((.*)\)$', 'rgba($1, 0.5)');
+@dark-color-warning-light-4: replace(~'@{color-warning-6}', 'rgb\((.*)\)$', 'rgba($1, 0.65)');
+@dark-color-link-light-1: replace(~'@{color-link-6}', 'rgb\((.*)\)$', 'rgba($1, 0.2)');
+@dark-color-link-light-2: replace(~'@{color-link-6}', 'rgb\((.*)\)$', 'rgba($1, 0.35)');
+@dark-color-link-light-3: replace(~'@{color-link-6}', 'rgb\((.*)\)$', 'rgba($1, 0.5)');
+@dark-color-link-light-4: replace(~'@{color-link-6}', 'rgb\((.*)\)$', 'rgba($1, 0.65)');
+
+@color-white: #ffffff;
+@dark-color-white: fade(@color-white, 90%);
+
+@{arco-theme-tag} {
+  font-family: @font-family;
+}
+
+@{arco-theme-tag} {
+  @{arco-cssvars-prefix}-color-white: @color-white;
+  @{arco-cssvars-prefix}-color-black: @color-black;
+  @{arco-cssvars-prefix}-color-border: @color-border;
+  @{arco-cssvars-prefix}-color-bg-popup: @color-bg-popup;
+  @{arco-cssvars-prefix}-color-bg-1: @color-bg-1;
+  @{arco-cssvars-prefix}-color-bg-2: @color-bg-2;
+  @{arco-cssvars-prefix}-color-bg-3: @color-bg-3;
+  @{arco-cssvars-prefix}-color-bg-4: @color-bg-4;
+  @{arco-cssvars-prefix}-color-bg-5: @color-bg-5;
+  @{arco-cssvars-prefix}-color-bg-white: @color-bg-white;
+  @{arco-cssvars-prefix}-color-neutral-1: rgb(var(~'@{arco-cssvars-prefix}-gray-1'));
+  @{arco-cssvars-prefix}-color-neutral-2: rgb(var(~'@{arco-cssvars-prefix}-gray-2'));
+  @{arco-cssvars-prefix}-color-neutral-3: rgb(var(~'@{arco-cssvars-prefix}-gray-3'));
+  @{arco-cssvars-prefix}-color-neutral-4: rgb(var(~'@{arco-cssvars-prefix}-gray-4'));
+  @{arco-cssvars-prefix}-color-neutral-5: rgb(var(~'@{arco-cssvars-prefix}-gray-5'));
+  @{arco-cssvars-prefix}-color-neutral-6: rgb(var(~'@{arco-cssvars-prefix}-gray-6'));
+  @{arco-cssvars-prefix}-color-neutral-7: rgb(var(~'@{arco-cssvars-prefix}-gray-7'));
+  @{arco-cssvars-prefix}-color-neutral-8: rgb(var(~'@{arco-cssvars-prefix}-gray-8'));
+  @{arco-cssvars-prefix}-color-neutral-9: rgb(var(~'@{arco-cssvars-prefix}-gray-9'));
+  @{arco-cssvars-prefix}-color-neutral-10: rgb(var(~'@{arco-cssvars-prefix}-gray-10'));
+  @{arco-cssvars-prefix}-color-text-1: @color-text-1;
+  @{arco-cssvars-prefix}-color-text-2: @color-text-2;
+  @{arco-cssvars-prefix}-color-text-3: @color-text-3;
+  @{arco-cssvars-prefix}-color-text-4: @color-text-4;
+  @{arco-cssvars-prefix}-color-fill-1: @color-fill-1;
+  @{arco-cssvars-prefix}-color-fill-2: @color-fill-2;
+  @{arco-cssvars-prefix}-color-fill-3: @color-fill-3;
+  @{arco-cssvars-prefix}-color-fill-4: @color-fill-4;
+  @{arco-cssvars-prefix}-color-border-1: @color-border-1;
+  @{arco-cssvars-prefix}-color-border-2: @color-border-2;
+  @{arco-cssvars-prefix}-color-border-3: @color-border-3;
+  @{arco-cssvars-prefix}-color-border-4: @color-border-4;
+  @{arco-cssvars-prefix}-color-primary-light-1: @color-primary-light-1;
+  @{arco-cssvars-prefix}-color-primary-light-2: @color-primary-light-2;
+  @{arco-cssvars-prefix}-color-primary-light-3: @color-primary-light-3;
+  @{arco-cssvars-prefix}-color-primary-light-4: @color-primary-light-4;
+  @{arco-cssvars-prefix}-color-secondary: @color-secondary;
+  @{arco-cssvars-prefix}-color-secondary-hover: @color-secondary-hover;
+  @{arco-cssvars-prefix}-color-secondary-active: @color-secondary-active;
+  @{arco-cssvars-prefix}-color-secondary-disabled: @color-secondary-disabled;
+  @{arco-cssvars-prefix}-color-danger-light-1: @color-danger-light-1;
+  @{arco-cssvars-prefix}-color-danger-light-2: @color-danger-light-2;
+  @{arco-cssvars-prefix}-color-danger-light-3: @color-danger-light-3;
+  @{arco-cssvars-prefix}-color-danger-light-4: @color-danger-light-4;
+  @{arco-cssvars-prefix}-color-success-light-1: @color-success-light-1;
+  @{arco-cssvars-prefix}-color-success-light-2: @color-success-light-2;
+  @{arco-cssvars-prefix}-color-success-light-3: @color-success-light-3;
+  @{arco-cssvars-prefix}-color-success-light-4: @color-success-light-4;
+  @{arco-cssvars-prefix}-color-warning-light-1: @color-warning-light-1;
+  @{arco-cssvars-prefix}-color-warning-light-2: @color-warning-light-2;
+  @{arco-cssvars-prefix}-color-warning-light-3: @color-warning-light-3;
+  @{arco-cssvars-prefix}-color-warning-light-4: @color-warning-light-4;
+  @{arco-cssvars-prefix}-color-link-light-1: @color-link-light-1;
+  @{arco-cssvars-prefix}-color-link-light-2: @color-link-light-2;
+  @{arco-cssvars-prefix}-color-link-light-3: @color-link-light-3;
+  @{arco-cssvars-prefix}-color-link-light-4: @color-link-light-4;
+
+  @{arco-cssvars-prefix}-border-radius-none: @border-radius-none;
+  @{arco-cssvars-prefix}-border-radius-small: @border-radius-small;
+  @{arco-cssvars-prefix}-border-radius-medium: @border-radius-medium;
+  @{arco-cssvars-prefix}-border-radius-large: @border-radius-large;
+  @{arco-cssvars-prefix}-border-radius-circle: @border-radius-circle;
+
+  @{arco-cssvars-prefix}-color-tooltip-bg: @color-tooltip-bg;
+  @{arco-cssvars-prefix}-color-spin-layer-bg: @color-spin-layer-bg;
+  @{arco-cssvars-prefix}-color-menu-dark-bg: @color-menu-dark-bg;
+  @{arco-cssvars-prefix}-color-menu-light-bg: @color-menu-light-bg;
+  @{arco-cssvars-prefix}-color-menu-dark-hover: @color-menu-dark-hover;
+  @{arco-cssvars-prefix}-color-mask-bg: @mask-color-bg;
+}
+
+@{arco-theme-tag}[arco-theme='dark'] {
+  @{arco-cssvars-prefix}-color-black: @dark-color-black;
+  @{arco-cssvars-prefix}-color-border: @dark-color-border;
+  @{arco-cssvars-prefix}-color-bg-1: @dark-color-bg-1;
+  @{arco-cssvars-prefix}-color-bg-2: @dark-color-bg-2;
+  @{arco-cssvars-prefix}-color-bg-3: @dark-color-bg-3;
+  @{arco-cssvars-prefix}-color-bg-4: @dark-color-bg-4;
+  @{arco-cssvars-prefix}-color-bg-5: @dark-color-bg-5;
+  @{arco-cssvars-prefix}-color-bg-white: @dark-color-bg-white;
+  @{arco-cssvars-prefix}-color-text-1: @dark-color-text-1;
+  @{arco-cssvars-prefix}-color-text-2: @dark-color-text-2;
+  @{arco-cssvars-prefix}-color-text-3: @dark-color-text-3;
+  @{arco-cssvars-prefix}-color-text-4: @dark-color-text-4;
+  @{arco-cssvars-prefix}-color-fill-1: @dark-color-fill-1;
+  @{arco-cssvars-prefix}-color-fill-2: @dark-color-fill-2;
+  @{arco-cssvars-prefix}-color-fill-3: @dark-color-fill-3;
+  @{arco-cssvars-prefix}-color-fill-4: @dark-color-fill-4;
+  @{arco-cssvars-prefix}-color-border-1: @dark-color-border-1;
+  @{arco-cssvars-prefix}-color-border-2: @dark-color-border-2;
+  @{arco-cssvars-prefix}-color-border-3: @dark-color-border-3;
+  @{arco-cssvars-prefix}-color-border-4: @dark-color-border-4;
+  @{arco-cssvars-prefix}-color-primary-light-1: @dark-color-primary-light-1;
+  @{arco-cssvars-prefix}-color-primary-light-2: @dark-color-primary-light-2;
+  @{arco-cssvars-prefix}-color-primary-light-3: @dark-color-primary-light-3;
+  @{arco-cssvars-prefix}-color-primary-light-4: @dark-color-primary-light-4;
+  @{arco-cssvars-prefix}-color-secondary: @dark-color-secondary;
+  @{arco-cssvars-prefix}-color-secondary-hover: @dark-color-secondary-hover;
+  @{arco-cssvars-prefix}-color-secondary-active: @dark-color-secondary-active;
+  @{arco-cssvars-prefix}-color-secondary-disabled: @dark-color-secondary-disabled;
+  @{arco-cssvars-prefix}-color-danger-light-1: @dark-color-danger-light-1;
+  @{arco-cssvars-prefix}-color-danger-light-2: @dark-color-danger-light-2;
+  @{arco-cssvars-prefix}-color-danger-light-3: @dark-color-danger-light-3;
+  @{arco-cssvars-prefix}-color-danger-light-4: @dark-color-danger-light-4;
+  @{arco-cssvars-prefix}-color-success-light-1: @dark-color-success-light-1;
+  @{arco-cssvars-prefix}-color-success-light-2: @dark-color-success-light-2;
+  @{arco-cssvars-prefix}-color-success-light-3: @dark-color-success-light-3;
+  @{arco-cssvars-prefix}-color-success-light-4: @dark-color-success-light-4;
+  @{arco-cssvars-prefix}-color-warning-light-1: @dark-color-warning-light-1;
+  @{arco-cssvars-prefix}-color-warning-light-2: @dark-color-warning-light-2;
+  @{arco-cssvars-prefix}-color-warning-light-3: @dark-color-warning-light-3;
+  @{arco-cssvars-prefix}-color-warning-light-4: @dark-color-warning-light-4;
+  @{arco-cssvars-prefix}-color-link-light-1: @dark-color-link-light-1;
+  @{arco-cssvars-prefix}-color-link-light-2: @dark-color-link-light-2;
+  @{arco-cssvars-prefix}-color-link-light-3: @dark-color-link-light-3;
+  @{arco-cssvars-prefix}-color-link-light-4: @dark-color-link-light-4;
+
+  @{arco-cssvars-prefix}-color-tooltip-bg: @dark-color-tooltip-bg;
+  @{arco-cssvars-prefix}-color-spin-layer-bg: @dark-color-spin-layer-bg;
+  @{arco-cssvars-prefix}-color-menu-dark-bg: @color-menu-dark-bg;
+  @{arco-cssvars-prefix}-color-menu-light-bg: @color-menu-dark-bg;
+  @{arco-cssvars-prefix}-color-menu-dark-hover: @dark-color-menu-dark-hover;
+  @{arco-cssvars-prefix}-color-mask-bg: @dark-mask-color-bg;
+}
+
+@{arco-theme-tag} {
+  @{arco-cssvars-prefix}-red-1: .getColorRgbStr(@red-1) [];
+  @{arco-cssvars-prefix}-red-2: .getColorRgbStr(@red-2) [];
+  @{arco-cssvars-prefix}-red-3: .getColorRgbStr(@red-3) [];
+  @{arco-cssvars-prefix}-red-4: .getColorRgbStr(@red-4) [];
+  @{arco-cssvars-prefix}-red-5: .getColorRgbStr(@red-5) [];
+  @{arco-cssvars-prefix}-red-6: .getColorRgbStr(@red-6) [];
+  @{arco-cssvars-prefix}-red-7: .getColorRgbStr(@red-7) [];
+  @{arco-cssvars-prefix}-red-8: .getColorRgbStr(@red-8) [];
+  @{arco-cssvars-prefix}-red-9: .getColorRgbStr(@red-9) [];
+  @{arco-cssvars-prefix}-red-10: .getColorRgbStr(@red-10) [];
+  @{arco-cssvars-prefix}-orangered-1: .getColorRgbStr(@orangered-1) [];
+  @{arco-cssvars-prefix}-orangered-2: .getColorRgbStr(@orangered-2) [];
+  @{arco-cssvars-prefix}-orangered-3: .getColorRgbStr(@orangered-3) [];
+  @{arco-cssvars-prefix}-orangered-4: .getColorRgbStr(@orangered-4) [];
+  @{arco-cssvars-prefix}-orangered-5: .getColorRgbStr(@orangered-5) [];
+  @{arco-cssvars-prefix}-orangered-6: .getColorRgbStr(@orangered-6) [];
+  @{arco-cssvars-prefix}-orangered-7: .getColorRgbStr(@orangered-7) [];
+  @{arco-cssvars-prefix}-orangered-8: .getColorRgbStr(@orangered-8) [];
+  @{arco-cssvars-prefix}-orangered-9: .getColorRgbStr(@orangered-9) [];
+  @{arco-cssvars-prefix}-orangered-10: .getColorRgbStr(@orangered-10) [];
+  @{arco-cssvars-prefix}-orange-1: .getColorRgbStr(@orange-1) [];
+  @{arco-cssvars-prefix}-orange-2: .getColorRgbStr(@orange-2) [];
+  @{arco-cssvars-prefix}-orange-3: .getColorRgbStr(@orange-3) [];
+  @{arco-cssvars-prefix}-orange-4: .getColorRgbStr(@orange-4) [];
+  @{arco-cssvars-prefix}-orange-5: .getColorRgbStr(@orange-5) [];
+  @{arco-cssvars-prefix}-orange-6: .getColorRgbStr(@orange-6) [];
+  @{arco-cssvars-prefix}-orange-7: .getColorRgbStr(@orange-7) [];
+  @{arco-cssvars-prefix}-orange-8: .getColorRgbStr(@orange-8) [];
+  @{arco-cssvars-prefix}-orange-9: .getColorRgbStr(@orange-9) [];
+  @{arco-cssvars-prefix}-orange-10: .getColorRgbStr(@orange-10) [];
+  @{arco-cssvars-prefix}-gold-1: .getColorRgbStr(@gold-1) [];
+  @{arco-cssvars-prefix}-gold-2: .getColorRgbStr(@gold-2) [];
+  @{arco-cssvars-prefix}-gold-3: .getColorRgbStr(@gold-3) [];
+  @{arco-cssvars-prefix}-gold-4: .getColorRgbStr(@gold-4) [];
+  @{arco-cssvars-prefix}-gold-5: .getColorRgbStr(@gold-5) [];
+  @{arco-cssvars-prefix}-gold-6: .getColorRgbStr(@gold-6) [];
+  @{arco-cssvars-prefix}-gold-7: .getColorRgbStr(@gold-7) [];
+  @{arco-cssvars-prefix}-gold-8: .getColorRgbStr(@gold-8) [];
+  @{arco-cssvars-prefix}-gold-9: .getColorRgbStr(@gold-9) [];
+  @{arco-cssvars-prefix}-gold-10: .getColorRgbStr(@gold-10) [];
+  @{arco-cssvars-prefix}-yellow-1: .getColorRgbStr(@yellow-1) [];
+  @{arco-cssvars-prefix}-yellow-2: .getColorRgbStr(@yellow-2) [];
+  @{arco-cssvars-prefix}-yellow-3: .getColorRgbStr(@yellow-3) [];
+  @{arco-cssvars-prefix}-yellow-4: .getColorRgbStr(@yellow-4) [];
+  @{arco-cssvars-prefix}-yellow-5: .getColorRgbStr(@yellow-5) [];
+  @{arco-cssvars-prefix}-yellow-6: .getColorRgbStr(@yellow-6) [];
+  @{arco-cssvars-prefix}-yellow-7: .getColorRgbStr(@yellow-7) [];
+  @{arco-cssvars-prefix}-yellow-8: .getColorRgbStr(@yellow-8) [];
+  @{arco-cssvars-prefix}-yellow-9: .getColorRgbStr(@yellow-9) [];
+  @{arco-cssvars-prefix}-yellow-10: .getColorRgbStr(@yellow-10) [];
+  @{arco-cssvars-prefix}-lime-1: .getColorRgbStr(@lime-1) [];
+  @{arco-cssvars-prefix}-lime-2: .getColorRgbStr(@lime-2) [];
+  @{arco-cssvars-prefix}-lime-3: .getColorRgbStr(@lime-3) [];
+  @{arco-cssvars-prefix}-lime-4: .getColorRgbStr(@lime-4) [];
+  @{arco-cssvars-prefix}-lime-5: .getColorRgbStr(@lime-5) [];
+  @{arco-cssvars-prefix}-lime-6: .getColorRgbStr(@lime-6) [];
+  @{arco-cssvars-prefix}-lime-7: .getColorRgbStr(@lime-7) [];
+  @{arco-cssvars-prefix}-lime-8: .getColorRgbStr(@lime-8) [];
+  @{arco-cssvars-prefix}-lime-9: .getColorRgbStr(@lime-9) [];
+  @{arco-cssvars-prefix}-lime-10: .getColorRgbStr(@lime-10) [];
+  @{arco-cssvars-prefix}-green-1: .getColorRgbStr(@green-1) [];
+  @{arco-cssvars-prefix}-green-2: .getColorRgbStr(@green-2) [];
+  @{arco-cssvars-prefix}-green-3: .getColorRgbStr(@green-3) [];
+  @{arco-cssvars-prefix}-green-4: .getColorRgbStr(@green-4) [];
+  @{arco-cssvars-prefix}-green-5: .getColorRgbStr(@green-5) [];
+  @{arco-cssvars-prefix}-green-6: .getColorRgbStr(@green-6) [];
+  @{arco-cssvars-prefix}-green-7: .getColorRgbStr(@green-7) [];
+  @{arco-cssvars-prefix}-green-8: .getColorRgbStr(@green-8) [];
+  @{arco-cssvars-prefix}-green-9: .getColorRgbStr(@green-9) [];
+  @{arco-cssvars-prefix}-green-10: .getColorRgbStr(@green-10) [];
+  @{arco-cssvars-prefix}-cyan-1: .getColorRgbStr(@cyan-1) [];
+  @{arco-cssvars-prefix}-cyan-2: .getColorRgbStr(@cyan-2) [];
+  @{arco-cssvars-prefix}-cyan-3: .getColorRgbStr(@cyan-3) [];
+  @{arco-cssvars-prefix}-cyan-4: .getColorRgbStr(@cyan-4) [];
+  @{arco-cssvars-prefix}-cyan-5: .getColorRgbStr(@cyan-5) [];
+  @{arco-cssvars-prefix}-cyan-6: .getColorRgbStr(@cyan-6) [];
+  @{arco-cssvars-prefix}-cyan-7: .getColorRgbStr(@cyan-7) [];
+  @{arco-cssvars-prefix}-cyan-8: .getColorRgbStr(@cyan-8) [];
+  @{arco-cssvars-prefix}-cyan-9: .getColorRgbStr(@cyan-9) [];
+  @{arco-cssvars-prefix}-cyan-10: .getColorRgbStr(@cyan-10) [];
+  @{arco-cssvars-prefix}-blue-1: .getColorRgbStr(@blue-1) [];
+  @{arco-cssvars-prefix}-blue-2: .getColorRgbStr(@blue-2) [];
+  @{arco-cssvars-prefix}-blue-3: .getColorRgbStr(@blue-3) [];
+  @{arco-cssvars-prefix}-blue-4: .getColorRgbStr(@blue-4) [];
+  @{arco-cssvars-prefix}-blue-5: .getColorRgbStr(@blue-5) [];
+  @{arco-cssvars-prefix}-blue-6: .getColorRgbStr(@blue-6) [];
+  @{arco-cssvars-prefix}-blue-7: .getColorRgbStr(@blue-7) [];
+  @{arco-cssvars-prefix}-blue-8: .getColorRgbStr(@blue-8) [];
+  @{arco-cssvars-prefix}-blue-9: .getColorRgbStr(@blue-9) [];
+  @{arco-cssvars-prefix}-blue-10: .getColorRgbStr(@blue-10) [];
+  @{arco-cssvars-prefix}-arcoblue-1: .getColorRgbStr(@arcoblue-1) [];
+  @{arco-cssvars-prefix}-arcoblue-2: .getColorRgbStr(@arcoblue-2) [];
+  @{arco-cssvars-prefix}-arcoblue-3: .getColorRgbStr(@arcoblue-3) [];
+  @{arco-cssvars-prefix}-arcoblue-4: .getColorRgbStr(@arcoblue-4) [];
+  @{arco-cssvars-prefix}-arcoblue-5: .getColorRgbStr(@arcoblue-5) [];
+  @{arco-cssvars-prefix}-arcoblue-6: .getColorRgbStr(@arcoblue-6) [];
+  @{arco-cssvars-prefix}-arcoblue-7: .getColorRgbStr(@arcoblue-7) [];
+  @{arco-cssvars-prefix}-arcoblue-8: .getColorRgbStr(@arcoblue-8) [];
+  @{arco-cssvars-prefix}-arcoblue-9: .getColorRgbStr(@arcoblue-9) [];
+  @{arco-cssvars-prefix}-arcoblue-10: .getColorRgbStr(@arcoblue-10) [];
+  @{arco-cssvars-prefix}-purple-1: .getColorRgbStr(@purple-1) [];
+  @{arco-cssvars-prefix}-purple-2: .getColorRgbStr(@purple-2) [];
+  @{arco-cssvars-prefix}-purple-3: .getColorRgbStr(@purple-3) [];
+  @{arco-cssvars-prefix}-purple-4: .getColorRgbStr(@purple-4) [];
+  @{arco-cssvars-prefix}-purple-5: .getColorRgbStr(@purple-5) [];
+  @{arco-cssvars-prefix}-purple-6: .getColorRgbStr(@purple-6) [];
+  @{arco-cssvars-prefix}-purple-7: .getColorRgbStr(@purple-7) [];
+  @{arco-cssvars-prefix}-purple-8: .getColorRgbStr(@purple-8) [];
+  @{arco-cssvars-prefix}-purple-9: .getColorRgbStr(@purple-9) [];
+  @{arco-cssvars-prefix}-purple-10: .getColorRgbStr(@purple-10) [];
+  @{arco-cssvars-prefix}-pinkpurple-1: .getColorRgbStr(@pinkpurple-1) [];
+  @{arco-cssvars-prefix}-pinkpurple-2: .getColorRgbStr(@pinkpurple-2) [];
+  @{arco-cssvars-prefix}-pinkpurple-3: .getColorRgbStr(@pinkpurple-3) [];
+  @{arco-cssvars-prefix}-pinkpurple-4: .getColorRgbStr(@pinkpurple-4) [];
+  @{arco-cssvars-prefix}-pinkpurple-5: .getColorRgbStr(@pinkpurple-5) [];
+  @{arco-cssvars-prefix}-pinkpurple-6: .getColorRgbStr(@pinkpurple-6) [];
+  @{arco-cssvars-prefix}-pinkpurple-7: .getColorRgbStr(@pinkpurple-7) [];
+  @{arco-cssvars-prefix}-pinkpurple-8: .getColorRgbStr(@pinkpurple-8) [];
+  @{arco-cssvars-prefix}-pinkpurple-9: .getColorRgbStr(@pinkpurple-9) [];
+  @{arco-cssvars-prefix}-pinkpurple-10: .getColorRgbStr(@pinkpurple-10) [];
+  @{arco-cssvars-prefix}-magenta-1: .getColorRgbStr(@magenta-1) [];
+  @{arco-cssvars-prefix}-magenta-2: .getColorRgbStr(@magenta-2) [];
+  @{arco-cssvars-prefix}-magenta-3: .getColorRgbStr(@magenta-3) [];
+  @{arco-cssvars-prefix}-magenta-4: .getColorRgbStr(@magenta-4) [];
+  @{arco-cssvars-prefix}-magenta-5: .getColorRgbStr(@magenta-5) [];
+  @{arco-cssvars-prefix}-magenta-6: .getColorRgbStr(@magenta-6) [];
+  @{arco-cssvars-prefix}-magenta-7: .getColorRgbStr(@magenta-7) [];
+  @{arco-cssvars-prefix}-magenta-8: .getColorRgbStr(@magenta-8) [];
+  @{arco-cssvars-prefix}-magenta-9: .getColorRgbStr(@magenta-9) [];
+  @{arco-cssvars-prefix}-magenta-10: .getColorRgbStr(@magenta-10) [];
+  @{arco-cssvars-prefix}-gray-1: .getColorRgbStr(@gray-1) [];
+  @{arco-cssvars-prefix}-gray-2: .getColorRgbStr(@gray-2) [];
+  @{arco-cssvars-prefix}-gray-3: .getColorRgbStr(@gray-3) [];
+  @{arco-cssvars-prefix}-gray-4: .getColorRgbStr(@gray-4) [];
+  @{arco-cssvars-prefix}-gray-5: .getColorRgbStr(@gray-5) [];
+  @{arco-cssvars-prefix}-gray-6: .getColorRgbStr(@gray-6) [];
+  @{arco-cssvars-prefix}-gray-7: .getColorRgbStr(@gray-7) [];
+  @{arco-cssvars-prefix}-gray-8: .getColorRgbStr(@gray-8) [];
+  @{arco-cssvars-prefix}-gray-9: .getColorRgbStr(@gray-9) [];
+  @{arco-cssvars-prefix}-gray-10: .getColorRgbStr(@gray-10) [];
+
+  @{arco-cssvars-prefix}-primary-1: if(
+    iscolor(@primary-1),
+    .getColorRgbStr(@primary-1) [],
+    replace(~'@{primary-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-2: if(
+    iscolor(@primary-2),
+    .getColorRgbStr(@primary-2) [],
+    replace(~'@{primary-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-3: if(
+    iscolor(@primary-3),
+    .getColorRgbStr(@primary-3) [],
+    replace(~'@{primary-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-4: if(
+    iscolor(@primary-4),
+    .getColorRgbStr(@primary-4) [],
+    replace(~'@{primary-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-5: if(
+    iscolor(@primary-5),
+    .getColorRgbStr(@primary-5) [],
+    replace(~'@{primary-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-6: if(
+    iscolor(@primary-6),
+    .getColorRgbStr(@primary-6) [],
+    replace(~'@{primary-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-7: if(
+    iscolor(@primary-7),
+    .getColorRgbStr(@primary-7) [],
+    replace(~'@{primary-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-8: if(
+    iscolor(@primary-8),
+    .getColorRgbStr(@primary-8) [],
+    replace(~'@{primary-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-9: if(
+    iscolor(@primary-9),
+    .getColorRgbStr(@primary-9) [],
+    replace(~'@{primary-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-10: if(
+    iscolor(@primary-10),
+    .getColorRgbStr(@primary-10) [],
+    replace(~'@{primary-10}', 'rgb\((.*)\)$', '$1')
+  );
+
+  @{arco-cssvars-prefix}-link-1: if(
+    iscolor(@link-1),
+    .getColorRgbStr(@link-1) [],
+    replace(~'@{link-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-2: if(
+    iscolor(@link-2),
+    .getColorRgbStr(@link-2) [],
+    replace(~'@{link-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-3: if(
+    iscolor(@link-3),
+    .getColorRgbStr(@link-3) [],
+    replace(~'@{link-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-4: if(
+    iscolor(@link-4),
+    .getColorRgbStr(@link-4) [],
+    replace(~'@{link-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-5: if(
+    iscolor(@link-5),
+    .getColorRgbStr(@link-5) [],
+    replace(~'@{link-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-6: if(
+    iscolor(@link-6),
+    .getColorRgbStr(@link-6) [],
+    replace(~'@{link-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-7: if(
+    iscolor(@link-7),
+    .getColorRgbStr(@link-7) [],
+    replace(~'@{link-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-8: if(
+    iscolor(@link-8),
+    .getColorRgbStr(@link-8) [],
+    replace(~'@{link-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-9: if(
+    iscolor(@link-9),
+    .getColorRgbStr(@link-9) [],
+    replace(~'@{link-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-10: if(
+    iscolor(@link-10),
+    .getColorRgbStr(@link-10) [],
+    replace(~'@{link-10}', 'rgb\((.*)\)$', '$1')
+  );
+
+  @{arco-cssvars-prefix}-success-1: if(
+    iscolor(@success-1),
+    .getColorRgbStr(@success-1) [],
+    replace(~'@{success-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-2: if(
+    iscolor(@success-2),
+    .getColorRgbStr(@success-2) [],
+    replace(~'@{success-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-3: if(
+    iscolor(@success-3),
+    .getColorRgbStr(@success-3) [],
+    replace(~'@{success-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-4: if(
+    iscolor(@success-4),
+    .getColorRgbStr(@success-4) [],
+    replace(~'@{success-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-5: if(
+    iscolor(@success-5),
+    .getColorRgbStr(@success-5) [],
+    replace(~'@{success-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-6: if(
+    iscolor(@success-6),
+    .getColorRgbStr(@success-6) [],
+    replace(~'@{success-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-7: if(
+    iscolor(@success-7),
+    .getColorRgbStr(@success-7) [],
+    replace(~'@{success-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-8: if(
+    iscolor(@success-8),
+    .getColorRgbStr(@success-8) [],
+    replace(~'@{success-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-9: if(
+    iscolor(@success-9),
+    .getColorRgbStr(@success-9) [],
+    replace(~'@{success-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-10: if(
+    iscolor(@success-10),
+    .getColorRgbStr(@success-10) [],
+    replace(~'@{success-10}', 'rgb\((.*)\)$', '$1')
+  );
+  // 错误色
+  @{arco-cssvars-prefix}-danger-1: if(
+    iscolor(@danger-1),
+    .getColorRgbStr(@danger-1) [],
+    replace(~'@{danger-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-2: if(
+    iscolor(@danger-2),
+    .getColorRgbStr(@danger-2) [],
+    replace(~'@{danger-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-3: if(
+    iscolor(@danger-3),
+    .getColorRgbStr(@danger-3) [],
+    replace(~'@{danger-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-4: if(
+    iscolor(@danger-4),
+    .getColorRgbStr(@danger-4) [],
+    replace(~'@{danger-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-5: if(
+    iscolor(@danger-5),
+    .getColorRgbStr(@danger-5) [],
+    replace(~'@{danger-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-6: if(
+    iscolor(@danger-6),
+    .getColorRgbStr(@danger-6) [],
+    replace(~'@{danger-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-7: if(
+    iscolor(@danger-7),
+    .getColorRgbStr(@danger-7) [],
+    replace(~'@{danger-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-8: if(
+    iscolor(@danger-8),
+    .getColorRgbStr(@danger-8) [],
+    replace(~'@{danger-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-9: if(
+    iscolor(@danger-9),
+    .getColorRgbStr(@danger-9) [],
+    replace(~'@{danger-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-10: if(
+    iscolor(@danger-10),
+    .getColorRgbStr(@danger-10) [],
+    replace(~'@{danger-10}', 'rgb\((.*)\)$', '$1')
+  );
+  // 警示色
+  @{arco-cssvars-prefix}-warning-1: if(
+    iscolor(@warning-1),
+    .getColorRgbStr(@warning-1) [],
+    replace(~'@{warning-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-2: if(
+    iscolor(@warning-2),
+    .getColorRgbStr(@warning-2) [],
+    replace(~'@{warning-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-3: if(
+    iscolor(@warning-3),
+    .getColorRgbStr(@warning-3) [],
+    replace(~'@{warning-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-4: if(
+    iscolor(@warning-4),
+    .getColorRgbStr(@warning-4) [],
+    replace(~'@{warning-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-5: if(
+    iscolor(@warning-5),
+    .getColorRgbStr(@warning-5) [],
+    replace(~'@{warning-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-6: if(
+    iscolor(@warning-6),
+    .getColorRgbStr(@warning-6) [],
+    replace(~'@{warning-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-7: if(
+    iscolor(@warning-7),
+    .getColorRgbStr(@warning-7) [],
+    replace(~'@{warning-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-8: if(
+    iscolor(@warning-8),
+    .getColorRgbStr(@warning-8) [],
+    replace(~'@{warning-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-9: if(
+    iscolor(@warning-9),
+    .getColorRgbStr(@warning-9) [],
+    replace(~'@{warning-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-10: if(
+    iscolor(@warning-10),
+    .getColorRgbStr(@warning-10) [],
+    replace(~'@{warning-10}', 'rgb\((.*)\)$', '$1')
+  );
+
+  @{arco-cssvars-prefix}-color-text-5: @color-text-5;
+  @{arco-cssvars-prefix}-color-fill-5: @color-fill-5;
+  @{arco-cssvars-prefix}-color-fill-6: @color-fill-6;
+  @{arco-cssvars-prefix}-color-bg-6: @color-bg-6;
+  @{arco-cssvars-prefix}-color-bg-7: @color-bg-7;
+  @{arco-cssvars-prefix}-color-bg-8: @color-bg-8;
+  @{arco-cssvars-prefix}-color-bg-9: @color-bg-9;
+  @{arco-cssvars-prefix}-color-bg-10: @color-bg-10;
+  @{arco-cssvars-prefix}-color-bg-11: @color-bg-11;
+  @{arco-cssvars-prefix}-color-grey-1: @color-grey-1;
+  @{arco-cssvars-prefix}-color-grey-2: @color-grey-2;
+  @{arco-cssvars-prefix}-color-grey-3: @color-grey-3;
+  @{arco-cssvars-prefix}-color-grey-4: @color-grey-4;
+  @{arco-cssvars-prefix}-color-grey-5: @color-grey-5;
+  @{arco-cssvars-prefix}-color-grey-6: @color-grey-6;
+  @{arco-cssvars-prefix}-color-grey-7: @color-grey-7;
+  @{arco-cssvars-prefix}-color-grey-8: @color-grey-8;
+  @{arco-cssvars-prefix}-color-alpha-link1: @color-alpha-link1;
+  @{arco-cssvars-prefix}-color-alpha-link2: @color-alpha-link2;
+  @{arco-cssvars-prefix}-color-alpha-link3: @color-alpha-link3;
+  @{arco-cssvars-prefix}-color-alpha-success1: @color-alpha-success1;
+  @{arco-cssvars-prefix}-color-alpha-success2: @color-alpha-success2;
+  @{arco-cssvars-prefix}-color-alpha-success3: @color-alpha-success3;
+  @{arco-cssvars-prefix}-color-alpha-danger1: @color-alpha-danger1;
+  @{arco-cssvars-prefix}-color-alpha-danger2: @color-alpha-danger2;
+  @{arco-cssvars-prefix}-color-alpha-danger3: @color-alpha-danger3;
+  @{arco-cssvars-prefix}-color-alpha-warning1: @color-alpha-warning1;
+  @{arco-cssvars-prefix}-color-alpha-warning2: @color-alpha-warning2;
+  @{arco-cssvars-prefix}-color-alpha-warning3: @color-alpha-warning3;
+  @{arco-cssvars-prefix}-color-alpha-oranged1: @color-alpha-oranged1;
+  @{arco-cssvars-prefix}-color-alpha-oranged2: @color-alpha-oranged2;
+  @{arco-cssvars-prefix}-color-alpha-oranged3: @color-alpha-oranged3;
+  @{arco-cssvars-prefix}-base-grey-1: if(
+    iscolor(@base-grey-1),
+    .getColorRgbStr(@base-grey-1) [],
+    replace(~'@{base-grey-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-2: if(
+    iscolor(@base-grey-2),
+    .getColorRgbStr(@base-grey-2) [],
+    replace(~'@{base-grey-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-3: if(
+    iscolor(@base-grey-3),
+    .getColorRgbStr(@base-grey-3) [],
+    replace(~'@{base-grey-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-4: if(
+    iscolor(@base-grey-4),
+    .getColorRgbStr(@base-grey-4) [],
+    replace(~'@{base-grey-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-5: if(
+    iscolor(@base-grey-5),
+    .getColorRgbStr(@base-grey-5) [],
+    replace(~'@{base-grey-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-6: if(
+    iscolor(@base-grey-6),
+    .getColorRgbStr(@base-grey-6) [],
+    replace(~'@{base-grey-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-7: if(
+    iscolor(@base-grey-7),
+    .getColorRgbStr(@base-grey-7) [],
+    replace(~'@{base-grey-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-8: if(
+    iscolor(@base-grey-8),
+    .getColorRgbStr(@base-grey-8) [],
+    replace(~'@{base-grey-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-9: if(
+    iscolor(@base-grey-9),
+    .getColorRgbStr(@base-grey-9) [],
+    replace(~'@{base-grey-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-10: if(
+    iscolor(@base-grey-10),
+    .getColorRgbStr(@base-grey-10) [],
+    replace(~'@{base-grey-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-1: if(
+    iscolor(@oranged-1),
+    .getColorRgbStr(@oranged-1) [],
+    replace(~'@{oranged-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-2: if(
+    iscolor(@oranged-2),
+    .getColorRgbStr(@oranged-2) [],
+    replace(~'@{oranged-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-3: if(
+    iscolor(@oranged-3),
+    .getColorRgbStr(@oranged-3) [],
+    replace(~'@{oranged-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-4: if(
+    iscolor(@oranged-4),
+    .getColorRgbStr(@oranged-4) [],
+    replace(~'@{oranged-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-5: if(
+    iscolor(@oranged-5),
+    .getColorRgbStr(@oranged-5) [],
+    replace(~'@{oranged-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-6: if(
+    iscolor(@oranged-6),
+    .getColorRgbStr(@oranged-6) [],
+    replace(~'@{oranged-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-7: if(
+    iscolor(@oranged-7),
+    .getColorRgbStr(@oranged-7) [],
+    replace(~'@{oranged-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-8: if(
+    iscolor(@oranged-8),
+    .getColorRgbStr(@oranged-8) [],
+    replace(~'@{oranged-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-9: if(
+    iscolor(@oranged-9),
+    .getColorRgbStr(@oranged-9) [],
+    replace(~'@{oranged-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-10: if(
+    iscolor(@oranged-10),
+    .getColorRgbStr(@oranged-10) [],
+    replace(~'@{oranged-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-1: if(
+    iscolor(@teal-1),
+    .getColorRgbStr(@teal-1) [],
+    replace(~'@{teal-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-2: if(
+    iscolor(@teal-2),
+    .getColorRgbStr(@teal-2) [],
+    replace(~'@{teal-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-3: if(
+    iscolor(@teal-3),
+    .getColorRgbStr(@teal-3) [],
+    replace(~'@{teal-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-4: if(
+    iscolor(@teal-4),
+    .getColorRgbStr(@teal-4) [],
+    replace(~'@{teal-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-5: if(
+    iscolor(@teal-5),
+    .getColorRgbStr(@teal-5) [],
+    replace(~'@{teal-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-6: if(
+    iscolor(@teal-6),
+    .getColorRgbStr(@teal-6) [],
+    replace(~'@{teal-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-7: if(
+    iscolor(@teal-7),
+    .getColorRgbStr(@teal-7) [],
+    replace(~'@{teal-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-8: if(
+    iscolor(@teal-8),
+    .getColorRgbStr(@teal-8) [],
+    replace(~'@{teal-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-9: if(
+    iscolor(@teal-9),
+    .getColorRgbStr(@teal-9) [],
+    replace(~'@{teal-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-10: if(
+    iscolor(@teal-10),
+    .getColorRgbStr(@teal-10) [],
+    replace(~'@{teal-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-color-functional-icon-1: @color-functional-icon-1;
+  @{arco-cssvars-prefix}-color-functional-icon-2: @color-functional-icon-2;
+}
+
+@{arco-theme-tag}[arco-theme='dark'] {
+  @{arco-cssvars-prefix}-red-1: .getColorRgbStr(@dark-red-1) [];
+  @{arco-cssvars-prefix}-red-2: .getColorRgbStr(@dark-red-2) [];
+  @{arco-cssvars-prefix}-red-3: .getColorRgbStr(@dark-red-3) [];
+  @{arco-cssvars-prefix}-red-4: .getColorRgbStr(@dark-red-4) [];
+  @{arco-cssvars-prefix}-red-5: .getColorRgbStr(@dark-red-5) [];
+  @{arco-cssvars-prefix}-red-6: .getColorRgbStr(@dark-red-6) [];
+  @{arco-cssvars-prefix}-red-7: .getColorRgbStr(@dark-red-7) [];
+  @{arco-cssvars-prefix}-red-8: .getColorRgbStr(@dark-red-8) [];
+  @{arco-cssvars-prefix}-red-9: .getColorRgbStr(@dark-red-9) [];
+  @{arco-cssvars-prefix}-red-10: .getColorRgbStr(@dark-red-10) [];
+  @{arco-cssvars-prefix}-orangered-1: .getColorRgbStr(@dark-orangered-1) [];
+  @{arco-cssvars-prefix}-orangered-2: .getColorRgbStr(@dark-orangered-2) [];
+  @{arco-cssvars-prefix}-orangered-3: .getColorRgbStr(@dark-orangered-3) [];
+  @{arco-cssvars-prefix}-orangered-4: .getColorRgbStr(@dark-orangered-4) [];
+  @{arco-cssvars-prefix}-orangered-5: .getColorRgbStr(@dark-orangered-5) [];
+  @{arco-cssvars-prefix}-orangered-6: .getColorRgbStr(@dark-orangered-6) [];
+  @{arco-cssvars-prefix}-orangered-7: .getColorRgbStr(@dark-orangered-7) [];
+  @{arco-cssvars-prefix}-orangered-8: .getColorRgbStr(@dark-orangered-8) [];
+  @{arco-cssvars-prefix}-orangered-9: .getColorRgbStr(@dark-orangered-9) [];
+  @{arco-cssvars-prefix}-orangered-10: .getColorRgbStr(@dark-orangered-10) [];
+  @{arco-cssvars-prefix}-orange-1: .getColorRgbStr(@dark-orange-1) [];
+  @{arco-cssvars-prefix}-orange-2: .getColorRgbStr(@dark-orange-2) [];
+  @{arco-cssvars-prefix}-orange-3: .getColorRgbStr(@dark-orange-3) [];
+  @{arco-cssvars-prefix}-orange-4: .getColorRgbStr(@dark-orange-4) [];
+  @{arco-cssvars-prefix}-orange-5: .getColorRgbStr(@dark-orange-5) [];
+  @{arco-cssvars-prefix}-orange-6: .getColorRgbStr(@dark-orange-6) [];
+  @{arco-cssvars-prefix}-orange-7: .getColorRgbStr(@dark-orange-7) [];
+  @{arco-cssvars-prefix}-orange-8: .getColorRgbStr(@dark-orange-8) [];
+  @{arco-cssvars-prefix}-orange-9: .getColorRgbStr(@dark-orange-9) [];
+  @{arco-cssvars-prefix}-orange-10: .getColorRgbStr(@dark-orange-10) [];
+  @{arco-cssvars-prefix}-gold-1: .getColorRgbStr(@dark-gold-1) [];
+  @{arco-cssvars-prefix}-gold-2: .getColorRgbStr(@dark-gold-2) [];
+  @{arco-cssvars-prefix}-gold-3: .getColorRgbStr(@dark-gold-3) [];
+  @{arco-cssvars-prefix}-gold-4: .getColorRgbStr(@dark-gold-4) [];
+  @{arco-cssvars-prefix}-gold-5: .getColorRgbStr(@dark-gold-5) [];
+  @{arco-cssvars-prefix}-gold-6: .getColorRgbStr(@dark-gold-6) [];
+  @{arco-cssvars-prefix}-gold-7: .getColorRgbStr(@dark-gold-7) [];
+  @{arco-cssvars-prefix}-gold-8: .getColorRgbStr(@dark-gold-8) [];
+  @{arco-cssvars-prefix}-gold-9: .getColorRgbStr(@dark-gold-9) [];
+  @{arco-cssvars-prefix}-gold-10: .getColorRgbStr(@dark-gold-10) [];
+  @{arco-cssvars-prefix}-yellow-1: .getColorRgbStr(@dark-yellow-1) [];
+  @{arco-cssvars-prefix}-yellow-2: .getColorRgbStr(@dark-yellow-2) [];
+  @{arco-cssvars-prefix}-yellow-3: .getColorRgbStr(@dark-yellow-3) [];
+  @{arco-cssvars-prefix}-yellow-4: .getColorRgbStr(@dark-yellow-4) [];
+  @{arco-cssvars-prefix}-yellow-5: .getColorRgbStr(@dark-yellow-5) [];
+  @{arco-cssvars-prefix}-yellow-6: .getColorRgbStr(@dark-yellow-6) [];
+  @{arco-cssvars-prefix}-yellow-7: .getColorRgbStr(@dark-yellow-7) [];
+  @{arco-cssvars-prefix}-yellow-8: .getColorRgbStr(@dark-yellow-8) [];
+  @{arco-cssvars-prefix}-yellow-9: .getColorRgbStr(@dark-yellow-9) [];
+  @{arco-cssvars-prefix}-yellow-10: .getColorRgbStr(@dark-yellow-10) [];
+  @{arco-cssvars-prefix}-lime-1: .getColorRgbStr(@dark-lime-1) [];
+  @{arco-cssvars-prefix}-lime-2: .getColorRgbStr(@dark-lime-2) [];
+  @{arco-cssvars-prefix}-lime-3: .getColorRgbStr(@dark-lime-3) [];
+  @{arco-cssvars-prefix}-lime-4: .getColorRgbStr(@dark-lime-4) [];
+  @{arco-cssvars-prefix}-lime-5: .getColorRgbStr(@dark-lime-5) [];
+  @{arco-cssvars-prefix}-lime-6: .getColorRgbStr(@dark-lime-6) [];
+  @{arco-cssvars-prefix}-lime-7: .getColorRgbStr(@dark-lime-7) [];
+  @{arco-cssvars-prefix}-lime-8: .getColorRgbStr(@dark-lime-8) [];
+  @{arco-cssvars-prefix}-lime-9: .getColorRgbStr(@dark-lime-9) [];
+  @{arco-cssvars-prefix}-lime-10: .getColorRgbStr(@dark-lime-10) [];
+  @{arco-cssvars-prefix}-green-1: .getColorRgbStr(@dark-green-1) [];
+  @{arco-cssvars-prefix}-green-2: .getColorRgbStr(@dark-green-2) [];
+  @{arco-cssvars-prefix}-green-3: .getColorRgbStr(@dark-green-3) [];
+  @{arco-cssvars-prefix}-green-4: .getColorRgbStr(@dark-green-4) [];
+  @{arco-cssvars-prefix}-green-5: .getColorRgbStr(@dark-green-5) [];
+  @{arco-cssvars-prefix}-green-6: .getColorRgbStr(@dark-green-6) [];
+  @{arco-cssvars-prefix}-green-7: .getColorRgbStr(@dark-green-7) [];
+  @{arco-cssvars-prefix}-green-8: .getColorRgbStr(@dark-green-8) [];
+  @{arco-cssvars-prefix}-green-9: .getColorRgbStr(@dark-green-9) [];
+  @{arco-cssvars-prefix}-green-10: .getColorRgbStr(@dark-green-10) [];
+  @{arco-cssvars-prefix}-cyan-1: .getColorRgbStr(@dark-cyan-1) [];
+  @{arco-cssvars-prefix}-cyan-2: .getColorRgbStr(@dark-cyan-2) [];
+  @{arco-cssvars-prefix}-cyan-3: .getColorRgbStr(@dark-cyan-3) [];
+  @{arco-cssvars-prefix}-cyan-4: .getColorRgbStr(@dark-cyan-4) [];
+  @{arco-cssvars-prefix}-cyan-5: .getColorRgbStr(@dark-cyan-5) [];
+  @{arco-cssvars-prefix}-cyan-6: .getColorRgbStr(@dark-cyan-6) [];
+  @{arco-cssvars-prefix}-cyan-7: .getColorRgbStr(@dark-cyan-7) [];
+  @{arco-cssvars-prefix}-cyan-8: .getColorRgbStr(@dark-cyan-8) [];
+  @{arco-cssvars-prefix}-cyan-9: .getColorRgbStr(@dark-cyan-9) [];
+  @{arco-cssvars-prefix}-cyan-10: .getColorRgbStr(@dark-cyan-10) [];
+  @{arco-cssvars-prefix}-blue-1: .getColorRgbStr(@dark-blue-1) [];
+  @{arco-cssvars-prefix}-blue-2: .getColorRgbStr(@dark-blue-2) [];
+  @{arco-cssvars-prefix}-blue-3: .getColorRgbStr(@dark-blue-3) [];
+  @{arco-cssvars-prefix}-blue-4: .getColorRgbStr(@dark-blue-4) [];
+  @{arco-cssvars-prefix}-blue-5: .getColorRgbStr(@dark-blue-5) [];
+  @{arco-cssvars-prefix}-blue-6: .getColorRgbStr(@dark-blue-6) [];
+  @{arco-cssvars-prefix}-blue-7: .getColorRgbStr(@dark-blue-7) [];
+  @{arco-cssvars-prefix}-blue-8: .getColorRgbStr(@dark-blue-8) [];
+  @{arco-cssvars-prefix}-blue-9: .getColorRgbStr(@dark-blue-9) [];
+  @{arco-cssvars-prefix}-blue-10: .getColorRgbStr(@dark-blue-10) [];
+  @{arco-cssvars-prefix}-arcoblue-1: .getColorRgbStr(@dark-arcoblue-1) [];
+  @{arco-cssvars-prefix}-arcoblue-2: .getColorRgbStr(@dark-arcoblue-2) [];
+  @{arco-cssvars-prefix}-arcoblue-3: .getColorRgbStr(@dark-arcoblue-3) [];
+  @{arco-cssvars-prefix}-arcoblue-4: .getColorRgbStr(@dark-arcoblue-4) [];
+  @{arco-cssvars-prefix}-arcoblue-5: .getColorRgbStr(@dark-arcoblue-5) [];
+  @{arco-cssvars-prefix}-arcoblue-6: .getColorRgbStr(@dark-arcoblue-6) [];
+  @{arco-cssvars-prefix}-arcoblue-7: .getColorRgbStr(@dark-arcoblue-7) [];
+  @{arco-cssvars-prefix}-arcoblue-8: .getColorRgbStr(@dark-arcoblue-8) [];
+  @{arco-cssvars-prefix}-arcoblue-9: .getColorRgbStr(@dark-arcoblue-9) [];
+  @{arco-cssvars-prefix}-arcoblue-10: .getColorRgbStr(@dark-arcoblue-10) [];
+  @{arco-cssvars-prefix}-purple-1: .getColorRgbStr(@dark-purple-1) [];
+  @{arco-cssvars-prefix}-purple-2: .getColorRgbStr(@dark-purple-2) [];
+  @{arco-cssvars-prefix}-purple-3: .getColorRgbStr(@dark-purple-3) [];
+  @{arco-cssvars-prefix}-purple-4: .getColorRgbStr(@dark-purple-4) [];
+  @{arco-cssvars-prefix}-purple-5: .getColorRgbStr(@dark-purple-5) [];
+  @{arco-cssvars-prefix}-purple-6: .getColorRgbStr(@dark-purple-6) [];
+  @{arco-cssvars-prefix}-purple-7: .getColorRgbStr(@dark-purple-7) [];
+  @{arco-cssvars-prefix}-purple-8: .getColorRgbStr(@dark-purple-8) [];
+  @{arco-cssvars-prefix}-purple-9: .getColorRgbStr(@dark-purple-9) [];
+  @{arco-cssvars-prefix}-purple-10: .getColorRgbStr(@dark-purple-10) [];
+  @{arco-cssvars-prefix}-pinkpurple-1: .getColorRgbStr(@dark-pinkpurple-1) [];
+  @{arco-cssvars-prefix}-pinkpurple-2: .getColorRgbStr(@dark-pinkpurple-2) [];
+  @{arco-cssvars-prefix}-pinkpurple-3: .getColorRgbStr(@dark-pinkpurple-3) [];
+  @{arco-cssvars-prefix}-pinkpurple-4: .getColorRgbStr(@dark-pinkpurple-4) [];
+  @{arco-cssvars-prefix}-pinkpurple-5: .getColorRgbStr(@dark-pinkpurple-5) [];
+  @{arco-cssvars-prefix}-pinkpurple-6: .getColorRgbStr(@dark-pinkpurple-6) [];
+  @{arco-cssvars-prefix}-pinkpurple-7: .getColorRgbStr(@dark-pinkpurple-7) [];
+  @{arco-cssvars-prefix}-pinkpurple-8: .getColorRgbStr(@dark-pinkpurple-8) [];
+  @{arco-cssvars-prefix}-pinkpurple-9: .getColorRgbStr(@dark-pinkpurple-9) [];
+  @{arco-cssvars-prefix}-pinkpurple-10: .getColorRgbStr(@dark-pinkpurple-10) [];
+  @{arco-cssvars-prefix}-magenta-1: .getColorRgbStr(@dark-magenta-1) [];
+  @{arco-cssvars-prefix}-magenta-2: .getColorRgbStr(@dark-magenta-2) [];
+  @{arco-cssvars-prefix}-magenta-3: .getColorRgbStr(@dark-magenta-3) [];
+  @{arco-cssvars-prefix}-magenta-4: .getColorRgbStr(@dark-magenta-4) [];
+  @{arco-cssvars-prefix}-magenta-5: .getColorRgbStr(@dark-magenta-5) [];
+  @{arco-cssvars-prefix}-magenta-6: .getColorRgbStr(@dark-magenta-6) [];
+  @{arco-cssvars-prefix}-magenta-7: .getColorRgbStr(@dark-magenta-7) [];
+  @{arco-cssvars-prefix}-magenta-8: .getColorRgbStr(@dark-magenta-8) [];
+  @{arco-cssvars-prefix}-magenta-9: .getColorRgbStr(@dark-magenta-9) [];
+  @{arco-cssvars-prefix}-magenta-10: .getColorRgbStr(@dark-magenta-10) [];
+  @{arco-cssvars-prefix}-gray-1: .getColorRgbStr(@dark-gray-1) [];
+  @{arco-cssvars-prefix}-gray-2: .getColorRgbStr(@dark-gray-2) [];
+  @{arco-cssvars-prefix}-gray-3: .getColorRgbStr(@dark-gray-3) [];
+  @{arco-cssvars-prefix}-gray-4: .getColorRgbStr(@dark-gray-4) [];
+  @{arco-cssvars-prefix}-gray-5: .getColorRgbStr(@dark-gray-5) [];
+  @{arco-cssvars-prefix}-gray-6: .getColorRgbStr(@dark-gray-6) [];
+  @{arco-cssvars-prefix}-gray-7: .getColorRgbStr(@dark-gray-7) [];
+  @{arco-cssvars-prefix}-gray-8: .getColorRgbStr(@dark-gray-8) [];
+  @{arco-cssvars-prefix}-gray-9: .getColorRgbStr(@dark-gray-9) [];
+  @{arco-cssvars-prefix}-gray-10: .getColorRgbStr(@dark-gray-10) [];
+  @{arco-cssvars-prefix}-primary-1: if(
+    iscolor(@dark-primary-1),
+    .getColorRgbStr(@dark-primary-1) [],
+    replace(~'@{dark-primary-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-2: if(
+    iscolor(@dark-primary-2),
+    .getColorRgbStr(@dark-primary-2) [],
+    replace(~'@{dark-primary-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-3: if(
+    iscolor(@dark-primary-3),
+    .getColorRgbStr(@dark-primary-3) [],
+    replace(~'@{dark-primary-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-4: if(
+    iscolor(@dark-primary-4),
+    .getColorRgbStr(@dark-primary-4) [],
+    replace(~'@{dark-primary-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-5: if(
+    iscolor(@dark-primary-5),
+    .getColorRgbStr(@dark-primary-5) [],
+    replace(~'@{dark-primary-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-6: if(
+    iscolor(@dark-primary-6),
+    .getColorRgbStr(@dark-primary-6) [],
+    replace(~'@{dark-primary-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-7: if(
+    iscolor(@dark-primary-7),
+    .getColorRgbStr(@dark-primary-7) [],
+    replace(~'@{dark-primary-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-8: if(
+    iscolor(@dark-primary-8),
+    .getColorRgbStr(@dark-primary-8) [],
+    replace(~'@{dark-primary-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-9: if(
+    iscolor(@dark-primary-9),
+    .getColorRgbStr(@dark-primary-9) [],
+    replace(~'@{dark-primary-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-primary-10: if(
+    iscolor(@dark-primary-10),
+    .getColorRgbStr(@dark-primary-10) [],
+    replace(~'@{dark-primary-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-1: if(
+    iscolor(@dark-link-1),
+    .getColorRgbStr(@dark-link-1) [],
+    replace(~'@{dark-link-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-2: if(
+    iscolor(@dark-link-2),
+    .getColorRgbStr(@dark-link-2) [],
+    replace(~'@{dark-link-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-3: if(
+    iscolor(@dark-link-3),
+    .getColorRgbStr(@dark-link-3) [],
+    replace(~'@{dark-link-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-4: if(
+    iscolor(@dark-link-4),
+    .getColorRgbStr(@dark-link-4) [],
+    replace(~'@{dark-link-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-5: if(
+    iscolor(@dark-link-5),
+    .getColorRgbStr(@dark-link-5) [],
+    replace(~'@{dark-link-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-6: if(
+    iscolor(@dark-link-6),
+    .getColorRgbStr(@dark-link-6) [],
+    replace(~'@{dark-link-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-7: if(
+    iscolor(@dark-link-7),
+    .getColorRgbStr(@dark-link-7) [],
+    replace(~'@{dark-link-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-8: if(
+    iscolor(@dark-link-8),
+    .getColorRgbStr(@dark-link-8) [],
+    replace(~'@{dark-link-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-9: if(
+    iscolor(@dark-link-9),
+    .getColorRgbStr(@dark-link-9) [],
+    replace(~'@{dark-link-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-link-10: if(
+    iscolor(@dark-link-10),
+    .getColorRgbStr(@dark-link-10) [],
+    replace(~'@{dark-link-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-1: if(
+    iscolor(@dark-success-1),
+    .getColorRgbStr(@dark-success-1) [],
+    replace(~'@{dark-success-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-2: if(
+    iscolor(@dark-success-2),
+    .getColorRgbStr(@dark-success-2) [],
+    replace(~'@{dark-success-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-3: if(
+    iscolor(@dark-success-3),
+    .getColorRgbStr(@dark-success-3) [],
+    replace(~'@{dark-success-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-4: if(
+    iscolor(@dark-success-4),
+    .getColorRgbStr(@dark-success-4) [],
+    replace(~'@{dark-success-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-5: if(
+    iscolor(@dark-success-5),
+    .getColorRgbStr(@dark-success-5) [],
+    replace(~'@{dark-success-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-6: if(
+    iscolor(@dark-success-6),
+    .getColorRgbStr(@dark-success-6) [],
+    replace(~'@{dark-success-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-7: if(
+    iscolor(@dark-success-7),
+    .getColorRgbStr(@dark-success-7) [],
+    replace(~'@{dark-success-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-8: if(
+    iscolor(@dark-success-8),
+    .getColorRgbStr(@dark-success-8) [],
+    replace(~'@{dark-success-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-9: if(
+    iscolor(@dark-success-9),
+    .getColorRgbStr(@dark-success-9) [],
+    replace(~'@{dark-success-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-success-10: if(
+    iscolor(@dark-success-10),
+    .getColorRgbStr(@dark-success-10) [],
+    replace(~'@{dark-success-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-1: if(
+    iscolor(@dark-danger-1),
+    .getColorRgbStr(@dark-danger-1) [],
+    replace(~'@{dark-danger-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-2: if(
+    iscolor(@dark-danger-2),
+    .getColorRgbStr(@dark-danger-2) [],
+    replace(~'@{dark-danger-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-3: if(
+    iscolor(@dark-danger-3),
+    .getColorRgbStr(@dark-danger-3) [],
+    replace(~'@{dark-danger-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-4: if(
+    iscolor(@dark-danger-4),
+    .getColorRgbStr(@dark-danger-4) [],
+    replace(~'@{dark-danger-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-5: if(
+    iscolor(@dark-danger-5),
+    .getColorRgbStr(@dark-danger-5) [],
+    replace(~'@{dark-danger-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-6: if(
+    iscolor(@dark-danger-6),
+    .getColorRgbStr(@dark-danger-6) [],
+    replace(~'@{dark-danger-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-7: if(
+    iscolor(@dark-danger-7),
+    .getColorRgbStr(@dark-danger-7) [],
+    replace(~'@{dark-danger-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-8: if(
+    iscolor(@dark-danger-8),
+    .getColorRgbStr(@dark-danger-8) [],
+    replace(~'@{dark-danger-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-9: if(
+    iscolor(@dark-danger-9),
+    .getColorRgbStr(@dark-danger-9) [],
+    replace(~'@{dark-danger-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-danger-10: if(
+    iscolor(@dark-danger-10),
+    .getColorRgbStr(@dark-danger-10) [],
+    replace(~'@{dark-danger-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-1: if(
+    iscolor(@dark-warning-1),
+    .getColorRgbStr(@dark-warning-1) [],
+    replace(~'@{dark-warning-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-2: if(
+    iscolor(@dark-warning-2),
+    .getColorRgbStr(@dark-warning-2) [],
+    replace(~'@{dark-warning-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-3: if(
+    iscolor(@dark-warning-3),
+    .getColorRgbStr(@dark-warning-3) [],
+    replace(~'@{dark-warning-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-4: if(
+    iscolor(@dark-warning-4),
+    .getColorRgbStr(@dark-warning-4) [],
+    replace(~'@{dark-warning-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-5: if(
+    iscolor(@dark-warning-5),
+    .getColorRgbStr(@dark-warning-5) [],
+    replace(~'@{dark-warning-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-6: if(
+    iscolor(@dark-warning-6),
+    .getColorRgbStr(@dark-warning-6) [],
+    replace(~'@{dark-warning-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-7: if(
+    iscolor(@dark-warning-7),
+    .getColorRgbStr(@dark-warning-7) [],
+    replace(~'@{dark-warning-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-8: if(
+    iscolor(@dark-warning-8),
+    .getColorRgbStr(@dark-warning-8) [],
+    replace(~'@{dark-warning-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-9: if(
+    iscolor(@dark-warning-9),
+    .getColorRgbStr(@dark-warning-9) [],
+    replace(~'@{dark-warning-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-warning-10: if(
+    iscolor(@dark-warning-10),
+    .getColorRgbStr(@dark-warning-10) [],
+    replace(~'@{dark-warning-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-color-text-5: @dark-color-text-5;
+  @{arco-cssvars-prefix}-color-fill-5: @dark-color-fill-5;
+  @{arco-cssvars-prefix}-color-fill-6: @dark-color-fill-6;
+  @{arco-cssvars-prefix}-color-bg-6: @dark-color-bg-6;
+  @{arco-cssvars-prefix}-color-bg-7: @dark-color-bg-7;
+  @{arco-cssvars-prefix}-color-bg-8: @dark-color-bg-8;
+  @{arco-cssvars-prefix}-color-bg-9: @dark-color-bg-9;
+  @{arco-cssvars-prefix}-color-bg-10: @dark-color-bg-10;
+  @{arco-cssvars-prefix}-color-bg-11: @dark-color-bg-11;
+  @{arco-cssvars-prefix}-color-grey-1: @dark-color-grey-1;
+  @{arco-cssvars-prefix}-color-grey-2: @dark-color-grey-2;
+  @{arco-cssvars-prefix}-color-grey-3: @dark-color-grey-3;
+  @{arco-cssvars-prefix}-color-grey-4: @dark-color-grey-4;
+  @{arco-cssvars-prefix}-color-grey-5: @dark-color-grey-5;
+  @{arco-cssvars-prefix}-color-grey-6: @dark-color-grey-6;
+  @{arco-cssvars-prefix}-color-grey-7: @dark-color-grey-7;
+  @{arco-cssvars-prefix}-color-grey-8: @dark-color-grey-8;
+  @{arco-cssvars-prefix}-color-alpha-link1: @dark-color-alpha-link1;
+  @{arco-cssvars-prefix}-color-alpha-link2: @dark-color-alpha-link2;
+  @{arco-cssvars-prefix}-color-alpha-link3: @dark-color-alpha-link3;
+  @{arco-cssvars-prefix}-color-alpha-success1: @dark-color-alpha-success1;
+  @{arco-cssvars-prefix}-color-alpha-success2: @dark-color-alpha-success2;
+  @{arco-cssvars-prefix}-color-alpha-success3: @dark-color-alpha-success3;
+  @{arco-cssvars-prefix}-color-alpha-danger1: @dark-color-alpha-danger1;
+  @{arco-cssvars-prefix}-color-alpha-danger2: @dark-color-alpha-danger2;
+  @{arco-cssvars-prefix}-color-alpha-danger3: @dark-color-alpha-danger3;
+  @{arco-cssvars-prefix}-color-alpha-warning1: @dark-color-alpha-warning1;
+  @{arco-cssvars-prefix}-color-alpha-warning2: @dark-color-alpha-warning2;
+  @{arco-cssvars-prefix}-color-alpha-warning3: @dark-color-alpha-warning3;
+  @{arco-cssvars-prefix}-color-alpha-oranged1: @dark-color-alpha-oranged1;
+  @{arco-cssvars-prefix}-color-alpha-oranged2: @dark-color-alpha-oranged2;
+  @{arco-cssvars-prefix}-color-alpha-oranged3: @dark-color-alpha-oranged3;
+  @{arco-cssvars-prefix}-base-grey-1: if(
+    iscolor(@dark-base-grey-1),
+    .getColorRgbStr(@dark-base-grey-1) [],
+    replace(~'@{dark-base-grey-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-2: if(
+    iscolor(@dark-base-grey-2),
+    .getColorRgbStr(@dark-base-grey-2) [],
+    replace(~'@{dark-base-grey-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-3: if(
+    iscolor(@dark-base-grey-3),
+    .getColorRgbStr(@dark-base-grey-3) [],
+    replace(~'@{dark-base-grey-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-4: if(
+    iscolor(@dark-base-grey-4),
+    .getColorRgbStr(@dark-base-grey-4) [],
+    replace(~'@{dark-base-grey-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-5: if(
+    iscolor(@dark-base-grey-5),
+    .getColorRgbStr(@dark-base-grey-5) [],
+    replace(~'@{dark-base-grey-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-6: if(
+    iscolor(@dark-base-grey-6),
+    .getColorRgbStr(@dark-base-grey-6) [],
+    replace(~'@{dark-base-grey-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-7: if(
+    iscolor(@dark-base-grey-7),
+    .getColorRgbStr(@dark-base-grey-7) [],
+    replace(~'@{dark-base-grey-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-8: if(
+    iscolor(@dark-base-grey-8),
+    .getColorRgbStr(@dark-base-grey-8) [],
+    replace(~'@{dark-base-grey-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-9: if(
+    iscolor(@dark-base-grey-9),
+    .getColorRgbStr(@dark-base-grey-9) [],
+    replace(~'@{dark-base-grey-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-base-grey-10: if(
+    iscolor(@dark-base-grey-10),
+    .getColorRgbStr(@dark-base-grey-10) [],
+    replace(~'@{dark-base-grey-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-1: if(
+    iscolor(@dark-oranged-1),
+    .getColorRgbStr(@dark-oranged-1) [],
+    replace(~'@{dark-oranged-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-2: if(
+    iscolor(@dark-oranged-2),
+    .getColorRgbStr(@dark-oranged-2) [],
+    replace(~'@{dark-oranged-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-3: if(
+    iscolor(@dark-oranged-3),
+    .getColorRgbStr(@dark-oranged-3) [],
+    replace(~'@{dark-oranged-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-4: if(
+    iscolor(@dark-oranged-4),
+    .getColorRgbStr(@dark-oranged-4) [],
+    replace(~'@{dark-oranged-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-5: if(
+    iscolor(@dark-oranged-5),
+    .getColorRgbStr(@dark-oranged-5) [],
+    replace(~'@{dark-oranged-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-6: if(
+    iscolor(@dark-oranged-6),
+    .getColorRgbStr(@dark-oranged-6) [],
+    replace(~'@{dark-oranged-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-7: if(
+    iscolor(@dark-oranged-7),
+    .getColorRgbStr(@dark-oranged-7) [],
+    replace(~'@{dark-oranged-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-8: if(
+    iscolor(@dark-oranged-8),
+    .getColorRgbStr(@dark-oranged-8) [],
+    replace(~'@{dark-oranged-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-9: if(
+    iscolor(@dark-oranged-9),
+    .getColorRgbStr(@dark-oranged-9) [],
+    replace(~'@{dark-oranged-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-oranged-10: if(
+    iscolor(@dark-oranged-10),
+    .getColorRgbStr(@dark-oranged-10) [],
+    replace(~'@{dark-oranged-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-1: if(
+    iscolor(@dark-teal-1),
+    .getColorRgbStr(@dark-teal-1) [],
+    replace(~'@{dark-teal-1}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-2: if(
+    iscolor(@dark-teal-2),
+    .getColorRgbStr(@dark-teal-2) [],
+    replace(~'@{dark-teal-2}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-3: if(
+    iscolor(@dark-teal-3),
+    .getColorRgbStr(@dark-teal-3) [],
+    replace(~'@{dark-teal-3}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-4: if(
+    iscolor(@dark-teal-4),
+    .getColorRgbStr(@dark-teal-4) [],
+    replace(~'@{dark-teal-4}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-5: if(
+    iscolor(@dark-teal-5),
+    .getColorRgbStr(@dark-teal-5) [],
+    replace(~'@{dark-teal-5}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-6: if(
+    iscolor(@dark-teal-6),
+    .getColorRgbStr(@dark-teal-6) [],
+    replace(~'@{dark-teal-6}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-7: if(
+    iscolor(@dark-teal-7),
+    .getColorRgbStr(@dark-teal-7) [],
+    replace(~'@{dark-teal-7}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-8: if(
+    iscolor(@dark-teal-8),
+    .getColorRgbStr(@dark-teal-8) [],
+    replace(~'@{dark-teal-8}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-9: if(
+    iscolor(@dark-teal-9),
+    .getColorRgbStr(@dark-teal-9) [],
+    replace(~'@{dark-teal-9}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-teal-10: if(
+    iscolor(@dark-teal-10),
+    .getColorRgbStr(@dark-teal-10) [],
+    replace(~'@{dark-teal-10}', 'rgb\((.*)\)$', '$1')
+  );
+  @{arco-cssvars-prefix}-color-functional-icon-1: @dark-color-functional-icon-1;
+  @{arco-cssvars-prefix}-color-functional-icon-2: @dark-color-functional-icon-2;
+}
+
+@font-face {
+  font-family: Roboto;
+  src: url('https://lf3-static.bytednsdoc.com/obj/eden-cn/lognulaps/Roboto-Regular.ttf');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: Roboto;
+  src: url('https://lf3-static.bytednsdoc.com/obj/eden-cn/lognulaps/Roboto-Medium.ttf');
+  font-weight: 500;
+}
+
+.force-icon {
+  display: inline-block;
+  color: inherit;
+  font-style: normal;
+  width: 1em;
+  height: 1em;
+  vertical-align: -2px;
+}
+.arco-icon-hover .force-icon {
+  position: relative;
+  vertical-align: -0.09em;
+}
+.force-icon-loading {
+  animation: force-loading-circle 1s infinite cubic-bezier(0, 0, 1, 1);
+}
+@keyframes force-loading-circle {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.arco-btn svg {
+  font-size: 16px;
+  vertical-align: -3px;
+}
+.arco-btn-size-mini svg {
+  font-size: 12px;
+  vertical-align: -2px;
+}

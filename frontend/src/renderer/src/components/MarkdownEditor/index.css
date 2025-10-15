@@ -1,0 +1,18 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.vault-card {
+  .vault-title-container .milkdown .ProseMirror {
+    padding: 30px 0 !important;
+  }
+
+  .milkdown .ProseMirror {
+    padding: 60px 0 !important;
+  }
+
+  .arco-card-body {
+    padding: 0 21% !important;
+  }
+}
