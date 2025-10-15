@@ -27,7 +27,7 @@
 [Mac 应用下载](https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg)
 
 </div>
-
+  
 目录
 
 - [👋🏻 MineContext 是什么](#-minecontext-是什么)
@@ -39,6 +39,7 @@
   - [4. 开始记录](#4-开始记录)
   - [5. 忘掉它](#5-忘掉它)
   - [6. 后台调试](#6-后台调试)
+- [🎃 贡献指南](#-贡献指南)
 - [🎨 前端架构](#-前端架构)
   - [核心技术栈](#核心技术栈)
   - [核心架构](#核心架构)
@@ -150,6 +151,8 @@ MineContext 支持在`http://localhost:8000` 进行后台调试。
 3.支持调整主动推送任务的系统提示词
 
 ![后台调试3](src/backend-web-3.png)
+
+# 🎃 贡献指南
 
 ## 🎨 前端架构
 

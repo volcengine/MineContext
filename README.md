@@ -39,6 +39,7 @@ Table of Contents
   - [4. Start Recording](#4-start-recording)
   - [5. Forget it](#5-forget-it)
   - [6. Backend Debugging](#6-backend-debugging)
+- [🎃 Contribution Guide](#-contribution-guide)
 - [🎨 Frontend Architecture](#-frontend-architecture)
   - [Core Tech Stack](#core-tech-stack)
   - [Core Architecture](#core-architecture)
@@ -152,6 +153,8 @@ MineContext supports backend debugging, which can be accessed at `http://localho
 
 3.Adjust System Prompt for Automated Tasks
 ![后台调试3](src/backend-web-3.png)
+
+# 🎃 Contribution Guide
 
 ## 🎨 Frontend Architecture
 
