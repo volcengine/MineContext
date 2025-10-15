@@ -188,25 +188,29 @@ frontend/
 ```
 
 1、主进程 (src/main/)负责：
-• 管理应用窗口
-• 处理生命周期事件（启动、退出、激活）
-• 建立安全的 IPC 通信
-• 与后端服务（Python 与系统 API）集成
+
+- 管理应用窗口
+- 处理生命周期事件（启动、退出、激活）
+- 建立安全的 IPC 通信
+- 与后端服务（Python 与系统 API）集成
 
 2、预加载脚本 (src/preload/)负责：
-• 安全地将 Node.js API 暴露给渲染进程
-• 处理与主进程的 IPC 通信
-• 实现跨进程的资源访问
+
+- 安全地将 Node.js API 暴露给渲染进程
+- 处理与主进程的 IPC 通信
+- 实现跨进程的资源访问
 
 3、渲染进程 (src/renderer/)负责：
-• 实现基于 React 的用户界面
-• 使用 Jotai 与 Redux 管理全局状态
-• 基于 Tailwind CSS 的高效样式体系
-• 动态加载与性能优化机制
+
+- 实现基于 React 的用户界面
+- 使用 Jotai 与 Redux 管理全局状态
+- 基于 Tailwind CSS 的高效样式体系
+- 动态加载与性能优化机制
 
 4、构建与打包负责：
-• electron-vite.config.ts — 同时配置主进程与渲染进程的构建逻辑（别名、插件等）。
-• electron-builder.yml — 定义针对 Windows、macOS、Linux 的打包与分发配置。
+
+- electron-vite.config.ts — 同时配置主进程与渲染进程的构建逻辑（别名、插件等）。
+- electron-builder.yml — 定义针对 Windows、macOS、Linux 的打包与分发配置。
 
 ## 💻 前端使用
 
