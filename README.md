@@ -22,7 +22,7 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 
 👋 Join our [WeChat / Lark / Red Note Group](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
-🌍  Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
+🌍 Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
 
 [App Download for Mac](https://github.com/volcengine/MineContext/releases/download/0.1.1/MineContext-0.1.1.dmg)
 
@@ -38,19 +38,29 @@ Table of Contents
   - [3. Enter Your API Key](#3-enter-your-api-key)
   - [4. Start Recording](#4-start-recording)
   - [5. Forget it](#5-forget-it)
+- [🎃 Contribution Guidelines](#-contribution-guidelines)
+
+  - [🎨 Frontend Architecture](#-frontend-architecture)
+    - [Core Tech Stack](#core-tech-stack)
+    - [Core Architecture](#core-architecture)
+  - [💻 Frontend Usage](#-frontend-usage)
+    - [Install Dependencies](#install-dependencies)
+    - [Development and Debugging](#development-and-debugging)
+    - [Application Packaging](#application-packaging)
+  - [🏗️ Backend Architecture](#️-backend-architecture)
+    - [Core Architecture Components](#core-architecture-components)
+    - [Layer Responsibilities](#layer-responsibilities)
+  - [🚀 Backend Usage](#-backend-usage)
+    - [Installation](#installation)
+    - [Configuration](#configuration)
+    - [Running the Server](#running-the-server)
+
 - [💎 The Philosophy Behind the Name](#-the-philosophy-behind-the-name)
 - [🎯 Target User](#-target-user)
 - [🔌 Context-Source](#-context-source)
 - [🆚 Comparison with Familiar Application](#-comparison-with-familiar-application)
-  - [MineContext  vs ChatGPT Pulse](#minecontext--vs-chatgpt-pulse)
+  - [MineContext vs ChatGPT Pulse](#minecontext--vs-chatgpt-pulse)
   - [MineContext vs Dayflow](#minecontext-vs-dayflow)
-- [🏗️ Backend Architecture](#️-backend-architecture)
-  - [Core Architecture Components](#core-architecture-components)
-  - [Layer Responsibilities](#layer-responsibilities)
-- [🚀 Backend Usage](#-backend-usage)
-  - [Installation](#installation)
-  - [Configuration](#configuration)
-  - [Running the Server](#running-the-server)
 - [👥 Community](#-community)
   - [Community and Support](#community-and-support)
 - [Star History](#star-history)
@@ -75,7 +85,7 @@ MineContext focuses on five key features: effortless collection, intelligent res
 3. 💡 Intelligent Resurfacing
    Surfaces relevant and useful context intelligently during creation. Ensures assisted creativity without overwhelming you with information.
 4. 🛡️ Privacy-First
-    All data is stored locally, ensuring your privacy and security.
+   All data is stored locally, ensuring your privacy and security.
 5. 🎯 Context Engineering Architecture
    Supports the complete lifecycle of multimodal, multi-source data—from capture, processing, and storage to management, retrieval, and consumption—enabling the generation of six types of intelligent context.
 
@@ -94,21 +104,26 @@ Enter the following command in the terminal to disable the quarantine attribute 
 ```
 sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 ```
+
 ![Quarantine](src/Quarantine.gif)
 
 ### 3. Enter Your API Key
 
-After the application loads（initial run may require installation of some backend environments, which may take a few minutes）, follow the instructions to enter your API. We currently support Doubao and OpenAI, with more platforms and local Ollama models to be added in the future.
+After the application launches, please follow the prompts to enter your API key. (Note: On the first run, the application needs to install the backend environment, which may take about two minutes).
+
+We currently support services from Doubao, OpenAI, and custom models. This includes any **local models** or **third-party model** services that are compatible with the OpenAI API format.
+
+We recommend using [LMStudio](https://lmstudio.ai/) to run local models. It provides a simple interface and powerful features to help you quickly deploy and manage them.
 
 **Considering both cost and performance, we recommend using the Doubao model.** The Doubao API Key can be generated in the [API Management Interface](https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey).
 
 After obtaining the Doubao API Key, you need to activate two models in the [Model Activation Management Interface](https://console.volcengine.com/ark/region:ark+cn-beijing/model): the Visual Language Model and the Embedding Model.
 
 - Visual Language Model: Doubao-Seed-1.6-flash
-![doubao-vlm-model](src/doubao-vlm-model.png)
+  ![doubao-vlm-model](src/doubao-vlm-model.png)
 
 - Embedding Model: Doubao-embedding-large
-![doubao-emb-model](src/doubao-emb-model.png)
+  ![doubao-emb-model](src/doubao-emb-model.png)
 
 The following is the filling process after obtaining the API Key:
 
@@ -125,94 +140,129 @@ After restarting the application, please first set your screen sharing area in �
 ### 5. Forget it
 
 After starting the recording, your context will gradually be collected. It will take some time to generate value. So, forget about it and focus on other tasks with peace of mind. MineContext will generate to-dos, prompts, summaries, and activities for you in the background. Of course, you can also engage in proactive Q&A through [Chat with AI].
+Of course, here is the English translation of the provided text:
 
+### 6. Backend Debugging
 
+MineContext supports backend debugging, which can be accessed at `http://localhost:8000`.
 
-## 💎 The Philosophy Behind the Name
+1.View Token Consumption and Usage
+![后台调试1](src/backend-web-1.png)
 
-The naming of MineContext also reflects the team's ingenuity. It signifies both "my context" and "mining context." It draws inspiration from the core philosophy of Minecraft—openness, creativity, and exploration.
+2.Configure Interval for Automated Tasks
+![后台调试2](src/backend-web-2.png)
 
-If vast amounts of context are like scattered "blocks," then MineContext provides a "world" where you can freely build, combine, and create. Users can reimagine and create new content based on the collected massive context and generate high-quality information.
+3.Adjust System Prompt for Automated Tasks
+![后台调试3](src/backend-web-3.png)
 
-## 🎯 Target User
+## 🎨 Frontend Architecture
 
-| Target User Category | Specific Roles/Identities          | Core Needs/Pain Points                                                                                   |
-| -------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Knowledge Workers    | Researchers, Analysts              | Navigating vast amounts of information, improving information processing and analysis efficiency         |
-| Content Creators     | Writers, Bloggers                  | Craving endless inspiration, optimizing content creation workflows                                       |
-| Lifelong Learners    | Students, Researchers              | Building systematic knowledge systems, efficiently managing and connecting learning materials            |
-| Project Managers     | Product Managers, Project Managers | Integrating multi-source information and data, ensuring project alignment and decision-making efficiency |
+The MineContext frontend is a cross-platform desktop application built with Electron, React, and TypeScript, providing a modular, maintainable, and high-performance foundation for desktop development.
 
-## 🔌 Context-Source
+### Core Tech Stack
 
-We will prioritize the expansion of Context Sources according to the following plan, and we warmly welcome everyone to actively contribute code to our efforts.
+| Technology   | Description                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| Electron     | Allows for the development of cross-platform desktop applications using web technologies. |
+| React        | A component-based UI library for building dynamic user interfaces.                        |
+| TypeScript   | Provides static type checking to enhance code maintainability.                            |
+| Vite         | A modern frontend build tool optimized for Electron.                                      |
+| Tailwind CSS | A utility-first CSS framework for rapid and consistent UI styling.                        |
+| pnpm         | A fast and efficient package manager suitable for monorepo projects.                      |
 
-- P0: Digital life and public information loop (PC screen capture and link upload)
-- P1: Personal text context loop (file upload, file tracking)
-- P2: AI and common office context loop (MCP, meeting notes)
-- P3: High-quality information acquisition loop (DeepResearch and RSS)
-- P4: Personal deep context loop (WeChat, QQ chat data acquisition, mobile screenshots)
-- P5: Physical world context loop (smart wearable synchronization, smart glasses synchronization)
+### Core Architecture
 
-| Context Capture Capability   | Context Source                     | Priority | Completion Status |
-| :--------------------------- | :--------------------------------- | :------- | :---------------- |
-| Screen Screenshot            | User PC Information                | P0       | ✅                |
-| Note Editing                 | Application Internal Creation Information | P0       | ✅                |
-| Link Upload                  | Internet Information               | P0       |                   |
-| File Upload                  | Structured Documents               | P1       |                   |
-| File Upload                  | Unstructured Documents             | P1       |                   |
-| File Upload                  | Images                             | P1       |                   |
-| File Upload                  | Audio                              | P4       |                   |
-| File Upload                  | Video                              | P4       |                   |
-| File Upload                  | Code                               | P4       |                   |
-| Browser Extension            | AI Conversation Records            | P2       |                   |
-| Browser Extension            | Refined Internet Information       | P5       |                   |
-| Meeting Records              | Meeting Information                | P2       |                   |
-| RSS                          | Consultation Information           | P3       |                   |
-| Deep Research                | High-Quality Research Analysis     | P3       |                   |
-| Application MCP/API          | Payment Records                    | P4       |                   |
-| Application MCP/API          | Research Papers                    | P3       |                   |
-| Application MCP/API          | News                               | P4       |                   |
-| Application MCP/API          | Emails                             | P4       |                   |
-| Application MCP/API          | Notion                             | P2       |                   |
-| Application MCP/API          | Obsidian                           | P2       |                   |
-| Application MCP/API          | Slack                              | P4       |                   |
-| Application MCP/API          | Jira                               | P4       |                   |
-| Application MCP/API          | Figma                              | P2       |                   |
-| Application MCP/API          | Linear                             | P4       |                   |
-| Application MCP/API          | Todoist                            | P4       |                   |
-| Memory Bank Migration Import | User Memory                        | P4       |                   |
-| WeChat Data Capture          | WeChat Chat History                | P4       |                   |
-| QQ Data Capture              | QQ Chat History                    | P4       |                   |
-| Mobile Screenshot Monitor    | User Mobile End Information        | P4       |                   |
-| Smart Glasses Data Sync      | Physical World Interaction Records | P5       |                   |
-| Smart Bracelet Data Sync     | Physiological Data                 | P5       |                   |
+The project follows a standard Electron architectural design, clearly separating the code for the main process, preload scripts, and renderer process to ensure security and maintainability.
 
-## 🆚 Comparison with Familiar Application
+```
+frontend/
+├── src/
+│ ├── main/     # Electron main process (window management, lifecycle, IPC)
+│ ├── preload/  # Preload script, securely bridging Node APIs and the renderer process
+│ └── renderer/ # React frontend interface (renderer process)
+│
+├── packages/
+│ └── shared/   # Common utilities, IPC channels, logging, and constant definitions
+│
+├── build/      # Build resources (icons, platform configurations)
+├── dist/       # Build artifacts generated by electron-builder
+├── externals/  # External dependencies (Python scripts, binaries, etc.)
+├── resources/  # Static assets (icons, templates, images)
+└── scripts/    # Development and build helper scripts
+```
 
-### MineContext  vs ChatGPT Pulse
+1.  **Main Process (`src/main/`) is responsible for:**
 
-- 🖥️ Comprehensive Digital Context:
-  MineContext captures your entire digital workflow by reading from screen screenshots, providing a rich, visual context of your daily activities and applications. ChatGPT Pulse, in contrast, is limited to the context of a single text-based conversation.
-- 🔒 Local-First Data & Privacy:
-  Your data is processed and stored entirely on your local device, ensuring complete privacy and security without relying on cloud servers. ChatGPT Pulse requires data to be sent to and stored on OpenAI's servers.
-- 🚀 Proactive & Diverse Insights:
-  MineContext delivers a wider variety of intelligent, auto-generated content—including daily summaries, actionable todos, and activity reports—not just simple tips. ChatGPT Pulse primarily offers reactive assistance within the chat interface.
-- 🔧 Open Source & Customizable:
-  As an open-source project, MineContext allows developers to freely inspect, modify, and build upon the codebase for complete customization. ChatGPT Pulse is a closed, proprietary product with no option for modification.
-- 💰 Cost-Effective API Usage:
-  MineContext avoids the need for a costly $200/month Pro subscription by allowing you to use your own API key, giving you full control over your spending. ChatGPT Pulse's advanced features are locked behind its expensive premium tier.
+    - Managing application windows
+    - Handling lifecycle events (startup, quit, activate)
+    - Establishing secure IPC communication
+    - Integrating with backend services (Python and system APIs)
 
-### MineContext vs Dayflow
+2.  **Preload Script (`src/preload/`) is responsible for:**
 
-- 💡 Richer, Proactive Insights:
-  ineContext delivers a more diverse range of automated, intelligent content—including concise summaries, actionable todos, and contextual tips—going beyond basic activity tracking. DayFlow primarily focuses on logging user activity.
-- 🧠 Context-Aware Q&A & Creation:
-  MineContext enables you to ask questions and generate new content based on your captured context, unlocking wider application scenarios like content drafting and project planning. DayFlow is limited to passive activity recording and review.
-- ✨ Superior Activity Generation & Experience:
-  MineContext produces activity records with greater clarity and detail, featuring a more intuitive and interactive dashboard for a seamless user experience. DayFlow's activity logs are more basic with limited interactivity.
+    - Securely exposing Node.js APIs to the renderer process
+    - Handling IPC communication with the main process
+    - Implementing cross-process resource access
 
-<br>
+3.  **Renderer Process (`src/renderer/`) is responsible for:**
+
+    - Implementing the user interface with React
+    - Managing global state with Jotai and Redux
+    - Utilizing an efficient styling system based on Tailwind CSS
+    - Implementing dynamic loading and performance optimization mechanisms
+
+4.  **Build and Packaging are responsible for:**
+
+    - `electron-vite.config.ts` — Configures the build logic for both the main and renderer processes (aliases, plugins, etc.).
+    - `electron-builder.yml` — Defines packaging and distribution configurations for Windows, macOS, and Linux.
+
+## 💻 Frontend Usage
+
+### Install Dependencies
+
+Due to package version issues, using a domestic PyPI mirror is not currently supported. Please run the following command to ensure you are using the original PyPI source:
+
+```bash
+pip config unset global.index-url
+cd frontend
+./start-dev.sh
+```
+
+### Development and Debugging
+
+During local development, it is normal for the screen capture area selection to be slow. Please wait, as this issue does not exist in the packaged application.
+
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+
+💡 **Tip:** It is recommended to use `./start-dev.sh` each time you start the frontend. This script ensures that a stable version of Node.js is used and configures the basic runtime environment.
+
+### Application Packaging
+
+To build executable files for different platforms:
+
+- **macOS**
+
+  ```bash
+  pnpm build:mac
+  ```
+
+- **Windows**
+
+  ```bash
+  pnpm build:win
+  ```
+
+- **Linux**
+
+  ```bash
+  pnpm build:linux
+  ```
+
+  The executable files generated by the packaging process will be stored in the `MineContext/frontend/dist` directory.
 
 ## 🏗️ Backend Architecture
 
@@ -240,28 +290,33 @@ opencontext/
    - FastAPI-based RESTful API
    - WebSocket support for real-time communication
    - Static file serving and template rendering
+
 2. **Manager Layer** (`managers/`)
 
    - `CaptureManager`: Manages all context capture sources
    - `ProcessorManager`: Coordinates context processing pipeline
    - `ConsumptionManager`: Handles context consumption and generation
    - `EventManager`: Event-driven system coordination
+
 3. **Context Capture Layer** (`context_capture/`)
 
    - Screenshot monitoring
    - Document monitoring
    - Extensible capture interface for future sources
+
 4. **Processing Layer** (`context_processing/`)
 
    - Document chunking strategies
    - Entity extraction and normalization
    - Context merging and deduplication
    - Multi-modal content processing (text, images)
+
 5. **Storage Layer** (`storage/`)
 
    - Multi-backend support (SQLite, ChromaDB)
    - Vector storage for similarity search
    - Unified storage interface
+
 6. **LLM Integration** (`llm/`)
 
    - Support for multiple LLM providers (OpenAI, Doubao)
@@ -297,12 +352,12 @@ server:
   debug: false
 
 embedding_model:
-  provider: doubao  # options: openai, doubao
+  provider: doubao # options: openai, doubao
   api_key: your-api-key
   model: doubao-embedding-large-text-240915
 
 vlm_model:
-  provider: doubao  # options: openai, doubao
+  provider: doubao # options: openai, doubao
   api_key: your-api-key
   model: doubao-seed-1-6-flash-250828
 
@@ -310,7 +365,7 @@ capture:
   enabled: true
   screenshot:
     enabled: true # enable screenshot capture
-    capture_interval: 5  # capture interval in seconds
+    capture_interval: 5 # capture interval in seconds
 ```
 
 2. **Prompt Templates** (`config/prompts_*.yaml`):
@@ -331,6 +386,7 @@ uv run opencontext start --port 8000
 ```
 
 **Available Options:**
+
 - `--config`: Path to configuration file
 - `--host`: Host address (default: from config or `localhost`)
 - `--port`: Port number (default: from config or `8000`)
@@ -345,6 +401,92 @@ pip install -e .
 opencontext start --port 8000
 ```
 
+## 💎 The Philosophy Behind the Name
+
+The naming of MineContext also reflects the team's ingenuity. It signifies both "my context" and "mining context." It draws inspiration from the core philosophy of Minecraft—openness, creativity, and exploration.
+
+If vast amounts of context are like scattered "blocks," then MineContext provides a "world" where you can freely build, combine, and create. Users can reimagine and create new content based on the collected massive context and generate high-quality information.
+
+## 🎯 Target User
+
+| Target User Category | Specific Roles/Identities          | Core Needs/Pain Points                                                                                   |
+| -------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Knowledge Workers    | Researchers, Analysts              | Navigating vast amounts of information, improving information processing and analysis efficiency         |
+| Content Creators     | Writers, Bloggers                  | Craving endless inspiration, optimizing content creation workflows                                       |
+| Lifelong Learners    | Students, Researchers              | Building systematic knowledge systems, efficiently managing and connecting learning materials            |
+| Project Managers     | Product Managers, Project Managers | Integrating multi-source information and data, ensuring project alignment and decision-making efficiency |
+
+## 🔌 Context-Source
+
+We will prioritize the expansion of Context Sources according to the following plan, and we warmly welcome everyone to actively contribute code to our efforts.
+
+- P0: Digital life and public information loop (PC screen capture and link upload)
+- P1: Personal text context loop (file upload, file tracking)
+- P2: AI and common office context loop (MCP, meeting notes)
+- P3: High-quality information acquisition loop (DeepResearch and RSS)
+- P4: Personal deep context loop (WeChat, QQ chat data acquisition, mobile screenshots)
+- P5: Physical world context loop (smart wearable synchronization, smart glasses synchronization)
+
+| Context Capture Capability   | Context Source                            | Priority | Completion Status |
+| :--------------------------- | :---------------------------------------- | :------- | :---------------- |
+| Screen Screenshot            | User PC Information                       | P0       | ✅                |
+| Note Editing                 | Application Internal Creation Information | P0       | ✅                |
+| Link Upload                  | Internet Information                      | P0       |                   |
+| File Upload                  | Structured Documents                      | P1       |                   |
+| File Upload                  | Unstructured Documents                    | P1       |                   |
+| File Upload                  | Images                                    | P1       |                   |
+| File Upload                  | Audio                                     | P4       |                   |
+| File Upload                  | Video                                     | P4       |                   |
+| File Upload                  | Code                                      | P4       |                   |
+| Browser Extension            | AI Conversation Records                   | P2       |                   |
+| Browser Extension            | Refined Internet Information              | P5       |                   |
+| Meeting Records              | Meeting Information                       | P2       |                   |
+| RSS                          | Consultation Information                  | P3       |                   |
+| Deep Research                | High-Quality Research Analysis            | P3       |                   |
+| Application MCP/API          | Payment Records                           | P4       |                   |
+| Application MCP/API          | Research Papers                           | P3       |                   |
+| Application MCP/API          | News                                      | P4       |                   |
+| Application MCP/API          | Emails                                    | P4       |                   |
+| Application MCP/API          | Notion                                    | P2       |                   |
+| Application MCP/API          | Obsidian                                  | P2       |                   |
+| Application MCP/API          | Slack                                     | P4       |                   |
+| Application MCP/API          | Jira                                      | P4       |                   |
+| Application MCP/API          | Figma                                     | P2       |                   |
+| Application MCP/API          | Linear                                    | P4       |                   |
+| Application MCP/API          | Todoist                                   | P4       |                   |
+| Memory Bank Migration Import | User Memory                               | P4       |                   |
+| WeChat Data Capture          | WeChat Chat History                       | P4       |                   |
+| QQ Data Capture              | QQ Chat History                           | P4       |                   |
+| Mobile Screenshot Monitor    | User Mobile End Information               | P4       |                   |
+| Smart Glasses Data Sync      | Physical World Interaction Records        | P5       |                   |
+| Smart Bracelet Data Sync     | Physiological Data                        | P5       |                   |
+
+## 🆚 Comparison with Familiar Application
+
+### MineContext vs ChatGPT Pulse
+
+- 🖥️ Comprehensive Digital Context:
+  MineContext captures your entire digital workflow by reading from screen screenshots, providing a rich, visual context of your daily activities and applications. ChatGPT Pulse, in contrast, is limited to the context of a single text-based conversation.
+- 🔒 Local-First Data & Privacy:
+  Your data is processed and stored entirely on your local device, ensuring complete privacy and security without relying on cloud servers. ChatGPT Pulse requires data to be sent to and stored on OpenAI's servers.
+- 🚀 Proactive & Diverse Insights:
+  MineContext delivers a wider variety of intelligent, auto-generated content—including daily summaries, actionable todos, and activity reports—not just simple tips. ChatGPT Pulse primarily offers reactive assistance within the chat interface.
+- 🔧 Open Source & Customizable:
+  As an open-source project, MineContext allows developers to freely inspect, modify, and build upon the codebase for complete customization. ChatGPT Pulse is a closed, proprietary product with no option for modification.
+- 💰 Cost-Effective API Usage:
+  MineContext avoids the need for a costly $200/month Pro subscription by allowing you to use your own API key, giving you full control over your spending. ChatGPT Pulse's advanced features are locked behind its expensive premium tier.
+
+### MineContext vs Dayflow
+
+- 💡 Richer, Proactive Insights:
+  ineContext delivers a more diverse range of automated, intelligent content—including concise summaries, actionable todos, and contextual tips—going beyond basic activity tracking. DayFlow primarily focuses on logging user activity.
+- 🧠 Context-Aware Q&A & Creation:
+  MineContext enables you to ask questions and generate new content based on your captured context, unlocking wider application scenarios like content drafting and project planning. DayFlow is limited to passive activity recording and review.
+- ✨ Superior Activity Generation & Experience:
+  MineContext produces activity records with greater clarity and detail, featuring a more intuitive and interactive dashboard for a seamless user experience. DayFlow's activity logs are more basic with limited interactivity.
+
+<br>
+
 ## 👥 Community
 
 ### Community and Support
@@ -356,7 +498,6 @@ opencontext start --port 8000
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=volcengine/MineContext&type=Timeline)](https://www.star-history.com/#volcengine/MineContext&Timeline)
-
 
 ## 📃 License
 

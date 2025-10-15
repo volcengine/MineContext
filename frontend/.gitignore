@@ -1,0 +1,15 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+/backend
+/externals/python/window_inspector/venv
+/externals/python/window_inspector/build
+/externals/python/window_inspector/dist
+/externals/python/window_capture/venv
+/externals/python/window_capture/build
+/externals/python/window_capture/dist
+
+frontend.zip

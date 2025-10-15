@@ -1,0 +1,231 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* 覆盖默认的壁纸样式 */
+body {
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  background-image: none !important;
+  background-color: #f5f5f5 !important;
+}
+
+#root {
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  margin-bottom: 0 !important;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* 隐藏默认的模板元素 */
+.logo,
+.creator,
+.text,
+.tip,
+.actions,
+.versions {
+  display: none !important;
+}
+
+.homepage-container {
+  position: relative;
+  padding: 8px 0px;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  flex-direction: column;
+
+  .homepage-container-inner {
+    background-color: #fff;
+    border-radius: 16px;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cards-section {
+  margin-bottom: 16px;
+  padding: 0px 24px;
+}
+
+.quick-start-card .arco-card-body {
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 60px;
+  padding-bottom: 60px;
+  text-align: center;
+}
+
+.empty-state img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+
+.summary-section {
+  flex: 1;
+  margin: 0 24px;
+}
+
+.summary-section .arco-tabs-content {
+  padding-top: 20px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  border-bottom: none !important;
+  padding: 8px 0 !important;
+}
+
+.task-item .arco-radio .arco-radio-icon {
+  border-radius: 50%;
+}
+
+.task-item .arco-radio-checked .arco-radio-mask {
+  background-color: black;
+  border-color: black;
+}
+
+.task-item .arco-radio.arco-radio-checked .arco-radio-icon .arco-radio-icon-dot {
+  background-color: white;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin: 16px 0 8px 0;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-content h1 {
+  font-size: 1.5em;
+}
+.markdown-content h2 {
+  font-size: 1.4em;
+}
+.markdown-content h3 {
+  font-size: 1.3em;
+}
+.markdown-content h4 {
+  font-size: 1.2em;
+}
+.markdown-content h5 {
+  font-size: 1.1em;
+}
+.markdown-content h6 {
+  font-size: 1em;
+}
+
+.markdown-content p {
+  margin: 8px 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.markdown-content li {
+  margin: 4px 0;
+}
+
+.markdown-content blockquote {
+  margin: 8px 0;
+  padding: 8px 16px;
+  border-left: 4px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #6b7280;
+}
+
+.markdown-content code {
+  padding: 2px 6px;
+  background-color: #f3f4f6;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.875em;
+}
+
+.markdown-content pre {
+  margin: 8px 0;
+  padding: 12px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.markdown-content pre code {
+  padding: 0;
+  background-color: transparent;
+  font-size: 0.875em;
+}
+
+.markdown-content a {
+  color: #165dff;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content table {
+  margin: 8px 0;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.markdown-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.arco-tabs-header-title-active .arco-tabs-header-title-text {
+  font-weight: 500 !important;
+}
+
+.arco-col.arco-col-12:first-child {
+  padding-right: 8px !important;
+}
+
+.arco-col.arco-col-12:last-child {
+  padding-left: 8px !important;
+}

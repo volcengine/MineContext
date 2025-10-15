@@ -1,0 +1,364 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.ai-assistant-sidebar {
+  position: relative;
+  height: calc(100% - 16px);
+  background: white;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  margin: 8px 0 8px 8px;
+  overflow: hidden;
+}
+
+.ai-assistant-sidebar-visible {
+  min-width: 340px;
+  width: 100%;
+}
+
+.ai-assistant-sidebar-hidden {
+  width: 0;
+  position: relative;
+  user-select: text; /* 允许文本选择 */
+}
+
+.ai-assistant-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+  gap: 8px;
+}
+
+.selection-copy-button {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 8px;
+  padding: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: fadeInScale 0.2s ease-out;
+}
+
+.selection-copy-button .arco-btn {
+  color: white !important;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+.selection-copy-button .arco-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.ai-assistant-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.ai-assistant-header-content {
+  display: flex;
+  align-items: center;
+}
+
+.ai-assistant-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  width: 100%;
+}
+
+.ai-assistant-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.ai-assistant-suggestions {
+  margin-top: 24px;
+}
+
+.suggestion-item {
+  padding: 4px 12px;
+  background: #f7f8fa;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: #1d2129;
+  border-radius: 8px;
+  border: 1px solid #ebedf4;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.suggestion-item:hover {
+  border-radius: 8px;
+  border: 1px solid var(--line-color-border-2, #ebedf4);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.ai-assistant-messages {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+}
+
+.message {
+  display: flex;
+  background-color: #fff;
+  width: 100%;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.assistant {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.message-content {
+  padding: 12px 16px;
+  border-radius: 12px;
+  line-height: 1.5;
+  position: relative;
+  user-select: text; /* 确保消息内容可选择 */
+}
+
+/* 确保markdown内容也可以选择 */
+.markdown-content {
+  user-select: text;
+}
+
+.markdown-content * {
+  user-select: text;
+}
+
+/* 确保所有文本内容都可选择 */
+.ai-assistant-messages * {
+  user-select: text;
+}
+
+.message-content * {
+  user-select: text;
+}
+
+/* 但是按钮等交互元素不应该被选择 */
+.ai-assistant-header,
+.ai-assistant-header *,
+.message-actions,
+.message-actions *,
+.ai-assistant-input,
+.ai-assistant-input *,
+.selection-copy-button,
+.selection-copy-button * {
+  user-select: none;
+}
+
+.message-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.message:hover .message-actions {
+  opacity: 1;
+}
+
+.message.user .message-content {
+  background: #edeffc;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.assistant .message-content {
+  background: transparent;
+  width: 100%;
+  color: #1d2129;
+  border-bottom-left-radius: 4px;
+}
+
+.message-content.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+}
+
+.message-content.streaming {
+  position: relative;
+}
+
+.message-content.streaming::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: #edeffc;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+.ai-assistant-header-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.stage-indicator {
+  margin-left: 8px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  animation: pulse 2s infinite;
+}
+
+.progress-container {
+  padding: 8px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  background: #86909c;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.ai-assistant-input {
+  padding: 16px;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f7f8fa;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #e5e6eb;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper {
+  flex: 1;
+}
+
+.message-input {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.message-input:focus {
+  box-shadow: none !important;
+}
+
+.message-input .arco-textarea-wrapper {
+  background: transparent;
+}
+
+.input-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.send-button,
+.stop-button {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.stop-button {
+  background: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+}
+
+.stop-button:hover {
+  background: #ff7875 !important;
+  border-color: #ff7875 !important;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}

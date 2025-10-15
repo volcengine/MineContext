@@ -1,0 +1,149 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.note-tree {
+  font-size: 14px;
+  overflow: auto;
+}
+
+/* 确保树的缩进结构正确显示 */
+.note-tree .arco-tree-node-indent {
+  display: inline-block;
+  visibility: visible !important;
+}
+
+.note-tree .arco-tree-node {
+  display: flex;
+  padding: 3px 0;
+}
+
+.note-tree .arco-tree-node-title {
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.note-tree .arco-tree-node-disabled-selectable .arco-tree-node-title {
+  color: var(--color-text-1);
+}
+
+.note-tree .arco-tree-node-title:hover {
+  background: transparent;
+}
+
+.note-tree .arco-tree-node-title-text {
+  align-items: center;
+  font-size: 14px;
+}
+
+/* 增加缩进单位宽度，让层级更明显 */
+.note-tree .arco-tree-node-indent-block {
+  width: 24px;
+  display: inline-block;
+  visibility: visible !important;
+}
+
+/* 为不同层级添加不同的左侧间距 */
+.note-tree .arco-tree-node {
+  display: flex;
+  padding: 5px 0;
+  border-radius: 4px;
+}
+
+.arco-tree-node-selected {
+  background: #ffffff66 !important;
+}
+
+/* 调整switcher的对齐和间距 */
+.note-tree .arco-tree-node-switcher {
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: visible !important;
+}
+
+/* 缩小三角图标 */
+.note-tree .arco-tree-node-switcher-icon {
+  font-size: 10px;
+  color: #86909c;
+  transform: scale(0.6);
+  margin: -3px;
+  width: 12px;
+  height: 12px;
+}
+
+.note-tree .arco-tree-node-switcher-icon svg {
+  width: 12px;
+  height: 12px;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+
+.note-tree .arco-tree-node-expanded .arco-tree-node-switcher-icon svg {
+  transform: rotate(0deg);
+}
+
+.note-tree .arco-tree-node-switcher-icon:hover {
+  color: #165dff;
+}
+
+.tree-node-title {
+  user-select: none;
+  cursor: pointer;
+}
+
+/* 图标样式 */
+.arco-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sidebar-container .arco-layout-sider-children {
+  /* 隐藏侧边栏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* 确保内容仍然可以滚动，但不显示滚动条 */
+.sidebar-container {
+  overflow: -moz-scrollbars-none; /* Firefox */
+}
+
+.arco-layout-sider.arco-layout-sider-light.sidebar-container {
+  box-shadow: none;
+}
+
+.note-tree::-webkit-scrollbar {
+  display: none;
+}
+
+.note-tree::-webkit-scrollbar-track {
+  background: #f7f8fa;
+}
+
+.note-tree::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+/* .note-tree::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+} */
+
+/* .arco-input::placeholder {
+  color: #000000;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.arco-input {
+  font-size: 12px;
+  color: #000000;
+} */

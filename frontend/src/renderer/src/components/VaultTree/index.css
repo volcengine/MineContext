@@ -1,0 +1,12 @@
+/*
+ * Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.note-tree-container {
+  color: black;
+
+  :global(.arco-typography) {
+    font-size: 13px !important;
+  }
+}
