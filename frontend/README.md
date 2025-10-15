@@ -5,9 +5,9 @@
 ### Build Backend
 #### for macos
 ```bash
-$ uv sync
-$ source .venv/bin/activate
-$ ./build.sh
+uv sync
+source .venv/bin/activate
+./build.sh
 ```
 #### for windows
 not support yet
@@ -16,19 +16,22 @@ not support yet
 ### Install
 
 ```bash
-$ pnpm install
+cd frontend
+pnpm install
 ```
 
 ### Development
 ```bash
-$ pnpm dev
+pnpm dev
 ```
 
 ### Build APP
 
 ```bash
 # For macOS
-$ pnpm build:mac
+pnpm build:mac
+# Data Path
+# ～/Library/Application\ Support/MineContext
 ```
 
 ### Data Path
