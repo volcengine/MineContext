@@ -213,38 +213,40 @@ frontend/
 
 ## 💻 前端使用
 
+### 构建后端
+
+在开始前端开发之前，需要先构建后端：
+
+```bash
+uv sync
+source .venv/bin/activate
+./build.sh
+```
+
 ### 安装依赖
 
 由于包版本原因，目前不支持使用国内 PYPI 源，请输入以下命令，确保使用的是原始 PYPI 环境
-
-```
+```bash
 pip config unset global.index-url
 cd frontend
-./start-dev.sh
+pnpm install
 ```
 
 ### 开发调试
 
 本地开发时，截屏范围获取较慢属于正常现象，等待即可，打包应用无此问题。
 
-```
-cd frontend
-pnpm install
+```bash
 pnpm dev
 ```
 
-💡 建议： 每次启动前端时优先使用 ./start-dev.sh，该脚本会确保 Node.js 使用稳定版本环境以及配置基础的运行环境。
-
 ### 应用打包
 
-为不同平台构建可执行文件：
-
-- macOS
+为 macOS 平台构建应用：
 
 ```bash
 pnpm build:mac
 ```
-
 
 打包生成的可执行文件会存放在`MineContext/frontend/dist`目录下。
 
