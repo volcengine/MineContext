@@ -80,12 +80,20 @@ class WorkflowEngine:
             ))
             state = await self._execute_workflow(state)
             self.logger.info(f"Workflow execution completed, current stage: {state.stage.value}")
-            await self.streaming_manager.emit(StreamEvent(
-                type=EventType.COMPLETED,
-                stage=state.stage,
-                content=state.final_content,
-                progress=1.0,
-            ))
+            if streaming:
+                await self.streaming_manager.emit(StreamEvent(
+                    type=EventType.STREAM_COMPLETE,
+                    stage=state.stage,
+                    content="",
+                    progress=1.0,
+                ))
+            else:
+                await self.streaming_manager.emit(StreamEvent(
+                    type=EventType.COMPLETED,
+                    stage=state.stage,
+                    content=state.final_content,
+                    progress=1.0,
+                ))
         except Exception as e:
             self.logger.exception(f"Workflow execution failed: {e}")
             state.update_stage(WorkflowStage.FAILED)
