@@ -8,7 +8,14 @@
 """
 
 from opencontext.config.config_manager import ConfigManager
+from opencontext.config.global_config import GlobalConfig, get_config, get_global_config, get_prompt
 from opencontext.config.prompt_manager import PromptManager
-from opencontext.config.global_config import GlobalConfig, get_global_config, get_config, get_prompt
 
-__all__ = ["ConfigManager", "PromptManager", "GlobalConfig", "get_global_config", "get_config", "get_prompt"]
+__all__ = [
+    "ConfigManager",
+    "PromptManager",
+    "GlobalConfig",
+    "get_global_config",
+    "get_config",
+    "get_prompt",
+]

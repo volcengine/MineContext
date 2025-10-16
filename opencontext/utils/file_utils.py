@@ -7,11 +7,11 @@
 File utilities - Provides file operation helper functions
 """
 
-import os
-import mimetypes
 import logging
+import mimetypes
+import os
 from pathlib import Path
-from typing import List, Optional, Tuple, Any
+from typing import Any, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 def ensure_dir(directory: str) -> bool:
     """
     Ensure directory exists, create if it doesn't exist
-    
+
     Args:
         directory: Directory path
-        
+
     Returns:
         Whether successfully created or already exists
     """
@@ -37,10 +37,10 @@ def ensure_dir(directory: str) -> bool:
 def get_file_extension(file_path: str) -> str:
     """
     Get file extension (without dot)
-    
+
     Args:
         file_path: File path
-        
+
     Returns:
         File extension
     """
@@ -50,10 +50,10 @@ def get_file_extension(file_path: str) -> str:
 def is_binary_file(file_path: str) -> bool:
     """
     Check if file is binary
-    
+
     Args:
         file_path: File path
-        
+
     Returns:
         Whether file is binary
     """
@@ -61,12 +61,12 @@ def is_binary_file(file_path: str) -> bool:
     if not Path(file_path).exists():
         logger.warning(f"File does not exist: {file_path}")
         return False
-    
+
     # Check by MIME type
     mime_type, _ = mimetypes.guess_type(file_path)
     if mime_type and not mime_type.startswith("text/"):
         return True
-    
+
     # Check for null bytes in first 4KB
     try:
         with open(file_path, "rb") as f:
@@ -80,10 +80,10 @@ def is_binary_file(file_path: str) -> bool:
 def get_file_size(file_path: str) -> int:
     """
     Get file size in bytes
-    
+
     Args:
         file_path: File path
-        
+
     Returns:
         File size in bytes
     """
@@ -97,11 +97,11 @@ def get_file_size(file_path: str) -> int:
 def read_text_file(file_path: str, encoding: str = "utf-8") -> Optional[str]:
     """
     Read text file content
-    
+
     Args:
         file_path: File path
         encoding: File encoding
-        
+
     Returns:
         File content, None if read fails
     """
@@ -116,24 +116,22 @@ def read_text_file(file_path: str, encoding: str = "utf-8") -> Optional[str]:
 def write_text_file(file_path: str, content: str, encoding: str = "utf-8") -> bool:
     """
     Write text file
-    
+
     Args:
         file_path: File path
         content: File content
         encoding: File encoding
-        
+
     Returns:
         Whether write succeeded
     """
     try:
         # Ensure directory exists
         ensure_dir(str(Path(file_path).parent))
-        
+
         with open(file_path, "w", encoding=encoding) as f:
             f.write(content)
         return True
     except Exception as e:
         logger.error(f"Failed to write file: {file_path}, error: {e}")
         return False
-
-

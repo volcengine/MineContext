@@ -8,8 +8,8 @@ State context retrieval tool
 Retrieves status and progress monitoring records from ChromaDB
 """
 
-from opencontext.tools.retrieval_tools.base_context_retrieval_tool import BaseContextRetrievalTool
 from opencontext.models.enums import ContextType
+from opencontext.tools.retrieval_tools.base_context_retrieval_tool import BaseContextRetrievalTool
 
 
 class StateContextTool(BaseContextRetrievalTool):

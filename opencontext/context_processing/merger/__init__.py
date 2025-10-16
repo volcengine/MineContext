@@ -10,27 +10,27 @@ Contains merge-related functionality including context merging, strategies, and 
 """
 
 from .context_merger import ContextMerger
+from .cross_type_relationships import CrossTypeRelationshipManager
 from .merge_strategies import (
-    ContextTypeAwareStrategy,
-    ProfileContextStrategy,
     ActivityContextStrategy,
-    StateContextStrategy,
+    ContextTypeAwareStrategy,
     IntentContextStrategy,
-    SemanticContextStrategy,
     ProceduralContextStrategy,
+    ProfileContextStrategy,
+    SemanticContextStrategy,
+    StateContextStrategy,
     StrategyFactory,
 )
-from .cross_type_relationships import CrossTypeRelationshipManager
 
 __all__ = [
-    'ContextMerger',
-    'ContextTypeAwareStrategy',
-    'ProfileContextStrategy',
-    'ActivityContextStrategy',
-    'StateContextStrategy',
-    'IntentContextStrategy',
-    'SemanticContextStrategy',
-    'ProceduralContextStrategy',
-    'StrategyFactory',
-    'CrossTypeRelationshipManager'
+    "ContextMerger",
+    "ContextTypeAwareStrategy",
+    "ProfileContextStrategy",
+    "ActivityContextStrategy",
+    "StateContextStrategy",
+    "IntentContextStrategy",
+    "SemanticContextStrategy",
+    "ProceduralContextStrategy",
+    "StrategyFactory",
+    "CrossTypeRelationshipManager",
 ]

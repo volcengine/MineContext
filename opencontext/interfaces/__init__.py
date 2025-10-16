@@ -14,7 +14,7 @@ from opencontext.interfaces.processor_interface import IContextProcessor
 from opencontext.interfaces.storage_interface import IContextStorage
 
 __all__ = [
-    'ICaptureComponent',
-    'IContextProcessor',
-    'IContextStorage',
+    "ICaptureComponent",
+    "IContextProcessor",
+    "IContextStorage",
 ]

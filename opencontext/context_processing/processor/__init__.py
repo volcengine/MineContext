@@ -6,19 +6,19 @@
 
 """
 Processor module for context processing.
-Contains processor-related functionality including base processor, document processor, 
+Contains processor-related functionality including base processor, document processor,
 screenshot processor, and processor factory.
 """
 
 from .base_processor import BaseContextProcessor
 from .document_processor import DocumentProcessor
-from .screenshot_processor import ScreenshotProcessor
 from .processor_factory import ProcessorFactory, processor_factory
+from .screenshot_processor import ScreenshotProcessor
 
 __all__ = [
-    'BaseContextProcessor',
-    'DocumentProcessor',
-    'ScreenshotProcessor',
-    'ProcessorFactory',
-    'processor_factory'
+    "BaseContextProcessor",
+    "DocumentProcessor",
+    "ScreenshotProcessor",
+    "ProcessorFactory",
+    "processor_factory",
 ]

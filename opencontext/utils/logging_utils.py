@@ -7,19 +7,21 @@
 Logging utilities - Provides logging related functionality
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
-from opencontext.utils.logger import log_manager, log
+from opencontext.utils.logger import log, log_manager
+
 
 def setup_logging(config: Dict[str, Any]):
     """
     Setup logging
-    
+
     Args:
         config (Dict[str, Any]): Logging configuration
     """
     log_manager.configure(config)
     log.info("Logging setup completed")
+
 
 def get_logger(name: str):
     """

@@ -6,4 +6,3 @@
 """
 OpenContext web module initialization
 """
-

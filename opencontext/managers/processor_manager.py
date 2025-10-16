@@ -9,22 +9,22 @@
 Context processing manager for managing and coordinating context processing components
 """
 import concurrent.futures
-from typing import Any, Dict, List, Optional, Callable
 from threading import Lock, Timer
+from typing import Any, Callable, Dict, List, Optional
 
 from loguru import logger
 
 from opencontext.interfaces import IContextProcessor
-from opencontext.models import RawContextProperties, ProcessedContext, ContentFormat, ContextSource
+from opencontext.models import ContentFormat, ContextSource, ProcessedContext, RawContextProperties
 
 
 class ContextProcessorManager:
     """
     Context processing manager
-    
+
     Manages and coordinates multiple context processing components, providing unified interface for context processing
     """
-    
+
     def __init__(self, max_workers: int = 5):
         """Initialize context processing manager"""
         self._processors: Dict[str, IContextProcessor] = {}
@@ -55,11 +55,13 @@ class ContextProcessorManager:
         self._compression_timer.daemon = True
         self._compression_timer.start()
 
-        logger.info(f"Started periodic memory compression, interval: {self._compression_interval} seconds")
+        logger.info(
+            f"Started periodic memory compression, interval: {self._compression_interval} seconds"
+        )
 
     def _run_periodic_compression(self):
         """Execute and reschedule next compression"""
-        if self._merger and hasattr(self._merger, 'periodic_memory_compression'):
+        if self._merger and hasattr(self._merger, "periodic_memory_compression"):
             try:
                 logger.info("Starting periodic memory compression...")
                 self._merger.periodic_memory_compression(self._compression_interval)
@@ -67,7 +69,9 @@ class ContextProcessorManager:
             except Exception as e:
                 logger.error(f"Periodic memory compression failed: {e}", exc_info=True)
         else:
-            logger.warning("Merger processor not found or does not support periodic_memory_compression, skipping periodic compression.")
+            logger.warning(
+                "Merger processor not found or does not support periodic_memory_compression, skipping periodic compression."
+            )
 
         # reschedule next execution
         self._compression_timer = Timer(self._compression_interval, self._run_periodic_compression)
@@ -92,32 +96,34 @@ class ContextProcessorManager:
             ContextSource.VAULT: "document_processor",
         }
         self._default_chain_by_format = {}
-    
+
     def register_processor(self, processor: IContextProcessor) -> bool:
         """
         Register processing component
-        
+
         Args:
             processor (IContextProcessor): Processing component instance
-            
+
         Returns:
             bool: Whether registration succeeded
         """
         processor_name = processor.get_name()
-        
+
         if processor_name in self._processors:
-            logger.warning(f"Processing component '{processor_name}' already registered, will be overwritten")
-        
+            logger.warning(
+                f"Processing component '{processor_name}' already registered, will be overwritten"
+            )
+
         self._processors[processor_name] = processor
         self._statistics["processors"][processor_name] = processor.get_statistics()
-        
+
         logger.info(f"Processing component '{processor_name}' registered successfully")
         return True
-    
+
     def set_merger(self, merger: IContextProcessor) -> None:
         """
         Set merger component
-        
+
         Args:
             merger (IContextProcessor): Merger component instance
         """
@@ -143,20 +149,26 @@ class ContextProcessorManager:
             processor_name = self._default_chain_by_format.get(initial_input.content_format, [])
 
         if not processor_name:
-            logger.error(f"No processing component defined for source_type='{initial_input.source}' or content_format='{initial_input.content_format}', no processing will be performed")
+            logger.error(
+                f"No processing component defined for source_type='{initial_input.source}' or content_format='{initial_input.content_format}', no processing will be performed"
+            )
             return False
 
         # logger.debug(f"Selected preprocessing component for input {initial_input.object_id} (source: {initial_input.source}): {processor_name}")
-        
+
         processor = self._processors.get(processor_name)
         if not processor or not processor.can_process(initial_input):
-            logger.error(f"Processor '{processor_name}' in processing chain not registered or does not support processing input type {initial_input.source}")
+            logger.error(
+                f"Processor '{processor_name}' in processing chain not registered or does not support processing input type {initial_input.source}"
+            )
             return False
 
         try:
             return processor.process(initial_input)
         except Exception as e:
-            logger.exception(f"Processing component '{processor_name}' encountered exception while processing data: {e}")
+            logger.exception(
+                f"Processing component '{processor_name}' encountered exception while processing data: {e}"
+            )
         return false
 
     def batch_process(
@@ -165,7 +177,10 @@ class ContextProcessorManager:
         """Batch process raw context data"""
         results = {}
         with concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-            future_to_input = {executor.submit(self.process, initial_input): initial_input for initial_input in initial_inputs}
+            future_to_input = {
+                executor.submit(self.process, initial_input): initial_input
+                for initial_input in initial_inputs
+            }
             for future in concurrent.futures.as_completed(future_to_input):
                 initial_input = future_to_input[future]
                 try:
@@ -203,7 +218,7 @@ class ContextProcessorManager:
         with self._lock:
             for processor in self._processors.values():
                 processor.reset_statistics()
-            
+
             self._statistics["total_processed_inputs"] = 0
             self._statistics["total_contexts_generated"] = 0
             self._statistics["errors"] = 0

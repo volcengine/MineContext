@@ -6,8 +6,4 @@ Context Agent Package
 from .agent import ContextAgent, process_query, process_query_stream
 
 __version__ = "1.0.0"
-__all__ = [
-    "ContextAgent",
-    "process_query",
-    "process_query_stream"
-]
+__all__ = ["ContextAgent", "process_query", "process_query_stream"]

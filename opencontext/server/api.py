@@ -14,7 +14,20 @@ from fastapi import APIRouter
 from opencontext.utils.logging_utils import get_logger
 
 # Import route modules
-from .routes import health, web, context, content_generation, screenshots, debug, monitoring, vaults, agent_chat, completions, events, settings
+from .routes import (
+    agent_chat,
+    completions,
+    content_generation,
+    context,
+    debug,
+    events,
+    health,
+    monitoring,
+    screenshots,
+    settings,
+    vaults,
+    web,
+)
 
 logger = get_logger(__name__)
 
