@@ -4,7 +4,7 @@
 import { formatRelativeTime } from '@renderer/utils/time'
 import docIcon from '@renderer/assets/icons/doc-icon.svg'
 import { VaultTreeNode } from '@renderer/types'
-import { useNavigation } from '@renderer/hooks/useNavigation'
+import { useNavigation } from '@renderer/hooks/use-navigation'
 import { CardLayout } from '@renderer/pages/home/components/layout'
 
 interface DocColumnBoxProps {

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { useNavigation } from '@renderer/hooks/useNavigation'
+import { useNavigation } from '@renderer/hooks/use-navigation'
 import { FC, useRef } from 'react'
 import { CardLayout } from '../layout'
 import { useMount, useRequest } from 'ahooks'

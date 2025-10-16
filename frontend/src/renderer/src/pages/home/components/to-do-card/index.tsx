@@ -16,11 +16,11 @@ import {
   Form
 } from '@arco-design/web-react'
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon'
-import { Task, useHomeInfo } from '@renderer/hooks/useHomeInfo'
+import { Task, useHomeInfo } from '@renderer/hooks/use-home-info'
 import { useRef, useState } from 'react'
 import taskEmpty from '@renderer/assets/images/task-empty.svg'
 import addIcon from '@renderer/assets/icons/add.svg'
-import { useInitPrepareData } from '@renderer/hooks/use-init-prepera-data'
+import { useInitPrepareData } from '@renderer/hooks/use-init-prepare-data'
 import { TaskUrgency, TODO_LIST_STATUS } from '@renderer/constant/feed'
 import { useMemoizedFn } from 'ahooks'
 import highPriorityIcon from '@renderer/assets/icons/high-priority.svg'

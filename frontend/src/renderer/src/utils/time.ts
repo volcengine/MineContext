@@ -3,49 +3,28 @@
 
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import utc from 'dayjs/plugin/utc';
 dayjs.extend(isBetween);
+dayjs.extend(utc);
 
 // Format time
 export const formatTime = (date: Date | number | string) => {
-  if (typeof date === 'string' || typeof date === 'number') {
-    date = new Date(date)
-  }
-  return date.toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  })
+  return dayjs(date).format('HH:mm:ss')
 }
 
 // Format date
 export const formatDate = (date: Date) => {
-  return date.toLocaleDateString('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  })
+  return dayjs(date).format('MMM D, HH:mm')
 }
 
 export const timestampToISODateString = (timestamp: number): string => {
-    const date = new Date(timestamp)
-    return date.toISOString().slice(0, 10).replace(/-/g, '')
+    return dayjs(timestamp).format('YYYYMMDD')
 }
 
 export const timeToISOTimeString = (time: number | Date): string => {
-    if (typeof time === 'number') {
-        time = new Date(time)
-    }
-    const year = time.getFullYear();
-    const month = time.getMonth();
-    const day = time.getDate();
-    const hour = time.getHours();
-    const minute = time.getMinutes();
-    const second = time.getSeconds();
-    return new Date(Date.UTC(year, month, day, hour, minute, second, 0)).toISOString();
-    // const endTime = new Date(Date.UTC(year, month, day + 1, 0, 0, 0, 0)).toISOString();
+    const dt = dayjs(time)
+    // 保持原始逻辑：用本地时间的组件创建UTC时间
+    return dayjs.utc(dt.format('YYYY-MM-DD HH:mm:ss')).toISOString()
 }
 
 
