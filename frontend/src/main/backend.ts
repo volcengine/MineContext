@@ -365,7 +365,7 @@ async function startBackendServer(mainWindow: BrowserWindow) {
 
   return new Promise((resolve, reject) => {
     try {
-      const executableName = 'main'
+      const executableName = process.platform === 'win32' ? 'main.exe' : 'main'
 
       let actualResourcesPath = getResourcesPath()
       logToBackendFile(`Initial resources path: ${actualResourcesPath}`)
