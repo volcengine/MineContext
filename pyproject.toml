@@ -3,7 +3,7 @@ name = "MineContext"
 version = "0.1.0"
 description = "An open-source, proactive context-aware AI partner"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [
     { name = "MineContext Team" }
@@ -14,7 +14,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -41,6 +40,13 @@ dependencies = [
     "imagehash",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "pre-commit>=3.6.0",
+]
+
 [project.scripts]
 opencontext = "opencontext.cli:main"
 
@@ -54,8 +60,34 @@ Documentation = "https://github.com/volcengine/MineContext"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[dependency-groups]
-dev = []
-
 [tool.hatch.build.targets.wheel]
 packages = ["opencontext"]
+
+# Black - 代码格式化工具
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312", "py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | node_modules
+  | frontend
+)/
+'''
+
+# isort - import 语句排序工具
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+known_first_party = ["opencontext"]
+extend_skip_glob = ["frontend/*", "node_modules/*"]

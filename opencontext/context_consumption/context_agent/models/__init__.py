@@ -4,5 +4,5 @@ Context Agent Models
 """
 
 from .enums import *
+from .events import EventBuffer, StreamEvent
 from .schemas import *
-from .events import StreamEvent, EventBuffer

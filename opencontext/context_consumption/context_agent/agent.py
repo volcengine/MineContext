@@ -7,12 +7,12 @@ Provides a simple API interface
 """
 
 import asyncio
-from typing import Optional, Dict, Any, AsyncIterator
-from opencontext.context_consumption.context_agent.core.workflow import WorkflowEngine
-from opencontext.context_consumption.context_agent.core.streaming import StreamingManager
-from opencontext.context_consumption.context_agent.core.state import StateManager, WorkflowState
-from opencontext.context_consumption.context_agent.models.events import StreamEvent, EventType
+from typing import Any, AsyncIterator, Dict, Optional
 
+from opencontext.context_consumption.context_agent.core.state import StateManager, WorkflowState
+from opencontext.context_consumption.context_agent.core.streaming import StreamingManager
+from opencontext.context_consumption.context_agent.core.workflow import WorkflowEngine
+from opencontext.context_consumption.context_agent.models.events import EventType, StreamEvent
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger("ContextAgent")
@@ -20,22 +20,21 @@ logger = get_logger("ContextAgent")
 
 class ContextAgent:
     """Context Agent main class"""
-    
+
     def __init__(self, enable_streaming: bool = True):
         """
         Initialize the Context Agent
-        
+
         Args:
             enable_streaming: Whether to enable streaming output
         """
         self.streaming_manager = StreamingManager() if enable_streaming else None
         self.state_manager = StateManager()
         self.workflow_engine = WorkflowEngine(
-            streaming_manager=self.streaming_manager,
-            state_manager=self.state_manager
+            streaming_manager=self.streaming_manager, state_manager=self.state_manager
         )
         self.enable_streaming = enable_streaming
-        
+
     async def process(self, **kwargs) -> Dict[str, Any]:
         """
         Process user queries
@@ -47,16 +46,16 @@ class ContextAgent:
     async def process_stream(self, **kwargs) -> AsyncIterator[StreamEvent]:
         async for event in self.workflow_engine.execute_stream(**kwargs):
             yield event
-            
+
     def _format_result(self, state: WorkflowState) -> Dict[str, Any]:
         """Format the result"""
         result = {
             "success": state.stage.value == "completed",
             "workflow_id": state.metadata.workflow_id,
             "stage": state.stage.value,
-            "query": state.query.text
+            "query": state.query.text,
         }
-        
+
         # Add intent analysis results
         if state.intent:
             result["intent"] = {
@@ -69,14 +68,14 @@ class ContextAgent:
             result["context"] = {
                 "count": len(state.contexts.items),
                 "sufficiency": state.contexts.sufficiency.value,
-                "summary": state.contexts.get_summary()
+                "summary": state.contexts.get_summary(),
             }
         # Add execution results
         if state.execution_result:
             result["execution"] = {
                 "success": state.execution_result.success,
                 "outputs": state.execution_result.outputs,
-                "errors": state.execution_result.errors
+                "errors": state.execution_result.errors,
             }
         # Add reflection results
         if state.reflection:
@@ -84,12 +83,12 @@ class ContextAgent:
                 "type": state.reflection.reflection_type.value,
                 "success_rate": state.reflection.success_rate,
                 "summary": state.reflection.summary,
-                "improvements": state.reflection.improvements
+                "improvements": state.reflection.improvements,
             }
         # Add error information
         if state.errors:
             result["errors"] = state.errors
-            
+
         return result
 
     async def get_state(self, workflow_id: str) -> Optional[Dict[str, Any]]:
@@ -100,29 +99,25 @@ class ContextAgent:
         if state:
             return self._format_result(state)
         return None
-        
-    async def resume(
-        self,
-        workflow_id: str,
-        user_input: Optional[str] = None
-    ) -> Dict[str, Any]:
+
+    async def resume(self, workflow_id: str, user_input: Optional[str] = None) -> Dict[str, Any]:
         """
         Resume a workflow
-        
+
         Args:
             workflow_id: Workflow ID
             user_input: User input
-            
+
         Returns:
             Processing result
         """
         state = await self.workflow_engine.resume(workflow_id, user_input)
         return self._format_result(state)
-        
+
     def cancel(self, workflow_id: str):
         """
         Cancel a workflow
-        
+
         Args:
             workflow_id: Workflow ID
         """
@@ -131,19 +126,18 @@ class ContextAgent:
 
 # Convenience functions
 
+
 async def process_query(
-    query: str,
-    session_id: Optional[str] = None,
-    context: Optional[Dict[str, Any]] = None
+    query: str, session_id: Optional[str] = None, context: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Convenience function to process a query
-    
+
     Args:
         query: User query
         session_id: Session ID
         context: Additional context
-        
+
     Returns:
         Processing result
     """
@@ -152,18 +146,16 @@ async def process_query(
 
 
 async def process_query_stream(
-    query: str,
-    session_id: Optional[str] = None,
-    context: Optional[Dict[str, Any]] = None
+    query: str, session_id: Optional[str] = None, context: Optional[Dict[str, Any]] = None
 ) -> AsyncIterator[Dict[str, Any]]:
     """
     Convenience function to process a query with streaming
-    
+
     Args:
         query: User query
         session_id: Session ID
         context: Additional context
-        
+
     Yields:
         Stream events
     """

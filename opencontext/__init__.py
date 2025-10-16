@@ -15,10 +15,4 @@ __license__ = "Apache-2.0"
 __description__ = "A comprehensive context management system for intelligent applications"
 
 # Package metadata
-__all__ = [
-    "__version__",
-    "__author__", 
-    "__email__",
-    "__license__",
-    "__description__"
-]
+__all__ = ["__version__", "__author__", "__email__", "__license__", "__description__"]

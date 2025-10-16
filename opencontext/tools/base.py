@@ -8,11 +8,13 @@
 Entity normalization tool base class
 """
 
-from typing import Dict, Any, Optional
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
+
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
+
 
 class BaseTool(ABC):
     """Base class for entity tools"""
@@ -20,24 +22,24 @@ class BaseTool(ABC):
     @classmethod
     def get_name(cls) -> str:
         """Get tool name"""
-    
+
     @classmethod
     def get_description(cls) -> str:
         """Get tool description"""
-    
+
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
         """Get tool parameters definition"""
-    
+
     @abstractmethod
     def execute(self, **kwargs) -> Dict[str, Any]:
         """Execute tool operation"""
-    
+
     @classmethod
     def get_definition(cls) -> Dict[str, Any]:
         """Get tool definition for LLM calls"""
         return {
             "name": cls.get_name(),
             "description": cls.get_description(),
-            "parameters": cls.get_parameters()
+            "parameters": cls.get_parameters(),
         }
