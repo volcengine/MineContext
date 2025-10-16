@@ -7,19 +7,17 @@ Analyzes user intent and enhances the query
 """
 
 import json
-import stat
-from typing import Set, List, Dict, Any
+from typing import List, Dict, Any
 from datetime import datetime
-from venv import logger
 
 from opencontext.context_consumption.context_agent.models.events import StreamEvent
 
 from .base import BaseNode
 from ..core.state import WorkflowState
-from ..models.enums import NodeType, WorkflowStage, QueryType, DataSource, EventType
-from ..models.schemas import Intent, Entity
+from ..models.enums import NodeType, WorkflowStage, QueryType, EventType
+from ..models.schemas import Intent
 
-from opencontext.llm.global_vlm_client import generate_with_messages_async
+from opencontext.llm.global_vlm_client import generate_with_messages_async, generate_stream_for_agent
 from opencontext.config.global_config import get_prompt_group
 
 
@@ -84,7 +82,7 @@ class IntentNode(BaseNode):
         return QueryType.QA_ANALYSIS
 
     async def _simple_chat(self, state: WorkflowState) -> WorkflowState:
-        """Handle simple chats"""
+        """Handle simple chats with streaming"""
         from ..models.schemas import ExecutionResult, ExecutionPlan
         await self.streaming_manager.emit(StreamEvent(type=EventType.THINKING, content="Generating reply...", stage=WorkflowStage.INTENT_ANALYSIS))
         prompt_template = get_prompt_group('chat_workflow.social_interaction')
@@ -97,21 +95,35 @@ class IntentNode(BaseNode):
             recent_messages = state.contexts.chat_history[-10:]  # Last 10 messages
             for msg in recent_messages:
                 messages.insert(1, {"role": msg.role, "content": msg.content})
-        response = await generate_with_messages_async(
-            messages,
-            temperature=0.7,
-            thinking="disabled",
-        )
+
+        # Use streaming generation
+        full_content = ""
+        chunk_index = 0
+        async for chunk in generate_stream_for_agent(messages, temperature=0.7):
+            if chunk.choices and len(chunk.choices) > 0:
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content:
+                    full_content += delta.content
+                    # Emit streaming chunk event
+                    await self.streaming_manager.emit(StreamEvent(
+                        type=EventType.STREAM_CHUNK,
+                        content=delta.content,
+                        stage=WorkflowStage.INTENT_ANALYSIS,
+                        progress=0.5,
+                        metadata={"index": chunk_index}
+                    ))
+                    chunk_index += 1
+
         state.execution_result = ExecutionResult(
             success=True,
             plan=ExecutionPlan(),
-            outputs=[response],
+            outputs=[full_content],
             metadata={"type": "simple_chat"}
         )
         await self.streaming_manager.emit(StreamEvent(
             type=EventType.DONE, content="Reply generated", stage=WorkflowStage.INTENT_ANALYSIS
         ))
-        state.final_content = response
+        state.final_content = full_content
         state.update_stage(WorkflowStage.COMPLETED)
         return state
 
