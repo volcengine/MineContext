@@ -343,8 +343,8 @@ const ToDoCard: React.FC = () => {
           {hasTasks ? (
             <div>{buildTodoTree([...(todoListInitData as any), ...filterDoneTasks])}</div>
           ) : (
-            <div className="empty-state">
-              <img src={taskEmpty} alt="empty" />
+            <div className="flex flex-col items-center justify-center pt-[60px] pb-[60px] text-center">
+              <img src={taskEmpty} alt="empty" className="w-20 h-20 mb-4" />
               <Text type="secondary">Update at 8 am everyday</Text>
             </div>
           )}
