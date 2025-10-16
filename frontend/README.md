@@ -1,38 +1,39 @@
-# vikingdb-open
-
-An Electron application with React and TypeScript
-
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+# MineContext
 
 ## Project Setup
+
+### Build Backend
+#### for macos
+```bash
+uv sync
+source .venv/bin/activate
+./build.sh
+```
+#### for windows
+not support yet
+
 
 ### Install
 
 ```bash
-$ pnpm install
+cd frontend
+pnpm install
 ```
 
 ### Development
-
 ```bash
-$ pnpm dev
+pnpm dev
 ```
 
-### Build
+### Build APP
 
 ```bash
-# For windows
-$ pnpm build:win
-
 # For macOS
-$ pnpm build:mac
-
-# For Linux
-$ pnpm build:linux
+pnpm build:mac
+# Data Path
+# ～/Library/Application\ Support/MineContext
 ```
 
-### data
+### Data Path
 
-/Users/bytedance/Library/Application\ Support/VikingdbAtlasDev
+～/Library/Application\ Support/MineContext

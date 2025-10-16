@@ -224,8 +224,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
             {allMessages.map((msg, index) => (
               <div key={index} className={`flex bg-white w-full select-text ${msg.role === 'user' ? 'justify-end' : 'justify-start w-full'}`}>
                 <div className={`px-4 py-3 rounded-xl leading-6 relative select-text ${
-                  msg.role === 'user' 
-                    ? 'bg-blue-50 text-white rounded-br-sm' 
+                  msg.role === 'user'
+                    ? 'bg-blue-50 text-white rounded-br-sm'
                     : 'bg-transparent w-full text-gray-800 rounded-bl-sm'
                 }`}>
                   {msg.role === 'assistant' ? (
