@@ -8,7 +8,7 @@
 
 一个开源、主动的上下文感知 AI 伙伴，致力于让您的工作、学习与创作更加清晰高效。
 
-<a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
+<a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">社区实践</a> · <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
 
 [![][release-shield]][release-link]
 [![][github-stars-shield]][github-stars-link]
@@ -44,6 +44,7 @@
     - [核心技术栈](#核心技术栈)
     - [核心架构](#核心架构)
   - [💻 前端使用](#-前端使用)
+    - [构建后端](#构建后端)
     - [安装依赖](#安装依赖)
     - [开发调试](#开发调试)
     - [应用打包](#应用打包)

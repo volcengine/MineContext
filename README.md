@@ -8,7 +8,7 @@
 
 An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
 
-<a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
+ <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">Community Best Practice</a> · <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
 
 [![][release-shield]][release-link]
 [![][github-stars-shield]][github-stars-link]
@@ -44,6 +44,7 @@ Table of Contents
     - [Core Tech Stack](#core-tech-stack)
     - [Core Architecture](#core-architecture)
   - [💻 Frontend Usage](#-frontend-usage)
+    - [Build Backend](#build-backend)
     - [Install Dependencies](#install-dependencies)
     - [Development and Debugging](#development-and-debugging)
     - [Application Packaging](#application-packaging)
