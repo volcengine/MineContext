@@ -13,7 +13,6 @@ import importlib
 from typing import Any, Dict, List, Optional, Protocol, Type
 
 from opencontext.config import GlobalConfig
-from opencontext.context_processing.merger.context_merger import ContextMerger
 from opencontext.context_processing.processor.document_processor import DocumentProcessor
 from opencontext.context_processing.processor.screenshot_processor import ScreenshotProcessor
 from opencontext.interfaces import IContextProcessor
@@ -53,7 +52,6 @@ class ProcessorFactory:
         built_in_processors = {
             "document_processor": DocumentProcessor,
             "screenshot_processor": ScreenshotProcessor,
-            "context_merger": ContextMerger,
         }
 
         for name, processor_class in built_in_processors.items():

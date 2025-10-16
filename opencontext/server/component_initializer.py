@@ -161,10 +161,10 @@ class ComponentInitializer:
 
         # Initialize context merger if enabled
         if processing_config.get("context_merger", {}).get("enabled", False):
-            merger = processor_factory.create_processor("context_merger")
-            if not merger:
-                logger.error("Failed to create context merger")
-                raise RuntimeError("Failed to create context merger")
+            # Direct instantiation instead of using factory to avoid circular import
+            from opencontext.context_processing.merger.context_merger import ContextMerger
+
+            merger = ContextMerger()
             processor_manager.set_merger(merger)
             processor_manager.start_periodic_compression()
             logger.info("Periodic memory compression started")
