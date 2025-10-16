@@ -6,9 +6,8 @@ Execution Node
 Executes specific tasks
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime
-import json
 
 from .base import BaseNode
 from ..core.state import WorkflowState, StreamEvent
@@ -20,10 +19,9 @@ from ..models.schemas import (
     ExecutionStep, ExecutionPlan, ExecutionResult, QueryType
 )
 
-from opencontext.llm.global_vlm_client import generate_with_messages_async
+from opencontext.llm.global_vlm_client import generate_stream_for_agent
 from opencontext.storage.global_storage import get_storage
 from opencontext.config.global_config import get_prompt_group
-from opencontext.models.enums import VaultType
 
 
 class ExecutorNode(BaseNode):
@@ -87,7 +85,6 @@ class ExecutorNode(BaseNode):
         """Generate execution plan"""
         plan = ExecutionPlan()
         query_type = state.intent.query_type
-        enhanced_query = state.intent.enhanced_query or state.query.text
         if query_type == QueryType.DOCUMENT_EDIT:
             step = ExecutionStep(action=ActionType.EDIT)
             plan.add_step(step)
@@ -116,12 +113,12 @@ class ExecutorNode(BaseNode):
         return result
             
     async def _execute_generate(self, state: WorkflowState) -> Dict[str, Any]:
-        """Execute generation task"""
+        """Execute generation task with streaming"""
         prompt_group = get_prompt_group("chat_workflow.executor.generate")
-        
+
         system_prompt = prompt_group["system"]
         temperature = 0.7
-        
+
         context = state.contexts.prepare_context()
         user_prompt = prompt_group["user"]
         user_prompt = user_prompt.format(
@@ -130,29 +127,45 @@ class ExecutorNode(BaseNode):
             collected_contexts=context.get("collected_contexts", ""),
             chat_history=context.get("chat_history", ""),
             current_document=context.get("current_document", ""),
-            selected_content=context.get("selected_content", "")   
+            selected_content=context.get("selected_content", "")
         )
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-        content = await generate_with_messages_async(
-            messages,
-            temperature=temperature
-        )
+
+        # Use streaming generation
+        full_content = ""
+        chunk_index = 0
+        async for chunk in generate_stream_for_agent(messages, temperature=temperature):
+            if chunk.choices and len(chunk.choices) > 0:
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content:
+                    full_content += delta.content
+                    # Emit streaming chunk event
+                    await self.streaming_manager.emit(StreamEvent(
+                        type=EventType.STREAM_CHUNK,
+                        content=delta.content,
+                        stage=WorkflowStage.EXECUTION,
+                        progress=0.5,  # Progress is unknown during streaming
+                        metadata={"index": chunk_index}
+                    ))
+                    chunk_index += 1
+
+
         return {
             "success": True,
             "output": {
                 "type": "generated_content",
-                "content": content
+                "content": full_content
             }
         }
             
     async def _execute_edit(self, state: WorkflowState) -> Dict[str, Any]:
-        """Execute edit/rewrite task"""
+        """Execute edit/rewrite task with streaming"""
         context = state.contexts.prepare_context()
         prompt_group = get_prompt_group("chat_workflow.executor.edit")
-        
+
         system_prompt = prompt_group["system"]
         user_prompt = prompt_group["user"]
         user_prompt = user_prompt.format(
@@ -161,21 +174,36 @@ class ExecutorNode(BaseNode):
             collected_contexts=context.get("collected_contexts", ""),
             chat_history=context.get("chat_history", ""),
             current_document=context.get("current_document", ""),
-            selected_content=context.get("selected_content", "")   
+            selected_content=context.get("selected_content", "")
         )
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-        edited_content = await generate_with_messages_async(
-            messages,
-            temperature=0.3
-        )
+
+        # Use streaming generation
+        full_content = ""
+        chunk_index = 0
+        async for chunk in generate_stream_for_agent(messages, temperature=0.3):
+            if chunk.choices and len(chunk.choices) > 0:
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content:
+                    full_content += delta.content
+                    # Emit streaming chunk event
+                    await self.streaming_manager.emit(StreamEvent(
+                        type=EventType.STREAM_CHUNK,
+                        content=delta.content,
+                        stage=WorkflowStage.EXECUTION,
+                        progress=0.5,
+                        metadata={"index": chunk_index}
+                    ))
+                    chunk_index += 1
+
         return {
             "success": True,
             "output": {
                 "type": "edited_content",
-                "content": edited_content
+                "content": full_content
             }
         }
 
@@ -211,7 +239,7 @@ class ExecutorNode(BaseNode):
     #     }
             
     async def _execute_answer(self, state: WorkflowState) -> Dict[str, Any]:
-        """Execute answer task - intelligently handle Q&A, summarization, analysis, etc."""
+        """Execute answer task - intelligently handle Q&A, summarization, analysis, etc. with streaming"""
         context = state.contexts.prepare_context()
         prompt_group = get_prompt_group("chat_workflow.executor.answer")
         system_prompt = prompt_group["system"]
@@ -228,15 +256,29 @@ class ExecutorNode(BaseNode):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-        answer = await generate_with_messages_async(
-            messages,
-            temperature=0.5
-        )
-        
+
+        # Use streaming generation
+        full_content = ""
+        chunk_index = 0
+        async for chunk in generate_stream_for_agent(messages, temperature=0.5):
+            if chunk.choices and len(chunk.choices) > 0:
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content:
+                    full_content += delta.content
+                    # Emit streaming chunk event
+                    await self.streaming_manager.emit(StreamEvent(
+                        type=EventType.STREAM_CHUNK,
+                        content=delta.content,
+                        stage=WorkflowStage.EXECUTION,
+                        progress=0.5,
+                        metadata={"index": chunk_index}
+                    ))
+                    chunk_index += 1
+
         return {
             "success": True,
             "output": {
                 "type": "answer",
-                "content": answer
+                "content": full_content
             }
         }
