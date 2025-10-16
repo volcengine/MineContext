@@ -19,8 +19,8 @@ const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({
   onGrantPermission
 }) => {
   return (
-    <div className="recording-area-content">
-      <div className="recording-placeholder">
+    <div className="flex items-center justify-center flex-1 min-h-[300px]">
+      <div className="text-center flex flex-col items-center justify-center">
         {hasPermission ? (
           isToday ? (
             <>
@@ -52,7 +52,7 @@ const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({
               type="primary"
               size="large"
               onClick={onGrantPermission}
-              className="[&_.arco-btn-primary]:!mt-6 [&_.arco-btn-primary]:!font-medium [&_.arco-btn-primary]:!bg-black">
+              className="[&_.arco-btn-primary]: !mt-6 [&_.arco-btn-primary]: !font-medium [&_.arco-btn-primary]: !bg-black">
               Enable Permission
             </Button>
           </>

@@ -4,10 +4,9 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import { Button, Input, Typography, Tag } from '@arco-design/web-react'
 import { IconClose, IconStop, IconPlus } from '@arco-design/web-react/icon'
-import { useChatStream } from '@renderer/hooks/useChatStream'
+import { useChatStream } from '@renderer/hooks/use-chat-stream'
 import { ChatContext } from '@renderer/services/ChatStreamService'
 import MarkdownIt from 'markdown-it'
-import './index.css'
 
 const { Text } = Typography
 const { TextArea } = Input
@@ -33,7 +32,7 @@ export const MarkdownContent: React.FC<{ content: string }> = ({ content }) => {
 
   return (
     <div
-      className="markdown-content"
+      className="markdown-content select-text"
       dangerouslySetInnerHTML={{ __html: htmlContent }}
       style={{
         fontSize: 14,
@@ -154,9 +153,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
   }, [messages, streamingMessage])
 
   return (
-    <div className={`ai-assistant-sidebar ${visible ? 'ai-assistant-sidebar-visible' : 'ai-assistant-sidebar-hidden'}`}>
+    <div className={`relative h-[calc(100%-16px)] bg-white flex flex-col flex-shrink-0 transition-all duration-300 rounded-2xl m-2 ml-2 overflow-hidden select-text ${visible ? 'min-w-[340px] w-full' : 'w-0 relative select-text'}`}>
       {/* Header */}
-      <div className="ai-assistant-header">
+      <div className="flex items-center px-4 py-3 border-b border-gray-100 bg-white gap-2 select-none">
         <Button type="text" icon={<IconPlus />} onClick={startNewConversation} />
         <Button
           type="text"
@@ -169,10 +168,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
         />
       </div>
 
-      <div className="ai-assistant-content">
+      <div className="flex-1 overflow-y-auto p-5 w-full">
         {allMessages.length === 0 ? (
-          <div className="ai-assistant-welcome">
-            <div className="ai-assistant-welcome-icon">
+          <div className="flex flex-col items-center text-center h-full justify-center">
+            <div className="mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
                 <g clip-path="url(#clip0_3_134963)">
                   <path
@@ -209,26 +208,30 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
             <Text type="secondary" style={{ textAlign: 'center', lineHeight: 1.5 }}>
               Try asking me
             </Text>
-            <div className="ai-assistant-suggestions">
-              <div className="suggestion-item" onClick={() => setMessage('Summarize my recent growth')}>
+            <div className="mt-6">
+              <div className="py-1 px-3 bg-gray-50 mb-2 cursor-pointer transition-all duration-200 text-[13px] text-gray-800 rounded-lg border border-gray-200 bg-white bg-opacity-50 hover:rounded-lg hover:border-gray-200 hover:bg-white hover:bg-opacity-50" onClick={() => setMessage('Summarize my recent growth')}>
                 Summarize my recent growth
               </div>
               <div
-                className="suggestion-item"
+                className="py-1 px-3 bg-gray-50 mb-2 cursor-pointer transition-all duration-200 text-[13px] text-gray-800 rounded-lg border border-gray-200 bg-white bg-opacity-50 hover:rounded-lg hover:border-gray-200 hover:bg-white hover:bg-opacity-50"
                 onClick={() => setMessage('List what I have done in the last two hours')}>
                 List what I have done in the last two hours
               </div>
             </div>
           </div>
         ) : (
-          <div className="ai-assistant-messages">
+          <div className="flex flex-col w-full gap-4 select-text">
             {allMessages.map((msg, index) => (
-              <div key={index} className={`message ${msg.role}`}>
-                <div className="message-content">
+              <div key={index} className={`flex bg-white w-full select-text ${msg.role === 'user' ? 'justify-end' : 'justify-start w-full'}`}>
+                <div className={`px-4 py-3 rounded-xl leading-6 relative select-text ${
+                  msg.role === 'user' 
+                    ? 'bg-blue-50 text-white rounded-br-sm' 
+                    : 'bg-transparent w-full text-gray-800 rounded-bl-sm'
+                }`}>
                   {msg.role === 'assistant' ? (
                     <MarkdownContent content={msg.content} />
                   ) : (
-                    <Text style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</Text>
+                    <Text style={{ whiteSpace: 'pre-wrap' }} className="select-text">{msg.content}</Text>
                   )}
                   {/* Display stage information for streaming messages */}
                   {streamingMessage && index === allMessages.length - 1 && streamingMessage.stage && (
@@ -248,8 +251,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
 
             {/* Error message display */}
             {error && (
-              <div className="message assistant">
-                <div className="message-content" style={{ background: '#fff2f0', borderColor: '#ffccc7' }}>
+              <div className="flex bg-white w-full justify-start w-full">
+                <div className="px-4 py-3 rounded-xl leading-6 relative select-text bg-red-50 border-red-200">
                   <Text style={{ color: '#ff4d4f', marginBottom: 8, display: 'block' }}>❌ {error}</Text>
                   <Button
                     size="small"
@@ -272,22 +275,22 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
         )}
       </div>
 
-      <div className="ai-assistant-input">
-        <div className="input-container">
-          <div className="input-wrapper">
+      <div className="p-4 bg-white border-t border-gray-100 select-none">
+        <div className="flex flex-col gap-2 bg-gray-50 rounded-xl p-3 border border-gray-200 transition-all duration-200">
+          <div className="flex-1">
             <TextArea
               placeholder={isLoading ? 'AI is thinking...' : 'Ask me anything'}
               value={message}
               onChange={setMessage}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
-              className="message-input"
+              className="!bg-transparent !border-none !p-0 text-sm leading-6 resize-none focus:!shadow-none [&_.arco-textarea-wrapper]:bg-transparent"
               autoFocus
             />
           </div>
-          <div className="input-actions">
+          <div className="flex justify-end items-center gap-2">
             {isLoading ? (
-              <Button type="primary" size="small" icon={<IconStop />} onClick={stopStreaming} className="stop-button" />
+              <Button type="primary" size="small" icon={<IconStop />} onClick={stopStreaming} className="rounded-lg font-medium !bg-red-500 !border-red-500 hover:!bg-red-400 hover:!border-red-400" />
             ) : (
               <Button
                 type="primary"
@@ -302,7 +305,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
                 }
                 onClick={handleSendMessage}
                 disabled={!message.trim()}
-                className="send-button"
+                className="rounded-lg font-medium"
               />
             )}
           </div>
