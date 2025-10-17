@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import dayjs from 'dayjs'
 export const useRecordingTimeValidation = (
     enableRecordingHours: boolean,
     recordingHours: [string, string],
@@ -9,9 +10,10 @@ export const useRecordingTimeValidation = (
 
   const checkCanRecord = useMemoizedFn(() => {
   if (enableRecordingHours) {
-        const currentDay = new Date().getDay()
-        const currentHour = new Date().getHours()
-        const currentMinute = new Date().getMinutes()
+        const now = dayjs()
+        const currentDay = now.day()
+        const currentHour = now.hour()
+        const currentMinute = now.minute()
 
   // Check if within allowed date range
         if (applyToDays === 'weekday') {

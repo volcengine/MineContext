@@ -8,8 +8,8 @@ Semantic context retrieval tool
 Retrieves knowledge concepts and technical principles from ChromaDB
 """
 
-from opencontext.tools.retrieval_tools.base_context_retrieval_tool import BaseContextRetrievalTool
 from opencontext.models.enums import ContextType
+from opencontext.tools.retrieval_tools.base_context_retrieval_tool import BaseContextRetrievalTool
 
 
 class SemanticContextTool(BaseContextRetrievalTool):

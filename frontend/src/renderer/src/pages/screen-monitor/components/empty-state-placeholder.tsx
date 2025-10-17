@@ -15,8 +15,8 @@ interface EmptyStatePlaceholderProps {
 
 const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({ hasPermission, isToday, onGrantPermission }) => {
   return (
-    <div className="flex flex-1 flex-col justify-center items-center">
-      <div className="flex flex-col justify-center items-center">
+    <div className="flex items-center justify-center flex-1 min-h-[300px]">
+      <div className="text-center flex flex-col items-center justify-center">
         {hasPermission ? (
           isToday ? (
             <>
@@ -42,7 +42,7 @@ const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({ hasPermis
               type="primary"
               size="large"
               onClick={onGrantPermission}
-              className="[&_.arco-btn-primary]:!mt-6 [&_.arco-btn-primary]:!font-medium [&_.arco-btn-primary]:!bg-black">
+              className="[&_.arco-btn-primary]: !mt-6 [&_.arco-btn-primary]: !font-medium [&_.arco-btn-primary]: !bg-black">
               Enable Permission
             </Button>
           </>

@@ -8,7 +8,10 @@
 
 一个开源、主动的上下文感知 AI 伙伴，致力于让您的工作、学习与创作更加清晰高效。
 
-<a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
+中文 / [English](README.md)
+
+
+<a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">社区实践</a> · <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
 
 [![][release-shield]][release-link]
 [![][github-stars-shield]][github-stars-link]
@@ -18,31 +21,36 @@
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
 
-中文 / [English](README.md)
+
+<a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
+
 
 👋 加入我们的 [微信 / 飞书 / 小红书交流群](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
 🌍 加入我们的 [Discord 社区](https://discord.gg/tGj7RQ3nUR)
 
-[Mac 应用下载](https://github.com/volcengine/MineContext/releases/download/0.1.1/MineContext-0.1.1.dmg)
+[Mac 应用下载](https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg)
 
 </div>
-
+  
 目录
 
-- [👋🏻 MineContext 是什么](#-minecontext是什么)
+- [👋🏻 MineContext 是什么](#-minecontext-是什么)
 - [🚀 核心功能](#-核心功能)
 - [🏁 快速开始](#-快速开始)
   - [1. 安装](#1-安装)
   - [2. 禁用隔离属性](#2-禁用隔离属性)
-  - [3. 输入您的 API 密钥](#3-输入您的api密钥)
+  - [3. 输入您的 API 密钥](#3-输入您的-api-密钥)
   - [4. 开始记录](#4-开始记录)
   - [5. 忘掉它](#5-忘掉它)
+  - [6. 后台调试](#6-后台调试)
 - [🎃 贡献指南](#-贡献指南)
   - [🎨 前端架构](#-前端架构)
     - [核心技术栈](#核心技术栈)
     - [核心架构](#核心架构)
   - [💻 前端使用](#-前端使用)
+    - [构建后端](#构建后端)
     - [安装依赖](#安装依赖)
     - [开发调试](#开发调试)
     - [应用打包](#应用打包)
@@ -53,7 +61,7 @@
     - [安装](#安装)
     - [配置](#配置)
     - [运行服务器](#运行服务器)
-- [💎 MineContext 与我的世界](#-minecontext与我的世界)
+- [💎 MineContext 与我的世界](#-minecontext-与我的世界)
 - [🎯 目标用户](#-目标用户)
 - [🔌 上下文来源](#-上下文来源)
 - [🆚 与同类应用的比较](#-与同类应用的比较)
@@ -64,13 +72,13 @@
 - [Star History](#star-history)
 - [📃 许可证](#-许可证)
 
-## 👋🏻 MineContext 是什么
+# 👋🏻 MineContext 是什么
 
 MineContext 是一个具有上下文感知能力的主动式 AI 伙伴。它基于屏幕截图+内容理解的方式（未来还将支持其他来源的多模态信息，包括文档、图片、视频、代码、外部应用数据），能够看到并看懂用户的数字世界上下文，然后再基于底层的上下文工程框架，主动推送洞察、日/周总结 、待办、活动记录等高质量信息，同时支持用户基于 Context 和生成的信息进行再创作。
 
 ![feature.gif](src/feature.gif)
 
-## 🚀 核心功能
+# 🚀 核心功能
 
 MineContext 专注于五个核心功能：轻松收集、智能重显和主动交付。
 
@@ -85,15 +93,15 @@ MineContext 专注于五个核心功能：轻松收集、智能重显和主动�
 5. 🎯 上下文工程架构
    支持多模态、多源数据的完整生命周期——从捕获、处理和存储到管理、检索和消费——支持生成六种类型的智能上下文。
 
-## 🏁 快速开始
+# 🏁 快速开始
 
-### 1. 安装
+## 1. 安装
 
 点击 [Github Latest Release](https://github.com/volcengine/MineContext/releases) 下载最新版本。
 
 ![Download APP](src/Download-App.gif)
 
-### 2. 禁用隔离属性
+## 2. 禁用隔离属性
 
 在运行应用程序之前，在终端中输入以下命令以禁用隔离属性。
 
@@ -103,7 +111,7 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 ![Quarantine](src/Quarantine.gif)
 
-### 3. 输入您的 API 密钥
+## 3. 输入您的 API 密钥
 
 应用程序启动后（首次运行时需要安装后端环境，约需等待两分钟），请根据引导输入您的 API 密钥。目前我们支持豆包、OpenAI 以及自定义模型服务，包括任何兼容 OpenAI API 格式的**本地模型**或**第三方模型**服务。
 我们推荐使用[LMStudio](https://lmstudio.ai/)来运行本地模型，它提供了简单的界面和强大的功能，能够帮助您快速部署和管理本地模型。
@@ -121,7 +129,7 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 以下是获取了 API Key 后的填写流程:
 ![Enter API-Key](src/Enter-API-Key.gif)
 
-### 4. 开始记录
+## 4. 开始记录
 
 进入【Screen Monitor】启用屏幕分享的系统权限，设置完之后需要重新启动应用使其生效。
 
@@ -131,11 +139,11 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 ![Screen-Settings](src/Screen-Settings.gif)
 
-### 5. 忘掉它
+## 5. 忘掉它
 
 启动记录后，您的上下文将逐渐被收集。这会需要一些时间才能产生价值。所以说，忘记它，安心专注于其他任务吧。MineContext 将会在后台为您生成待办事项、提示、摘要和活动。当然，您也可以通过【Chat with AI】进行主动问答。
 
-### 6. 后台调试
+## 6. 后台调试
 
 MineContext 支持在`http://localhost:8000` 进行后台调试。
 
@@ -150,6 +158,8 @@ MineContext 支持在`http://localhost:8000` 进行后台调试。
 3.支持调整主动推送任务的系统提示词
 
 ![后台调试3](src/backend-web-3.png)
+
+# 🎃 贡献指南
 
 ## 🎨 前端架构
 
@@ -188,70 +198,65 @@ frontend/
 ```
 
 1、主进程 (src/main/)负责：
-• 管理应用窗口
-• 处理生命周期事件（启动、退出、激活）
-• 建立安全的 IPC 通信
-• 与后端服务（Python 与系统 API）集成
+
+- 管理应用窗口
+- 处理生命周期事件（启动、退出、激活）
+- 建立安全的 IPC 通信
+- 与后端服务（Python 与系统 API）集成
 
 2、预加载脚本 (src/preload/)负责：
-• 安全地将 Node.js API 暴露给渲染进程
-• 处理与主进程的 IPC 通信
-• 实现跨进程的资源访问
+
+- 安全地将 Node.js API 暴露给渲染进程
+- 处理与主进程的 IPC 通信
+- 实现跨进程的资源访问
 
 3、渲染进程 (src/renderer/)负责：
-• 实现基于 React 的用户界面
-• 使用 Jotai 与 Redux 管理全局状态
-• 基于 Tailwind CSS 的高效样式体系
-• 动态加载与性能优化机制
+
+- 实现基于 React 的用户界面
+- 使用 Jotai 与 Redux 管理全局状态
+- 基于 Tailwind CSS 的高效样式体系
+- 动态加载与性能优化机制
 
 4、构建与打包负责：
-• electron-vite.config.ts — 同时配置主进程与渲染进程的构建逻辑（别名、插件等）。
-• electron-builder.yml — 定义针对 Windows、macOS、Linux 的打包与分发配置。
+
+- electron-vite.config.ts — 同时配置主进程与渲染进程的构建逻辑（别名、插件等）。
+- electron-builder.yml — 定义针对 Windows、macOS、Linux 的打包与分发配置。
 
 ## 💻 前端使用
+
+### 构建后端
+
+在开始前端开发之前，需要先构建后端：
+
+```bash
+uv sync
+source .venv/bin/activate
+./build.sh
+```
 
 ### 安装依赖
 
 由于包版本原因，目前不支持使用国内 PYPI 源，请输入以下命令，确保使用的是原始 PYPI 环境
-
-```
+```bash
 pip config unset global.index-url
 cd frontend
-./start-dev.sh
+pnpm install
 ```
 
 ### 开发调试
 
 本地开发时，截屏范围获取较慢属于正常现象，等待即可，打包应用无此问题。
 
-```
-cd frontend
-pnpm install
+```bash
 pnpm dev
 ```
 
-💡 建议： 每次启动前端时优先使用 ./start-dev.sh，该脚本会确保 Node.js 使用稳定版本环境以及配置基础的运行环境。
-
 ### 应用打包
 
-为不同平台构建可执行文件：
-
-- macOS
+为 macOS 平台构建应用：
 
 ```bash
 pnpm build:mac
-```
-
-- Windows
-
-```bash
-pnpm build:win
-```
-
-- Linux
-
-```bash
-pnpm build:linux
 ```
 
 打包生成的可执行文件会存放在`MineContext/frontend/dist`目录下。
@@ -393,13 +398,13 @@ pip install -e .
 opencontext start --port 8000
 ```
 
-## 💎 MineContext 与我的世界
+# 💎 MineContext 与我的世界
 
 MineContext 的命名，也体现了团队的巧思。既是“我的上下文”，更要“挖掘上下文”。它借鉴了 MineCraft（我的世界）的核心理念——开放、创造与探索。
 
 如果说海量的 Context 是散落各处的“方块”，那么 MineContext 提供的就是一个让你能够自由搭建、组合、创造的“世界”。用户除了接收到主动推送的信息外，还能够基于收集到的海量 Context 和生成的高质量信息进行再创作。
 
-## 🎯 目标用户
+# 🎯 目标用户
 
 | 目标用户类别 | 具体角色/身份      | 核心需求/痛点                                |
 | ------------ | ------------------ | -------------------------------------------- |
@@ -408,7 +413,7 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 | 终身学习者   | 学生、研究者       | 建立系统化知识体系，高效管理和连接学习材料   |
 | 项目经理     | 产品经理、项目经理 | 整合多源信息和数据，确保项目一致性和决策效率 |
 
-## 🔌 上下文来源
+# 🔌 上下文来源
 
 我们将按照以下计划优先扩展上下文来源，热烈欢迎大家积极贡献代码。
 
@@ -453,9 +458,9 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 | 智能眼镜数据同步 | 物理世界交互记录 | P5     |          |
 | 智能手环数据同步 | 生理数据         | P5     |          |
 
-## 🆚 与同类应用的比较
+# 🆚 与同类应用的比较
 
-### MineContext vs ChatGPT Pulse
+## MineContext vs ChatGPT Pulse
 
 - 🖥️ 全面的数字世界上下文：
   MineContext 通过读取屏幕截图捕获您的整个数字工作流程，提供丰富的、可视化的日常活动和应用程序上下文。相比之下，ChatGPT Pulse 仅限于单个基于文本的对话上下文。
@@ -468,7 +473,7 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 - 💰 经济实惠的 API 使用：
   MineContext 通过允许您使用自己的 API 密钥，避免了每月 200 美元的昂贵 Pro 订阅费用，让您完全控制支出。ChatGPT Pulse 的高级功能被锁定在其昂贵的高级订阅后面。
 
-### MineContext vs Dayflow
+## MineContext vs Dayflow
 
 - 💡 更丰富、更主动的洞察：
   MineContext 提供更多样化的自动智能内容——包括简明摘要、可操作的待办事项和上下文提示——超越基本的活动跟踪。DayFlow 仅记录用户活动。
@@ -477,19 +482,19 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 - ✨ 更优质的活动生成与体验：
   MineContext 生成的活动记录更加清晰和详细，具有更直观和交互式的仪表板，提供无缝的用户体验。DayFlow 的活动日志更基本，交互性有限。
 
-## 👥 社区
+# 👥 社区
 
-### 社区与支持
+## 社区与支持
 
 - [GitHub Issues](https://github.com/volcengine/MineContext/issues)：使用 MineContext 时遇到的错误和问题。
 - [邮件支持](mailto:minecontext@bytedance.com)：关于使用 MineContext 的反馈和问题。
 - <a href="https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg">微信群</a>：讨论 MineContext 使用并分享最新 AI 技术。
 
-## Star History
+# Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=volcengine/MineContext&type=Timeline)](https://www.star-history.com/#volcengine/MineContext&Timeline)
 
-## 📃 许可证
+# 📃 许可证
 
 本仓库在 Apache 2.0 许可证下发布。
 

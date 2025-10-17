@@ -1,9 +1,10 @@
 import React from 'react'
 import { Typography, Timeline } from '@arco-design/web-react'
-import { Activity } from '../ScreenMonitor'
+import { Activity } from '../screen-monitor'
 import { ActivityTimelineItem } from './activitie-timeline-item'
 import { formatTime } from '@renderer/utils/time'
 import { SCREEN_INTERVAL_TIME } from '../constant'
+import dayjs from 'dayjs'
 
 const { Text } = Typography
 const TimelineItem = Timeline.Item
@@ -59,7 +60,7 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
 
         {/* Display activities */}
         {activities
-          .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime()) // Sort by time in descending order
+          .sort((a, b) => dayjs(b.start_time).valueOf() - dayjs(a.start_time).valueOf()) // Sort by time in descending order
           .map((activity) => (
             <TimelineItem label={formatTime(activity?.end_time)} key={activity.id}>
               <ActivityTimelineItem key={activity.id} activity={activity} />

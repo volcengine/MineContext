@@ -7,22 +7,22 @@
 Server component: monitoring routes - Monitoring API endpoints
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from datetime import datetime, timedelta
 from typing import Optional
-from datetime import datetime
-from opencontext.server.utils import get_context_lab
-from opencontext.server.opencontext import OpenContext
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+
 from opencontext.monitoring import get_monitor
 from opencontext.server.middleware.auth import auth_dependency
-from datetime import timedelta
+from opencontext.server.opencontext import OpenContext
+from opencontext.server.utils import get_context_lab
 
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
 
 @router.get("/overview")
 async def get_system_overview(
-    opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    opencontext: OpenContext = Depends(get_context_lab), _auth: str = auth_dependency
 ):
     """
     Get system monitoring overview
@@ -39,7 +39,7 @@ async def get_system_overview(
 async def get_context_type_stats(
     force_refresh: bool = Query(False, description="Whether to force refresh cache"),
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get candidate count statistics for each context_type
@@ -49,13 +49,15 @@ async def get_context_type_stats(
         stats = monitor.get_context_type_stats(force_refresh=force_refresh)
         return {"success": True, "data": stats}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get context type statistics: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get context type statistics: {str(e)}"
+        )
 
 
 @router.get("/token-usage")
 async def get_token_usage_summary(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get model token consumption details
@@ -65,13 +67,15 @@ async def get_token_usage_summary(
         summary = monitor.get_token_usage_summary(hours=hours)
         return {"success": True, "data": summary}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get token usage statistics: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get token usage statistics: {str(e)}"
+        )
 
 
 @router.get("/processing")
 async def get_processing_metrics(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get processor performance metrics
@@ -81,14 +85,16 @@ async def get_processing_metrics(
         metrics = monitor.get_processing_summary(hours=hours)
         return {"success": True, "data": metrics}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get processing performance metrics: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get processing performance metrics: {str(e)}"
+        )
 
 
 @router.get("/todo-stats")
 async def get_todo_stats(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get TODO task statistics
@@ -105,7 +111,7 @@ async def get_todo_stats(
 async def get_tips_count(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get Tips count
@@ -122,7 +128,7 @@ async def get_tips_count(
 async def get_activity_count(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get activity record count
@@ -137,8 +143,7 @@ async def get_activity_count(
 
 @router.post("/refresh-context-stats")
 async def refresh_context_type_stats(
-    opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    opencontext: OpenContext = Depends(get_context_lab), _auth: str = auth_dependency
 ):
     """
     Refresh context type statistics cache
@@ -152,22 +157,18 @@ async def refresh_context_type_stats(
 
 
 @router.get("/health")
-async def monitoring_health(
-    _auth: str = auth_dependency
-):
+async def monitoring_health(_auth: str = auth_dependency):
     """
     Monitoring system health check
     """
     try:
         monitor = get_monitor()
-        uptime_seconds = int((datetime.now() - monitor._start_time).total_seconds()) if monitor._start_time else 0
-        return {
-            "success": True,
-            "data": {
-                "monitor_active": True,
-                "uptime_seconds": uptime_seconds
-            }
-        }
+        uptime_seconds = (
+            int((datetime.now() - monitor._start_time).total_seconds())
+            if monitor._start_time
+            else 0
+        )
+        return {"success": True, "data": {"monitor_active": True, "uptime_seconds": uptime_seconds}}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
@@ -176,7 +177,7 @@ async def monitoring_health(
 async def get_processing_errors(
     hours: int = Query(1, ge=1, le=24, description="Statistics time range (hours)"),
     top: int = Query(5, ge=1, le=20, description="Number of top errors to return"),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """
     Get processing errors Top N

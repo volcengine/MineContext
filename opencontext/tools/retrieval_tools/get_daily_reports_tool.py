@@ -9,6 +9,7 @@ Retrieves daily/weekly reports from SQLite vaults table
 """
 
 from typing import Any, Dict, List
+
 from opencontext.tools.retrieval_tools.base_document_retrieval_tool import BaseDocumentRetrievalTool
 from opencontext.utils.logging_utils import get_logger
 
@@ -64,29 +65,31 @@ class GetDailyReportsTool(BaseDocumentRetrievalTool):
         base_params = super().get_parameters()
 
         # Add document-specific parameters
-        base_params["properties"].update({
-            "document_type": {
-                "type": "string",
-                "enum": ["DailyReport", "WeeklyReport", "Note"],
-                "description": "Filter by document type. Leave empty to retrieve all types."
-            },
-            "created_after": {
-                "type": "integer",
-                "description": "Filter reports created after this timestamp (Unix epoch seconds)"
-            },
-            "created_before": {
-                "type": "integer",
-                "description": "Filter reports created before this timestamp (Unix epoch seconds)"
-            },
-            "updated_after": {
-                "type": "integer",
-                "description": "Filter reports updated after this timestamp (Unix epoch seconds)"
-            },
-            "updated_before": {
-                "type": "integer",
-                "description": "Filter reports updated before this timestamp (Unix epoch seconds)"
+        base_params["properties"].update(
+            {
+                "document_type": {
+                    "type": "string",
+                    "enum": ["DailyReport", "WeeklyReport", "Note"],
+                    "description": "Filter by document type. Leave empty to retrieve all types.",
+                },
+                "created_after": {
+                    "type": "integer",
+                    "description": "Filter reports created after this timestamp (Unix epoch seconds)",
+                },
+                "created_before": {
+                    "type": "integer",
+                    "description": "Filter reports created before this timestamp (Unix epoch seconds)",
+                },
+                "updated_after": {
+                    "type": "integer",
+                    "description": "Filter reports updated after this timestamp (Unix epoch seconds)",
+                },
+                "updated_before": {
+                    "type": "integer",
+                    "description": "Filter reports updated before this timestamp (Unix epoch seconds)",
+                },
             }
-        })
+        )
 
         return base_params
 
@@ -101,7 +104,7 @@ class GetDailyReportsTool(BaseDocumentRetrievalTool):
             "document_type": doc.get("document_type"),
             "created_at": doc.get("created_at"),
             "updated_at": doc.get("updated_at"),
-            "is_folder": doc.get("is_folder", False)
+            "is_folder": doc.get("is_folder", False),
         }
 
     def execute(self, **kwargs) -> List[Dict[str, Any]]:
@@ -138,7 +141,7 @@ class GetDailyReportsTool(BaseDocumentRetrievalTool):
                 created_after=self._parse_datetime(created_after),
                 created_before=self._parse_datetime(created_before),
                 updated_after=self._parse_datetime(updated_after),
-                updated_before=self._parse_datetime(updated_before)
+                updated_before=self._parse_datetime(updated_before),
             )
 
             # Format and return results

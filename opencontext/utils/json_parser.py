@@ -31,16 +31,16 @@ def parse_json_from_response(response: str) -> Optional[Any]:
     """
     if not isinstance(response, str):
         return None
-    
+
     # Remove leading and trailing whitespace
     response = response.strip()
-    
+
     # Strategy 1: Direct parsing
     try:
         return json.loads(response)
     except json.JSONDecodeError:
         pass
-    
+
     # Strategy 2: Extract JSON from code blocks
     match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", response, re.DOTALL)
     if match:
@@ -49,7 +49,7 @@ def parse_json_from_response(response: str) -> Optional[Any]:
             return json.loads(json_str)
         except json.JSONDecodeError:
             pass
-    
+
     # Strategy 3: Regex match JSON structure
     match = re.search(r"(\{[\s\S]*\}|\[[\s\S]*\])", response)
     if match:
@@ -58,7 +58,7 @@ def parse_json_from_response(response: str) -> Optional[Any]:
             return json.loads(json_str)
         except json.JSONDecodeError:
             pass
-    
+
     # Strategy 4: Parse after fixing common issues
     try:
         # Fix internal unescaped quote issues
@@ -66,7 +66,7 @@ def parse_json_from_response(response: str) -> Optional[Any]:
         return json.loads(fixed_response)
     except json.JSONDecodeError:
         pass
-    
+
     # Strategy 5: Use json_repair library
     try:
         return json_repair.loads(response)
@@ -82,12 +82,12 @@ def _fix_json_quotes(json_str: str) -> str:
     """
     # Match unescaped quotes in string values
     # This is a simple fix strategy, may not be perfect but handles common cases
-    
+
     # First handle obvious unescaped quote issues
     # Example: "title":"Use\"codex\"tool" -> "title":"Use\"codex\"tool"
-    
+
     import re
-    
+
     # Find all string values and fix quotes in them
     def fix_quotes_in_match(match):
         key = match.group(1)
@@ -95,7 +95,7 @@ def _fix_json_quotes(json_str: str) -> str:
         # Escape quotes in value
         fixed_value = value.replace('"', '\\"')
         return f'"{key}":"{fixed_value}"'
-    
+
     # Match "key":"value" pattern and fix quotes in value
     pattern = r'"([^"]+)":"([^"]*(?:"[^"]*)*)"'
     try:

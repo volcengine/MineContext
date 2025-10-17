@@ -10,14 +10,13 @@ System Monitor - Collects and manages various system metrics
 import threading
 import time
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-
-from opencontext.utils.logging_utils import get_logger
-from opencontext.storage.global_storage import get_storage
-from opencontext.models.enums import ContextType
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+from opencontext.models.enums import ContextType
+from opencontext.storage.global_storage import get_storage
+from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -25,6 +24,7 @@ logger = get_logger(__name__)
 @dataclass
 class TokenUsage:
     """Token usage statistics"""
+
     model: str
     prompt_tokens: int = 0
     completion_tokens: int = 0
@@ -35,6 +35,7 @@ class TokenUsage:
 @dataclass
 class ProcessingMetrics:
     """Processing performance metrics"""
+
     processor_name: str
     operation: str
     duration_ms: int
@@ -46,6 +47,7 @@ class ProcessingMetrics:
 @dataclass
 class RetrievalMetrics:
     """Retrieval performance metrics"""
+
     operation: str
     duration_ms: int
     snippets_count: int = 0
@@ -56,6 +58,7 @@ class RetrievalMetrics:
 @dataclass
 class ContextTypeStats:
     """Context type statistics"""
+
     context_type: str
     count: int
     last_update: datetime = field(default_factory=datetime.now)
@@ -64,6 +67,7 @@ class ContextTypeStats:
 @dataclass
 class ProcessingError:
     """Processing error record"""
+
     error_message: str
     processor_name: str = ""
     context_count: int = 0
@@ -100,16 +104,17 @@ class Monitor:
         self._start_time = datetime.now()
         self._storage = get_storage()
         logger.info("System monitor initialized")
-    
-    def record_token_usage(self, model: str, prompt_tokens: int = 0,
-                          completion_tokens: int = 0, total_tokens: int = 0):
+
+    def record_token_usage(
+        self, model: str, prompt_tokens: int = 0, completion_tokens: int = 0, total_tokens: int = 0
+    ):
         """Record token usage"""
         with self._lock:
             usage = TokenUsage(
                 model=model,
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
-                total_tokens=total_tokens
+                total_tokens=total_tokens,
             )
             self._token_usage_history.append(usage)
             self._token_usage_by_model[model].append(usage)
@@ -118,9 +123,14 @@ class Monitor:
             if len(self._token_usage_by_model[model]) > 100:
                 self._token_usage_by_model[model] = self._token_usage_by_model[model][-100:]
 
-    def record_processing_metrics(self, processor_name: str, operation: str,
-                                duration_ms: int, context_type: Optional[str] = None,
-                                context_count: int = 1):
+    def record_processing_metrics(
+        self,
+        processor_name: str,
+        operation: str,
+        duration_ms: int,
+        context_type: Optional[str] = None,
+        context_count: int = 1,
+    ):
         """Record processing performance metrics"""
         with self._lock:
             metrics = ProcessingMetrics(
@@ -128,7 +138,7 @@ class Monitor:
                 operation=operation,
                 duration_ms=duration_ms,
                 context_type=context_type,
-                context_count=context_count
+                context_count=context_count,
             )
             self._processing_history.append(metrics)
             key = f"{processor_name}:{operation}"
@@ -138,15 +148,16 @@ class Monitor:
             if len(self._processing_by_type[key]) > 100:
                 self._processing_by_type[key] = self._processing_by_type[key][-100:]
 
-    def record_retrieval_metrics(self, operation: str, duration_ms: int,
-                               snippets_count: int = 0, query: Optional[str] = None):
+    def record_retrieval_metrics(
+        self, operation: str, duration_ms: int, snippets_count: int = 0, query: Optional[str] = None
+    ):
         """Record retrieval performance metrics"""
         with self._lock:
             metrics = RetrievalMetrics(
                 operation=operation,
                 duration_ms=duration_ms,
                 snippets_count=snippets_count,
-                query=query
+                query=query,
             )
             self._retrieval_history.append(metrics)
 
@@ -155,8 +166,9 @@ class Monitor:
         now = datetime.now()
 
         # Check if cache is expired
-        if (not force_refresh and
-            now - self._last_stats_update < timedelta(seconds=self._stats_cache_ttl)):
+        if not force_refresh and now - self._last_stats_update < timedelta(
+            seconds=self._stats_cache_ttl
+        ):
             return {k: v.count for k, v in self._context_type_stats.items()}
 
         # Fetch latest statistics from storage
@@ -164,24 +176,27 @@ class Monitor:
             try:
                 with self._lock:
                     # Use dedicated count method for better efficiency
-                    if hasattr(self._storage, 'get_all_processed_context_counts'):
+                    if hasattr(self._storage, "get_all_processed_context_counts"):
                         stats = self._storage.get_all_processed_context_counts()
                     else:
                         # Fallback to old method
                         stats = {}
                         for context_type in ContextType:
-                            if hasattr(self._storage, 'get_processed_context_count'):
-                                count = self._storage.get_processed_context_count(context_type.value)
+                            if hasattr(self._storage, "get_processed_context_count"):
+                                count = self._storage.get_processed_context_count(
+                                    context_type.value
+                                )
                             else:
                                 # Final fallback: fetch actual records and count
                                 contexts = self._storage.get_all_processed_contexts(
-                                    context_types=[context_type.value],
-                                    limit=10000
+                                    context_types=[context_type.value], limit=10000
                                 )
                                 count = 0
                                 if isinstance(contexts, dict):
-                                    count = sum(len(backend_contexts) if backend_contexts else 0
-                                              for backend_contexts in contexts.values())
+                                    count = sum(
+                                        len(backend_contexts) if backend_contexts else 0
+                                        for backend_contexts in contexts.values()
+                                    )
                                 elif isinstance(contexts, list):
                                     count = len(contexts)
 
@@ -190,8 +205,7 @@ class Monitor:
                     # Update cache
                     for context_type_value, count in stats.items():
                         self._context_type_stats[context_type_value] = ContextTypeStats(
-                            context_type=context_type_value,
-                            count=count
+                            context_type=context_type_value, count=count
                         )
 
                     self._last_stats_update = now
@@ -215,11 +229,12 @@ class Monitor:
                 "by_model": {},
                 "total_tokens": 0,
                 "total_prompt_tokens": 0,
-                "total_completion_tokens": 0
+                "total_completion_tokens": 0,
             }
 
-            model_stats = defaultdict(lambda: {"count": 0, "total_tokens": 0,
-                                             "prompt_tokens": 0, "completion_tokens": 0})
+            model_stats = defaultdict(
+                lambda: {"count": 0, "total_tokens": 0, "prompt_tokens": 0, "completion_tokens": 0}
+            )
 
             for usage in recent_usage:
                 model_stats[usage.model]["count"] += 1
@@ -246,16 +261,18 @@ class Monitor:
                 "by_processor": {},
                 "by_context_type": {},
                 "avg_duration_ms": 0,
-                "total_contexts_processed": 0
+                "total_contexts_processed": 0,
             }
 
             if not recent_metrics:
                 return summary
 
-            processor_stats = defaultdict(lambda: {"count": 0, "total_duration": 0,
-                                                 "avg_duration": 0, "contexts": 0})
-            context_stats = defaultdict(lambda: {"count": 0, "total_duration": 0,
-                                               "avg_duration": 0})
+            processor_stats = defaultdict(
+                lambda: {"count": 0, "total_duration": 0, "avg_duration": 0, "contexts": 0}
+            )
+            context_stats = defaultdict(
+                lambda: {"count": 0, "total_duration": 0, "avg_duration": 0}
+            )
 
             total_duration = 0
             total_contexts = 0
@@ -286,7 +303,9 @@ class Monitor:
 
             summary["by_processor"] = dict(processor_stats)
             summary["by_context_type"] = dict(context_stats)
-            summary["avg_duration_ms"] = total_duration / len(recent_metrics) if recent_metrics else 0
+            summary["avg_duration_ms"] = (
+                total_duration / len(recent_metrics) if recent_metrics else 0
+            )
             summary["total_contexts_processed"] = total_contexts
 
             return summary
@@ -305,7 +324,7 @@ class Monitor:
                 pending = 0
 
                 for todo in todos:
-                    if todo.get('status', 0) == 1:  # 1 means completed
+                    if todo.get("status", 0) == 1:  # 1 means completed
                         completed += 1
                     else:
                         pending += 1
@@ -314,7 +333,7 @@ class Monitor:
                     "total": len(todos),
                     "completed": completed,
                     "pending": pending,
-                    "time_range_hours": hours
+                    "time_range_hours": hours,
                 }
         except Exception as e:
             logger.error(f"Failed to get TODO statistics: {e}")
@@ -330,10 +349,7 @@ class Monitor:
 
                 tips = self._storage.get_tips(start_time=start_time, end_time=end_time)
 
-                return {
-                    "total": len(tips),
-                    "time_range_hours": hours
-                }
+                return {"total": len(tips), "time_range_hours": hours}
         except Exception as e:
             logger.error(f"Failed to get Tips count: {e}")
 
@@ -346,15 +362,18 @@ class Monitor:
                 end_time = datetime.now()
                 start_time = end_time - timedelta(hours=hours)
                 activities = self._storage.get_activities(start_time=start_time, end_time=end_time)
-                return {
-                    "total": len(activities),
-                    "time_range_hours": hours
-                }
+                return {"total": len(activities), "time_range_hours": hours}
         except Exception as e:
             logger.error(f"Failed to get activity count: {e}")
         return {"total": 0, "time_range_hours": hours}
 
-    def record_processing_error(self, error_message: str, processor_name: str = "", context_count: int = 0, timestamp: datetime = None):
+    def record_processing_error(
+        self,
+        error_message: str,
+        processor_name: str = "",
+        context_count: int = 0,
+        timestamp: datetime = None,
+    ):
         """Record processing error"""
         if timestamp is None:
             timestamp = datetime.now()
@@ -363,7 +382,7 @@ class Monitor:
                 error_message=error_message,
                 processor_name=processor_name,
                 context_count=context_count,
-                timestamp=timestamp
+                timestamp=timestamp,
             )
             self._processing_errors.append(error)
 
@@ -383,7 +402,7 @@ class Monitor:
                     "error_message": e.error_message,
                     "processor_name": e.processor_name,
                     "context_count": e.context_count,
-                    "timestamp": e.timestamp.isoformat()
+                    "timestamp": e.timestamp.isoformat(),
                 }
                 for e in top_errors
             ]
@@ -391,7 +410,7 @@ class Monitor:
             return {
                 "errors": errors_list,
                 "total_errors": len(recent_errors),
-                "time_range_hours": hours
+                "time_range_hours": hours,
             }
 
     def get_retrieval_summary(self, hours: int = 24) -> Dict[str, Any]:
@@ -406,14 +425,15 @@ class Monitor:
                 "by_operation": {},
                 "avg_duration_ms": 0,
                 "total_snippets": 0,
-                "avg_snippets_per_query": 0
+                "avg_snippets_per_query": 0,
             }
 
             if not recent_metrics:
                 return summary
 
-            operation_stats = defaultdict(lambda: {"count": 0, "total_duration": 0,
-                                                 "avg_duration": 0, "snippets": 0})
+            operation_stats = defaultdict(
+                lambda: {"count": 0, "total_duration": 0, "avg_duration": 0, "snippets": 0}
+            )
 
             total_duration = 0
             total_snippets = 0
@@ -432,9 +452,13 @@ class Monitor:
                     stats["avg_duration"] = stats["total_duration"] / stats["count"]
 
             summary["by_operation"] = dict(operation_stats)
-            summary["avg_duration_ms"] = total_duration / len(recent_metrics) if recent_metrics else 0
+            summary["avg_duration_ms"] = (
+                total_duration / len(recent_metrics) if recent_metrics else 0
+            )
             summary["total_snippets"] = total_snippets
-            summary["avg_snippets_per_query"] = total_snippets / len(recent_metrics) if recent_metrics else 0
+            summary["avg_snippets_per_query"] = (
+                total_snippets / len(recent_metrics) if recent_metrics else 0
+            )
 
             return summary
 
@@ -444,14 +468,14 @@ class Monitor:
 
         return {
             "uptime_seconds": int(uptime.total_seconds()),
-            "uptime_formatted": str(uptime).split('.')[0],
+            "uptime_formatted": str(uptime).split(".")[0],
             "context_types": self.get_context_type_stats(),
             "token_usage": self.get_token_usage_summary(hours=24),
             "processing": self.get_processing_summary(hours=24),
             "todo_stats": self.get_todo_stats(hours=24),
             "tips_count": self.get_tips_count(hours=24),
             "activity_count": self.get_activity_count(hours=24),
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
 
@@ -477,25 +501,35 @@ def initialize_monitor() -> Monitor:
 
 
 # Convenient global functions for reporting metrics
-def record_token_usage(model: str, prompt_tokens: int = 0,
-                      completion_tokens: int = 0, total_tokens: int = 0):
+def record_token_usage(
+    model: str, prompt_tokens: int = 0, completion_tokens: int = 0, total_tokens: int = 0
+):
     """Global function: Record token usage"""
     get_monitor().record_token_usage(model, prompt_tokens, completion_tokens, total_tokens)
 
 
-def record_processing_metrics(processor_name: str, operation: str,
-                            duration_ms: int, context_type: Optional[str] = None,
-                            context_count: int = 1):
+def record_processing_metrics(
+    processor_name: str,
+    operation: str,
+    duration_ms: int,
+    context_type: Optional[str] = None,
+    context_count: int = 1,
+):
     """Global function: Record processing performance metrics"""
-    get_monitor().record_processing_metrics(processor_name, operation, duration_ms, context_type, context_count)
+    get_monitor().record_processing_metrics(
+        processor_name, operation, duration_ms, context_type, context_count
+    )
 
 
-def record_retrieval_metrics(operation: str, duration_ms: int,
-                           snippets_count: int = 0, query: Optional[str] = None):
+def record_retrieval_metrics(
+    operation: str, duration_ms: int, snippets_count: int = 0, query: Optional[str] = None
+):
     """Global function: Record retrieval performance metrics"""
     get_monitor().record_retrieval_metrics(operation, duration_ms, snippets_count, query)
 
 
-def record_processing_error(error_message: str, processor_name: str = "", context_count: int = 0, timestamp: datetime = None):
+def record_processing_error(
+    error_message: str, processor_name: str = "", context_count: int = 0, timestamp: datetime = None
+):
     """Global function: Record processing error"""
     get_monitor().record_processing_error(error_message, processor_name, context_count, timestamp)

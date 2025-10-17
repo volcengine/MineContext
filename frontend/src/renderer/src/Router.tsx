@@ -6,16 +6,16 @@
 import { FC, useEffect, useMemo } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 
-import HomePage from './pages/home/HomePage'
+import HomePage from './pages/home/home-page'
 import VaultPage from './pages/vault/Vault'
-import ScreenMonitor from './pages/screen-monitor/ScreenMonitor'
+import ScreenMonitor from './pages/screen-monitor/screen-monitor'
 import Settings from './pages/settings/settings'
 
 import Files from './pages/files/Files'
-import AIDemo from './pages/ai-demo/AIDemo'
-import Sidebar from './components/Sidebar'
+import AIDemo from './pages/ai-demo/ai-demo'
+import Sidebar from './components/sidebar'
 import 'allotment/dist/style.css'
-import { useEvents } from './hooks/useEvents'
+import { useEvents } from './hooks/use-events'
 import GlobalEventService from './services/GlobalEventService'
 import { useServiceHandler } from './atom/event-loop.atom'
 
