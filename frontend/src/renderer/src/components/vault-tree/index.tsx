@@ -228,7 +228,9 @@ const Sidebar = () => {
         </div>
 
         {/* Modern tree structure */}
-        <div className="text-black flex-1 min-h-[0] font-[12px] [&_.arco-typography]: !font-[13px]" ref={treeContainerRef}>
+        <div
+          className="text-black flex-1 min-h-[0] font-[12px] [&_.arco-typography]: !font-[13px]"
+          ref={treeContainerRef}>
           {treeDimensions.height > 0 && (
             <Tree
               idAccessor={(data) => data.id.toString()}

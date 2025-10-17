@@ -10,11 +10,7 @@ interface RecordingStatusIndicatorProps {
   isToday: boolean
 }
 
-const RecordingStatusIndicator: React.FC<RecordingStatusIndicatorProps> = ({
-  isMonitoring,
-  canRecord,
-  isToday
-}) => {
+const RecordingStatusIndicator: React.FC<RecordingStatusIndicatorProps> = ({ isMonitoring, canRecord, isToday }) => {
   if (!isToday) return null
 
   return (
@@ -26,8 +22,7 @@ const RecordingStatusIndicator: React.FC<RecordingStatusIndicatorProps> = ({
               Recording screen...
             </Text>
             <div className="text-[#C9C9D4]">
-              Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen
-              analysis.
+              Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen analysis.
             </div>
           </div>
         ) : (
@@ -36,8 +31,7 @@ const RecordingStatusIndicator: React.FC<RecordingStatusIndicatorProps> = ({
               Recording stopped
             </Text>
             <div className="text-[#C9C9D4]">
-              It's not in recording hours now. Recording will automatically start at the next allowed
-              time.
+              It's not in recording hours now. Recording will automatically start at the next allowed time.
             </div>
           </div>
         )

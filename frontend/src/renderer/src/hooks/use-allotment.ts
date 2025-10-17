@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useRef, useMemo } from 'react';
-import { AllotmentHandle } from 'allotment';
+import { useEffect, useRef, useMemo } from 'react'
+import { AllotmentHandle } from 'allotment'
 
 const LeftMinSize = 600
 const RightVisibleMinSize = 340

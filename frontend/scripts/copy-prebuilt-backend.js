@@ -9,7 +9,7 @@ console.log('📦 Copying pre-built backend executable...')
 // Setup paths
 const backendDir = path.join(__dirname, '..', 'backend')
 const sourceDir = path.join(__dirname, '..', '..')
-const executableName = 'main'
+const executableName = process.platform === 'win32' ? 'main.exe' : 'main'
 const sourceExecutablePath = path.join(sourceDir, 'dist', executableName)
 const destExecutablePath = path.join(backendDir, executableName)
 

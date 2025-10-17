@@ -344,7 +344,9 @@ class DatabaseManager {
       const stmt = this.db!.prepare(sql)
       const result = stmt.run(...values)
 
-      console.log(`✅ Vault updated successfully: ID ${id}, updated fields: ${changedFields.join(', ')}, rows affected: ${result.changes}`)
+      console.log(
+        `✅ Vault updated successfully: ID ${id}, updated fields: ${changedFields.join(', ')}, rows affected: ${result.changes}`
+      )
       return { changes: result.changes }
     } catch (error) {
       console.error('❌ Failed to update Vault:', error)

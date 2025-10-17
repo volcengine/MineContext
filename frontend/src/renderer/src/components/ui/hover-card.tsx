@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-"use client"
+'use client'
 
 import * as React from 'react'
 import * as HoverCardPrimitive from '@radix-ui/react-hover-card'

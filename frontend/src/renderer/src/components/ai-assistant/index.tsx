@@ -153,7 +153,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
   }, [messages, streamingMessage])
 
   return (
-    <div className={`relative h-[calc(100%-16px)] bg-white flex flex-col flex-shrink-0 transition-all duration-300 rounded-2xl m-2 ml-2 overflow-hidden select-text ${visible ? 'min-w-[340px] w-full' : 'w-0 relative select-text'}`}>
+    <div
+      className={`relative h-[calc(100%-16px)] bg-white flex flex-col flex-shrink-0 transition-all duration-300 rounded-2xl m-2 ml-2 overflow-hidden select-text ${visible ? 'min-w-[340px] w-full' : 'w-0 relative select-text'}`}>
       {/* Header */}
       <div className="flex items-center px-4 py-3 border-b border-gray-100 bg-white gap-2 select-none">
         <Button type="text" icon={<IconPlus />} onClick={startNewConversation} />
@@ -209,7 +210,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
               Try asking me
             </Text>
             <div className="mt-6">
-              <div className="py-1 px-3 bg-gray-50 mb-2 cursor-pointer transition-all duration-200 text-[13px] text-gray-800 rounded-lg border border-gray-200 bg-white bg-opacity-50 hover:rounded-lg hover:border-gray-200 hover:bg-white hover:bg-opacity-50" onClick={() => setMessage('Summarize my recent growth')}>
+              <div
+                className="py-1 px-3 bg-gray-50 mb-2 cursor-pointer transition-all duration-200 text-[13px] text-gray-800 rounded-lg border border-gray-200 bg-white bg-opacity-50 hover:rounded-lg hover:border-gray-200 hover:bg-white hover:bg-opacity-50"
+                onClick={() => setMessage('Summarize my recent growth')}>
                 Summarize my recent growth
               </div>
               <div
@@ -222,16 +225,21 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
         ) : (
           <div className="flex flex-col w-full gap-4 select-text">
             {allMessages.map((msg, index) => (
-              <div key={index} className={`flex bg-white w-full select-text ${msg.role === 'user' ? 'justify-end' : 'justify-start w-full'}`}>
-                <div className={`px-4 py-3 rounded-xl leading-6 relative select-text ${
-                  msg.role === 'user'
-                    ? 'bg-blue-50 text-white rounded-br-sm'
-                    : 'bg-transparent w-full text-gray-800 rounded-bl-sm'
-                }`}>
+              <div
+                key={index}
+                className={`flex bg-white w-full select-text ${msg.role === 'user' ? 'justify-end' : 'justify-start w-full'}`}>
+                <div
+                  className={`px-4 py-3 rounded-xl leading-6 relative select-text ${
+                    msg.role === 'user'
+                      ? 'bg-blue-50 text-white rounded-br-sm'
+                      : 'bg-transparent w-full text-gray-800 rounded-bl-sm'
+                  }`}>
                   {msg.role === 'assistant' ? (
                     <MarkdownContent content={msg.content} />
                   ) : (
-                    <Text style={{ whiteSpace: 'pre-wrap' }} className="select-text">{msg.content}</Text>
+                    <Text style={{ whiteSpace: 'pre-wrap' }} className="select-text">
+                      {msg.content}
+                    </Text>
                   )}
                   {/* Display stage information for streaming messages */}
                   {streamingMessage && index === allMessages.length - 1 && streamingMessage.stage && (
@@ -290,7 +298,13 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose }) => {
           </div>
           <div className="flex justify-end items-center gap-2">
             {isLoading ? (
-              <Button type="primary" size="small" icon={<IconStop />} onClick={stopStreaming} className="rounded-lg font-medium !bg-red-500 !border-red-500 hover:!bg-red-400 hover:!border-red-400" />
+              <Button
+                type="primary"
+                size="small"
+                icon={<IconStop />}
+                onClick={stopStreaming}
+                className="rounded-lg font-medium !bg-red-500 !border-red-500 hover:!bg-red-400 hover:!border-red-400"
+              />
             ) : (
               <Button
                 type="primary"

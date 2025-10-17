@@ -38,6 +38,9 @@ Table of Contents
 
 - [👋🏻 What is MineContext](#-what-is-minecontext)
 - [🚀 Key Features](#-key-features)
+- [🔏 Privacy Protection](#-privacy-protection)
+  - [Local-First](#local-first)
+  - [Local AI model](#local-ai-model)
 - [🏁 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
   - [2. Disable the quarantine attribute](#2-disable-the-quarantine-attribute)
@@ -80,9 +83,11 @@ MineContext is a proactive context-aware AI partner. By utilizing screenshots an
 
 ![feature.gif](src/feature.gif)
 
+
+
 # 🚀 Key Features
 
-MineContext focuses on five key features: effortless collection, intelligent resurfacing, and proactive delivery.
+MineContext focuses on four key features: effortless collection, intelligent resurfacing, proactive delivery, and a context engineering architecture.
 
 1. 📥 Effortless Collection
    Capable of gathering and processing massive amounts of context. Designed storage management enables extensive collection without adding mental burden.
@@ -90,10 +95,22 @@ MineContext focuses on five key features: effortless collection, intelligent res
    Delivers key information and insights proactively in daily use. It extracts summarized content from your context—such as daily/weekly summaries, tips, and todos—and pushes them directly to your homepage.
 3. 💡 Intelligent Resurfacing
    Surfaces relevant and useful context intelligently during creation. Ensures assisted creativity without overwhelming you with information.
-4. 🛡️ Privacy-First
-   All data is stored locally, ensuring your privacy and security.
-5. 🎯 Context Engineering Architecture
+4. 🎯 Context Engineering Architecture
    Supports the complete lifecycle of multimodal, multi-source data—from capture, processing, and storage to management, retrieval, and consumption—enabling the generation of six types of intelligent context.
+
+
+# 🔏 Privacy Protection
+
+##  Local-First
+MineContext places a high priority on user privacy. By default, all data is stored locally in the following path to ensure your privacy and security.
+
+
+```
+~/Library/Application Support/MineContext/Data
+```
+
+## Local AI model 
+In addition, we support custom model services based on the OpenAI API protocol. You can use fully local models in MineContext, ensuring that any data does not leave your local environment.
 
 # 🏁 Quick Start
 

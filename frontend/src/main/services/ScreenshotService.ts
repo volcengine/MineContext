@@ -266,7 +266,9 @@ class ScreenshotService extends CaptureSourcesTools {
    * @param {number} retentionDays - Retention period in days, default is 15 days
    * @returns {Promise<{ success: boolean; deletedCount?: number; error?: string }>}
    */
-  async cleanupOldScreenshots(retentionDays: number = 15): Promise<{ success: boolean; deletedCount?: number; deletedSize?: number; error?: string }> {
+  async cleanupOldScreenshots(
+    retentionDays: number = 15
+  ): Promise<{ success: boolean; deletedCount?: number; deletedSize?: number; error?: string }> {
     try {
       const userDataPath = app.getPath('userData')
       const screenshotBasePath = path.join(userDataPath, 'Data', 'screenshot', 'activity')
@@ -313,7 +315,9 @@ class ScreenshotService extends CaptureSourcesTools {
         }
       }
 
-      logger.info(`Cleanup completed. Deleted ${deletedCount} directories, freed ${(deletedSize / 1024 / 1024).toFixed(2)} MB`)
+      logger.info(
+        `Cleanup completed. Deleted ${deletedCount} directories, freed ${(deletedSize / 1024 / 1024).toFixed(2)} MB`
+      )
       return { success: true, deletedCount, deletedSize }
     } catch (error: any) {
       logger.error('Failed to cleanup old screenshots:', error)
