@@ -62,10 +62,8 @@ const Sidebar = () => {
       width={176}
       className="sidebar-container [&_.arco-layout-sider]: !flex !flex-col !bg-transparent !height-[100vh] !py-0 !pl-[12px] !py-[16px]">
       {/* Top logo and title */}
-      <div
-        className='flex items-center px-4 py-2 h-[80px] flex-shrink-0'
-        onClick={() => handleTabChange('home')}>
-        <div className='flex items-center gap-2 flex-1'>
+      <div className="flex items-center px-4 py-2 h-[80px] flex-shrink-0" onClick={() => handleTabChange('home')}>
+        <div className="flex items-center gap-2 flex-1">
           <img
             src={logo}
             alt="Logo"
@@ -83,17 +81,15 @@ const Sidebar = () => {
       </div>
 
       {/* Tab navigation */}
-      <div
-        className='flex-shrink-0'>
+      <div className="flex-shrink-0">
         {tabItems.map((item) => (
           <div
             key={item.key}
             onClick={() => handleTabChange(item.key)}
             className={`h-[28px] p-2 px-3 text-left cursor-pointer text-sm leading-[22px] 
               ${isMainTabActive(item.key) ? 'bg-[#FFFFFF66] font-medium' : 'bg-transparent font-normal hover:bg-[#FFFFFF66]'} 
-              text-[#3F3F54] transition-all duration-200 ease-in-out rounded-lg flex items-center gap-2 mt-[5px]`}
-            >
-            <span className='flex'>{item.icon}</span>
+              text-[#3F3F54] transition-all duration-200 ease-in-out rounded-lg flex items-center gap-2 mt-[5px]`}>
+            <span className="flex">{item.icon}</span>
             {item.label}
           </div>
         ))}

@@ -1,10 +1,10 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from 'react';
-import { Input, Tag } from '@arco-design/web-react';
-import { Vault } from '@renderer/types';
-import dayjs from 'dayjs';
+import React, { useState } from 'react'
+import { Input, Tag } from '@arco-design/web-react'
+import { Vault } from '@renderer/types'
+import dayjs from 'dayjs'
 
 interface StatusBarProps {
   vaultData: Vault | null

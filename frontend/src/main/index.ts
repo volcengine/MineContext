@@ -65,7 +65,9 @@ async function performCleanup() {
     logger.info('Starting screenshot cleanup...')
     const result = await screenshotService.cleanupOldScreenshots(15) // Keep 15 days
     if (result.success) {
-      logger.info(`Screenshot cleanup completed. Deleted ${result.deletedCount} directories, freed ${((result.deletedSize || 0) / 1024 / 1024).toFixed(2)} MB`)
+      logger.info(
+        `Screenshot cleanup completed. Deleted ${result.deletedCount} directories, freed ${((result.deletedSize || 0) / 1024 / 1024).toFixed(2)} MB`
+      )
     } else {
       logger.error(`Screenshot cleanup failed: ${result.error}`)
     }

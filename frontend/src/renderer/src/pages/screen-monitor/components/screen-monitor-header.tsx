@@ -36,8 +36,8 @@ const ScreenMonitorHeader: React.FC<ScreenMonitorHeaderProps> = ({
           Screen Monitor
         </Title>
         <Text type="secondary" className="[&_.arco-typography]: !text-[13px]">
-          Screen Monitor captures anything on your screen and transforms it into intelligent, connected Contexts.
-          All data stays local with full privacy protection ✨
+          Screen Monitor captures anything on your screen and transforms it into intelligent, connected Contexts. All
+          data stays local with full privacy protection ✨
         </Text>
       </div>
       <div className="flex items-center ml-0 md:ml-6 mt-4 md:mt-0 justify-end">
