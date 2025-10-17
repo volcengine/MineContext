@@ -8,7 +8,7 @@ import { find } from 'lodash'
 import ModelRadio from './components/modelRadio/model-radio'
 import { ModelInfoMap, ModelTypeList, BaseUrl, embeddingModels } from './constants'
 import { getModelInfo, updateModelSettings } from '../../services/Settings'
-import checkIcon from '../../assets/icons/check.svg'
+import loadingGif from '@renderer/assets/images/loading.gif'
 
 const FormItem = Form.Item
 const { Text } = Typography
@@ -119,6 +119,7 @@ const Settings: FC<Props> = (props: Props) => {
   const [showCheckIcon, setShowCheckIcon] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const ModelInfoList = ModelInfoMap()
   const [form] = Form.useForm()
@@ -155,6 +156,7 @@ const Settings: FC<Props> = (props: Props) => {
   const submit = async () => {
     setErrorMessage(null)
     setSuccessMessage(null)
+    setIsLoading(true)
 
     try {
       const values = await form.validate().catch(() => {}) // only need backend's error
@@ -213,6 +215,8 @@ const Settings: FC<Props> = (props: Props) => {
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -286,12 +290,12 @@ const Settings: FC<Props> = (props: Props) => {
 
             {/* Success and Error Messages */}
             {successMessage && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-800 text-sm">
+              <div className="mb-4 p-3 bg-green-50 w-[574px] border border-green-200 rounded-md text-green-800 text-sm">
                 {successMessage}
               </div>
             )}
             {errorMessage && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
+              <div className="mb-4 p-3 bg-red-50 border w-[574px] border-red-200 rounded-md text-red-800 text-sm">
                 {errorMessage}
               </div>
             )}
@@ -300,23 +304,40 @@ const Settings: FC<Props> = (props: Props) => {
               <Space>
                 {/* Determine if it is a routing page or a guide */}
                 {!init ? (
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    onClick={submit}
-                    className="[&_.arco-btn-primary]: !bg-[#000]">
-                    Get started
-                  </Button>
+                  <div className="flex items-center gap-[8px]">
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      onClick={submit}
+                      disabled={isLoading}
+                      className="[&_.arco-btn-primary]: !bg-[#000]">
+                      Get started
+                    </Button>
+                    {isLoading && (
+                      <img
+                        src={loadingGif}
+                        alt="loading"
+                        className="w-6 h-6"
+                      />
+                    )}
+                  </div>
                 ) : (
                   <div className="flex items-center gap-[8px]">
                     <Button
                       type="primary"
                       className="[&_.arco-btn-primary]: !bg-[#000]"
                       htmlType="submit"
-                      onClick={submit}>
+                      onClick={submit}
+                      disabled={isLoading}>
                       Save
                     </Button>
-                    {showCheckIcon && <img src={checkIcon} alt="check" className="w-[20px] h-[20px] mr-[8px]" />}
+                    {isLoading && (
+                      <img
+                        src={loadingGif}
+                        alt="loading"
+                        className="w-6 h-6"
+                      />
+                    )}
                   </div>
                 )}
               </Space>
