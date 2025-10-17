@@ -13,7 +13,7 @@ import Settings from './pages/settings/settings'
 
 import Files from './pages/files/Files'
 import AIDemo from './pages/ai-demo/ai-demo'
-import Sidebar from './components/sidebar'
+import Sidebar from './components/Sidebar'
 import 'allotment/dist/style.css'
 import { useEvents } from './hooks/use-events'
 import GlobalEventService from './services/GlobalEventService'
