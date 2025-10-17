@@ -20,6 +20,8 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 [![][license-shield]][license-shield-link]  
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
+
+
 <a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
 
