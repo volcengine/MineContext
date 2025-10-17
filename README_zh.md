@@ -8,6 +8,9 @@
 
 一个开源、主动的上下文感知 AI 伙伴，致力于让您的工作、学习与创作更加清晰高效。
 
+中文 / [English](README.md)
+
+
 <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">社区实践</a> · <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
 
 [![][release-shield]][release-link]
@@ -17,8 +20,9 @@
 [![][license-shield]][license-shield-link]  
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
+<a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
-中文 / [English](README.md)
+
 
 👋 加入我们的 [微信 / 飞书 / 小红书交流群](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 

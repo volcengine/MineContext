@@ -8,6 +8,9 @@
 
 An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
 
+[中文](README_zh.md) / English
+
+
  <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">Community Best Practice</a> · <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
 
 [![][release-shield]][release-link]
@@ -17,14 +20,15 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 [![][license-shield]][license-shield-link]  
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
+<a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
-[中文](README_zh.md) / English
 
 👋 Join our [WeChat / Lark / Red Note Group](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
 🌍 Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
 
 [App Download for Mac](https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg)
+
 
 </div>
 
