@@ -39,7 +39,7 @@ Table of Contents
 - [👋🏻 What is MineContext](#-what-is-minecontext)
 - [🚀 Key Features](#-key-features)
 - [🔏 Privacy Protection](#-privacy-protection)
-  - [Local first](#local-first)
+  - [Local-First](#local-first)
   - [Local AI model](#local-ai-model)
 - [🏁 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
@@ -101,7 +101,7 @@ MineContext focuses on four key features: effortless collection, intelligent res
 
 # 🔏 Privacy Protection
 
-##  Local first
+##  Local-First
 MineContext places a high priority on user privacy. By default, all data is stored locally in the following path to ensure your privacy and security.
 
 
