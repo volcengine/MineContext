@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { cn } from '@renderer/lib/utils';
-import type { Experimental_GeneratedImage } from 'ai';
+import { cn } from '@renderer/lib/utils'
+import type { Experimental_GeneratedImage } from 'ai'
 
 export type ImageProps = Experimental_GeneratedImage & {
   className?: string

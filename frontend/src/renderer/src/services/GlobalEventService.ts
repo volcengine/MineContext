@@ -9,7 +9,7 @@ import { removeMarkdownSymbols } from '@renderer/utils/time'
 import { PushDataTypes } from '@renderer/constant/feed'
 
 // Define polling intervals (in milliseconds)
-const NORMAL_POLLING_INTERVAL = 30 * 1000  // Normal: 30 seconds
+const NORMAL_POLLING_INTERVAL = 30 * 1000 // Normal: 30 seconds
 const LOCKED_POLLING_INTERVAL = 300 * 1000 // Locked: 5 minutes
 
 class GlobalEventService {
