@@ -93,23 +93,29 @@ class GlobalVLMClient:
 
     def reinitialize(self):
         """
-        Thread-safe reinitialization of VLM client
+        Thread-safe reinitialization of VLM client.
+        This method ensures that if reinitialization fails, the old client is restored.
         """
         with self._lock:
+            old_client = self._vlm_client
             try:
                 vlm_config = get_config("vlm_model")
                 if not vlm_config:
-                    logger.error("No vlm config found during reinitialize")
-                    raise ValueError("No vlm config found")
-                new_client = LLMClient(llm_type=LLMType.CHAT, config=vlm_config)
-                old_client = self._vlm_client
-                self._vlm_client = new_client
-                logger.info("GlobalVLMClient reinitialized successfully")
+                    logger.error("No vlm_config found during reinitialization.")
+                    raise ValueError("No vlm_config found during reinitialization")
 
+                new_client = LLMClient(llm_type=LLMType.CHAT, config=vlm_config)
+                is_valid, msg = new_client.validate()
+                if not is_valid:
+                    raise ValueError(f"New VLM client validation failed: {msg}")
+
+                self._vlm_client = new_client
+                logger.info("GlobalVLMClient reinitialized successfully.")
+                return True
             except Exception as e:
-                logger.error(f"Failed to reinitialize VLM client: {e}")
+                logger.error(f"Failed to reinitialize VLM client: {e}. Restoring previous client.")
+                self._vlm_client = old_client
                 return False
-            return True
 
     def generate_with_messages(
         self, messages: list, enable_executor: bool = True, max_calls: int = 5, **kwargs
