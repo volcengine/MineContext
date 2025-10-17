@@ -39,6 +39,8 @@ Table of Contents
 - [👋🏻 What is MineContext](#-what-is-minecontext)
 - [🚀 Key Features](#-key-features)
 - [🔏 Privacy Protection](#-privacy-protection)
+  - [Local first](#local-first)
+  - [Local AI model](#local-ai-model)
 - [🏁 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
   - [2. Disable the quarantine attribute](#2-disable-the-quarantine-attribute)
@@ -99,11 +101,15 @@ MineContext focuses on four key features: effortless collection, intelligent res
 
 # 🔏 Privacy Protection
 
-MineContext very pays attention to user privacy. All data is stored locally by default in the following path, ensuring your privacy and security.
+##  Local first
+MineContext places a high priority on user privacy. By default, all data is stored locally in the following path to ensure your privacy and security.
+
 
 ```
 ~/Library/Application Support/MineContext/Data
 ```
+
+## Local AI model 
 In addition, we support custom model services based on the OpenAI API protocol. You can use fully local models in MineContext, ensuring that any data does not leave your local environment.
 
 # 🏁 Quick Start
