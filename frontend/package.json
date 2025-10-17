@@ -27,7 +27,7 @@
     "build": "npm run build:externals && node build-python.js && npm run typecheck && node -e \"if(process.platform==='win32'){require('fs').rmSync('./dist',{recursive:true,force:true})}else{require('child_process').execSync('rm -rf ./dist')}\" && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win",
+    "build:win": "npm run copy-backend && npm run build && electron-builder --win",
     "build:mac": "npm run copy-backend && npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
@@ -140,6 +140,13 @@
     "onlyBuiltDependencies": [
       "electron",
       "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "@swc/core",
+      "@tailwindcss/oxide",
+      "better-sqlite3",
+      "lzma-native",
+      "registry-js"
     ]
   }
 }

@@ -26,11 +26,16 @@ asarUnpack:
   - resources/**
 win:
   executableName: MineContext
+  signingHashAlgorithms:
+    - sha256
+  sign: null
+  signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  differentialPackage: false
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   icon: build/icon.icns
