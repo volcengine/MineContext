@@ -21,6 +21,6 @@ uv.lock
 .env
 .env.local
 
-⚙️ work_phases
-🗄️ archive
-🧠 knowledge_base
+⚙️ work_phases/
+🗄️ archive/
+🧠 knowledge_base/

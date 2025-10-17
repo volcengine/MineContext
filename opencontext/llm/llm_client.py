@@ -56,7 +56,6 @@ class LLMClient:
         self.base_url = config.get("base_url")
         self.timeout = config.get("timeout", 300)
         self.provider = config.get("provider") or LLMProvider.OPENAI.value
-
         # Validate required fields
         if not self.base_url or not self.model:
             raise ValueError("Base URL and model must be provided for LLMClient")
