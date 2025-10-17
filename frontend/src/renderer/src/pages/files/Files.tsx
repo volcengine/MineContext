@@ -80,12 +80,11 @@ const Files: React.FC = () => {
               Upload Your Files
             </Title>
             <Text type="secondary" style={{ width: 519, fontSize: 12 }}>
-              Upload screenshots and docs—MineContext auto-organizes tasks and generates summaries. Simplify work reviews
-              and planning, and save your energy for what truly matters ✨
+              Upload screenshots and docs—MineContext auto-organizes tasks and generates summaries. Simplify work
+              reviews and planning, and save your energy for what truly matters ✨
             </Text>
           </div>
-          <div className="flex items-center ml-6 max-md:ml-0 max-md:mt-4 max-md:justify-end">
-          </div>
+          <div className="flex items-center ml-6 max-md:ml-0 max-md:mt-4 max-md:justify-end"></div>
         </div>
 
         {/* Upload area */}
@@ -156,11 +155,10 @@ const Files: React.FC = () => {
                       </Text>
                     </div>
                   </div>
-                  <div className={`flex items-center text-xs mt-2 px-2 py-1 rounded-md w-fit ${
-                    doc.status === 'Analyzing'
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-green-600 bg-green-50'
-                  }`}>
+                  <div
+                    className={`flex items-center text-xs mt-2 px-2 py-1 rounded-md w-fit ${
+                      doc.status === 'Analyzing' ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'
+                    }`}>
                     {doc.status === 'Analyzing' ? (
                       <>
                         <IconLoading style={{ marginRight: 6 }} />

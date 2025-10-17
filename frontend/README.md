@@ -3,15 +3,18 @@
 ## Project Setup
 
 ### Build Backend
+
 #### for macos
+
 ```bash
 uv sync
 source .venv/bin/activate
 ./build.sh
 ```
-#### for windows
-not support yet
 
+#### for windows
+
+not support yet
 
 ### Install
 
@@ -21,6 +24,7 @@ pnpm install
 ```
 
 ### Development
+
 ```bash
 pnpm dev
 ```

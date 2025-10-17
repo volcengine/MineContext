@@ -31,7 +31,3 @@ export const LEVEL_MAP: Record<LogLevel, number> = {
   silly: 5,
   none: 6
 }
-
-
-
-
