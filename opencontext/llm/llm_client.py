@@ -36,9 +36,11 @@ class LLMClient:
         self.api_key = config.get("api_key")
         self.base_url = config.get("base_url")
         self.timeout = config.get("timeout", 300)
-        self.provider = config.get("provider", LLMProvider.OPENAI.value)
-        if not self.api_key or not self.base_url or not self.model:
-            raise ValueError("API key, base URL, and model must be provided")
+        self.provider = config.get("provider") or LLMProvider.OPENAI.value
+        if not self.base_url or not self.model:
+            raise ValueError("Base URL and model must be provided for LLMClient")
+        if self.provider.lower() != "ollama" and not self.api_key:
+            raise ValueError("API key must be provided for non-Ollama models")
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
         self.async_client = AsyncOpenAI(
             api_key=self.api_key, base_url=self.base_url, timeout=self.timeout

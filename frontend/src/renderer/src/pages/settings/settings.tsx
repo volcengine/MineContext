@@ -127,7 +127,7 @@ const Settings: FC<Props> = (props: Props) => {
     setSuccessMessage(null)
 
     try {
-      const values = await form.validate().catch(() => {})  // only need backend's error
+      const values = await form.validate()
 
       let param
       if (isCustom) {
