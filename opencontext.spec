@@ -1,4 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+
+is_windows = sys.platform.startswith("win")
 
 a = Analysis(
     ['opencontext/cli.py'],
@@ -39,7 +42,7 @@ exe = EXE(
     name='main',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=True,
+    strip=not is_windows,
     upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
