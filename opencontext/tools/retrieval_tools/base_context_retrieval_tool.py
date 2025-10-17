@@ -9,12 +9,13 @@ Provides common functionality for searching and filtering processed contexts
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple, Optional
-from opencontext.tools.base import BaseTool
-from opencontext.models.context import Vectorize, ProcessedContext
+from typing import Any, Dict, List, Optional, Tuple
+
+from opencontext.models.context import ProcessedContext, Vectorize
+from opencontext.models.enums import ContextSimpleDescriptions, ContextType
 from opencontext.storage.global_storage import get_storage
+from opencontext.tools.base import BaseTool
 from opencontext.tools.profile_tools.profile_entity_tool import ProfileEntityTool
-from opencontext.models.enums import ContextType, ContextSimpleDescriptions
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -23,6 +24,7 @@ logger = get_logger(__name__)
 @dataclass
 class TimeRangeFilter:
     """Time range filter conditions"""
+
     start: Optional[int] = None
     end: Optional[int] = None
     timezone: Optional[str] = None
@@ -32,6 +34,7 @@ class TimeRangeFilter:
 @dataclass
 class ContextRetrievalFilter:
     """Context retrieval filter conditions"""
+
     time_range: Optional[TimeRangeFilter] = None
     entities: List[str] = field(default_factory=list)
 
@@ -75,14 +78,14 @@ class BaseContextRetrievalTool(BaseTool):
         if filters.entities is not None and filters.entities:
             # Use Profile entity tool to handle entity unification
             unify_result = self.profile_entity_tool.execute(
-                entities=filters.entities,
-                operation="match_entities",
-                context_info=""
+                entities=filters.entities, operation="match_entities", context_info=""
             )
             if unify_result.get("success"):
                 # Extract matched standardized entity names
                 matches = unify_result.get("matches", [])
-                unified_entities = [match.get("entity_canonical_name", match["input_entity"]) for match in matches]
+                unified_entities = [
+                    match.get("entity_canonical_name", match["input_entity"]) for match in matches
+                ]
                 if not unified_entities:
                     unified_entities = filters.entities
                 build_filter["entities"] = unified_entities
@@ -91,10 +94,9 @@ class BaseContextRetrievalTool(BaseTool):
 
         return build_filter
 
-    def _execute_search(self,
-                       query: Optional[str],
-                       filters: ContextRetrievalFilter,
-                       top_k: int = 20) -> List[Tuple[ProcessedContext, float]]:
+    def _execute_search(
+        self, query: Optional[str], filters: ContextRetrievalFilter, top_k: int = 20
+    ) -> List[Tuple[ProcessedContext, float]]:
         """
         Execute search operation
 
@@ -117,14 +119,12 @@ class BaseContextRetrievalTool(BaseTool):
                 query=vectorize,
                 context_types=[context_type_str],
                 filters=built_filters,
-                top_k=top_k
+                top_k=top_k,
             )
         else:
             # Filter-only retrieval without query
             results_dict = self.storage.get_all_processed_contexts(
-                context_types=[context_type_str],
-                limit=top_k,
-                filter=built_filters
+                context_types=[context_type_str], limit=top_k, filter=built_filters
             )
 
             # Convert results to (context, score) format
@@ -135,15 +135,14 @@ class BaseContextRetrievalTool(BaseTool):
 
             return results[:top_k]
 
-    def _format_context_result(self,
-                              context: ProcessedContext,
-                              score: float,
-                              additional_fields: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _format_context_result(
+        self, context: ProcessedContext, score: float, additional_fields: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
         """Format single context result"""
         result = {
             "similarity_score": score,
             "context": context.get_llm_context_string(),
-            "context_type": self.CONTEXT_TYPE.value
+            "context_type": self.CONTEXT_TYPE.value,
         }
 
         # Add context type description
@@ -157,8 +156,9 @@ class BaseContextRetrievalTool(BaseTool):
 
         return result
 
-    def _format_results(self,
-                       search_results: List[Tuple[ProcessedContext, float]]) -> List[Dict[str, Any]]:
+    def _format_results(
+        self, search_results: List[Tuple[ProcessedContext, float]]
+    ) -> List[Dict[str, Any]]:
         """Format search results"""
         formatted_results = []
 
@@ -181,42 +181,42 @@ class BaseContextRetrievalTool(BaseTool):
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "Optional natural language query for semantic search. If not provided, will perform filter-only retrieval."
+                    "description": "Optional natural language query for semantic search. If not provided, will perform filter-only retrieval.",
                 },
                 "entities": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Entity list for filtering records containing specific entities (e.g., person names, project names). For current user, use 'current_user'"
+                    "description": "Entity list for filtering records containing specific entities (e.g., person names, project names). For current user, use 'current_user'",
                 },
                 "time_range": {
                     "type": "object",
                     "properties": {
                         "start": {
                             "type": "integer",
-                            "description": "Start timestamp in seconds (Unix epoch). MUST be a calculated integer, not a string or expression"
+                            "description": "Start timestamp in seconds (Unix epoch). MUST be a calculated integer, not a string or expression",
                         },
                         "end": {
                             "type": "integer",
-                            "description": "End timestamp in seconds (Unix epoch). MUST be a calculated integer, not a string or expression"
+                            "description": "End timestamp in seconds (Unix epoch). MUST be a calculated integer, not a string or expression",
                         },
                         "time_type": {
                             "type": "string",
                             "enum": ["create_time_ts", "update_time_ts", "event_time_ts"],
                             "default": "event_time_ts",
-                            "description": "Time type: create_time_ts (creation time), update_time_ts (update time), event_time_ts (event time)"
-                        }
+                            "description": "Time type: create_time_ts (creation time), update_time_ts (update time), event_time_ts (event time)",
+                        },
                     },
-                    "description": f"Time range filter for {cls.CONTEXT_TYPE.value}. Context: {context_desc.get('description', '')}. Start and end must be pre-calculated integer timestamps."
+                    "description": f"Time range filter for {cls.CONTEXT_TYPE.value}. Context: {context_desc.get('description', '')}. Start and end must be pre-calculated integer timestamps.",
                 },
                 "top_k": {
                     "type": "integer",
                     "default": 20,
                     "minimum": 1,
                     "maximum": 100,
-                    "description": "Number of results to return"
-                }
+                    "description": "Number of results to return",
+                },
             },
-            "required": []
+            "required": [],
         }
 
     def execute(self, **kwargs) -> List[Dict[str, Any]]:
@@ -246,15 +246,13 @@ class BaseContextRetrievalTool(BaseTool):
 
         try:
             # Execute search
-            search_results = self._execute_search(
-                query=query,
-                filters=filters,
-                top_k=top_k
-            )
+            search_results = self._execute_search(query=query, filters=filters, top_k=top_k)
 
             # Format and return results
             return self._format_results(search_results)
 
         except Exception as e:
             logger.error(f"{self.get_name()} execute exception: {str(e)}")
-            return [{"error": f"Error occurred during {self.CONTEXT_TYPE.value} retrieval: {str(e)}"}]
+            return [
+                {"error": f"Error occurred during {self.CONTEXT_TYPE.value} retrieval: {str(e)}"}
+            ]

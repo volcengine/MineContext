@@ -34,10 +34,7 @@ def convert_resp(data: Any = None, code: int = 0, status: int = 200, message: st
     }
     if data is not None:
         content["data"] = data
-    
+
     # Use CustomJSONEncoder to handle datetime and other special types
     json_content = json.dumps(content, cls=CustomJSONEncoder)
-    return JSONResponse(
-        status_code=status,
-        content=json.loads(json_content)
-    )
+    return JSONResponse(status_code=status, content=json.loads(json_content))

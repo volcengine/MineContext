@@ -108,32 +108,91 @@ Use descriptive branch names with appropriate prefixes:
    git checkout -b fix/your-bug-fix
    ```
 
-2. **Make your changes**
+2. **Set up code formatting (first time only)**
+
+   ```bash
+   # Install formatting tools
+   pip install black isort pre-commit
+
+   # Set up automatic formatting on commit
+   pre-commit install
+   ```
+
+3. **Make your changes**
 
    - Follow [PEP 8](https://pep8.org/) style guidelines
    - Add tests for new features
    - Update documentation if needed
 
-3. **Commit with clear messages**
+4. **Commit your changes**
+
+   Code will be **automatically formatted** when you commit:
 
    ```bash
+   git add .
    git commit -m "feat: add your feature description"
-   # or
-   git commit -m "fix: fix your bug description"
    ```
 
-4. **Push and create a Pull Request**
+   If files are modified by the formatter:
+   ```bash
+   git add .  # Add the formatted changes
+   git commit -m "feat: add your feature description"  # Commit again
+   ```
+
+5. **Push and create a Pull Request**
 
    ```bash
    git push origin feature/your-feature-name
    ```
 
+   **Before submitting PR, ensure:**
+   - ✅ All code is properly formatted (automatic if you set up pre-commit)
+   - ✅ All tests pass
+   - ✅ Documentation is updated if needed
+
 ## Code Style
 
+We use automated tools to maintain consistent code formatting.
+
+### Quick Setup (Recommended)
+
+```bash
+# 1. Install tools
+pip install black isort pre-commit
+
+# 2. Enable automatic formatting on commit
+pre-commit install
+
+# Done! Code will be formatted automatically when you commit
+```
+
+### How It Works
+
+When you run `git commit`, Black and isort will automatically format your code:
+- **Black**: Formats code style (spacing, line breaks, etc.)
+- **isort**: Sorts and organizes import statements
+
+If files are modified during commit, just run `git commit` again.
+
+### Manual Formatting (Optional)
+
+If you need to format code manually:
+
+```bash
+# Format all code
+pre-commit run --all-files
+
+# Or format specific tools
+black opencontext
+isort opencontext
+```
+
+### Formatting Rules
+
+- Maximum line length: 100 characters
 - Follow PEP 8 guidelines
 - Use type hints where appropriate
 - Keep functions focused and well-documented
-- Maximum line length: 100 characters
 
 ## Module Development Guide
 

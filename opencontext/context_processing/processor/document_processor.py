@@ -8,21 +8,36 @@
 """
 Document processor - Responsible for processing document-type data
 """
-from typing import Any, Dict, List, Optional
+import queue
+import threading
+import time
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-import threading, queue, time
-from opencontext.context_processing.processor.base_processor import BaseContextProcessor
-from opencontext.storage.global_storage import get_storage
-from opencontext.models.context import (ProcessedContext,
-                                        RawContextProperties, Chunk, ExtractedData, ContextProperties, Vectorize)
-from opencontext.models.enums import ContentFormat, ContextSource, ContextType, FileType, STRUCTURED_FILE_TYPES
-from opencontext.utils.logging_utils import get_logger
 from opencontext.context_processing.chunker.chunkers import (
-    BaseChunker, StructuredFileChunker, FAQChunker
+    BaseChunker,
+    FAQChunker,
+    StructuredFileChunker,
 )
 from opencontext.context_processing.chunker.llm_document_chunker import LLMDocumentChunker
-
+from opencontext.context_processing.processor.base_processor import BaseContextProcessor
+from opencontext.models.context import (
+    Chunk,
+    ContextProperties,
+    ExtractedData,
+    ProcessedContext,
+    RawContextProperties,
+    Vectorize,
+)
+from opencontext.models.enums import (
+    STRUCTURED_FILE_TYPES,
+    ContentFormat,
+    ContextSource,
+    ContextType,
+    FileType,
+)
+from opencontext.storage.global_storage import get_storage
+from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -32,21 +47,37 @@ class DocumentProcessor(BaseContextProcessor):
     Document processor that selects appropriate chunking strategies based on content type to chunk documents (files, URLs) and long text.
     This processor uses a background thread model, placing processing tasks in a queue and executing them in the background.
     """
+
     def __init__(self):
         # Get config and prompt_manager from global configuration
         from opencontext.config.global_config import get_config, get_prompt_manager
-        config = get_config('processing.document_processor') or {}
+
+        config = get_config("processing.document_processor") or {}
         super().__init__(config)
-        
+
         self.prompt_manager = get_prompt_manager()
         self.batch_size = self.config.get("batch_size", 10)
-        self.batch_timeout = self.config.get("batch_timeout", 5) # seconds
+        self.batch_timeout = self.config.get("batch_timeout", 5)  # seconds
         self._stop_event = threading.Event()
-        
+
         # LLM chunker configuration
         self.use_llm_chunker = self.config.get("use_llm_chunker", False)
         self.llm_chunker = None
-        self.llm_supported_types = {'.pdf', '.md', '.markdown', '.txt', '.rst', '.html', '.htm', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}
+        self.llm_supported_types = {
+            ".pdf",
+            ".md",
+            ".markdown",
+            ".txt",
+            ".rst",
+            ".html",
+            ".htm",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".bmp",
+            ".webp",
+        }
         if self.use_llm_chunker:
             self.llm_chunker = LLMDocumentChunker()
 
@@ -61,10 +92,10 @@ class DocumentProcessor(BaseContextProcessor):
         }
 
         # Pipeline related
-        self._input_queue = queue.Queue(maxsize=self.batch_size*2)
+        self._input_queue = queue.Queue(maxsize=self.batch_size * 2)
         self._processing_task = threading.Thread(target=self._run_processing_loop, daemon=True)
         self._processing_task.start()
-    
+
     @property
     def storage(self):
         """Get storage from global singleton"""
@@ -96,8 +127,8 @@ class DocumentProcessor(BaseContextProcessor):
     def _get_file_type(self, file_path: str) -> Optional[FileType]:
         if "faq" in file_path.lower() and file_path.endswith(".xlsx"):
             return FileType.FAQ_XLSX
-        
-        suffix = Path(file_path).suffix.lower().lstrip('.')
+
+        suffix = Path(file_path).suffix.lower().lstrip(".")
         try:
             return FileType(suffix)
         except ValueError:
@@ -108,25 +139,25 @@ class DocumentProcessor(BaseContextProcessor):
         """Check if the specified format context data can be processed"""
         if not isinstance(context, RawContextProperties):
             return False
-        
+
         # Support TEXT type content (from vaults documents) - processed using LLM chunker
         if context.source == ContextSource.TEXT:
             return self.llm_chunker is not None or context.content_format == ContentFormat.TEXT
-        
+
         if context.source == ContextSource.FILE:
             if not context.content_path or not Path(context.content_path).exists():
                 return False
             file_type = self._get_file_type(context.content_path)
-            
+
             # Structured document type check
             if file_type and file_type in STRUCTURED_FILE_TYPES:
                 return file_type in self.chunker_mapping
-            
+
             # Unstructured document check for LLM chunker support
             if self.llm_chunker:
                 file_ext = Path(context.content_path).suffix.lower()
                 return file_ext in self.llm_supported_types
-            
+
             # Other known file types
             return file_type in self.chunker_mapping
 
@@ -147,28 +178,34 @@ class DocumentProcessor(BaseContextProcessor):
         if context_data.source == ContextSource.FILE:
             content_path = context_data.content_path
             if not content_path or not Path(content_path).exists():
-                logger.warning(f"File path does not exist or not provided: {content_path} for object {context_data.object_id}.")
+                logger.warning(
+                    f"File path does not exist or not provided: {content_path} for object {context_data.object_id}."
+                )
                 return None
 
             # First determine file type
             file_type = self._get_file_type(content_path)
-            
+
             # Structured documents use specialized chunker first, not LLM chunker
             if file_type and file_type in STRUCTURED_FILE_TYPES:
-                logger.info(f"Using structured chunker for structured document {context_data.object_id} of type {file_type}")
+                logger.info(
+                    f"Using structured chunker for structured document {context_data.object_id} of type {file_type}"
+                )
                 return self.chunker_mapping.get(file_type)
-            
+
             # Unstructured documents consider using LLM chunker
             if self.llm_chunker:
                 file_ext = Path(content_path).suffix.lower()
                 if file_ext in self.llm_supported_types:
-                    logger.info(f"Using LLM chunker for unstructured document {context_data.object_id} of type {file_ext}")
+                    logger.info(
+                        f"Using LLM chunker for unstructured document {context_data.object_id} of type {file_ext}"
+                    )
                     return self.llm_chunker
 
             # Other file types use traditional chunker (if exists)
             if file_type:
                 return self.chunker_mapping.get(file_type)
-        
+
         return None
 
     def process(self, context: RawContextProperties) -> bool:
@@ -189,16 +226,18 @@ class DocumentProcessor(BaseContextProcessor):
                 # Wait for new items or timeout
                 raw_context = self._input_queue.get(timeout=self.batch_timeout)
 
-                if raw_context is None: # sentinel value
+                if raw_context is None:  # sentinel value
                     break
-                
+
                 logger.info(f"Started processing document: {raw_context.object_id}")
                 time1 = time.time()
                 processed_contexts = self._process_single_document(raw_context)
                 if processed_contexts:
                     self.storage.batch_upsert_processed_context(processed_contexts)
                 time2 = time.time()
-                logger.info(f"Processing document {raw_context.object_id} took: {time2 - time1:.2f} seconds")
+                logger.info(
+                    f"Processing document {raw_context.object_id} took: {time2 - time1:.2f} seconds"
+                )
 
             except queue.Empty:
                 # Queue is empty, continue waiting
@@ -209,13 +248,15 @@ class DocumentProcessor(BaseContextProcessor):
 
     def _process_single_document(self, raw_context: RawContextProperties) -> List[ProcessedContext]:
         """Process single document, chunk it and convert to ProcessedContext object list."""
-        
+
         # 1. Select chunker and chunk
         chunker = self._get_chunker(raw_context)
         if not chunker:
-            logger.warning(f"Content format {raw_context.content_format} cannot find suitable chunker, skipping document {raw_context.object_id}")
+            logger.warning(
+                f"Content format {raw_context.content_format} cannot find suitable chunker, skipping document {raw_context.object_id}"
+            )
             return []
-        
+
         logger.info(f"Started chunking document {raw_context.object_id}...")
         chunks = chunker.chunk(raw_context)
         logger.info(f"Document {raw_context.object_id} was chunked into {len(chunks)} chunks.")
@@ -229,28 +270,36 @@ class DocumentProcessor(BaseContextProcessor):
 
         # 4. Convert chunks to ProcessedContext objects
         processed_contexts = self._create_processed_contexts_from_chunks(raw_context, chunks)
-        
+
         return processed_contexts
 
-    def _create_processed_contexts_from_chunks(self, raw_context: RawContextProperties, chunks: List[Chunk]) -> List[ProcessedContext]:
+    def _create_processed_contexts_from_chunks(
+        self, raw_context: RawContextProperties, chunks: List[Chunk]
+    ) -> List[ProcessedContext]:
         """Create ProcessedContext objects from chunks."""
         processed_contexts = []
-        
+
         # Extract vaults document information
         additional_info = raw_context.additional_info or {}
-        vault_id = additional_info.get('vault_id')
-        document_title = additional_info.get('title', '')
-        
+        vault_id = additional_info.get("vault_id")
+        document_title = additional_info.get("title", "")
+
         for i, chunk in enumerate(chunks):
             # 1. Create ExtractedData
             extracted_data = ExtractedData(
                 title=chunk.title if chunk.title else document_title,
-                summary=chunk.summary if chunk.summary else chunk.text[:200] + "..." if len(chunk.text) > 200 else chunk.text,
+                summary=(
+                    chunk.summary
+                    if chunk.summary
+                    else chunk.text[:200] + "..." if len(chunk.text) > 200 else chunk.text
+                ),
                 context_type=ContextType.SEMANTIC_CONTEXT,
                 confidence=10,
                 importance=5,
             )
-            logger.info(f"Chunk title: {chunk.title} \n summary: {chunk.summary} \n text: {chunk.text}")
+            logger.info(
+                f"Chunk title: {chunk.title} \n summary: {chunk.summary} \n text: {chunk.text}"
+            )
 
             # 2. Create ContextProperties (including document tracking info)
             context_properties = ContextProperties(
@@ -261,7 +310,7 @@ class DocumentProcessor(BaseContextProcessor):
                 raw_properties=[raw_context],
                 # Document tracking fields
                 file_path=None,  # vaults documents have no file path
-                raw_type='vaults',  # source type
+                raw_type="vaults",  # source type
                 raw_id=str(vault_id) if vault_id else None,  # ID from vaults table
             )
 
@@ -281,5 +330,5 @@ class DocumentProcessor(BaseContextProcessor):
             )
 
             processed_contexts.append(processed_context)
-        
+
         return processed_contexts

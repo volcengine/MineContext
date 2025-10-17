@@ -7,16 +7,13 @@
 数据模型模块 - 定义系统中使用的数据结构
 """
 
-from opencontext.models.enums import (
-    ContextSource,
-    ContentFormat,
-)
 from opencontext.models.context import (
-    RawContextProperties,
-    ProcessedContext,
-    ExtractedData,
     ContextProperties,
+    ExtractedData,
+    ProcessedContext,
+    RawContextProperties,
 )
+from opencontext.models.enums import ContentFormat, ContextSource
 
 __all__ = [
     "RawContextProperties",

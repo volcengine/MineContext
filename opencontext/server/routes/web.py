@@ -7,20 +7,19 @@
 Web interface routes
 """
 
+import datetime
 from pathlib import Path
 from typing import Optional
-import datetime
 
-from fastapi import APIRouter, Request, HTTPException, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from opencontext.server.opencontext import OpenContext
 from opencontext.models.context import ProcessedContextModel
+from opencontext.server.middleware.auth import auth_dependency
+from opencontext.server.opencontext import OpenContext
 from opencontext.server.utils import get_context_lab
 from opencontext.storage.global_storage import get_storage
-from opencontext.server.middleware.auth import auth_dependency
-
 
 router = APIRouter(tags=["web"])
 
@@ -40,32 +39,40 @@ async def read_contexts(
     page: int = 1,
     limit: int = 15,
     type: Optional[str] = None,
-    opencontext: OpenContext = Depends(get_context_lab)
+    opencontext: OpenContext = Depends(get_context_lab),
 ):
     offset = (page - 1) * limit
     types = []
     if type:
         types.append(type)
-    contexts_dict = get_storage().get_all_processed_contexts(context_types=list(types), limit=limit+1, offset=offset, need_vector=False)
+    contexts_dict = get_storage().get_all_processed_contexts(
+        context_types=list(types), limit=limit + 1, offset=offset, need_vector=False
+    )
     contexts = []
     for backend_contexts in contexts_dict.values():
         contexts.extend(backend_contexts)
     contexts.sort(key=lambda x: x.properties.create_time, reverse=True)
     has_next = len(contexts) > limit
     contexts_to_display = contexts[:limit]
-    
+
     context_types = get_storage().get_available_context_types()
-    
-    return templates.TemplateResponse("contexts.html", {
-        "request": request,
-        "contexts": [ProcessedContextModel.from_processed_context(c, project_root) for c in contexts_to_display],
-        "page": page,
-        "limit": limit,
-        "type": type,
-        "context_types": context_types,
-        "has_next": has_next,
-        "has_prev": page > 1,
-    })
+
+    return templates.TemplateResponse(
+        "contexts.html",
+        {
+            "request": request,
+            "contexts": [
+                ProcessedContextModel.from_processed_context(c, project_root)
+                for c in contexts_to_display
+            ],
+            "page": page,
+            "limit": limit,
+            "type": type,
+            "context_types": context_types,
+            "has_next": has_next,
+            "has_prev": page > 1,
+        },
+    )
 
 
 @router.get("/vector_search", response_class=HTMLResponse)
@@ -94,9 +101,17 @@ async def advanced_chat_page(request: Request):
 async def serve_file(file_path: str, _auth: str = auth_dependency):
     # Security check: block access to sensitive directories
     sensitive_paths = [
-        'config/', '.env', '.git/', 'opencontext/',
-        '__pycache__/', '.pytest_cache/', 'logs/',
-        'private/', 'secret', 'password', 'key'
+        "config/",
+        ".env",
+        ".git/",
+        "opencontext/",
+        "__pycache__/",
+        ".pytest_cache/",
+        "logs/",
+        "private/",
+        "secret",
+        "password",
+        "key",
     ]
 
     # Check if accessing sensitive paths
@@ -107,18 +122,28 @@ async def serve_file(file_path: str, _auth: str = auth_dependency):
 
     # Only allow access to specific safe directories
     allowed_prefixes = [
-        'screenshots/', 'static/', 'uploads/', 'public/',
-        'docs/', 'examples/', 'templates/public/'
+        "screenshots/",
+        "static/",
+        "uploads/",
+        "public/",
+        "docs/",
+        "examples/",
+        "templates/public/",
     ]
-    
+
     if not any(file_path.startswith(prefix) for prefix in allowed_prefixes):
-        raise HTTPException(status_code=403, detail="Access forbidden: file is outside allowed directories")
-    
+        raise HTTPException(
+            status_code=403, detail="Access forbidden: file is outside allowed directories"
+        )
+
     full_path = (project_root / file_path).resolve()
     if not str(full_path).startswith(str(project_root)):
-        raise HTTPException(status_code=403, detail="Access forbidden: file is outside the project directory.")
+        raise HTTPException(
+            status_code=403, detail="Access forbidden: file is outside the project directory."
+        )
     if not full_path.is_file():
         from opencontext.utils.logging_utils import get_logger
+
         logger = get_logger(__name__)
         logger.error(f"File not found at: {full_path}")
         raise HTTPException(status_code=404, detail="File not found")
@@ -134,9 +159,6 @@ async def monitoring_page(request: Request):
 @router.get("/assistant", response_class=HTMLResponse)
 async def assistant_page(request: Request):
     """Intelligent assistant page"""
-    return templates.TemplateResponse("assistant.html", {
-        "request": request,
-        "title": "Intelligent Assistant"
-    })
-
-
+    return templates.TemplateResponse(
+        "assistant.html", {"request": request, "title": "Intelligent Assistant"}
+    )

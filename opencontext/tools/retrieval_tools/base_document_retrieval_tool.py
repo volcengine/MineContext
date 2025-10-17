@@ -8,10 +8,11 @@ Base document retrieval tool class for SQLite-based document retrieval
 Provides common functionality for querying structured document data
 """
 
-from typing import Any, Dict, List, Optional
 from datetime import datetime
-from opencontext.tools.base import BaseTool
+from typing import Any, Dict, List, Optional
+
 from opencontext.storage.global_storage import get_storage
+from opencontext.tools.base import BaseTool
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -80,7 +81,7 @@ class BaseDocumentRetrievalTool(BaseTool):
             "id": doc.get("id"),
             "content": doc.get("content"),
             "created_at": doc.get("created_at"),
-            "document_type": self.DOCUMENT_TYPE_NAME
+            "document_type": self.DOCUMENT_TYPE_NAME,
         }
 
     def _format_results(self, documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -109,16 +110,16 @@ class BaseDocumentRetrievalTool(BaseTool):
                     "default": 20,
                     "minimum": 1,
                     "maximum": 100,
-                    "description": "Number of results to return"
+                    "description": "Number of results to return",
                 },
                 "offset": {
                     "type": "integer",
                     "default": 0,
                     "minimum": 0,
-                    "description": "Offset for pagination"
-                }
+                    "description": "Offset for pagination",
+                },
             },
-            "required": []
+            "required": [],
         }
 
     def execute(self, **kwargs) -> List[Dict[str, Any]]:

@@ -9,20 +9,20 @@ Context management routes
 
 import json
 from pathlib import Path
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Request, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from opencontext.server.opencontext import OpenContext
 from opencontext.models.context import ProcessedContextModel
-from opencontext.models.enums import ContextSource, ContentFormat
+from opencontext.models.enums import ContentFormat, ContextSource
+from opencontext.server.middleware.auth import auth_dependency
+from opencontext.server.opencontext import OpenContext
+from opencontext.server.utils import convert_resp, get_context_lab
 from opencontext.utils.json_encoder import CustomJSONEncoder
 from opencontext.utils.logging_utils import get_logger
-from opencontext.server.utils import get_context_lab, convert_resp
-from opencontext.server.middleware.auth import auth_dependency
 
 logger = get_logger(__name__)
 router = APIRouter(tags=["context"])
@@ -72,7 +72,7 @@ class VectorSearchRequest(BaseModel):
 def delete_context(
     detail_request: ContextDetailRequest,
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """Delete a processed context by its ID and context_type."""
     success = opencontext.delete_context(detail_request.id, detail_request.context_type)
@@ -86,22 +86,26 @@ async def read_context_detail(
     detail_request: ContextDetailRequest,
     request: Request,
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     context = opencontext.get_context(detail_request.id, detail_request.context_type)
     if context is None:
-        return templates.TemplateResponse("error.html", {"request": request, "message": "Context not found"}, status_code=404)
-    
-    return templates.TemplateResponse("context_detail.html", {
-        "request": request,
-        "context": ProcessedContextModel.from_processed_context(context, project_root)
-    })
+        return templates.TemplateResponse(
+            "error.html", {"request": request, "message": "Context not found"}, status_code=404
+        )
+
+    return templates.TemplateResponse(
+        "context_detail.html",
+        {
+            "request": request,
+            "context": ProcessedContextModel.from_processed_context(context, project_root),
+        },
+    )
 
 
 @router.get("/api/context_types")
 async def get_context_types(
-    opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    opencontext: OpenContext = Depends(get_context_lab), _auth: str = auth_dependency
 ):
     """Get all available context types."""
     try:
@@ -116,7 +120,7 @@ async def get_context_types(
 async def vector_search(
     request: VectorSearchRequest,
     opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency
+    _auth: str = auth_dependency,
 ):
     """Directly search vector database without using LLM."""
     try:
@@ -124,18 +128,20 @@ async def vector_search(
             query=request.query,
             top_k=request.top_k,
             context_types=request.context_types,
-            filters=request.filters
+            filters=request.filters,
         )
-        
-        return convert_resp(data={
-            "results": results,
-            "total": len(results),
-            "query": request.query,
-            "top_k": request.top_k,
-            "context_types": request.context_types,
-            "filters": request.filters
-        })
-        
+
+        return convert_resp(
+            data={
+                "results": results,
+                "total": len(results),
+                "query": request.query,
+                "top_k": request.top_k,
+                "context_types": request.context_types,
+                "filters": request.filters,
+            }
+        )
+
     except Exception as e:
         logger.exception(f"Error in vector search: {e}")
         return convert_resp(code=500, status=500, message=f"Vector search failed: {str(e)}")

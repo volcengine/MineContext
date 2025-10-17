@@ -10,20 +10,20 @@ Refactored for better separation of concerns and maintainability.
 """
 
 import threading
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 from opencontext.config.config_manager import ConfigManager
-from opencontext.managers.capture_manager import ContextCaptureManager
-from opencontext.managers.processor_manager import ContextProcessorManager
-from opencontext.managers.consumption_manager import ConsumptionManager
-from opencontext.models.context import RawContextProperties, ProcessedContext
-from opencontext.utils.logging_utils import get_logger
-from opencontext.server.component_initializer import ComponentInitializer
-from opencontext.server.context_operations import ContextOperations
+from opencontext.config.global_config import GlobalConfig
 from opencontext.llm.global_embedding_client import GlobalEmbeddingClient
 from opencontext.llm.global_vlm_client import GlobalVLMClient
-from opencontext.config.global_config import GlobalConfig
+from opencontext.managers.capture_manager import ContextCaptureManager
+from opencontext.managers.consumption_manager import ConsumptionManager
+from opencontext.managers.processor_manager import ContextProcessorManager
+from opencontext.models.context import ProcessedContext, RawContextProperties
+from opencontext.server.component_initializer import ComponentInitializer
+from opencontext.server.context_operations import ContextOperations
 from opencontext.storage.global_storage import GlobalStorage
+from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,10 +31,7 @@ logger = get_logger(__name__)
 class OpenContext:
     """OpenContext main class - integrates all components and provides unified API."""
 
-    def __init__(
-        self,
-        config_path: Optional[str] = None
-    ):
+    def __init__(self, config_path: Optional[str] = None):
         """
         Initialize OpenContext.
 
@@ -49,11 +46,11 @@ class OpenContext:
         self.consumption_manager: Optional[ConsumptionManager] = None
         self.workflow_engine = None  # New Agent-based workflow engine
         self.completion_service = None  # Smart completion service
-        
+
         # Helper classes
         self.component_initializer = ComponentInitializer()
         self.context_operations: Optional[ContextOperations] = None
-        
+
         # Web server state
         self.web_server: Optional[threading.Thread] = None
         self.web_server_running: bool = False
@@ -63,7 +60,7 @@ class OpenContext:
     def initialize(self) -> None:
         """Initialize all components in proper order."""
         logger.info("Starting initialization of all components...")
-        
+
         try:
             GlobalConfig.get_instance()
             GlobalEmbeddingClient.get_instance()
@@ -74,24 +71,25 @@ class OpenContext:
             self.component_initializer.initialize_capture_components(self.capture_manager)
             logger.info("Capture modules initialization completed")
             self.component_initializer.initialize_processors(
-                self.processor_manager,
-                self._handle_processed_context
+                self.processor_manager, self._handle_processed_context
             )
-            self.consumption_manager = self.component_initializer.initialize_consumption_components()
+            self.consumption_manager = (
+                self.component_initializer.initialize_consumption_components()
+            )
             self.completion_service = self.component_initializer.initialize_completion_service()
             self._initialize_monitoring()
             logger.info("All components initialization completed successfully")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize components: {e}", exc_info=True)
             self.shutdown(graceful=False)
             raise
 
-
     def _initialize_monitoring(self):
         """Initialize monitoring system"""
         try:
             from opencontext.monitoring import initialize_monitor
+
             initialize_monitor()
             logger.info("Monitoring system initialized with storage backend")
         except ImportError:
@@ -105,7 +103,7 @@ class OpenContext:
         """
         if not contexts:
             return False
-            
+
         try:
             for context_data in contexts:
                 self.processor_manager.process(context_data)
@@ -113,20 +111,20 @@ class OpenContext:
         except Exception as e:
             logger.error(f"Error processing captured contexts: {e}")
             return False
-    
+
     def _handle_processed_context(self, contexts: List[ProcessedContext]) -> bool:
         """
         Store processed contexts.
-        
+
         Args:
             contexts: List of processed contexts to store
-            
+
         Returns:
             True if storage was successful, False otherwise
         """
         if not contexts:
             return False
-            
+
         if self.storage:
             try:
                 return self.storage.batch_upsert_processed_context(contexts)
@@ -149,12 +147,12 @@ class OpenContext:
 
     def shutdown(self, graceful: bool = True) -> None:
         """Shutdown all components gracefully.
-        
+
         Args:
             graceful: Whether to perform graceful shutdown
         """
         logger.info("Shutting down all components...")
-        
+
         try:
             # Stop content generation scheduled tasks
             if self.consumption_manager:
@@ -163,16 +161,16 @@ class OpenContext:
                     logger.info("Content generation scheduled tasks stopped")
                 except Exception as e:
                     logger.warning(f"Error stopping content generation scheduled tasks: {e}")
-            
+
             # Shutdown managers
             self.capture_manager.shutdown(graceful=graceful)
             self.processor_manager.shutdown(graceful=graceful)
-            
+
             if self.web_server and self.web_server.is_alive():
                 logger.info("Web server will close when main thread exits.")
-                
+
             logger.info("All components shut down successfully.")
-            
+
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
             if not graceful:
@@ -181,10 +179,10 @@ class OpenContext:
     def add_context(self, context_data: RawContextProperties) -> bool:
         """
         Process a single context data item.
-        
+
         Args:
             context_data: Raw context properties to process
-            
+
         Returns:
             True if processing was successful, False otherwise
         """
@@ -193,19 +191,18 @@ class OpenContext:
         except Exception as e:
             logger.error(f"Error adding context: {e}")
             return False
-    
+
     # Delegate context operations to ContextOperations helper
     def get_all_contexts(
-        self, 
-        limit: int = 10, 
-        offset: int = 0, 
-        filter_criteria: Optional[Dict[str, Any]] = None
+        self, limit: int = 10, offset: int = 0, filter_criteria: Optional[Dict[str, Any]] = None
     ) -> Dict[str, List[ProcessedContext]]:
         """Get all processed contexts."""
         if not self.context_operations:
             logger.warning("Context operations not initialized.")
             return {}
-        return self.context_operations.get_all_contexts(limit, offset, filter_criteria, need_vector=False)
+        return self.context_operations.get_all_contexts(
+            limit, offset, filter_criteria, need_vector=False
+        )
 
     def get_context(self, doc_id: str, context_type: str) -> Optional[ProcessedContext]:
         """Get a single processed context."""
@@ -238,11 +235,11 @@ class OpenContext:
         )
 
     def search(
-        self, 
-        query: str, 
-        top_k: int = 10, 
-        context_types: Optional[List[str]] = None, 
-        filters: Optional[Dict[str, Any]] = None
+        self,
+        query: str,
+        top_k: int = 10,
+        context_types: Optional[List[str]] = None,
+        filters: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Perform vector search without LLM processing."""
         if not self.context_operations:
@@ -254,13 +251,14 @@ class OpenContext:
         if not self.context_operations:
             raise RuntimeError("Context operations not initialized")
         return self.context_operations.get_context_types()
-    
+
     def check_components_health(self) -> Dict[str, bool]:
         """Check health status of all components."""
         return {
             "config": GlobalConfig.get_instance().is_initialized(),
             "storage": GlobalStorage.get_instance().get_storage() is not None,
-            "llm": GlobalEmbeddingClient.get_instance().is_initialized() and GlobalVLMClient.get_instance().is_initialized(),
+            "llm": GlobalEmbeddingClient.get_instance().is_initialized()
+            and GlobalVLMClient.get_instance().is_initialized(),
             "capture": bool(self.capture_manager),
             "consumption": bool(self.consumption_manager),
         }
@@ -269,26 +267,23 @@ class OpenContext:
 def main():
     """Main entry point for running the server."""
     import argparse
+
     import uvicorn
-    
+
     parser = argparse.ArgumentParser(description="OpenContext Server")
     parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--config", help="Configuration file path", default="./config/config.yaml")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload for development")
-    
+
     args = parser.parse_args()
-    
+
     print(f"Starting OpenContext Server on {args.host}:{args.port}")
     if args.config:
         print(f"Using config file: {args.config}")
-    
+
     uvicorn.run(
-        "opencontext.cli:app",
-        host=args.host,
-        port=args.port,
-        reload=args.reload,
-        log_level="info"
+        "opencontext.cli:app", host=args.host, port=args.port, reload=args.reload, log_level="info"
     )
 
 

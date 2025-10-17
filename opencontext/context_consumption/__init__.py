@@ -6,5 +6,3 @@
 """
 OpenContext context_consumption module initialization
 """
-
-

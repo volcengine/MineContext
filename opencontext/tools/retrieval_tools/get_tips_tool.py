@@ -9,6 +9,7 @@ Retrieves tips from SQLite tips table
 """
 
 from typing import Any, Dict, List
+
 from opencontext.tools.retrieval_tools.base_document_retrieval_tool import BaseDocumentRetrievalTool
 from opencontext.utils.logging_utils import get_logger
 
@@ -62,16 +63,18 @@ class GetTipsTool(BaseDocumentRetrievalTool):
         base_params = super().get_parameters()
 
         # Add tips-specific parameters
-        base_params["properties"].update({
-            "created_after": {
-                "type": "integer",
-                "description": "Filter tips created after this timestamp (Unix epoch seconds)"
-            },
-            "created_before": {
-                "type": "integer",
-                "description": "Filter tips created before this timestamp (Unix epoch seconds)"
+        base_params["properties"].update(
+            {
+                "created_after": {
+                    "type": "integer",
+                    "description": "Filter tips created after this timestamp (Unix epoch seconds)",
+                },
+                "created_before": {
+                    "type": "integer",
+                    "description": "Filter tips created before this timestamp (Unix epoch seconds)",
+                },
             }
-        })
+        )
 
         return base_params
 
@@ -81,7 +84,7 @@ class GetTipsTool(BaseDocumentRetrievalTool):
             "id": doc.get("id"),
             "content": doc.get("content"),
             "created_at": doc.get("created_at"),
-            "document_type": self.DOCUMENT_TYPE_NAME
+            "document_type": self.DOCUMENT_TYPE_NAME,
         }
 
     def execute(self, **kwargs) -> List[Dict[str, Any]]:
@@ -108,7 +111,7 @@ class GetTipsTool(BaseDocumentRetrievalTool):
                 start_time=self._parse_datetime(created_after),
                 end_time=self._parse_datetime(created_before),
                 limit=limit,
-                offset=offset
+                offset=offset,
             )
 
             # Format and return results
