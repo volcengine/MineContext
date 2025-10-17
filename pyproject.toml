@@ -38,6 +38,7 @@ dependencies = [
     "volcengine",
     "pillow",
     "imagehash",
+    "google-generativeai",
 ]
 
 [project.optional-dependencies]
