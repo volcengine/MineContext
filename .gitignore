@@ -11,6 +11,7 @@ __pycache__
 /config/runtime
 /test_script
 /config/user_setting.yaml
+/config/config.yaml
 .DS_Store
 
 .venv/
