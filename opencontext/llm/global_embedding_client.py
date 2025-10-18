@@ -80,23 +80,40 @@ class GlobalEmbeddingClient:
 
     def reinitialize(self, new_config: Optional[Dict] = None):
         """
-        Reinitialize embedding client (thread-safe)
+        Thread-safe reinitialization of embedding client.
+        This method ensures that if reinitialization fails, the old client is restored.
+
+        Args:
+            new_config: Optional new configuration dict (if None, loads from global config)
+
+        Returns:
+            bool: True if reinitialization succeeded, False otherwise
         """
         with self._lock:
+            old_client = self._embedding_client
             try:
-                embedding_config = get_config("embedding_model")
+                embedding_config = new_config or get_config("embedding_model")
                 if not embedding_config:
-                    logger.error("No embedding config found during reinitialize")
-                    raise ValueError("No embedding config found")
+                    logger.error("No embedding_config found during reinitialization.")
+                    raise ValueError("No embedding_config found during reinitialization")
+
                 logger.info("Reinitializing embedding client...")
                 new_client = LLMClient(llm_type=LLMType.EMBEDDING, config=embedding_config)
-                old_client = self._embedding_client
+
+                # Validate the new client before replacing the old one
+                is_valid, msg = new_client.validate()
+                if not is_valid:
+                    raise ValueError(f"New embedding client validation failed: {msg}")
+
                 self._embedding_client = new_client
-                logger.info("Embedding client reinitialization completed")
+                logger.info("Embedding client reinitialized successfully.")
+                return True
             except Exception as e:
-                logger.error(f"Failed to reinitialize embedding client: {e}")
+                logger.error(
+                    f"Failed to reinitialize embedding client: {e}. Restoring previous client."
+                )
+                self._embedding_client = old_client
                 return False
-            return True
 
     def do_embedding(self, text: str, **kwargs) -> List[float]:
         """

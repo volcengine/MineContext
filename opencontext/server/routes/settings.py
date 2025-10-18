@@ -154,15 +154,18 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
             emb_url = cfg.embeddingBaseUrl or cfg.baseUrl
             emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
 
-            # Validation
-            if cfg.modelPlatform.lower() != "ollama" and not vlm_key:
-                return convert_resp(code=400, status=400, message="VLM API key cannot be empty")
+            # Basic validation (existence of required fields)
+            if not cfg.baseUrl:
+                return convert_resp(code=400, status=400, message="VLM base URL cannot be empty")
             if not cfg.modelId:
                 return convert_resp(code=400, status=400, message="VLM model ID cannot be empty")
             if not cfg.embeddingModelId:
                 return convert_resp(
                     code=400, status=400, message="Embedding model ID cannot be empty"
                 )
+
+            # Note: API key validation is delegated to LLMClient
+            # Some providers (Ollama, LocalAI, etc.) don't require API keys
 
             # Validate VLM
             vlm_config = _build_llm_config(

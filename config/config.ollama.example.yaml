@@ -1,0 +1,226 @@
+# Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+#
+# OpenContext Configuration File - Ollama Example
+# This example shows how to configure MineContext to use Ollama (or other local LLM providers)
+# without requiring API keys.
+
+# General switch
+enabled: true
+
+# Logging configuration
+logging:
+  level: DEBUG
+  log_path: "${CONTEXT_PATH:.}/logs/opencontext.log"
+
+user_setting_path: "${CONTEXT_PATH:.}/config/user_setting.yaml"
+
+# VLM Model Configuration - Ollama Example
+# For Ollama, you don't need to provide an API key
+vlm_model:
+  base_url: "http://localhost:11434/v1"  # Default Ollama API endpoint
+  api_key: ""  # Empty for Ollama - no authentication needed
+  model: "qwen2.5:14b"  # Or any model you have pulled: llama3.1, mistral, etc.
+  provider: "ollama"  # Important: set provider to "ollama"
+  temperature: 0.7
+
+# Embedding Model Configuration - Ollama Example
+# Ollama can also provide embedding models
+embedding_model:
+  base_url: "http://localhost:11434/v1"  # Same Ollama endpoint
+  api_key: ""  # Empty for Ollama
+  model: "nomic-embed-text"  # Or mxbai-embed-large, bge-m3, etc.
+  provider: "ollama"  # Important: set provider to "ollama"
+  output_dim: 768  # Adjust based on your embedding model
+
+# Alternative: Use different providers for VLM and Embedding
+# 
+# For example, you can use:
+# - Ollama for VLM (chat)
+# - OpenAI for embedding
+# OR
+# - LocalAI for both
+# OR
+# - LlamaCPP for VLM, Ollama for embedding
+#
+# Just ensure the base_url and provider match your setup.
+
+# Context capture module
+capture:
+  enabled: true
+  screenshot:
+    enabled: false
+    capture_interval: 5
+    storage_path: "${CONTEXT_PATH:.}/screenshots"
+
+  file_monitor:
+    enabled: false
+    recursive: true
+    initial_scan: true
+    monitor_paths: "./doc"
+    capture_interval: 30
+    ignore_patterns:
+      - "**/node_modules/**"
+      - "**/.git/**"
+
+  vault_document_monitor:
+    enabled: false
+    monitor_interval: 30
+    initial_scan: true
+
+# Context processing module
+processing:
+  enabled: true
+  document_processor:
+    enabled: true
+    batch_size: 10
+    batch_timeout: 5
+    use_cloud_chunker: false
+    
+  screenshot_processor:
+    enabled: true
+    dedup_cache_size: 30
+    similarity_hash_threshold: 5
+    batch_size: 20
+    batch_timeout: 10
+    max_image_size: 1920
+    resize_quality: 85
+    enabled_delete: true
+    max_raw_properties: 5
+
+  context_merger:
+    enabled: false
+    similarity_threshold: 0.90
+    associative_similarity_threshold: 0.6
+    use_intelligent_merging: true
+    enable_memory_management: true
+    cleanup_interval_hours: 24
+    enable_cross_type_processing: true
+    conversion_confidence_threshold: 0.8
+    max_conversions_per_session: 10
+
+# Context storage module
+storage:
+  enabled: true
+  backends:
+    - name: "default_vector"
+      storage_type: "vector_db"
+      backend: "chromadb"
+      config:
+        mode: "local"
+        path: "${CONTEXT_PATH:.}/persist/chromadb"
+        collection_prefix: "opencontext"
+    
+    - name: "document_store"
+      storage_type: "document_db"
+      backend: "sqlite"
+      config:
+        path: "${CONTEXT_PATH:.}/persist/sqlite/app.db"
+
+# Context consumption module
+consumption:
+  enabled: true
+
+# Web server
+web:
+  host: "127.0.0.1"
+  port: 8000
+
+# API authentication configuration
+api_auth:
+  enabled: false
+  api_keys: 
+    - "${CONTEXT_API_KEY:test}"
+  excluded_paths:
+    - "/health"
+    - "/api/health"
+    - "/api/auth/status"
+    - "/"
+    - "/static/*"
+    - "/contexts"
+    - "/vector_search"
+    - "/debug"
+    - "/chat"
+    - "/advanced_chat"
+    - "/monitoring"
+    - "/assistant"
+    - "/vaults"
+
+# Prompts configuration
+prompts:
+  language: "zh"  # or "en"
+
+# Content generation service configuration
+content_generation:
+  activity:
+    enabled: true
+    interval: 900
+  tips:
+    enabled: true
+    interval: 3600
+  todos:
+    enabled: true
+    interval: 1800
+  report:
+    enabled: true
+    time: "08:00"
+
+# Tools configuration
+tools:
+  entity_tools:
+    enabled: true
+    entity_normalizer:
+      entity_config_path: "${CONTEXT_PATH:.}/config/runtime/entity_config.json"
+      similarity_threshold: 0.8
+      auto_learn: true
+      min_frequency: 3
+    entity_extractor:
+      extract_types: ["person", "product", "company", "technology"]
+      enable_context_patterns: true
+    context_enhancement:
+      max_background_entities: 3
+      background_cache_size: 100
+      enhance_summary: true
+      suggest_merge: true
+    user_entity_unifier:
+      unified_user_name: "current_user"
+      auto_detect_names: true
+      enable_query_support: true
+
+  operation_tools:      
+    sqlite_operations:
+      enabled: true
+    web_search_tool:
+      enabled: true
+      web_search:
+        engine: duckduckgo
+        max_results: 5
+        timeout: 10
+    web_viewer_tool:
+      enabled: true
+
+# Intelligent completion service configuration
+completion:
+  enabled: true
+  max_context_length: 500
+  max_suggestions: 3
+  min_trigger_length: 3
+  similarity_threshold: 0.7
+  cache:
+    enabled: true
+    max_size: 1000
+    ttl_seconds: 300
+    strategy: "hybrid"
+  completion_types:
+    semantic_continuation:
+      enabled: true
+      priority: 1
+    template_completion:
+      enabled: true
+      priority: 2
+    reference_suggestion:
+      enabled: true
+      priority: 3
+    context_aware:
+      enabled: true
+      priority: 4
