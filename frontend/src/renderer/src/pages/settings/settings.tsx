@@ -18,66 +18,88 @@ interface Props {
 }
 
 const InputBeforeDiv = ({ label }: { label: string }) => {
-  return (
-    <div className="flex w-[73px] items-center">
-      {label}
-    </div>
-  )
+  return <div className="flex w-[73px] items-center">{label}</div>
 }
 
 const CustomFormItems = () => {
   return (
     <>
-    <div className="flex flex-col gap-6 mb-6">
-      <div className="flex flex-col gap-[8px]">
-        <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px] tracking-[0.042px]">Vision language model</span>
-        <FormItem
-          field="modelId"
-          className="[&_.arco-form-item]: !mb-0"
-          rules={[{ required: true, message: 'Cannot be empty' }]}
-          requiredSymbol={false}>
-          <Input addBefore={<InputBeforeDiv label="Model name" />} placeholder="A VLM model with visual understanding capabilities is required." allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
-        </FormItem>
-        <FormItem
-          field="baseUrl"
-          className="[&_.arco-form-item]: !mb-0"
-          rules={[{ required: true, message: 'Cannot be empty' }]}
-          requiredSymbol={false}>
-          <Input addBefore={<InputBeforeDiv label="Base URL" />} placeholder="Enter your base URL" allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
-        </FormItem>
-        <FormItem
-          field="apiKey"
-          className="[&_.arco-form-item]: !mb-0"
-          rules={[{ required: true, message: 'Cannot be empty' }]}
-          requiredSymbol={false}>
-          <Input addBefore={<InputBeforeDiv label="API Key" />} placeholder="Enter your API Key" allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
-        </FormItem>
-      </div>
-      <div className="flex flex-col gap-[8px]">
-        <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px] tracking-[0.042px]">Embedding model</span>
-        <FormItem
-          field="embeddingModelId"
-          className="[&_.arco-form-item]: !mb-0"
-          rules={[{ required: true, message: 'Cannot be empty' }]}
-          requiredSymbol={false}>
-          <Input addBefore={<InputBeforeDiv label="Model name" />} placeholder="Enter your embedding model name" allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
-        </FormItem>
-        <FormItem
-          field="embeddingBaseUrl"
-          className="[&_.arco-form-item]: !mb-0"
-          rules={[{ required: true, message: 'Cannot be empty' }]}
-          requiredSymbol={false}>
-          <Input addBefore={<InputBeforeDiv label="Base URL" />} placeholder="Enter your base URL" allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
-        </FormItem>
-        <FormItem
-          field="embeddingApiKey"
-          className="[&_.arco-form-item]: !mb-0"
-          rules={[{ required: true, message: 'Cannot be empty' }]}
-          requiredSymbol={false}>
-          <Input addBefore={<InputBeforeDiv label="API Key" />} placeholder="Enter your API Key" allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
-        </FormItem>
+      <div className="flex flex-col gap-6 mb-6">
+        <div className="flex flex-col gap-[8px]">
+          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px] tracking-[0.042px]">
+            Vision language model
+          </span>
+          <FormItem
+            field="modelId"
+            className="[&_.arco-form-item]: !mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputBeforeDiv label="Model name" />}
+              placeholder="A VLM model with visual understanding capabilities is required."
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+          <FormItem
+            field="baseUrl"
+            className="[&_.arco-form-item]: !mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputBeforeDiv label="Base URL" />}
+              placeholder="Enter your base URL"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+          <FormItem field="apiKey" className="[&_.arco-form-item]: !mb-0" requiredSymbol={false}>
+            <Input
+              addBefore={<InputBeforeDiv label="API Key" />}
+              placeholder="Enter your API Key (optional for Ollama/LocalAI)"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
         </div>
-    </div>
+        <div className="flex flex-col gap-[8px]">
+          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px] tracking-[0.042px]">
+            Embedding model
+          </span>
+          <FormItem
+            field="embeddingModelId"
+            className="[&_.arco-form-item]: !mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputBeforeDiv label="Model name" />}
+              placeholder="Enter your embedding model name"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+          <FormItem
+            field="embeddingBaseUrl"
+            className="[&_.arco-form-item]: !mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputBeforeDiv label="Base URL" />}
+              placeholder="Enter your base URL"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+          <FormItem field="embeddingApiKey" className="[&_.arco-form-item]: !mb-0" requiredSymbol={false}>
+            <Input
+              addBefore={<InputBeforeDiv label="API Key" />}
+              placeholder="Enter your API Key (optional for Ollama/LocalAI)"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+        </div>
+      </div>
     </>
   )
 }
@@ -111,7 +133,9 @@ const Settings: FC<Props> = (props: Props) => {
   const getInfo = async () => {
     const res = await getModelInfo()
 
-    if (res.data.config.apiKey === '') {
+    // Check if model is configured based on modelId, not apiKey
+    // API key can be empty for local providers like Ollama, LocalAI, etc.
+    if (!res.data.config.modelId || res.data.config.modelId === '') {
       setInit(false)
     } else {
       form.setFieldsValue(res.data.config)
@@ -244,7 +268,12 @@ const Settings: FC<Props> = (props: Props) => {
                     </div>
                   }
                   rules={[{ required: true, message: 'Please enter' }]}>
-                  <Input autoFocus placeholder="Enter your API key" allowClear className="[&_.arco-input-inner-wrapper]: !w-[574px]" />
+                  <Input
+                    autoFocus
+                    placeholder="Enter your API key"
+                    allowClear
+                    className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+                  />
                 </FormItem>
               </>
             )}
