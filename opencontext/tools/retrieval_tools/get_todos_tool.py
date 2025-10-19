@@ -72,8 +72,8 @@ class GetTodosTool(BaseDocumentRetrievalTool):
         base_params["properties"].update(
             {
                 "status": {
-                    "type": "integer",
-                    "enum": [0, 1],
+                    "type": "string",
+                    "enum": ["0", "1"],
                     "description": "Filter by status: 0=pending, 1=completed. Leave empty to retrieve all statuses.",
                 },
                 "urgency": {
@@ -127,6 +127,12 @@ class GetTodosTool(BaseDocumentRetrievalTool):
             List of formatted todo items
         """
         status = kwargs.get("status")
+        if status is not None:
+            try:
+                status = int(status)
+            except (ValueError, TypeError):
+                return [{"error": "Invalid status value. Must be '0' or '1'."}]
+
         urgency = kwargs.get("urgency")
         start_time = kwargs.get("start_time")
         end_time = kwargs.get("end_time")
