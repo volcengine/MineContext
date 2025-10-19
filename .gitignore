@@ -16,6 +16,10 @@ __pycache__
 .venv/
 uv.lock
 
+# Environment variables
+.env
+.env.local
+
 ⚙️ work_phases
 🗄️ archive
 🧠 knowledge_base

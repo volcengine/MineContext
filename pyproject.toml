@@ -39,6 +39,7 @@ dependencies = [
     "pillow",
     "imagehash",
     "google-generativeai",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]

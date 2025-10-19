@@ -15,17 +15,17 @@ user_setting_path: "${CONTEXT_PATH:.}/config/user_setting.yaml"
 
 vlm_model:
   base_url: "${LLM_BASE_URL}"
-  api_key: "${LLM_API_KEY}"
+  api_key: "${LLM_API_KEY:}"
   model: "${LLM_MODEL}"
-  provider: ""
+  provider: "${LLM_PROVIDER:}"
   # max_tokens: 4096
   temperature: 0.7
 
 embedding_model:
-  base_url: "${EMBEDDING_BASE_URL}"
-  api_key: "${EMBEDDING_API_KEY}"
+  base_url: "${EMBEDDING_BASE_URL:${LLM_BASE_URL}}"
+  api_key: "${EMBEDDING_API_KEY:${LLM_API_KEY}}"
   model: "${EMBEDDING_MODEL}"
-  provider: ""
+  provider: "${EMBEDDING_PROVIDER:${LLM_PROVIDER}}"
   output_dim: 2048
 
 # Context capture module
