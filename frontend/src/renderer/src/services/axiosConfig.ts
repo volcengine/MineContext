@@ -4,9 +4,14 @@
 import axios from 'axios'
 
 // TODO: Finally, use the main process proxy so that the baseURL does not need to be updated every time
-// Create an axios instance, initially using the default port
+// Resolve default backend URL from env (fallback to 127.0.0.1:8000)
+const DEFAULT_HOST = (import.meta.env?.VITE_WEB_HOST as string) || '127.0.0.1'
+const DEFAULT_PORT = Number(import.meta.env?.VITE_WEB_PORT ?? 8000)
+const DEFAULT_BASE_URL = `http://${DEFAULT_HOST}:${DEFAULT_PORT}`
+
+// Create an axios instance, initially using the env/default port
 const axiosInstance = axios.create({
-  baseURL: 'http://127.0.0.1:8000', // Default port, will be updated at runtime
+  baseURL: DEFAULT_BASE_URL,
   timeout: 300000,
   headers: {
     'Content-Type': 'application/json'
@@ -27,12 +32,12 @@ if (typeof window !== 'undefined' && window.electron) {
   window.electron.ipcRenderer
     .invoke('backend:get-port')
     .then((port: number) => {
-      if (port && port !== 8000) {
+      if (port && port !== DEFAULT_PORT) {
         updateBaseURL(port)
       }
     })
     .catch((error) => {
-      console.warn('Failed to get backend port, using default 8000:', error)
+      console.warn(`Failed to get backend port, using default ${DEFAULT_PORT}:`, error)
     })
 }
 

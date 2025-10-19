@@ -72,6 +72,8 @@ The application will automatically load variables from `.env`!
 | `EMBEDDING_API_KEY` | Embedding API key | Same as `LLM_API_KEY` |
 | `CONTEXT_PATH` | Data storage path | `.` (current directory) |
 | `CONTEXT_API_KEY` | API authentication key | `test` |
+| `WEB_HOST` | Backend web server host | `127.0.0.1` |
+| `WEB_PORT` | Backend web server port | `8000` |
 
 ## Configuration Examples
 
@@ -88,6 +90,10 @@ EMBEDDING_PROVIDER=ollama
 EMBEDDING_MODEL=nomic-embed-text
 EMBEDDING_BASE_URL=http://localhost:11434/v1
 EMBEDDING_API_KEY=
+
+# Backend web server (frontend will consume this too)
+WEB_HOST=127.0.0.1
+WEB_PORT=8000
 ```
 
 **Setup:**

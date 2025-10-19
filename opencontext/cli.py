@@ -228,9 +228,13 @@ def handle_start(args: argparse.Namespace) -> int:
 
     web_config = get_config("web")
     if web_config.get("enabled", True):
-        # Command line arguments override config file
-        host = args.host if args.host else web_config.get("host", "localhost")
-        port = args.port if args.port else web_config.get("port", 8000)
+        # Priority: CLI args > ENV (.env) > config.yaml defaults
+        env_host = os.environ.get("WEB_HOST")
+        env_port = os.environ.get("WEB_PORT")
+
+        # Command line arguments override env/config
+        host = args.host or env_host or web_config.get("host", "localhost")
+        port = args.port or (int(env_port) if env_port and env_port.isdigit() else None) or web_config.get("port", 8000)
 
         try:
             logger.info(f"Starting web server on {host}:{port}")

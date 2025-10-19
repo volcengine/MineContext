@@ -16,7 +16,7 @@ import {
   Form,
   Tooltip
 } from '@arco-design/web-react'
-import { IconDelete, IconEdit } from '@arco-design/web-react/icon'
+import { IconDelete } from '@arco-design/web-react/icon'
 import { Task, useHomeInfo } from '@renderer/hooks/use-home-info'
 import { useRef, useState } from 'react'
 import taskEmpty from '@renderer/assets/images/task-empty.svg'
