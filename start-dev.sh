@@ -9,6 +9,15 @@ NC='\033[0m' # No Color
 
 echo "🚀 Starting MineContext Development Environment..."
 
+# Check if .env file exists
+if [ ! -f ".env" ]; then
+    echo -e "${YELLOW}⚠️  Warning: .env file not found${NC}"
+    echo "   It's recommended to use .env file for environment variables"
+    echo "   Run: cp .env.example .env"
+    echo "   Then edit .env with your configuration"
+    echo ""
+fi
+
 # Check if config exists
 if [ ! -f "config/config.yaml" ]; then
     echo -e "${YELLOW}⚠️  Warning: config/config.yaml not found${NC}"

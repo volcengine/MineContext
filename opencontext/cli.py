@@ -8,6 +8,7 @@ Command-line interface - provides the entry point for command-line tools
 """
 
 import argparse
+import os
 import sys
 import time
 from contextlib import asynccontextmanager
@@ -15,6 +16,7 @@ from pathlib import Path
 from typing import Optional
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -23,6 +25,18 @@ from opencontext.config.config_manager import ConfigManager
 from opencontext.server.api import router as api_router
 from opencontext.server.opencontext import OpenContext
 from opencontext.utils.logging_utils import get_logger, setup_logging
+
+# Load .env file if it exists
+_env_path = Path(".env")
+if _env_path.exists():
+    load_dotenv(_env_path)
+    print(f"✓ Loaded environment variables from {_env_path.absolute()}")
+else:
+    # Try to load from parent directory (for development)
+    _parent_env = Path("../.env")
+    if _parent_env.exists():
+        load_dotenv(_parent_env)
+        print(f"✓ Loaded environment variables from {_parent_env.absolute()}")
 
 logger = get_logger(__name__)
 
