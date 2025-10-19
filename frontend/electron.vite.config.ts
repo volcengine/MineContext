@@ -45,6 +45,8 @@ export default defineConfig({
     }
   },
   renderer: {
+    // Point envDir to repo root so renderer can read root .env
+    envDir: '..',
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
@@ -78,7 +80,12 @@ export default defineConfig({
       }),
       ...(isDev ? [CodeInspectorPlugin({ bundler: 'vite' })] : []), // 只在开发环境下启用 CodeInspectorPlugin
       ...visualizerPlugin('renderer')
-    ]
+    ],
+    // Map WEB_HOST/WEB_PORT from process.env into Vite runtime vars
+    define: {
+      'import.meta.env.VITE_WEB_HOST': JSON.stringify(process.env.WEB_HOST || '127.0.0.1'),
+      'import.meta.env.VITE_WEB_PORT': JSON.stringify(process.env.WEB_PORT || '8000')
+    }
     // server: {
     //   proxy: {
     //     // 代理Express服务 (AI Chat)
