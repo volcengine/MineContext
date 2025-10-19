@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import * as React from "react"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+import * as React from 'react'
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 import { cn } from '@renderer/lib/utils'
 

@@ -1,16 +1,11 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-'use client';
-import { Button } from '@renderer/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@renderer/components/ui/tooltip';
-import { cn } from '@renderer/lib/utils';
-import type { ComponentProps } from 'react';
+'use client'
+import { Button } from '@renderer/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@renderer/components/ui/tooltip'
+import { cn } from '@renderer/lib/utils'
+import type { ComponentProps } from 'react'
 
 export type ActionsProps = ComponentProps<'div'>
 

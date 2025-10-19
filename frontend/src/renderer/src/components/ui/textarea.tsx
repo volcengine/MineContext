@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import * as React from "react"
+import * as React from 'react'
 
 import { cn } from '@renderer/lib/utils'
 

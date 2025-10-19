@@ -1,14 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-export type NotificationType =
-  | 'progress'
-  | 'success'
-  | 'error'
-  | 'warning'
-  | 'info'
-  | 'action'
-  | 'normal'
+export type NotificationType = 'progress' | 'success' | 'error' | 'warning' | 'info' | 'action' | 'normal'
 export type NotificationSource = 'assistant' | 'backup' | 'knowledge' | 'update'
 
 export interface Notification<T = any> {

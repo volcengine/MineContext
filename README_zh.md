@@ -8,6 +8,9 @@
 
 一个开源、主动的上下文感知 AI 伙伴，致力于让您的工作、学习与创作更加清晰高效。
 
+中文 / [English](README.md)
+
+
 <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">社区实践</a> · <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
 
 [![][release-shield]][release-link]
@@ -18,7 +21,10 @@
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
 
-中文 / [English](README.md)
+
+<a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
+
 
 👋 加入我们的 [微信 / 飞书 / 小红书交流群](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
@@ -32,6 +38,9 @@
 
 - [👋🏻 MineContext 是什么](#-minecontext-是什么)
 - [🚀 核心功能](#-核心功能)
+- [🔏 隐私保护](#-隐私保护)
+  - [本地存储](#本地存储)
+  - [本地模型](#本地模型)
 - [🏁 快速开始](#-快速开始)
   - [1. 安装](#1-安装)
   - [2. 禁用隔离属性](#2-禁用隔离属性)
@@ -72,20 +81,35 @@ MineContext 是一个具有上下文感知能力的主动式 AI 伙伴。它基�
 
 ![feature.gif](src/feature.gif)
 
+
+
+
 # 🚀 核心功能
 
-MineContext 专注于五个核心功能：轻松收集、智能重显和主动交付。
+MineContext 专注于四个核心功能：无负担收集、主动推送、智能浮现和上下文工程架构。
 
-1. 📥 无感收集
+1. 📥 无负担收集
    支持收集和处理海量的 Context，并通过设计存储管理来实现海量收集却没有心智负担。
 2. 🚀 主动推送
    支持日常主动推送关键信息和洞见，能够提炼 Context 中的总结信息，比如每日总结，每周总结，tips，todo，主动推送到主页。
-3. 💡 智能浮现
+3. 💡 智能浮现（实现中）
    支持创作时智能浮现，可以随时浮现相关有用的 Context，确保辅助创作又不会被淹没
-4. 🛡️ 隐私优先
-   所有数据都保存在本地，确保您的隐私和安全。
-5. 🎯 上下文工程架构
+4. 🎯 上下文工程架构
    支持多模态、多源数据的完整生命周期——从捕获、处理和存储到管理、检索和消费——支持生成六种类型的智能上下文。
+
+
+# 🔏 隐私保护
+
+## 本地存储
+
+MineContext非常注重用户隐私，所有数据都默认保存在本地如下路径，确保您的隐私和安全。
+
+```
+~/Library/Application Support/MineContext/Data
+```
+
+## 本地模型
+此外我们支持了OpenAI API协议的自定义模型服务，您可以在MineContext中使用全本地模型，做到任何数据不上云。
 
 # 🏁 快速开始
 
