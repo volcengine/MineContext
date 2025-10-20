@@ -165,6 +165,19 @@ class ConfigManager:
             logger.error(f"Failed to load user settings: {e}")
             return False
 
+    def get_storage_management_config(self) -> Optional[Dict[str, Any]]:
+        """
+        Get storage management configuration
+
+        Returns:
+            Optional[Dict[str, Any]]: Storage management configuration, or None if not loaded
+        """
+        if self._config is None:
+            return None
+
+        storage_config = self._config.get("storage", {})
+        return storage_config.get("management", {})
+
     def save_user_settings(self, settings: Dict[str, Any]) -> bool:
         """
         Save user settings to a separate file
@@ -198,6 +211,13 @@ class ConfigManager:
                 user_settings["embedding_model"] = settings["embedding_model"]
             if "content_generation" in settings:
                 user_settings["content_generation"] = settings["content_generation"]
+            if "storage" in settings:
+                # Merge storage settings
+                if "storage" not in user_settings:
+                    user_settings["storage"] = {}
+                user_settings["storage"] = self.deep_merge(
+                    user_settings.get("storage", {}), settings["storage"]
+                )
 
             # Save to file
             with open(user_setting_path, "w", encoding="utf-8") as f:

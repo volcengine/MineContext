@@ -25,6 +25,7 @@ from .routes import (
     monitoring,
     screenshots,
     settings,
+    storage_settings,
     vaults,
     web,
 )
@@ -49,3 +50,4 @@ router.include_router(agent_chat.router)
 router.include_router(completions.router)
 router.include_router(events.router)
 router.include_router(settings.router)
+router.include_router(storage_settings.router)

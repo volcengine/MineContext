@@ -86,8 +86,8 @@ const Sidebar = () => {
           <div
             key={item.key}
             onClick={() => handleTabChange(item.key)}
-            className={`h-[28px] p-2 px-3 text-left cursor-pointer text-sm leading-[22px] 
-              ${isMainTabActive(item.key) ? 'bg-[#FFFFFF66] font-medium' : 'bg-transparent font-normal hover:bg-[#FFFFFF66]'} 
+            className={`h-[28px] p-2 px-3 text-left cursor-pointer text-sm leading-[22px]
+              ${isMainTabActive(item.key) ? 'bg-[#FFFFFF66] font-medium' : 'bg-transparent font-normal hover:bg-[#FFFFFF66]'}
               text-[#3F3F54] transition-all duration-200 ease-in-out rounded-lg flex items-center gap-2 mt-[5px]`}>
             <span className="flex">{item.icon}</span>
             {item.label}

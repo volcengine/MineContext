@@ -501,6 +501,27 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
     screenshotService.cleanupOldScreenshots(retentionDays)
   )
 
+  // Storage management
+  ipcMain.handle('storage:get-stats', async () => {
+    try {
+      return await screenshotService.getStorageStats()
+    } catch (error) {
+      logger.error('Failed to get storage stats:', error)
+      return { success: false, error: String(error) }
+    }
+  })
+
+  ipcMain.handle('storage:settings-updated', async (_, config) => {
+    try {
+      logger.info('Storage settings updated:', config)
+      // Settings will be read from backend on next cleanup cycle
+      return { success: true }
+    } catch (error) {
+      logger.error('Failed to handle storage settings update:', error)
+      return { success: false, error: String(error) }
+    }
+  })
+
   ipcMain.handle(IpcChannel.File_Save, (_, fileName: string, fileData: Uint8Array) =>
     FileService.saveFile(fileName, fileData)
   )

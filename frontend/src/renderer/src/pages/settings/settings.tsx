@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { FC, useMemo, useEffect, useState } from 'react'
-import { Form, Button, Select, Input, Typography, Space } from '@arco-design/web-react'
+import { Form, Button, Select, Input, Typography, Space, Divider } from '@arco-design/web-react'
 import { find } from 'lodash'
 
 import ModelRadio from './components/modelRadio/model-radio'
+import StorageSettings from './components/storage-settings'
 import { ModelInfoMap, ModelTypeList, BaseUrl, embeddingModels } from './constants'
 import { getModelInfo, updateModelSettings } from '../../services/Settings'
 import loadingGif from '@renderer/assets/images/loading.gif'
+import { getStorageSettings, updateStorageSettings, StorageManagementConfig } from '../../services/StorageSettings'
+import checkIcon from '../../assets/icons/check.svg'
 
 const FormItem = Form.Item
 const { Text } = Typography
@@ -120,9 +123,11 @@ const Settings: FC<Props> = (props: Props) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [storageSettingsLoaded, setStorageSettingsLoaded] = useState(false)
 
   const ModelInfoList = ModelInfoMap()
   const [form] = Form.useForm()
+  const [storageForm] = Form.useForm()
   const modelPlatform = Form.useWatch('modelPlatform', form)
   const isCustom = modelPlatform === ModelTypeList.Custom
   const option = useMemo(() => {
@@ -149,8 +154,29 @@ const Settings: FC<Props> = (props: Props) => {
       setInit(true)
     }
   }
+
+  const getStorageInfo = async () => {
+    try {
+      const res = await getStorageSettings()
+      if (res.code === 0 && res.data?.config) {
+        storageForm.setFieldsValue(res.data.config)
+        setStorageSettingsLoaded(true)
+      }
+    } catch (error) {
+      console.error('Failed to load storage settings:', error)
+      // Set default values if loading fails
+      storageForm.setFieldsValue({
+        retention_days: 15,
+        max_storage_size_mb: 5000,
+        auto_cleanup_enabled: true
+      })
+      setStorageSettingsLoaded(true)
+    }
+  }
+
   useEffect(() => {
     getInfo()
+    getStorageInfo()
   }, [])
   // 2. Modify the submit function
   const submit = async () => {
@@ -220,9 +246,51 @@ const Settings: FC<Props> = (props: Props) => {
     }
   }
 
+  // Save storage settings
+  const saveStorageSettings = async () => {
+    setErrorMessage(null)
+    setSuccessMessage(null)
+
+    try {
+      const values = await storageForm.validate()
+      const config: StorageManagementConfig = {
+        retention_days: values.retention_days,
+        max_storage_size_mb: values.max_storage_size_mb,
+        auto_cleanup_enabled: values.auto_cleanup_enabled
+      }
+
+      await updateStorageSettings(config)
+
+      // Show success message
+      setSuccessMessage('Storage settings saved successfully')
+      setShowCheckIcon(true)
+
+      // Notify main process to update cleanup settings
+      try {
+        await window.electron.ipcRenderer.invoke('storage:settings-updated', config)
+      } catch (ipcError) {
+        console.warn('Failed to notify main process:', ipcError)
+      }
+
+      // Hide after 3 seconds
+      setTimeout(() => {
+        setShowCheckIcon(false)
+        setSuccessMessage(null)
+      }, 3000)
+    } catch (error: any) {
+      const errMsg = error?.response?.data?.message || error?.message || 'Failed to save storage settings'
+      console.error('Failed to update storage settings:', error)
+      setErrorMessage(errMsg)
+
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
   return (
-    <div className="fixed top-0 left-0 flex flex-col h-full overflow-y-hidden p-[8px] pl-0 rounded-[20px] relative ">
-      <div className="bg-white rounded-[16px] pl-6 h-[calc(100%-8px)] flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
+    <div className="top-0 left-0 flex flex-col h-full overflow-y-hidden p-[8px] pl-0 rounded-[20px] relative ">
+      <div className="bg-white rounded-[16px] pl-6 flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
         <div className="mb-[12px]">
           <div className="mt-[26px] mb-[10px] text-[24px] font-bold text-[#000]">{'Select a AI model to start'}</div>
           <Text type="secondary" className="text-[13px]">
@@ -313,13 +381,7 @@ const Settings: FC<Props> = (props: Props) => {
                       className="[&_.arco-btn-primary]: !bg-[#000]">
                       Get started
                     </Button>
-                    {isLoading && (
-                      <img
-                        src={loadingGif}
-                        alt="loading"
-                        className="w-6 h-6"
-                      />
-                    )}
+                    {isLoading && <img src={loadingGif} alt="loading" className="w-6 h-6" />}
                   </div>
                 ) : (
                   <div className="flex items-center gap-[8px]">
@@ -331,18 +393,46 @@ const Settings: FC<Props> = (props: Props) => {
                       disabled={isLoading}>
                       Save
                     </Button>
-                    {isLoading && (
-                      <img
-                        src={loadingGif}
-                        alt="loading"
-                        className="w-6 h-6"
-                      />
-                    )}
+                    {isLoading && <img src={loadingGif} alt="loading" className="w-6 h-6" />}
                   </div>
                 )}
               </Space>
             </FormItem>
           </Form>
+
+          {/* Storage Management Section */}
+          {init && storageSettingsLoaded && (
+            <>
+              <Divider className="!my-8" />
+              <div className="mb-[12px]">
+                <div className="mb-[10px] text-[24px] font-bold text-[#000]">Storage Manage</div>
+                <Text type="secondary" className="text-[13px]">
+                  Configure the retention time and storage space limit of screenshot files
+                </Text>
+              </div>
+
+              <Form
+                autoComplete="off"
+                layout={'vertical'}
+                form={storageForm}
+                initialValues={{
+                  retention_days: 15,
+                  max_storage_size_mb: 5000,
+                  auto_cleanup_enabled: true
+                }}>
+                <StorageSettings form={storageForm} />
+
+                <FormItem className="mt-6">
+                  <div className="flex items-center gap-[8px]">
+                    <Button type="primary" className="[&_.arco-btn-primary]: !bg-[#000]" onClick={saveStorageSettings}>
+                      Save storage settings
+                    </Button>
+                    {showCheckIcon && <img src={checkIcon} alt="check" className="w-[20px] h-[20px] mr-[8px]" />}
+                  </div>
+                </FormItem>
+              </Form>
+            </>
+          )}
         </div>
       </div>
     </div>
