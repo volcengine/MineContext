@@ -140,13 +140,6 @@
     "onlyBuiltDependencies": [
       "electron",
       "esbuild"
-    ],
-    "ignoredBuiltDependencies": [
-      "@swc/core",
-      "@tailwindcss/oxide",
-      "better-sqlite3",
-      "lzma-native",
-      "registry-js"
     ]
   }
 }
