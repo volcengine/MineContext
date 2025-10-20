@@ -154,10 +154,10 @@ The following is the filling process after obtaining the API Key:
 
 ## 4. Start Recording
 
-Enter 【Screen Monitor】 to enable the system permissions for screen sharing. After completing the setup, you need to restart the application for the changes to take effect.
+Enter [Screen Monitor] to enable the system permissions for screen sharing. After completing the setup, you need to restart the application for the changes to take effect.
 ![Enable-Permissions](src/Enable-Permissions.gif)
 
-After restarting the application, please first set your screen sharing area in 【Settings】, then click [Start Recording] to begin taking screenshots.
+After restarting the application, please first set your screen sharing area in [Settings], then click [Start Recording] to begin taking screenshots.
 ![Screen-Settings](src/Screen-Settings.gif)
 
 ## 5. Forget it
