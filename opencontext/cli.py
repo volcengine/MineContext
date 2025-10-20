@@ -78,6 +78,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request metrics middleware
+from opencontext.server.middleware.metrics import RequestMetricsMiddleware
+app.add_middleware(RequestMetricsMiddleware)
+
 # Project root
 if hasattr(sys, "_MEIPASS"):
     project_root = Path(sys._MEIPASS)
