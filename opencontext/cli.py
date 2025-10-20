@@ -25,6 +25,7 @@ from opencontext.config.config_manager import ConfigManager
 from opencontext.server.api import router as api_router
 from opencontext.server.opencontext import OpenContext
 from opencontext.utils.logging_utils import get_logger, setup_logging
+from opencontext.db import run_migrations
 
 # Load .env file if it exists
 _env_path = Path(".env")
@@ -216,6 +217,12 @@ def handle_start(args: argparse.Namespace) -> int:
     Returns:
         Exit code (0 for success, 1 for failure)
     """
+    try:
+        run_migrations()
+    except Exception as e:
+        logger.error(f"Database migration failed: {e}")
+        return 1
+
     try:
         lab_instance = _initialize_context_lab(args.config)
     except RuntimeError:
