@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, TypedDict
 
 from opencontext.config.global_config import get_prompt_manager
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ProcessedContext
 from opencontext.models.enums import ContextType
@@ -310,6 +311,20 @@ class SmartTipGenerator:
             max_calls=2,
             tools=ALL_TOOL_DEFINITIONS,
             temperature=0.1,
+        )
+
+        # Save debug information
+        DebugHelper.save_generation_debug(
+            task_type="tips",
+            messages=messages,
+            response=tip_content,
+            metadata={
+                "start_time": start_time,
+                "end_time": end_time,
+                "num_contexts": len(context_data) if context_data else 0,
+                "num_activity_patterns": len(activity_patterns) if activity_patterns else 0,
+                "num_recent_tips": len(recent_tips) if recent_tips else 0,
+            },
         )
 
         return tip_content

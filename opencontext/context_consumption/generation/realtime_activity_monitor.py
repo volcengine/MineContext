@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, TypedDict
 
 from opencontext.config.global_config import get_prompt_manager
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ProcessedContext
 from opencontext.models.enums import ContentFormat, ContextType
@@ -217,6 +218,22 @@ class RealtimeActivityMonitor:
                 tools=ALL_RETRIEVAL_TOOL_DEFINITIONS + ALL_PROFILE_TOOL_DEFINITIONS,
                 temperature=0.1,
             )
+
+            # Save debug information
+            DebugHelper.save_generation_debug(
+                task_type="activity",
+                messages=messages,
+                response=response,
+                metadata={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "num_context_types": len(context_data),
+                    "total_contexts": (
+                        sum(len(v) for v in context_data.values()) if context_data else 0
+                    ),
+                },
+            )
+
             try:
                 from opencontext.utils.json_parser import parse_json_from_response
 

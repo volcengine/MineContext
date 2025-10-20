@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TypedDict
 
 from opencontext.config.global_config import get_prompt_manager
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ContextType, Vectorize
 from opencontext.storage.global_storage import get_storage
@@ -275,6 +276,20 @@ class SmartTodoManager:
                 messages,
                 temperature=0.1,
             )
+
+            # Save debug information
+            DebugHelper.save_generation_debug(
+                task_type="todo",
+                messages=messages,
+                response=task_response,
+                metadata={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "num_contexts": len(context_data) if context_data else 0,
+                    "num_historical_todos": len(historical_todos) if historical_todos else 0,
+                },
+            )
+
             tasks = parse_json_from_response(task_response)
             tasks = self._post_process_tasks(tasks)
 

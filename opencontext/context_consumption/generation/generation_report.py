@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from opencontext.config import GlobalConfig
 from opencontext.config.global_config import get_prompt_manager
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages_async
 from opencontext.models.enums import ContextType
 from opencontext.storage.global_storage import get_storage
@@ -200,6 +201,20 @@ class ReportGenerator:
             summary = await generate_with_messages_async(
                 messages, enable_executor=False, temperature=0.2
             )
+
+            # Save debug information (sync call within async function)
+            DebugHelper.save_generation_debug(
+                task_type="report",
+                messages=messages,
+                response=summary,
+                metadata={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "num_contexts": len(contexts),
+                    "is_hourly_summary": True,
+                },
+            )
+
             return summary
         except Exception as e:
             logger.error(f"Failed to generate hourly summary: {e}")
@@ -318,6 +333,20 @@ class ReportGenerator:
             tools=ALL_TOOL_DEFINITIONS,
             temperature=0.1,
         )
+
+        # Save debug information (sync call within async function)
+        DebugHelper.save_generation_debug(
+            task_type="report",
+            messages=messages,
+            response=report,
+            metadata={
+                "start_time": start_time,
+                "end_time": end_time,
+                "num_contexts": len(contexts),
+                "is_hourly_summary": False,
+            },
+        )
+
         return report
 
     def _format_timestamp(self, timestamp: int) -> str:

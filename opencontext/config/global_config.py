@@ -236,41 +236,6 @@ class GlobalConfig:
             return config.get("enabled", False)
         return False
 
-    def update_config(self, path: str, value: Any) -> bool:
-        """
-        Update a configuration value
-        """
-        if not self._config_manager:
-            logger.error("Config manager not initialized")
-            return False
-
-        config = self._config_manager.get_config()
-        if not config:
-            return False
-
-        # Update configuration by path
-        keys = path.split(".")
-        current = config
-        for key in keys[:-1]:
-            if key not in current:
-                current[key] = {}
-            current = current[key]
-
-        current[keys[-1]] = value
-        self._config_manager.update_config(config)
-        logger.info(f"Updated config: {path} = {value}")
-        return True
-
-    def save_config(self, config_path: Optional[str] = None) -> bool:
-        """
-        Save configuration to a file
-        """
-        if not self._config_manager:
-            logger.error("Config manager not initialized")
-            return False
-
-        return self._config_manager.save_config(config_path)
-
     def is_initialized(self) -> bool:
         """Check if the global configuration is initialized"""
         return self._initialized
