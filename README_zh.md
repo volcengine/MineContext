@@ -132,11 +132,11 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 ## 3. 输入您的 API 密钥
 
 应用程序启动后（首次运行时需要安装后端环境，约需等待两分钟），请根据引导输入您的 API 密钥。目前我们支持豆包、OpenAI 以及自定义模型服务，包括任何兼容 OpenAI API 格式的**本地模型**或**第三方模型**服务。
-我们推荐使用[LMStudio](https://lmstudio.ai/)来运行本地模型，它提供了简单的界面和强大的功能，能够帮助您快速部署和管理本地模型。
+我们推荐使用 [LMStudio](https://lmstudio.ai/) 来运行本地模型，它提供了简单的界面和强大的功能，能够帮助您快速部署和管理本地模型。
 
-**综合成本和性能，我们推荐使用豆包模型**，豆包模型的 API-Key 可以在[API 管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey)生成。
+**综合成本和性能，我们推荐使用豆包模型**，豆包模型的 API-Key 可以在 [API 管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey) 生成。
 
-获取豆包 API 之后需要在[模型开通管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/model)开通视觉语言模型和向量化两个模型。
+获取豆包 API 之后需要在 [模型开通管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/model) 开通视觉语言模型和向量化两个模型。
 
 - 视觉语言模型: Doubao-Seed-1.6-flash
   ![doubao-vlm-model](src/doubao-vlm-model.png)
