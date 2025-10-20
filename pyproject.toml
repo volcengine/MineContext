@@ -42,6 +42,7 @@ dependencies = [
     "python-dotenv",
     "sqlalchemy>=2.0",
     "alembic>=1.13",
+    "prometheus_client>=0.20",
 ]
 
 [project.optional-dependencies]
