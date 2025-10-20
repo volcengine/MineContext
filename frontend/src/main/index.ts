@@ -96,6 +96,9 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     icon,
+    frame: false,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 12, y: 12 },
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
