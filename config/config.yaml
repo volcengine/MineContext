@@ -184,6 +184,11 @@ prompts:
 
 # Content generation service configuration
 content_generation:
+  # Debug configuration
+  debug:
+    enabled: false  # Enable debug mode to save generation messages and responses
+    output_path: "${CONTEXT_PATH:.}/debug/generation"  # Debug output directory
+
   # Task configurations
   activity:
     enabled: true

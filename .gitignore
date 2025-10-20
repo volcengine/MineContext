@@ -5,6 +5,7 @@ __pycache__
 /screenshots
 /logs
 /persist
+/debug
 /dist/*
 /venv/*
 /test_storage
