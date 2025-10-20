@@ -24,3 +24,28 @@ export const typeIconMap = {
   markdown: markdownIcon,
   faq: faqIcon
 }
+
+/**
+ * Convert file system path to file:// URL
+ * Handles both Windows and macOS/Linux paths correctly
+ * @param filePath - The file system path (can use either / or \ as separator)
+ * @returns Properly formatted file:// URL
+ */
+export function pathToFileURL(filePath: string): string {
+  // Normalize path separators to forward slashes
+  const normalizedPath = filePath.replace(/\\/g, '/')
+
+  // Check if it's a Windows absolute path (e.g., C:/Users/...)
+  if (/^[a-zA-Z]:/.test(normalizedPath)) {
+    // Windows: file:///C:/Users/...
+    return `file:///${normalizedPath}`
+  }
+
+  // macOS/Linux: file:///Users/... or file:///home/...
+  if (normalizedPath.startsWith('/')) {
+    return `file://${normalizedPath}`
+  }
+
+  // Fallback: assume it's already a relative path or URL
+  return normalizedPath
+}

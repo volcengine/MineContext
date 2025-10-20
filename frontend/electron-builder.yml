@@ -12,26 +12,29 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 extraResources:
-  - from: backend/main
-    to: backend/main
-  - from: backend/config/
-    to: backend/config/
+  - from: backend/
+    to: backend/
     filter:
-      - '**/*'
-  - from: externals/python/window_inspector/dist/window_inspector/window_inspector
-    to: bin/window_inspector
-  - from: externals/python/window_capture/dist/window_capture/window_capture
-    to: bin/window_capture
+      - 'main*'
+      - 'config/**/*'
 asarUnpack:
   - resources/**
 win:
   executableName: MineContext
+  icon: build/icon.ico
+  signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  differentialPackage: false
 mac:
+  extraResources:
+    - from: externals/python/window_inspector/dist/window_inspector/window_inspector
+      to: bin/window_inspector
+    - from: externals/python/window_capture/dist/window_capture/window_capture
+      to: bin/window_capture
   entitlementsInherit: build/entitlements.mac.plist
   icon: build/icon.icns
   extendInfo:

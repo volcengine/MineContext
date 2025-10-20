@@ -49,4 +49,5 @@ exe = EXE(
     console=True,
     disable_windowed_traceback=False,
     codesign_identity=None,
+    icon=None,  # Disable icon to avoid Windows resource locking issues
 )
