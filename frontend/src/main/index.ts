@@ -23,6 +23,7 @@ import { ensureBackendRunning, startBackendInBackground, stopBackendServerSync }
 import { powerWatcher } from './background/os/Power'
 import { initLog } from '@shared/logger/init'
 import { getLogger } from '@shared/logger/main'
+import { monitor } from '@shared/logger/performance'
 initLog()
 const logger = getLogger('MainEntry')
 
@@ -145,7 +146,7 @@ function createWindow() {
 let server: any
 app.whenReady().then(() => {
   logger.info('app_started', { argv: process.argv, version: app.getVersion() })
-
+  monitor.start(5000)
   protocol.registerBufferProtocol('vikingdb', (request, callback) => {
     try {
       let filePath = request.url.replace('vikingdb://', '')
@@ -217,6 +218,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  monitor.stop()
   if (process.platform !== 'darwin') {
     // Restore the original console.log to avoid "Object has been destroyed" errors during exit
     console.log = originalConsoleLog
