@@ -40,16 +40,15 @@ class IContextStorage(ABC):
     def batch_upsert_processed_context(self, contexts: List[ProcessedContext]) -> List[str]:
         """Batch store processed context data"""
 
-
     @abstractmethod
     def query(self, query: Vectorize, top_k: int = 5) -> List[ProcessedContext]:
         """
         Query processed context data
-        
+
         Args:
             query (Vectorize): Query statement
             top_k (int, optional): Number of results to return. Defaults to 5.
-            
+
         Returns:
             List[ProcessedContext]: List of query results
         """
@@ -59,5 +58,7 @@ class IContextStorage(ABC):
         """Delete processed context data"""
 
     @abstractmethod
-    def get_all_processed_contexts(self, limit: int = 100, offset: int = 0, filter: Dict[str, Any] = {}) -> List[ProcessedContext]:
+    def get_all_processed_contexts(
+        self, limit: int = 100, offset: int = 0, filter: Dict[str, Any] = {}
+    ) -> List[ProcessedContext]:
         """Get all processed context data"""

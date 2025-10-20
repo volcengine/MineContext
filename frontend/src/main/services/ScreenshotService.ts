@@ -8,6 +8,7 @@ import { getLogger } from '@shared/logger/main'
 import { isMac } from '@main/constant'
 import { getCacheDir } from '@main/utils/file'
 import { CaptureSourcesTools } from '@main/utils/get-capture-sources'
+import dayjs from 'dayjs'
 
 const logger = getLogger('ScreenshotService')
 
@@ -70,9 +71,8 @@ class ScreenshotService extends CaptureSourcesTools {
         //   `[ScreenshotService] start Screenshot image size: ---***${dayjs().format('YYYY-MM-DD HH:mm:ss')}***--- ${image.length}`
         // )
         const userDataPath = app.getPath('userData')
-        const today = new Date()
-        const dateString = today.toISOString().slice(0, 10).replace(/-/g, '')
-        const timestamp = Date.now()
+        const dateString = dayjs().format('YYYYMMDD')
+        const timestamp = dayjs().valueOf()
         const activityPath = path.join(
           userDataPath,
           'Data',
@@ -111,7 +111,7 @@ class ScreenshotService extends CaptureSourcesTools {
   async getScreenshotsByDate(date?: string): Promise<{ success: boolean; screenshots?: any[]; error?: string }> {
     try {
       const userDataPath = app.getPath('userData')
-      const dateString = date || new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      const dateString = date || dayjs().format('YYYYMMDD')
       const activityPath = path.join(userDataPath, 'Data', 'screenshot', 'activity', dateString)
 
       // Check if the directory exists
@@ -154,7 +154,7 @@ class ScreenshotService extends CaptureSourcesTools {
                 timestamp: timestamp,
                 image_url: filePath,
                 description: 'Historical screenshot',
-                created_at: stats.birthtime.toISOString(),
+                created_at: dayjs(stats.birthtime).toISOString(),
                 group_id: groupIntervalTime // Group ID parsed from the path
               })
             }
@@ -188,7 +188,7 @@ class ScreenshotService extends CaptureSourcesTools {
         throw new Error(`Source with id ${sourceId} not found.`)
       }
       const image = source.thumbnail.toPNG()
-      const filePath = path.join(getCacheDir(), `screenshot-source-${Date.now()}.png`)
+      const filePath = path.join(getCacheDir(), `screenshot-source-${dayjs().valueOf()}.png`)
       await fs.promises.writeFile(filePath, image)
       return { success: true, filePath }
     } catch (error: any) {
@@ -266,7 +266,9 @@ class ScreenshotService extends CaptureSourcesTools {
    * @param {number} retentionDays - Retention period in days, default is 15 days
    * @returns {Promise<{ success: boolean; deletedCount?: number; error?: string }>}
    */
-  async cleanupOldScreenshots(retentionDays: number = 15): Promise<{ success: boolean; deletedCount?: number; deletedSize?: number; error?: string }> {
+  async cleanupOldScreenshots(
+    retentionDays: number = 15
+  ): Promise<{ success: boolean; deletedCount?: number; deletedSize?: number; error?: string }> {
     try {
       const userDataPath = app.getPath('userData')
       const screenshotBasePath = path.join(userDataPath, 'Data', 'screenshot', 'activity')
@@ -278,9 +280,8 @@ class ScreenshotService extends CaptureSourcesTools {
       }
 
       // Calculate cutoff date (current date - retention days)
-      const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - retentionDays)
-      const cutoffDateString = cutoffDate.toISOString().slice(0, 10).replace(/-/g, '')
+      const cutoffDate = dayjs().subtract(retentionDays, 'day')
+      const cutoffDateString = cutoffDate.format('YYYYMMDD')
 
       logger.info(`Starting cleanup of screenshots older than ${retentionDays} days (before ${cutoffDateString})`)
 
@@ -314,7 +315,9 @@ class ScreenshotService extends CaptureSourcesTools {
         }
       }
 
-      logger.info(`Cleanup completed. Deleted ${deletedCount} directories, freed ${(deletedSize / 1024 / 1024).toFixed(2)} MB`)
+      logger.info(
+        `Cleanup completed. Deleted ${deletedCount} directories, freed ${(deletedSize / 1024 / 1024).toFixed(2)} MB`
+      )
       return { success: true, deletedCount, deletedSize }
     } catch (error: any) {
       logger.error('Failed to cleanup old screenshots:', error)

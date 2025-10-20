@@ -9,6 +9,7 @@ Retrieves real-time activity records from SQLite activity table
 """
 
 from typing import Any, Dict, List
+
 from opencontext.tools.retrieval_tools.base_document_retrieval_tool import BaseDocumentRetrievalTool
 from opencontext.utils.logging_utils import get_logger
 
@@ -64,16 +65,18 @@ class GetActivitiesTool(BaseDocumentRetrievalTool):
         base_params = super().get_parameters()
 
         # Add activity-specific parameters
-        base_params["properties"].update({
-            "start_time": {
-                "type": "integer",
-                "description": "Filter activities that started after this timestamp (Unix epoch seconds)"
-            },
-            "end_time": {
-                "type": "integer",
-                "description": "Filter activities that ended before this timestamp (Unix epoch seconds)"
+        base_params["properties"].update(
+            {
+                "start_time": {
+                    "type": "integer",
+                    "description": "Filter activities that started after this timestamp (Unix epoch seconds)",
+                },
+                "end_time": {
+                    "type": "integer",
+                    "description": "Filter activities that ended before this timestamp (Unix epoch seconds)",
+                },
             }
-        })
+        )
 
         return base_params
 
@@ -87,7 +90,7 @@ class GetActivitiesTool(BaseDocumentRetrievalTool):
             "metadata": doc.get("metadata"),
             "start_time": doc.get("start_time"),
             "end_time": doc.get("end_time"),
-            "document_type": self.DOCUMENT_TYPE_NAME
+            "document_type": self.DOCUMENT_TYPE_NAME,
         }
 
     def execute(self, **kwargs) -> List[Dict[str, Any]]:
@@ -114,7 +117,7 @@ class GetActivitiesTool(BaseDocumentRetrievalTool):
                 start_time=self._parse_datetime(start_time),
                 end_time=self._parse_datetime(end_time),
                 limit=limit,
-                offset=offset
+                offset=offset,
             )
 
             # Format and return results

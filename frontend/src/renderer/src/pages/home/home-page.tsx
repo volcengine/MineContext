@@ -3,13 +3,13 @@
 
 import React from 'react'
 import { Typography } from '@arco-design/web-react'
-import './HomePage.css'
+import './home-page.css'
 import { Allotment } from 'allotment'
-import { useAIAssistant } from '@renderer/hooks/useAIAssistant'
-import { useAllotment } from '@renderer/hooks/useAllotment'
-import AIToggleButton from '@renderer/components/AIToggleButton'
-import AIAssistant from '@renderer/components/AIAssistant'
-import { ProactiveFeedCard } from './components/ProactiveFeedCard'
+import { useAIAssistant } from '@renderer/hooks/use-ai-assistant'
+import { useAllotment } from '@renderer/hooks/use-allotment'
+import AIToggleButton from '@renderer/components/ai-toggle-button'
+import AIAssistant from '@renderer/components/ai-assistant'
+import { ProactiveFeedCard } from './components/proactive-feed-card'
 import { LatestActivityCard } from './components/latest-activity-card'
 import { getRecentVaults } from '@renderer/utils/vault'
 import { ToDoCard } from './components/to-do-card'
@@ -32,8 +32,8 @@ const HomePage: React.FC = () => {
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>
       <Allotment separator={false} ref={controller} defaultSizes={defaultSizes}>
         <Allotment.Pane minSize={leftMinSize}>
-          <div className="homepage-container">
-            <div className="homepage-container-inner">
+          <div className="relative py-2 h-full w-full overflow-hidden flex flex-col">
+            <div className="bg-white rounded-2xl h-full overflow-y-auto overflow-x-hidden pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <div className="flex w-full h-[648px] pt-5 px-4 pb-3 flex-col items-start gap-4 flex-shrink-0">
                 <div className="flex justify-between items-start self-stretch w-full">
                   <div className="rounded-xl w-full flex justify-between items-start">
@@ -65,13 +65,6 @@ const HomePage: React.FC = () => {
               </div>
             </div>
           </div>
-          {/* <ProactiveFeedModal
-            isVisible={currentModalVisible}
-            handleConfirm={() => {
-              setCurrentModalVisible(false)
-            }}
-            event={activeEvent!}
-          /> */}
         </Allotment.Pane>
         <Allotment.Pane minSize={rightMinSize}>
           {isVisible && <AIAssistant visible={isVisible} onClose={hideAIAssistant} />}

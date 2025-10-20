@@ -144,6 +144,7 @@ class AssistantChat {
         let buffer = '';
         let currentMessage = '';
         let messageStarted = false;
+        let assistantMessageDiv = null;
 
         try {
             while (true) {
@@ -158,23 +159,40 @@ class AssistantChat {
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6));
-                            this.handleStreamEvent(data);
-                            
-                            // 处理消息内容
-                            if (data.type === 'content' && data.content) {
+
+                            // 处理流式内容 chunk
+                            if (data.type === 'stream_chunk' && data.content) {
                                 if (!messageStarted) {
                                     this.hideTypingIndicator();
-                                    this.addMessage('assistant', '');
+                                    assistantMessageDiv = this.addMessage('assistant', '');
                                     messageStarted = true;
                                 }
                                 currentMessage += data.content;
                                 this.updateLastMessage(currentMessage);
+                            }
+                            // 处理流式完成事件
+                            else if (data.type === 'stream_complete') {
+                                // 流式完成，但不需要额外操作，因为内容已经通过 chunk 累积显示
+                                console.log('📦 Stream complete, total length:', currentMessage.length);
+                            }
+                            // 处理其他事件（thinking, running, done 等）
+                            else {
+                                this.handleStreamEvent(data);
                             }
                         } catch (e) {
                             console.error('解析流数据失败:', e);
                         }
                     }
                 }
+            }
+
+            // 完成后添加到历史记录
+            if (messageStarted && currentMessage) {
+                this.chatHistory.push({
+                    role: 'assistant',
+                    content: currentMessage
+                });
+                console.log('📥 助手回复已添加到历史，当前历史长度:', this.chatHistory.length);
             }
         } finally {
             reader.releaseLock();
@@ -250,10 +268,7 @@ class AssistantChat {
                 // 最终完成状态
                 this.hideTypingIndicator();
                 this.addTimelineEvent('任务执行完成', 'success');
-                if (data.type === 'completed' && data.content) {
-                    // 显示最终回复
-                    this.addMessage('assistant', data.content);
-                }
+                // 注意：不再在这里添加消息，因为已经通过 stream_chunk 实时显示了
                 break;
                 
             case 'failed':
@@ -376,13 +391,8 @@ class AssistantChat {
         // 滚动到底部
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // 添加到历史记录（只记录 assistant 的回复，user 在发送时已经添加）
-        if (type === 'assistant' && content) {
-            this.chatHistory.push({
-                role: 'assistant',
-                content: content
-            });
-        }
+        // 注意：历史记录的添加现在统一在 handleStreamResponse 中处理
+        // 这里不再添加到历史记录，避免重复
 
         return messageDiv;
     }

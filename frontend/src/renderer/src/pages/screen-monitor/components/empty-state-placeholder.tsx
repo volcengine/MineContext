@@ -13,38 +13,28 @@ interface EmptyStatePlaceholderProps {
   onGrantPermission: () => void
 }
 
-const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({
-  hasPermission,
-  isToday,
-  onGrantPermission
-}) => {
+const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({ hasPermission, isToday, onGrantPermission }) => {
   return (
-    <div className="recording-area-content">
-      <div className="recording-placeholder">
+    <div className="flex items-center justify-center flex-1 min-h-[300px]">
+      <div className="text-center flex flex-col items-center justify-center">
         {hasPermission ? (
           isToday ? (
             <>
               <img src={Stopped} alt="Screen recording" style={{ width: 66, height: 78 }} />
               <Text style={{ marginTop: 16, width: 270, color: '#6C7191', fontSize: 12 }}>
-                Start screen recording, and then it will take screenshots and summarize your work records
-                every {SCREEN_INTERVAL_TIME} minutes
+                Start screen recording, and then it will take screenshots and summarize your work records every{' '}
+                {SCREEN_INTERVAL_TIME} minutes
               </Text>
             </>
           ) : (
             <>
               <img src={screenMonitorEmpty} alt="Screen recording" style={{ width: 66, height: 78 }} />
-              <Text style={{ marginTop: 16, width: 270, color: '#6C7191', fontSize: 12 }}>
-                No data available
-              </Text>
+              <Text style={{ marginTop: 16, width: 270, color: '#6C7191', fontSize: 12 }}>No data available</Text>
             </>
           )
         ) : (
           <>
-            <img
-              src={NeedPermission}
-              alt="Need permission"
-              style={{ width: 286, height: 168, marginLeft: 67 }}
-            />
+            <img src={NeedPermission} alt="Need permission" style={{ width: 286, height: 168, marginLeft: 67 }} />
             <Text style={{ marginTop: 16, width: 440, color: '#6C7191', fontSize: 12 }}>
               Enable screen recording permission, summary with AI every {SCREEN_INTERVAL_TIME} minutes
             </Text>
@@ -52,7 +42,7 @@ const EmptyStatePlaceholder: React.FC<EmptyStatePlaceholderProps> = ({
               type="primary"
               size="large"
               onClick={onGrantPermission}
-              className="[&_.arco-btn-primary]:!mt-6 [&_.arco-btn-primary]:!font-medium [&_.arco-btn-primary]:!bg-black">
+              className="[&_.arco-btn-primary]: !mt-6 [&_.arco-btn-primary]: !font-medium [&_.arco-btn-primary]: !bg-black">
               Enable Permission
             </Button>
           </>

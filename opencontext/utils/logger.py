@@ -19,15 +19,15 @@ from loguru import logger
 class LogManager:
     """
     Log manager
-    
+
     Configures and manages logging
     """
-    
+
     def __init__(self):
         """Initialize log manager"""
         # Remove default handlers
         logger.remove()
-    
+
     def configure(self, config: Dict[str, Any]) -> None:
         """
         Configure logging
@@ -65,14 +65,13 @@ class LogManager:
                 format=file_format,
                 rotation=rotation,
                 retention=retention,
-                encoding="utf-8"
+                encoding="utf-8",
             )
-        
-    
+
     def get_logger(self):
         """
         Get logger instance
-        
+
         Returns:
             Logger: Logger instance
         """

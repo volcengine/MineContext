@@ -3,6 +3,7 @@ dist
 out
 .DS_Store
 .eslintcache
+pnpm-lock.yaml
 *.log*
 /backend
 /externals/python/window_inspector/venv

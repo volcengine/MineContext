@@ -9,38 +9,37 @@ Web search tool
 Provides internet search capabilities to help obtain the latest information
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
+from opencontext.config.global_config import get_config
 from opencontext.tools.base import BaseTool
 from opencontext.utils.logging_utils import get_logger
-from opencontext.config.global_config import get_config
 
 logger = get_logger(__name__)
 
+
 class WebSearchTool(BaseTool):
     """Web search tool"""
-    
+
     def __init__(self):
         super().__init__()
-        self.config = get_config('tools.operation_tools.web_search_tool') or {}
+        self.config = get_config("tools.operation_tools.web_search_tool") or {}
         # Get search engine settings from config
-        self.search_config = self.config.get('web_search', {})
-        self.default_engine = self.search_config.get('engine', 'duckduckgo')
-        self.max_results = self.search_config.get('max_results', 5)
-        self.timeout = self.search_config.get('timeout', 10)
+        self.search_config = self.config.get("web_search", {})
+        self.default_engine = self.search_config.get("engine", "duckduckgo")
+        self.max_results = self.search_config.get("max_results", 5)
+        self.timeout = self.search_config.get("timeout", 10)
         # Proxy settings
-        self.proxy = self.search_config.get('proxy', None)
+        self.proxy = self.search_config.get("proxy", None)
         if self.proxy:
-            self.proxies = {
-                'http': self.proxy,
-                'https': self.proxy
-            }
+            self.proxies = {"http": self.proxy, "https": self.proxy}
         else:
             self.proxies = None
-    
+
     @classmethod
     def get_name(cls) -> str:
         return "web_search"
-    
+
     @classmethod
     def get_description(cls) -> str:
         return """Internet search tool for retrieving real-time information from the web. Returns relevant webpage titles, snippets, and URLs based on search queries.
@@ -78,45 +77,44 @@ class WebSearchTool(BaseTool):
 - "What happened in the world today?" → web_search
 - "Current price of Bitcoin" → web_search
 """
-    
+
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search keywords or question"
-                },
+                "query": {"type": "string", "description": "Search keywords or question"},
                 "max_results": {
                     "type": "integer",
                     "description": "Maximum number of results, default 5",
                     "minimum": 1,
                     "maximum": 20,
-                    "default": 5
+                    "default": 5,
                 },
                 "lang": {
-                    "type": "string", 
+                    "type": "string",
                     "description": "Search language preference, e.g. 'zh-cn', 'en', etc.",
-                    "default": "zh-cn"
-                }
+                    "default": "zh-cn",
+                },
             },
-            "required": ["query"]
+            "required": ["query"],
         }
-    
-    def execute(self, query: str, max_results: int = None, lang: str = "zh-cn", **kwargs) -> Dict[str, Any]:
+
+    def execute(
+        self, query: str, max_results: int = None, lang: str = "zh-cn", **kwargs
+    ) -> Dict[str, Any]:
         """Execute web search with automatic fallback support"""
         if max_results is None:
             max_results = self.max_results
-        
+
         max_results = min(max_results, 20)  # Limit maximum results
-        
+
         logger.info(f"Using primary search engine: {self.default_engine}")
-        if self.default_engine == 'duckduckgo':
+        if self.default_engine == "duckduckgo":
             results = self._search_duckduckgo(query, max_results, lang)
         else:
             raise ValueError(f"Unknown search engine: {self.default_engine}")
-            
+
         if results:
             logger.info(f"Successfully retrieved {len(results)} results from {self.default_engine}")
             return {
@@ -124,47 +122,51 @@ class WebSearchTool(BaseTool):
                 "query": query,
                 "results_count": len(results),
                 "results": results,
-                "engine": self.default_engine
+                "engine": self.default_engine,
             }
-        
+
         # All search engines failed
         return {
             "success": False,
             "query": query,
             "error": "All search engines failed",
-            "results": []
+            "results": [],
         }
-    
+
     def _search_duckduckgo(self, query: str, max_results: int, lang: str) -> List[Dict[str, Any]]:
         """Search using ddgs library"""
         try:
             from ddgs import DDGS
-            
+
             # Get region settings
             region = self._get_region(lang)
             results = []
-            
+
             # Use ddgs API with SSL verification enabled for secure connection
             with DDGS(proxy=self.proxy, timeout=self.timeout, verify=True) as ddgs:
                 # New API: text(query, ...) as the first positional argument
-                search_results = list(ddgs.text(
-                    query,  # First positional argument
-                    region=region,
-                    safesearch='moderate',
-                    max_results=max_results
-                ))
-            
+                search_results = list(
+                    ddgs.text(
+                        query,  # First positional argument
+                        region=region,
+                        safesearch="moderate",
+                        max_results=max_results,
+                    )
+                )
+
             # Format results
             for r in search_results:
-                results.append({
-                    'title': r.get('title', ''),
-                    'snippet': r.get('body', ''),
-                    'url': r.get('href', ''),
-                    'source': 'DuckDuckGo'
-                })
-            
+                results.append(
+                    {
+                        "title": r.get("title", ""),
+                        "snippet": r.get("body", ""),
+                        "url": r.get("href", ""),
+                        "source": "DuckDuckGo",
+                    }
+                )
+
             return results
-            
+
         except ImportError:
             logger.error("ddgs library not installed")
             raise Exception("ddgs library not installed. Please install with: pip install ddgs")
@@ -175,17 +177,17 @@ class WebSearchTool(BaseTool):
     def _get_region(self, lang: str) -> str:
         """Get region code based on language (for DuckDuckGo)"""
         region_map = {
-            'zh-cn': 'cn-zh',
-            'zh': 'cn-zh',
-            'en': 'us-en',
-            'en-us': 'us-en',
-            'en-gb': 'gb-en',
-            'ja': 'jp-ja',
-            'ko': 'kr-ko',
-            'fr': 'fr-fr',
-            'de': 'de-de',
-            'es': 'es-es',
-            'ru': 'ru-ru',
+            "zh-cn": "cn-zh",
+            "zh": "cn-zh",
+            "en": "us-en",
+            "en-us": "us-en",
+            "en-gb": "gb-en",
+            "ja": "jp-ja",
+            "ko": "kr-ko",
+            "fr": "fr-fr",
+            "de": "de-de",
+            "es": "es-es",
+            "ru": "ru-ru",
         }
-        
-        return region_map.get(lang.lower(), 'wt-wt')  # wt-wt means no specific region
+
+        return region_map.get(lang.lower(), "wt-wt")  # wt-wt means no specific region

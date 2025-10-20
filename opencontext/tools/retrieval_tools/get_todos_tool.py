@@ -9,6 +9,7 @@ Retrieves todo items from SQLite todo table
 """
 
 from typing import Any, Dict, List
+
 from opencontext.tools.retrieval_tools.base_document_retrieval_tool import BaseDocumentRetrievalTool
 from opencontext.utils.logging_utils import get_logger
 
@@ -68,27 +69,29 @@ class GetTodosTool(BaseDocumentRetrievalTool):
         base_params = super().get_parameters()
 
         # Add todos-specific parameters
-        base_params["properties"].update({
-            "status": {
-                "type": "integer",
-                "enum": [0, 1],
-                "description": "Filter by status: 0=pending, 1=completed. Leave empty to retrieve all statuses."
-            },
-            "urgency": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 10,
-                "description": "Filter by minimum urgency level (0-10). Leave empty for all urgency levels."
-            },
-            "start_time": {
-                "type": "integer",
-                "description": "Filter todos that start after this timestamp (Unix epoch seconds)"
-            },
-            "end_time": {
-                "type": "integer",
-                "description": "Filter todos that end before this timestamp (Unix epoch seconds)"
+        base_params["properties"].update(
+            {
+                "status": {
+                    "type": "integer",
+                    "enum": [0, 1],
+                    "description": "Filter by status: 0=pending, 1=completed. Leave empty to retrieve all statuses.",
+                },
+                "urgency": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10,
+                    "description": "Filter by minimum urgency level (0-10). Leave empty for all urgency levels.",
+                },
+                "start_time": {
+                    "type": "integer",
+                    "description": "Filter todos that start after this timestamp (Unix epoch seconds)",
+                },
+                "end_time": {
+                    "type": "integer",
+                    "description": "Filter todos that end before this timestamp (Unix epoch seconds)",
+                },
             }
-        })
+        )
 
         return base_params
 
@@ -105,7 +108,7 @@ class GetTodosTool(BaseDocumentRetrievalTool):
             "created_at": doc.get("created_at"),
             "start_time": doc.get("start_time"),
             "end_time": doc.get("end_time"),
-            "document_type": self.DOCUMENT_TYPE_NAME
+            "document_type": self.DOCUMENT_TYPE_NAME,
         }
 
     def execute(self, **kwargs) -> List[Dict[str, Any]]:
@@ -137,7 +140,7 @@ class GetTodosTool(BaseDocumentRetrievalTool):
                 start_time=self._parse_datetime(start_time),
                 end_time=self._parse_datetime(end_time),
                 limit=limit,
-                offset=offset
+                offset=offset,
             )
 
             # Apply urgency filter if specified (SQLite backend doesn't support this directly)

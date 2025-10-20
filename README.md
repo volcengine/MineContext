@@ -8,7 +8,10 @@
 
 An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
 
-<a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
+[中文](README_zh.md) / English
+
+
+ <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">Community Best Practice</a> · <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
 
 [![][release-shield]][release-link]
 [![][github-stars-shield]][github-stars-link]
@@ -18,7 +21,9 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
 
-[中文](README_zh.md) / English
+
+<a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 
 👋 Join our [WeChat / Lark / Red Note Group](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
@@ -26,12 +31,16 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 
 [App Download for Mac](https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg)
 
+
 </div>
 
 Table of Contents
 
 - [👋🏻 What is MineContext](#-what-is-minecontext)
 - [🚀 Key Features](#-key-features)
+- [🔏 Privacy Protection](#-privacy-protection)
+  - [Local-First](#local-first)
+  - [Local AI model](#local-ai-model)
 - [🏁 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
   - [2. Disable the quarantine attribute](#2-disable-the-quarantine-attribute)
@@ -44,6 +53,7 @@ Table of Contents
     - [Core Tech Stack](#core-tech-stack)
     - [Core Architecture](#core-architecture)
   - [💻 Frontend Usage](#-frontend-usage)
+    - [Build Backend](#build-backend)
     - [Install Dependencies](#install-dependencies)
     - [Development and Debugging](#development-and-debugging)
     - [Application Packaging](#application-packaging)
@@ -73,9 +83,11 @@ MineContext is a proactive context-aware AI partner. By utilizing screenshots an
 
 ![feature.gif](src/feature.gif)
 
+
+
 # 🚀 Key Features
 
-MineContext focuses on five key features: effortless collection, intelligent resurfacing, and proactive delivery.
+MineContext focuses on four key features: effortless collection, intelligent resurfacing, proactive delivery, and a context engineering architecture.
 
 1. 📥 Effortless Collection
    Capable of gathering and processing massive amounts of context. Designed storage management enables extensive collection without adding mental burden.
@@ -83,10 +95,22 @@ MineContext focuses on five key features: effortless collection, intelligent res
    Delivers key information and insights proactively in daily use. It extracts summarized content from your context—such as daily/weekly summaries, tips, and todos—and pushes them directly to your homepage.
 3. 💡 Intelligent Resurfacing
    Surfaces relevant and useful context intelligently during creation. Ensures assisted creativity without overwhelming you with information.
-4. 🛡️ Privacy-First
-   All data is stored locally, ensuring your privacy and security.
-5. 🎯 Context Engineering Architecture
+4. 🎯 Context Engineering Architecture
    Supports the complete lifecycle of multimodal, multi-source data—from capture, processing, and storage to management, retrieval, and consumption—enabling the generation of six types of intelligent context.
+
+
+# 🔏 Privacy Protection
+
+##  Local-First
+MineContext places a high priority on user privacy. By default, all data is stored locally in the following path to ensure your privacy and security.
+
+
+```
+~/Library/Application Support/MineContext/Data
+```
+
+## Local AI model 
+In addition, we support custom model services based on the OpenAI API protocol. You can use fully local models in MineContext, ensuring that any data does not leave your local environment.
 
 # 🏁 Quick Start
 
@@ -130,10 +154,10 @@ The following is the filling process after obtaining the API Key:
 
 ## 4. Start Recording
 
-Enter 【Screen Monitor】 to enable the system permissions for screen sharing. After completing the setup, you need to restart the application for the changes to take effect.
+Enter [Screen Monitor] to enable the system permissions for screen sharing. After completing the setup, you need to restart the application for the changes to take effect.
 ![Enable-Permissions](src/Enable-Permissions.gif)
 
-After restarting the application, please first set your screen sharing area in 【Settings】, then click [Start Recording] to begin taking screenshots.
+After restarting the application, please first set your screen sharing area in [Settings], then click [Start Recording] to begin taking screenshots.
 ![Screen-Settings](src/Screen-Settings.gif)
 
 ## 5. Forget it

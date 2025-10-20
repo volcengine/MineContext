@@ -1,9 +1,9 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, Typography } from '@arco-design/web-react'
-import VaultTree from '@renderer/components/VaultTree'
-import { useNavigation } from '@renderer/hooks/useNavigation'
+import { Layout } from '@arco-design/web-react'
+import VaultTree from '@renderer/components/vault-tree'
+import { useNavigation } from '@renderer/hooks/use-navigation'
 import logo from '/src/assets/icons/logo.svg'
 import homeIcon from '/src/assets/icons/home.svg'
 import screenMonitorIcon from '/src/assets/icons/screen-monitor.svg'
@@ -12,8 +12,6 @@ import settings from '/src/assets/icons/settings.svg'
 // import resourcesIcon from '/src/assets/icons/resources.svg'
 // import { IconRobot } from '@arco-design/web-react/icon'
 import './index.css'
-
-const { Text } = Typography
 const { Sider } = Layout
 
 const tabItems = [
@@ -62,32 +60,10 @@ const Sidebar = () => {
   return (
     <Sider
       width={176}
-      className="sidebar-container"
-      style={{
-        background: 'transparent',
-        // borderRight: '1px solid #e5e6eb',
-        height: '100vh',
-        padding: '0 12px 16px',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+      className="sidebar-container [&_.arco-layout-sider]: !flex !flex-col !bg-transparent !height-[100vh] !py-0 !pl-[12px] !py-[16px]">
       {/* Top logo and title */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '8px 16px',
-          height: '80px',
-          flexShrink: 0
-        }}
-        onClick={() => handleTabChange('home')}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            flex: 1
-          }}>
+      <div className="flex items-center px-4 py-2 h-[80px] flex-shrink-0" onClick={() => handleTabChange('home')}>
+        <div className="flex items-center gap-2 flex-1">
           <img
             src={logo}
             alt="Logo"
@@ -96,58 +72,24 @@ const Sidebar = () => {
               height: 24
             }}
           />
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: '#1d2129',
-              margin: 0,
-              whiteSpace: 'nowrap'
-            }}
+          <div
             onClick={() => navigateToMainTab('home', '/')}
-            className="cursor-pointer">
+            className="text-base font-bold text-[#1d2129] m-0 whitespace-nowrap cursor-pointer">
             MineContext
-          </Text>
+          </div>
         </div>
       </div>
 
       {/* Tab navigation */}
-      <div
-        style={{
-          flexShrink: 0
-        }}>
+      <div className="flex-shrink-0">
         {tabItems.map((item) => (
           <div
             key={item.key}
             onClick={() => handleTabChange(item.key)}
-            className="h-[28px]"
-            style={{
-              padding: '8px 12px',
-              textAlign: 'left',
-              cursor: 'pointer',
-              backgroundColor: isMainTabActive(item.key) ? '#FFFFFF66' : 'transparent',
-              fontSize: '13px',
-              lineHeight: '22px',
-              color: '#3F3F54',
-              fontWeight: isMainTabActive(item.key) ? 500 : 400,
-              transition: 'all 0.2s ease',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginTop: 5
-            }}
-            onMouseEnter={(e) => {
-              if (!isMainTabActive(item.key)) {
-                e.currentTarget.style.backgroundColor = '#FFFFFF66'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isMainTabActive(item.key)) {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }
-            }}>
-            <span style={{ display: 'flex' }}>{item.icon}</span>
+            className={`h-[28px] p-2 px-3 text-left cursor-pointer text-sm leading-[22px] 
+              ${isMainTabActive(item.key) ? 'bg-[#FFFFFF66] font-medium' : 'bg-transparent font-normal hover:bg-[#FFFFFF66]'} 
+              text-[#3F3F54] transition-all duration-200 ease-in-out rounded-lg flex items-center gap-2 mt-[5px]`}>
+            <span className="flex">{item.icon}</span>
             {item.label}
           </div>
         ))}

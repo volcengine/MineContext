@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Modal, Image, Form, Message } from '@arco-design/web-react'
-import { useSetting } from '@renderer/hooks/useSetting'
-import { useScreen, intervalRef } from '@renderer/hooks/useScreen'
+import { useSetting } from '@renderer/hooks/use-setting'
+import { useScreen, intervalRef } from '@renderer/hooks/use-screen'
+import dayjs from 'dayjs'
 
 import { useMemoizedFn } from 'ahooks'
 import { useCheckVisibleSources } from './hooks/useCheckVisibleSources'
@@ -74,8 +75,8 @@ const ScreenMonitor: React.FC = () => {
   }, [sources])
   const { checkVisibleSources, clearCache } = useCheckVisibleSources()
 
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const isToday = currentDate.toDateString() === new Date().toDateString()
+  const [currentDate, setCurrentDate] = useState(dayjs().toDate())
+  const isToday = dayjs(currentDate).isSame(dayjs(), 'day')
   const screenshots = currentSession?.screenshots || {}
   const [settingsVisible, setSettingsVisible] = useState(false)
   const [activities, setActivities] = useState<Activity[]>([])
@@ -83,7 +84,7 @@ const ScreenMonitor: React.FC = () => {
   const lastCheckedTimeRef = useRef<string>(
     activities.length > 0
       ? activities[activities.length - 1].end_time || activities[activities.length - 1].start_time
-      : new Date().toISOString()
+      : dayjs().toISOString()
   )
   const isScreenLockedRef = useRef(false)
 
@@ -100,8 +101,7 @@ const ScreenMonitor: React.FC = () => {
 
   useEffect(() => {
     const initActivities = async () => {
-      const date = new Date(currentDate)
-      date.setHours(0, 0, 0, 0)
+      const date = dayjs(currentDate).startOf('day').toDate()
       const todayActivities = await getActivitiesByDate(date)
       const todayActivitiesParsed: Activity[] = todayActivities.map((item: any) => ({
         ...item,
@@ -116,9 +116,7 @@ const ScreenMonitor: React.FC = () => {
         lastCheckedTimeRef.current = latestActivity.end_time || latestActivity.start_time
       } else {
         // If there are no activities, reset to the start of the day
-        const dayStart = new Date(currentDate)
-        dayStart.setHours(0, 0, 0, 0)
-        lastCheckedTimeRef.current = dayStart.toISOString()
+        lastCheckedTimeRef.current = dayjs(currentDate).startOf('day').toISOString()
       }
     }
     initActivities()
@@ -138,14 +136,12 @@ const ScreenMonitor: React.FC = () => {
   }, [currentDate, isMonitoring, isToday])
 
   const handlePreviousDay = () => {
-    const newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() - 1)
+    const newDate = dayjs(currentDate).subtract(1, 'day').toDate()
     setCurrentDate(newDate)
   }
 
   const handleNextDay = () => {
-    const newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() + 1)
+    const newDate = dayjs(currentDate).add(1, 'day').toDate()
     setCurrentDate(newDate)
   }
 
@@ -154,7 +150,7 @@ const ScreenMonitor: React.FC = () => {
   }
 
   const disabledDate = (current) => {
-    return current && current > new Date()
+    return current && dayjs(current).isAfter(dayjs(), 'day')
   }
 
   // Start monitoring session
@@ -220,9 +216,9 @@ const ScreenMonitor: React.FC = () => {
         }))
         if (newActivitiesParsed && newActivitiesParsed.length > 0) {
           // Filter activities for the current date
-          const currentDateStr = currentDate.toISOString().split('T')[0]
+          const currentDateStr = dayjs(currentDate).format('YYYY-MM-DD')
           const filteredActivities = newActivitiesParsed.filter((activity) => {
-            const activityDateStr = new Date(activity.start_time).toISOString().split('T')[0]
+            const activityDateStr = dayjs(activity.start_time).format('YYYY-MM-DD')
             return activityDateStr === currentDateStr
           })
 
@@ -310,9 +306,10 @@ const ScreenMonitor: React.FC = () => {
   const [canRecord, setCanRecord] = useState(false)
   const checkCanRecord = useMemoizedFn(() => {
     if (enableRecordingHours) {
-      const currentDay = new Date().getDay()
-      const currentHour = new Date().getHours()
-      const currentMinute = new Date().getMinutes()
+      const now = dayjs()
+      const currentDay = now.day()
+      const currentHour = now.hour()
+      const currentMinute = now.minute()
 
       // Check if within the allowed date range
       if (applyToDays === 'weekday') {

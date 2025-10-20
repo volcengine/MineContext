@@ -1,14 +1,10 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@renderer/components/ui/avatar';
-import { cn } from '@renderer/lib/utils';
-import type { UIMessage } from 'ai';
-import type { ComponentProps, HTMLAttributes } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@renderer/components/ui/avatar'
+import { cn } from '@renderer/lib/utils'
+import type { UIMessage } from 'ai'
+import type { ComponentProps, HTMLAttributes } from 'react'
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage['role']

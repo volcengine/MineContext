@@ -9,12 +9,7 @@ Context Consumption - Completion Module
 智能补全模块
 """
 
-from .completion_service import CompletionService, get_completion_service
 from .completion_cache import CompletionCache, get_completion_cache
+from .completion_service import CompletionService, get_completion_service
 
-__all__ = [
-    'CompletionService',
-    'get_completion_service',
-    'CompletionCache', 
-    'get_completion_cache'
-]
+__all__ = ["CompletionService", "get_completion_service", "CompletionCache", "get_completion_cache"]

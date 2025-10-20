@@ -4,8 +4,8 @@
 import { Dropdown, Menu, Space, Typography, Input, Message } from '@arco-design/web-react'
 import { Tree, NodeRendererProps } from 'react-arborist'
 
-import { useVaults } from '@renderer/hooks/useVault'
-import { useNavigation } from '@renderer/hooks/useNavigation'
+import { useVaults } from '@renderer/hooks/use-vault'
+import { useNavigation } from '@renderer/hooks/use-navigation'
 import { VaultTreeNode } from '@renderer/types'
 import folderStrokedIcon from '/src/assets/icons/folder-stroked.svg'
 import folderOpenIcon from '/src/assets/icons/folder-open.svg'
@@ -13,7 +13,6 @@ import fileIcon from '/src/assets/icons/file.svg'
 import addIcon from '/src/assets/icons/add.svg'
 import deleteIcon from '/src/assets/icons/delete.svg'
 import renameIcon from '/src/assets/icons/rename.svg'
-import './index.css'
 import { useEffect, useRef, useState } from 'react'
 
 const { Text, Ellipsis } = Typography
@@ -229,7 +228,9 @@ const Sidebar = () => {
         </div>
 
         {/* Modern tree structure */}
-        <div className="note-tree-container flex-1 min-h-[0] font-[12px]" ref={treeContainerRef}>
+        <div
+          className="text-black flex-1 min-h-[0] font-[12px] [&_.arco-typography]: !font-[13px]"
+          ref={treeContainerRef}>
           {treeDimensions.height > 0 && (
             <Tree
               idAccessor={(data) => data.id.toString()}

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { useNavigation } from '@renderer/hooks/useNavigation'
+import { useNavigation } from '@renderer/hooks/use-navigation'
 import { FC, useRef } from 'react'
 import { CardLayout } from '../layout'
 import { useMount, useRequest } from 'ahooks'
@@ -16,8 +16,8 @@ interface LatestActivityCardProps {
   children?: React.ReactNode
 }
 
-const NORMAL_INTERVAL = 60000   // Normal: 60 seconds
-const LOCKED_INTERVAL = 300000  // Locked: 5 minutes
+const NORMAL_INTERVAL = 60000 // Normal: 60 seconds
+const LOCKED_INTERVAL = 300000 // Locked: 5 minutes
 
 const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   const { navigateToMainTab } = useNavigation()
@@ -81,9 +81,7 @@ const LatestActivityCard: FC<LatestActivityCardProps> = () => {
       emptyText="No activity in the last 7 days. "
       isEmpty={isEmpty(data)}>
       {data ? (
-        <ActivityTimelineItem
-          activity={{ ...data, resources: JSON.parse(data.resources || '[]') } as any}
-        />
+        <ActivityTimelineItem activity={{ ...data, resources: JSON.parse(data.resources || '[]') } as any} />
       ) : null}
     </CardLayout>
   )

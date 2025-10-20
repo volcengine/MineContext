@@ -1,9 +1,10 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { useVaults } from '@renderer/hooks/useVault'
+import { useVaults } from '@renderer/hooks/use-vault'
 import { VaultTreeNode } from '@renderer/types'
 import { isWithinSevenDays } from './time'
+import dayjs from 'dayjs'
 
 /**
  * Recursively find a node with the specified ID
@@ -207,20 +208,7 @@ export const removeMarkdownSymbols = (text: string) => {
 }
 
 export function formatVaultDate(date: Date | string | number): string {
-  const d = new Date(date)
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const month = monthNames[d.getMonth()]
-  const day = d.getDate()
-  const year = d.getFullYear()
-  let hours = d.getHours()
-  const minutes = d.getMinutes()
-  const seconds = d.getSeconds()
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-  hours = hours % 12
-  hours = hours ? hours : 12 // the hour '0' should be '12'
-  const strMinutes = minutes < 10 ? '0' + minutes : minutes
-  const strSeconds = seconds < 10 ? '0' + seconds : seconds
-  return `${month} ${day}, ${year} ${hours}:${strMinutes}:${strSeconds} ${ampm}`
+  return dayjs(date).format('MMM D, YYYY h:mm:ss A')
 }
 
 export function getAllVaultsFlat(): VaultTreeNode[] {

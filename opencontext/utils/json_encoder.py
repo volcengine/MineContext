@@ -7,10 +7,12 @@
 OpenContext module: json_encoder
 """
 
-import json
 import datetime
-from dataclasses import is_dataclass, asdict
+import json
+from dataclasses import asdict, is_dataclass
+
 from pydantic import BaseModel
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):

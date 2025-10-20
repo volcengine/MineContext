@@ -4,6 +4,8 @@
 import { FC } from 'react'
 import { Activity } from '../screen-monitor'
 import { Popover, Image } from '@arco-design/web-react'
+import { pathToFileURL } from '@renderer/utils/file'
+
 export interface ActivityTimelineItemProps {
   activity: Activity
 }
@@ -29,7 +31,7 @@ const ActivityTimelineItem: FC<ActivityTimelineItemProps> = (props) => {
               return (
                 <Image
                   key={index}
-                  src={`file://${encodeURI(resource.path)}`}
+                  src={pathToFileURL(resource.path)}
                   width={110}
                   height={60}
                   alt={`lamp${index + 1}`}

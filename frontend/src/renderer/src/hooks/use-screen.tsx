@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Message } from '@arco-design/web-react'
 import { useSelector } from 'react-redux'
 import { useMemoizedFn, useMount } from 'ahooks'
+import dayjs from 'dayjs'
 
 import { RootState, useAppDispatch } from '@renderer/store'
 import {
@@ -107,11 +108,8 @@ export const useScreen = () => {
 
   // Get activities for a specific date
   const getActivitiesByDate = useMemoizedFn(async (date: Date) => {
-    const startOfDay = new Date(date)
-    startOfDay.setHours(0, 0, 0, 0)
-
-    const endOfDay = new Date(date)
-    endOfDay.setHours(23, 59, 59, 999)
+    const startOfDay = dayjs(date).startOf('day').toDate()
+    const endOfDay = dayjs(date).endOf('day').toDate()
 
     const res = await window.dbAPI.getNewActivities(timeToISOTimeString(startOfDay), timeToISOTimeString(endOfDay))
     if (res.length > 0) {
@@ -179,7 +177,7 @@ export const useScreen = () => {
       const data = {
         path: screenshot.image_url,
         window: 'Test Window',
-        create_time: new Date(screenshot.timestamp).toISOString(),
+        create_time: dayjs(screenshot.timestamp).toISOString(),
         app: 'Test App'
       }
       const res = await axiosInstance.post('/api/add_screenshot', data)

@@ -169,11 +169,38 @@ export const useChatStream = () => {
         break
 
       case 'stream_complete':
-      case 'completed':
-        console.log('✅ Received completion event, content:', event.content)
-        // Finish streaming, add message to history
+        // Stream complete (streaming mode) - save accumulated streamingMessage
+        setStreamingMessage((prev) => {
+          if (prev && prev.content.trim()) {
+            const finalMessage: ChatMessage = {
+              role: 'assistant',
+              content: prev.content
+            }
 
-        // If the event itself contains content, use it directly
+            setChatState((chatState) => ({
+              ...chatState,
+              messages: [...chatState.messages, finalMessage],
+              isLoading: false,
+              currentStage: 'completed',
+              progress: 1.0
+            }))
+
+            currentStreamingId.current = null
+            return null
+          }
+          // No streaming message - just update state
+          setChatState((chatState) => ({
+            ...chatState,
+            isLoading: false,
+            currentStage: 'completed',
+            progress: 1.0
+          }))
+          return null
+        })
+        break
+
+      case 'completed':
+        // Completed (non-streaming mode) - use content from event directly
         if (event.content && event.content.trim()) {
           const finalMessage: ChatMessage = {
             role: 'assistant',
@@ -187,39 +214,17 @@ export const useChatStream = () => {
             currentStage: 'completed',
             progress: 1.0
           }))
-
-          setStreamingMessage(null)
-          currentStreamingId.current = null
         } else {
-          // Otherwise, use the content of the streaming message
-          setStreamingMessage((prev) => {
-            if (prev && prev.content.trim()) {
-              const finalMessage: ChatMessage = {
-                role: 'assistant',
-                content: prev.content
-              }
-
-              setChatState((chatState) => ({
-                ...chatState,
-                messages: [...chatState.messages, finalMessage],
-                isLoading: false,
-                currentStage: 'completed',
-                progress: 1.0
-              }))
-
-              currentStreamingId.current = null
-            } else {
-              // If there is no valid content, at least update the status
-              setChatState((chatState) => ({
-                ...chatState,
-                isLoading: false,
-                currentStage: 'completed',
-                progress: 1.0
-              }))
-            }
-            return null
-          })
+          // Just update state if no content
+          setChatState((prev) => ({
+            ...prev,
+            isLoading: false,
+            currentStage: 'completed',
+            progress: 1.0
+          }))
         }
+        setStreamingMessage(null)
+        currentStreamingId.current = null
         break
 
       case 'fail':

@@ -6,6 +6,7 @@ import { initVaults, addVault, deleteVault, renameVault, updateVault, updateVaul
 import { Vault } from '@renderer/types'
 import { getLogger } from '@shared/logger/renderer'
 import { sortTreeByOrder } from '@renderer/utils/vault'
+import dayjs from 'dayjs'
 
 import { AppDispatch } from '..'
 
@@ -38,8 +39,8 @@ export const addVaultThunk = (vault: Omit<Vault, 'id'>) => async (dispatch: AppD
     const newVault: Vault = {
       ...vault,
       id: result.id,
-      created_at: vault.created_at || new Date().toISOString(),
-      updated_at: vault.updated_at || new Date().toISOString()
+      created_at: vault.created_at || dayjs().toISOString(),
+      updated_at: vault.updated_at || dayjs().toISOString()
     }
 
     // 3. Update the Redux store
@@ -83,7 +84,7 @@ export const updateVaultThunk = (vaultId: number, updates: Partial<Vault>) => as
     const updatedVault: Vault = {
       ...updates,
       id: vaultId,
-      updated_at: new Date().toISOString()
+      updated_at: dayjs().toISOString()
     } as Vault
 
     // 3. Update the Redux store
@@ -108,7 +109,7 @@ export const updateVaultPositionThunk = (vaultId: number, updates: Partial<Vault
     const updatedVault: Vault = {
       ...updates,
       id: vaultId,
-      updated_at: new Date().toISOString()
+      updated_at: dayjs().toISOString()
     } as Vault
 
     // 3. Update the Redux store
@@ -127,7 +128,7 @@ export const updateVaultPositionThunk = (vaultId: number, updates: Partial<Vault
 export const renameVaultThunk = (vaultId: number, name: string) => async (dispatch: AppDispatch) => {
   try {
     // 1. First, update the database
-    await updateVaultById(vaultId, { title: name, updated_at: new Date().toISOString() })
+    await updateVaultById(vaultId, { title: name, updated_at: dayjs().toISOString() })
 
     // 2. Update the Redux store
     dispatch(renameVault({ vaultId, name }))
@@ -157,8 +158,8 @@ export const createFolderThunk = (title: string, parentId?: number) => async (di
       parent_id: parentId || -1,
       is_folder: 1,
       is_deleted: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: dayjs().toISOString(),
+      updated_at: dayjs().toISOString()
     }
 
     // 3. Add to the Redux store

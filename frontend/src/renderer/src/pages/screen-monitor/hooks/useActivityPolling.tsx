@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import { Activity } from '../screen-monitor'
 import { getLogger } from '@shared/logger/renderer'
+import dayjs from 'dayjs'
 
 const logger = getLogger('useActivityPolling')
 export const useActivityPolling = (
@@ -11,16 +12,15 @@ export const useActivityPolling = (
 ) => {
   const [activities, setActivities] = useState<Activity[]>([])
   const activityPollingRef = useRef<NodeJS.Timeout | null>(null)
-  const lastCheckedTimeRef = useRef<string>(new Date().toISOString())
+  const lastCheckedTimeRef = useRef<string>(dayjs().toISOString())
 
   // Determine if currently viewing today
-  const isToday = currentDate.toDateString() === new Date().toDateString()
+  const isToday = dayjs(currentDate).isSame(dayjs(), 'day')
 
   // Initialize activities for current date
   useEffect(() => {
     const initActivities = async () => {
-      const date = new Date(currentDate)
-      date.setHours(0, 0, 0, 0)
+      const date = dayjs(currentDate).startOf('day').toDate()
       const todayActivities = await getActivitiesByDate(date)
       const todayActivitiesParsed: Activity[] = todayActivities.map((item: any) => ({
         ...item,
@@ -35,9 +35,7 @@ export const useActivityPolling = (
         lastCheckedTimeRef.current = latestActivity.end_time || latestActivity.start_time
       } else {
         // If there are no activities, reset to the start of the day
-        const dayStart = new Date(currentDate)
-        dayStart.setHours(0, 0, 0, 0)
-        lastCheckedTimeRef.current = dayStart.toISOString()
+        lastCheckedTimeRef.current = dayjs(currentDate).startOf('day').toISOString()
       }
     }
     initActivities()
@@ -63,9 +61,9 @@ export const useActivityPolling = (
         }))
         if (newActivitiesParsed && newActivitiesParsed.length > 0) {
           // Filter activities for the current date
-          const currentDateStr = currentDate.toISOString().split('T')[0]
+          const currentDateStr = dayjs(currentDate).format('YYYY-MM-DD')
           const filteredActivities = newActivitiesParsed.filter((activity) => {
-            const activityDateStr = new Date(activity.start_time).toISOString().split('T')[0]
+            const activityDateStr = dayjs(activity.start_time).format('YYYY-MM-DD')
             return activityDateStr === currentDateStr
           })
 

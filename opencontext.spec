@@ -1,4 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+
+is_windows = sys.platform.startswith("win")
 
 a = Analysis(
     ['opencontext/cli.py'],
@@ -39,11 +42,12 @@ exe = EXE(
     name='main',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=True,
+    strip=not is_windows,
     upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,
     disable_windowed_traceback=False,
     codesign_identity=None,
+    icon=None,  # Disable icon to avoid Windows resource locking issues
 )

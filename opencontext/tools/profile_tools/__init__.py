@@ -10,4 +10,4 @@ Profile tools for entity management
 
 from .profile_entity_tool import ProfileEntityTool
 
-__all__ = ['ProfileEntityTool']
+__all__ = ["ProfileEntityTool"]
