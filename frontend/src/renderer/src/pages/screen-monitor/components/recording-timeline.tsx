@@ -1,6 +1,6 @@
 import React from 'react'
 import { Typography, Timeline } from '@arco-design/web-react'
-import { Activity } from '../ScreenMonitor'
+import { Activity } from '../screen-monitor'
 import { ActivityTimelineItem } from './activitie-timeline-item'
 import { formatTime } from '@renderer/utils/time'
 import { SCREEN_INTERVAL_TIME } from '../constant'
@@ -15,12 +15,7 @@ interface RecordingTimelineProps {
   activities: Activity[]
 }
 
-const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
-  isMonitoring,
-  isToday,
-  canRecord,
-  activities
-}) => {
+const RecordingTimeline: React.FC<RecordingTimelineProps> = ({ isMonitoring, isToday, canRecord, activities }) => {
   return (
     <div className="mt-5">
       <Timeline labelPosition="relative">
@@ -33,8 +28,7 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
                     Recording screen...
                   </Text>
                   <div className="text-[#C9C9D4]">
-                    Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen
-                    analysis.
+                    Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen analysis.
                   </div>
                 </div>
               ) : (
@@ -43,8 +37,7 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
                     Recording stopped
                   </Text>
                   <div className="text-[#C9C9D4]">
-                    It's not in recording hours now. Recording will automatically start at the next allowed
-                    time.
+                    It's not in recording hours now. Recording will automatically start at the next allowed time.
                   </div>
                 </div>
               )

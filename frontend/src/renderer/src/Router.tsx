@@ -8,7 +8,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom'
 
 import HomePage from './pages/home/HomePage'
 import VaultPage from './pages/vault/Vault'
-import ScreenMonitor from './pages/screen-monitor/ScreenMonitor'
+import ScreenMonitor from './pages/screen-monitor/screen-monitor'
 import Settings from './pages/settings/settings'
 
 import Files from './pages/files/Files'

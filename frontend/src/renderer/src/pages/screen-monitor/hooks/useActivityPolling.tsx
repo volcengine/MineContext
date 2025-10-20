@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useMemoizedFn } from 'ahooks'
-import { Activity } from '../ScreenMonitor'
+import { Activity } from '../screen-monitor'
 import { getLogger } from '@shared/logger/renderer'
 
 const logger = getLogger('useActivityPolling')
