@@ -40,6 +40,8 @@ dependencies = [
     "imagehash",
     "google-generativeai",
     "python-dotenv",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
 ]
 
 [project.optional-dependencies]
