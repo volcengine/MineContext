@@ -6,7 +6,8 @@ import BetterSqlite3, { type Statement, type RunResult, type Database as BetterS
 import path from 'path'
 import fs from 'fs'
 import { app } from 'electron'
-
+import { getLogger } from '@shared/logger/main'
+const logger = getLogger('Database')
 /**
  * Represents the result of a query returning a list of items.
  * @template T The type of items in the result array.
@@ -40,7 +41,7 @@ export class DB {
       fs.mkdirSync(dir, { recursive: true })
     }
     const options: BetterSqlite3.Options = {
-      verbose: is.dev ? console.log : undefined, // Can be enabled for debugging to print executed SQL
+      verbose: is.dev ? logger.debug : undefined, // Can be enabled for debugging to print executed SQL
       fileMustExist: false
     }
     this.db = new BetterSqlite3(dbFilePath, options)
@@ -78,7 +79,7 @@ export class DB {
   public close(): void {
     if (this.db && this.db.open) {
       this.db.close()
-      console.log('Database connection closed.')
+      logger.log('Database connection closed.')
     }
   }
 
@@ -118,7 +119,7 @@ export class DB {
     try {
       insertTransaction(items)
     } catch (err) {
-      console.error(`Transaction failed for bulk insert into ${table}:`, err)
+      logger.error(`Transaction failed for bulk insert into ${table}:`, err)
       throw err
     }
   }

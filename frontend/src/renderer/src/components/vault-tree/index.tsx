@@ -159,7 +159,7 @@ const Sidebar = () => {
   const { navigateToVault } = useNavigation()
   const treeContainerRef = useRef<HTMLDivElement>(null)
   const [treeDimensions, setTreeDimensions] = useState({ width: 200, height: 600 })
-
+  console.log('treeData', treeData)
   useEffect(() => {
     if (treeContainerRef.current && treeContainerRef.current.clientWidth > 0) {
       setTreeDimensions({
@@ -228,9 +228,7 @@ const Sidebar = () => {
         </div>
 
         {/* Modern tree structure */}
-        <div
-          className="text-black flex-1 min-h-[0] font-[12px] [&_.arco-typography]: !font-[13px]"
-          ref={treeContainerRef}>
+        <div className="text-black flex-1 min-h-[0]  [&_.arco-typography]: !font-[13px]" ref={treeContainerRef}>
           {treeDimensions.height > 0 && (
             <Tree
               idAccessor={(data) => data.id.toString()}
