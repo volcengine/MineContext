@@ -29,7 +29,7 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 
 🌍 Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
 
- <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">Download for Windows</a>
+ <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">🖥️  Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">💻 Download for Windows</a>
 
 
 

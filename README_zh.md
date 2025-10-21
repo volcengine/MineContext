@@ -25,12 +25,11 @@
 <a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
 
-
 👋 加入我们的 [微信 / 飞书 / 小红书交流群](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
 🌍 加入我们的 [Discord 社区](https://discord.gg/tGj7RQ3nUR)
 
- <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">Mac版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">Windows版下载</a>
+ <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">🖥️  Mac版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">💻 Windows版下载</a>
 </div>
   
 目录
