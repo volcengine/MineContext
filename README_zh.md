@@ -30,8 +30,7 @@
 
 🌍 加入我们的 [Discord 社区](https://discord.gg/tGj7RQ3nUR)
 
-[Mac 应用下载](https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg)
-
+ <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">Mac版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">Windows版下载</a>
 </div>
   
 目录
