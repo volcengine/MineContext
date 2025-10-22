@@ -60,9 +60,13 @@ const Sidebar = () => {
   return (
     <Sider
       width={176}
-      className="sidebar-container [&_.arco-layout-sider]: !flex !flex-col !bg-transparent !height-[100vh] !py-0 !pl-[12px] !py-[16px]">
+      className="sidebar-container [&_.arco-layout-sider]: !flex !flex-col !bg-transparent !height-[100vh]">
       {/* Top logo and title */}
-      <div className="flex items-center px-4 py-2 h-[80px] flex-shrink-0" onClick={() => handleTabChange('home')}>
+      <div style={{ height: '16px', appRegion: 'drag' } as React.CSSProperties} />
+      <div
+        className="flex items-center px-4 py-2 h-[80px] flex-shrink-0"
+        onClick={() => handleTabChange('home')}
+        style={{ appRegion: 'drag' } as React.CSSProperties}>
         <div className="flex items-center gap-2 flex-1">
           <img
             src={logo}

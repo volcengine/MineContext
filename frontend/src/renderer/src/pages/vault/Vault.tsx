@@ -69,6 +69,7 @@ const VaultPage = () => {
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>
       <Allotment separator={false} ref={controller} defaultSizes={defaultSizes}>
         <Allotment.Pane minSize={leftMinSize}>
+          <div style={{ height: '8px', appRegion: 'drag' } as React.CSSProperties} />
           <div className="vault-page-container">
             <Card className="vault-card">
               {loading || !vault ? (

@@ -289,8 +289,9 @@ const Settings: FC<Props> = (props: Props) => {
   }
 
   return (
-    <div className="top-0 left-0 flex flex-col h-full overflow-y-hidden p-[8px] pl-0 rounded-[20px] relative ">
-      <div className="bg-white rounded-[16px] pl-6 flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
+    <div className="fixed top-0 left-0 flex flex-col h-full overflow-y-hidden pr-2 pb-2 pl-0 rounded-[20px] relative">
+      <div style={{ height: '8px', appRegion: 'drag' } as React.CSSProperties} />
+      <div className="bg-white rounded-[16px] pl-6 h-[calc(100%-8px)] flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
         <div className="mb-[12px]">
           <div className="mt-[26px] mb-[10px] text-[24px] font-bold text-[#000]">{'Select a AI model to start'}</div>
           <Text type="secondary" className="text-[13px]">

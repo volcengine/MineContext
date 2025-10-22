@@ -482,7 +482,8 @@ const ScreenMonitor: React.FC = () => {
   })
 
   return (
-    <div className="fixed top-0 left-0 flex flex-col h-screen overflow-y-hidden p-[8px] pl-0 rounded-[20px] relative">
+    <div className="fixed top-0 left-0 flex flex-col h-screen overflow-y-hidden pr-2 pb-2 pl-0 rounded-[20px] relative">
+      <div style={{ height: '8px', appRegion: 'drag' } as React.CSSProperties} />
       <div className="bg-white rounded-[16px] p-6 h-[calc(100%-8px)] flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
         <ScreenMonitorHeader
           hasPermission={hasPermission}
