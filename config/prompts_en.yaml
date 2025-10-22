@@ -422,6 +422,8 @@ processing:
           8. **Knowledge Preservation**: Ensure generated content can serve as high-quality memory context
           9. **Cross-screenshot Association**: Understand continuity and associations of multiple screenshots based on historical context
           10. **Activity Coherence**: Identify complete activity sequences spanning multiple screenshots, forming coherent behavioral trajectories
+          11. **Identify Activity First, Then Classify Type**: First understand the overall activity in screenshots, default to generating activity_context, only generate other context_type when clearly meeting other type definitions
+          12. **Type and Style Matching**: Different context_type must use corresponding description styles, avoid using activity style to describe state/procedural/semantic
 
           ## Output Format
           Strictly output JSON object, no explanatory text:
@@ -459,15 +461,74 @@ processing:
           ```
           Note: Different topics under the same context_type must generate separate items, do not mix unrelated content.
 
+          ## context_type Recognition Key Principles
+
+          ### Default Priority Principle (Must Follow Extraction Strategy)
+          **Basic Requirement**: When seeing screenshots of user operating interfaces, must first generate **activity_context** (record what user is doing)
+
+          **Active Extraction Strategy**: On the basis of activity_context, **proactively identify and extract** other types of information contained in screenshots:
+          - **semantic_context**: When screenshots contain product introductions, technical documents, configuration specifications, architecture descriptions and other knowledge content, **must extract**
+          - **state_context**: When screenshots show task boards, progress panels, status lists, statistical data, **must extract**
+          - **procedural_context**: When reusable operation processes can be learned from screenshot sequences, **should extract**
+          - **intent_context**: When screenshots clearly show future plans, todo items, **should extract**
+
+          **Key Concept**: One activity can simultaneously produce multiple types of context!
+          - Example: Viewing product introduction page → activity_context (user viewing behavior) + semantic_context (product knowledge content)
+          - Example: Viewing task board → activity_context (user viewing behavior) + state_context (task status information)
+          - Example: Configure and start service → activity_context (user operation behavior) + procedural_context (operation process)
+
+          ### Style Matching Principle (Important)
+          **Generate which type, must use corresponding description style for that type**:
+          - ✅ activity_context: "current_user viewing...", "current_user configuring..."
+          - ✅ state_context: "Project progress shows...", "System status is..."
+          - ✅ procedural_context: "Step 1:...; Step 2:...; Step 3:..."
+          - ✅ semantic_context: "Technical architecture adopts...", "Core principle is..."
+
+          **Common Error Examples**:
+          - ❌ Misjudge activity as state, but use activity style description:
+            ```
+            Type: state_context
+            Summary: current_user is viewing project board, board shows task status...
+            ```
+            **Problem**: Used "current_user is viewing" (activity style), should change to activity_context
+
+          - ❌ Misjudge activity as procedural, but use activity style description:
+            ```
+            Type: procedural_context
+            Summary: current_user opens config file, modifies parameters, then starts service...
+            ```
+            **Problem**: Describes single operation rather than reusable process, should change to activity_context
+
+          ### Multi-screenshot Judgment Principle
+          - **Same activity** + multiple screenshots → merge into **one** activity_context (use screen_ids to associate)
+          - **Different activities** + multiple screenshots → generate **multiple** independent activity_context
+          - Judgment criteria: whether topics are the same, whether time is continuous, whether operations are related
+
           ## Processing Flow
-          1. **Content Understanding**: Deeply understand the interface, text, and operation status displayed in screenshots
+
+          ### Phase One: Overall Understanding
+          1. **Global Cognition**: Read all screenshots, form complete cognition
              - Identify all visible text content, values, options, buttons, status information
              - Understand interface layout, user's current operation position, interaction status
              - Analyze technical level and professional degree of content
              - Understand the association of current screenshot with previous activities based on historical context
-          2. **Subject Identification**: Identify operation subject, unify user-related activities as "current_user"
-          3. **Behavior Inference**: Infer specific behaviors and intentions based on interface state
-          4. **Specific Content Extraction**: **Key Step** - Extract specific information from screenshots in detail
+
+          2. **Activity Identification**: Determine how many different activities are included in screenshots
+             - Identify which independent activities the user conducted
+             - Judge which screenshots belong to the same activity, which are different activities
+             - Understand user's activity trajectory, form coherent behavioral sequences
+
+          3. **Subject Identification**: Identify operation subject, unify user-related activities as "current_user"
+
+          4. **Behavior Inference**: Infer specific behaviors and intentions based on interface state
+
+          ### Phase Two: Generate activity_context
+          5. **Generate Activity Context**: Each independent activity must generate one activity_context
+             - Merge related screenshots into the same activity (use screen_ids to associate multiple screenshots)
+             - Generate independent items for activities with different topics
+             - If user is simultaneously conducting multiple activities on different topics, must generate multiple independent activity_context items
+
+          6. **Specific Content Extraction**: **Key Step** - Extract specific information from screenshots in detail
              - **Technical Content**: Extract code snippets, command syntax, parameter values, configuration options
              - **Data Information**: Record specific values, statistics, list items, status values
              - **Operation Details**: Describe specific click positions, input content, selected items
@@ -475,30 +536,48 @@ processing:
              - **Interface Elements**: Record window titles, menu options, button text, prompt information
              - **Chat Interactions**: Record conversation content and speakers, questions and answers, interaction feedback
              - **Schedule Management**: Record meeting time, location, participants, agenda items
-          5. **Tool Enhancement**: Actively use available tools for entity normalization and background information retrieval
-             - entity_normalizer: Normalize entities, unify similar expressions
-             - context_enhancement: Obtain background information, enhance content readability
-          6. **Content Association**: Associate content according to time and topic, forming complete context units
-             - Identify continuous activities across screenshots, integrate related content
-             - Understand user's activity trajectory, form coherent behavioral sequences
-          7. **Generate activity_context**
-             - Record what activities the user is currently doing. If the user is simultaneously conducting multiple activities on different topics, must generate multiple independent activity_context items
-          7. **Multi-topic and context_type Identification**:
-             - Record each topic independently, avoid information confusion
+
+          ### Phase Three: Proactively Extract Other context_type
+          8. **Multi-type Proactive Extraction**: On the basis of generating activity_context, **proactively identify and extract** other types of context contained in screenshots
+             - **Principle**: One activity can simultaneously generate multiple types of context (activity + semantic + state + procedural, etc.)
+             - Record each topic independently to avoid information confusion
              - Different topics of the same context_type should also be recorded separately
-             - **Must first understand multiple images to form overall cognition, then critically generate corresponding content based on context_type!**
-             - **semantic_context**: Extract when screenshots contain concept definitions, knowledge learning, theoretical understanding. When generating, only extract core knowledge concepts, do not describe user operation process
-             - **procedural_context**: Record user's operation flow and steps. Learn how users complete specific tasks based on screenshot time sequence, forming reusable operation patterns
-             - **state_context**: Extract when screenshots show project progress, task status, performance metrics. Describe current state information
-             - **intent_context**: Extract when screenshots show future plans, goal setting, to-do items. Record future plans and goals
-          8. **Decision Judgment**:
+             - **Must use the description style corresponding to that type**
+
+          9. **Proactive Identification and Extraction for Each Type**:
+             - **semantic_context** (knowledge content):
+               * **Identification clues**: Product introduction pages, technical documents, tutorial content, architecture descriptions, configuration specifications, concept definitions
+               * **Extraction requirements**: Extract knowledge content that can exist independently from screenshots, only record knowledge itself, do not describe user operations
+               * **Example scenarios**: Product feature introduction page → extract core product features and architecture; configuration file content → extract configuration specifications and parameter descriptions
+
+             - **state_context** (status information):
+               * **Identification clues**: Task boards, progress panels, status lists, monitoring dashboards, statistical data displays
+               * **Extraction requirements**: Extract current status, progress, statistical information, subject uses "project/system/task" rather than "current_user"
+               * **Example scenarios**: Task board shows task status → extract project task distribution and completion status
+
+             - **procedural_context** (operation process):
+               * **Identification clues**: Multi-step operation sequences, configuration + startup processes, problem troubleshooting processes
+               * **Extraction requirements**: When reusable operation processes can be learned from screenshot sequences, extract as step-by-step description
+               * **Example scenarios**: Continuous operations of viewing config file + starting service → extract as reusable configuration startup process
+
+             - **intent_context** (future plans):
+               * **Identification clues**: Todo lists, calendars, planning documents, not-yet-started tasks
+               * **Extraction requirements**: Extract explicit future plans and goals
+               * **Example scenarios**: "Not started" status tasks in task board → may extract as future plans
+
+          10. **Decision Judgment**:
              - NEW: Completely new activity, no historical overlap
-             - MERGE: Activity continuation/update with historical item, and same context_type
+             - MERGE: Activity continuation/update with historical item, and meets the following conditions:
+               * Same activity topic
+               * Same context_type
+               * Time continuous or logically related
              - Ignore: Completely duplicate or meaningless content
-          9. **Detailed Description Generation**:
+
+          11. **Detailed Description Generation**:
              - NEW: Generate detailed natural language description based on extracted specific content
              - MERGE: Integrate old and new content to form complete technical learning or operation sequence description
              - Ensure description includes all important specific information from screenshots
+             - **Use corresponding description style according to context_type**
 
           ## Field Specifications
           - **title**: Generate appropriate title based on context_type:
@@ -509,10 +588,34 @@ processing:
             * **intent_context**: Plan or goal expression (e.g., "Next week product release preparation items", "Q4 quarterly technical planning")
           - **summary**: Generate appropriate content description based on context_type:
             * **activity_context**: Describe user's specific operations, behavioral sequences, and interaction processes in detail
-            * **semantic_context**: Extract core knowledge points, concept definitions, technical principles. Only record knowledge itself, do not include acquisition process. For example: "MineContext adopts hybrid storage architecture, supports privacy local storage and cloud inference, based on Python+FastAPI+ChromaDB technology stack"
-            * **procedural_context**: Record operation step sequences for users to complete specific tasks. Learn operation patterns based on screenshot time sequence, for example: "Step 1: Open terminal; Step 2: Execute git status to check status; Step 3: Use git add to add files; Step 4: Execute git commit to submit"
-            * **state_context**: Describe current state, progress metrics, performance data, focusing on "how it is now"
-            * **intent_context**: Explain future plans, goal settings, to-do items, focusing on "what will be done"
+              - **Description style**: Subject is current_user, use action verbs (view, edit, discuss, configure, start, etc.)
+              - **Content focus**: What user did, how they operated, what content they viewed, what goals they achieved
+              - **Example**: "current_user views project management board, understands task assignment and completion status. Board is divided into not started/in progress/completed three statuses, showing multiple development tasks..."
+              - **Prohibit**: Do not only describe interface content without explaining user behavior
+
+            * **semantic_context**: Extract core knowledge points, concept definitions, technical principles. Only record knowledge itself, do not include acquisition process.
+              - **Description style**: Subject is technology/concept/system, use explanatory verbs (adopt, support, include, implement, etc.)
+              - **Content focus**: What knowledge is, how architecture works, why principles, technical characteristics
+              - **Example**: "MineContext adopts hybrid storage architecture, supports privacy local storage and cloud inference, based on Python+FastAPI+ChromaDB technology stack, core modules include..."
+              - **Prohibit**: Avoid user behavior descriptions such as "user learned", "current_user viewed"
+
+            * **procedural_context**: Record operation step sequences for users to complete specific tasks. Learn operation patterns based on screenshot time sequence.
+              - **Description style**: Use step-by-step structure, form reusable operation process
+              - **Content focus**: Step 1→Step 2→Step 3, how to complete a certain task
+              - **Example**: "Operation process for configuring and starting service: Step 1: Open config.yaml configuration file; Step 2: Modify API key and model parameters; Step 3: Execute startup command; Step 4: View console to confirm service started successfully"
+              - **Prohibit**: Not describing single operations, but extracting repeatable operation patterns
+
+            * **state_context**: Describe current status, progress metrics, performance data, focus on "how it is now"
+              - **Description style**: Subject is project/system/task, use status verbs (show, reach, be in, complete, etc.)
+              - **Content focus**: What is status, how is progress, metric values, current situation
+              - **Example**: "Project development progress shows 80% completion, frontend module completed, backend API development in progress, testing phase not started. Code commits 20 times, bug fix rate 95%"
+              - **Prohibit**: Do not describe user behavior, only describe status itself
+
+            * **intent_context**: Explain future plans, goal settings, todo items, focus on "what will be done"
+              - **Description style**: Use future tense, explain plans and goals
+              - **Content focus**: What will be done in the future, what are goals, how are plans
+              - **Example**: "Plan to complete frontend optimization next week, goal is to reduce page load time by 30%, prepare to refactor component architecture"
+              - **Prohibit**: Do not describe completed things
           - **Content Extraction Principles** - Adjust content detail level based on context_type:
             * **Technical Learning Scenarios**: Must include specific technical details, code examples, configuration parameters, operation steps, command syntax, etc.
             * **Operation Interface Scenarios**: Record interface elements, data values, configuration options, status information, user interaction behaviors in detail

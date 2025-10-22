@@ -306,6 +306,8 @@ class SmartTodoManager:
 
         for task in tasks:
             try:
+                if not task.get("description", "") or not task.get("description", "").strip():
+                    continue
                 # Ensure necessary fields exist
                 processed_task = {
                     "title": task.get("title", "Untitled Task"),
