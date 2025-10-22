@@ -15,7 +15,7 @@ import {
   MonitorSession,
   ScreenshotRecord
 } from '@renderer/store/screen'
-import { captureScreenshotThunk } from '@renderer/store/thunk/screenThunk'
+import { captureScreenshotThunk } from '@renderer/store/thunk/screen-thunk'
 import { CaptureSource } from '@renderer/atom/capture.atom'
 import axiosInstance from '@renderer/services/axiosConfig'
 import { timeToISOTimeString } from '@renderer/utils/time'

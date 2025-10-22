@@ -12,6 +12,7 @@ import { ProactiveFeedModal } from '@renderer/components/proactive-feed-modal'
 import { formatRelativeTime } from '@renderer/utils/time'
 import chatIcon from '@renderer/assets/icons/chat-icon.svg'
 import feedEmptyIcon from '@renderer/assets/icons/feed-empty.svg'
+import { useNavigation } from '@renderer/hooks/use-navigation'
 
 // Define the properties received by the component
 interface FeedCardProps {
@@ -25,7 +26,7 @@ interface FeedCardProps {
 }
 
 const ProactiveFeedCardItem: FC<FeedCardProps> = (props) => {
-  const { id, feedType, time, desc, doc_content } = props
+  const { id, feedType, time, desc, doc_content, doc_id } = props
   // const isDocument =
   //   feedType === PushDataTypes.DAILY_SUMMARY_GENERATED || feedType === PushDataTypes.WEEKLY_SUMMARY_GENERATED
   // const { navigateToVault } = useNavigation()
@@ -36,10 +37,14 @@ const ProactiveFeedCardItem: FC<FeedCardProps> = (props) => {
   //     navigateToVault(Number(doc_id))
   //   }
   // }
-
+  const { navigateToVault } = useNavigation()
   const handleChat = () => {
-    setCurrentActiveEvent(id)
-    setVisible(true)
+    if (feedType === PushDataTypes.DAILY_SUMMARY_GENERATED) {
+      navigateToVault(Number(doc_id))
+    } else {
+      setCurrentActiveEvent(id)
+      setVisible(true)
+    }
   }
 
   const [eventIcon, eventTitle] = useMemo(() => {
@@ -97,7 +102,7 @@ const ProactiveFeedCardItem: FC<FeedCardProps> = (props) => {
                 <img src={chatIcon} alt="chat icon" />
               </div>
               <div className="text-[var(--text-color-text-3,#5252FF)] font-['Roboto'] text-xs font-normal leading-5">
-                Check
+                {feedType === PushDataTypes.DAILY_SUMMARY_GENERATED ? 'View' : 'Check'}
               </div>
             </div>
           </div>
@@ -115,6 +120,7 @@ const ProactiveFeedCardItem: FC<FeedCardProps> = (props) => {
 
 const ProactiveFeedCard: React.FC = ({}) => {
   const { feedEvents } = useEvents()
+  console.log('feedEvents', feedEvents)
   const transferType = (event: FeedEvent): FeedCardProps => {
     return {
       id: event.id,

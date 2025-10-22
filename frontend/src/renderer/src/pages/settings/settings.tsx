@@ -116,7 +116,7 @@ const CustomFormItems = () => {
 const Settings: FC<Props> = (props: Props) => {
   const { onOk } = props
   const [init, setInit] = useState<undefined | boolean>(undefined)
-  const [showCheckIcon, setShowCheckIcon] = useState(false)
+  const [, setShowCheckIcon] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)

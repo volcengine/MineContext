@@ -13,9 +13,18 @@ import fileIcon from '/src/assets/icons/file.svg'
 import addIcon from '/src/assets/icons/add.svg'
 import deleteIcon from '/src/assets/icons/delete.svg'
 import renameIcon from '/src/assets/icons/rename.svg'
-import { useEffect, useRef, useState } from 'react'
-
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEvents } from '@renderer/hooks/use-events'
+import { PushDataTypes } from '@renderer/constant/feed'
+import { get } from 'lodash'
+import { useMemoizedFn, useMount, useRequest } from 'ahooks'
+import PQueue from 'p-queue'
+import { VaultDocumentType, VaultTitle } from '@shared/enums/global-enum'
+import { getLogger } from '@shared/logger/renderer'
+import dayjs from 'dayjs'
+const queue = new PQueue({ concurrency: 2 })
 const { Text, Ellipsis } = Typography
+const logger = getLogger('VaultTree')
 
 const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
   const isFolder = node.data.is_folder === 1
@@ -75,6 +84,16 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
       )}
     </Menu>
   )
+
+  const title = useMemo(() => {
+    const t = get(node, 'data.title', '')
+    if (t.startsWith('Daily Report')) {
+      const end = t.match(/\d{4}-\d{2}-\d{2}/)?.[0]
+      return end ? dayjs(end).format('MMM D, YYYY') : t
+    } else {
+      return t
+    }
+  }, [node.data])
 
   return (
     <Dropdown trigger="contextMenu" droplist={dropList} onVisibleChange={setVisible} popupVisible={visible}>
@@ -146,7 +165,7 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
             style={{
               fontWeight: !isFolder && isVaultActive(node.data.id) ? 500 : 400
             }}>
-            {node.data.title}
+            {title}
           </Ellipsis>
         )}
       </div>
@@ -155,11 +174,80 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
 }
 
 const Sidebar = () => {
-  const { vaults: treeData, updateVaultPosition, createFolder, addVault, renameVault: onRenameVault } = useVaults()
+  const {
+    vaults: treeData,
+    updateVaultPosition,
+    createFolder,
+    addVault,
+    renameVault: onRenameVault,
+    updateVault,
+    initVaults
+  } = useVaults()
+
+  const { feedEvents } = useEvents()
+  // eventLoop every 10s
+  const dailySummaryPushEvent = useMemo(() => {
+    return (feedEvents || []).filter((event) => event.type === PushDataTypes.DAILY_SUMMARY_GENERATED)
+  }, [feedEvents])
+  const { run: getDailyReportDocument, data: dailyReportDocument } = useRequest(window.dbAPI.getVaultsByDocumentType, {
+    manual: true
+  })
+  const { run: getSummaryFolder, data: summaryFolderId } = useRequest(
+    async (title: VaultTitle) => {
+      const folder = await window.dbAPI.getVaultByTitle(title)
+      if (Array.isArray(folder) && folder.length > 0) {
+        return get(folder, '0.id')
+      }
+      const res = await createFolder(title)
+      return get(res, 'id')
+    },
+    { manual: true }
+  )
+  const updateVaultsParentId = useMemoizedFn(async (ids: number[]) => {
+    if (!ids || ids.length === 0) {
+      return
+    }
+    const tasks = ids.map((id) => {
+      return async () => {
+        await updateVault(id, { parent_id: summaryFolderId })
+      }
+    })
+
+    try {
+      await initVaults()
+      await queue.addAll(tasks)
+      logger.info('bind summary folder success')
+    } catch (error) {
+      logger.error('bind summary folder failed', error)
+    } finally {
+      await initVaults()
+    }
+  })
+
+  useMount(() => {
+    getDailyReportDocument(VaultDocumentType.DailyReport)
+    getSummaryFolder(VaultTitle.Summary)
+  })
+  useEffect(() => {
+    if (summaryFolderId) {
+      const ids =
+        dailyReportDocument?.filter((item) => item.parent_id === -1 || !item.parent_id)?.map((item) => item.id) || []
+      updateVaultsParentId(ids)
+    }
+  }, [summaryFolderId, dailyReportDocument])
+
+  useEffect(() => {
+    if (dailySummaryPushEvent.length > 0 && summaryFolderId) {
+      const summary = get(treeData, 'children')?.find((item) => item.title === VaultTitle.Summary)
+      const exitIds = summary?.children?.map((item) => item.id) || []
+      const ids = dailySummaryPushEvent.map((item) => Number(get(item, 'data.doc_id')))
+      updateVaultsParentId(ids.filter((id) => !exitIds.includes(id)))
+    }
+  }, [dailySummaryPushEvent.length])
+
   const { navigateToVault } = useNavigation()
   const treeContainerRef = useRef<HTMLDivElement>(null)
   const [treeDimensions, setTreeDimensions] = useState({ width: 200, height: 600 })
-
   useEffect(() => {
     if (treeContainerRef.current && treeContainerRef.current.clientWidth > 0) {
       setTreeDimensions({
@@ -228,9 +316,7 @@ const Sidebar = () => {
         </div>
 
         {/* Modern tree structure */}
-        <div
-          className="text-black flex-1 min-h-[0] font-[12px] [&_.arco-typography]: !font-[13px]"
-          ref={treeContainerRef}>
+        <div className="text-black flex-1 min-h-[0]  [&_.arco-typography]: !font-[13px]" ref={treeContainerRef}>
           {treeDimensions.height > 0 && (
             <Tree
               idAccessor={(data) => data.id.toString()}
