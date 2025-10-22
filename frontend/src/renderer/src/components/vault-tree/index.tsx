@@ -25,6 +25,7 @@ import dayjs from 'dayjs'
 const queue = new PQueue({ concurrency: 2 })
 const { Text, Ellipsis } = Typography
 const logger = getLogger('VaultTree')
+
 const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
   const isFolder = node.data.is_folder === 1
   const { deleteVault, createFolder, addVault, getVaultPath } = useVaults()
@@ -87,8 +88,8 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
   const title = useMemo(() => {
     const t = get(node, 'data.title', '')
     if (t.startsWith('Daily Report')) {
-      const [, end] = t.split('-').map((v) => v.trim())
-      return dayjs(end).format('MMM D, YYYY')
+      const end = t.match(/\d{4}-\d{2}-\d{2}/)?.[0]
+      return end ? dayjs(end).format('MMM D, YYYY') : t
     } else {
       return t
     }
