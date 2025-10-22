@@ -321,8 +321,21 @@ class LLMClient:
 
         try:
             if self.llm_type == LLMType.CHAT:
-                # Test with a simple message
-                messages = [{"role": "user", "content": "Hi"}]
+                # Test with an image input - 20x20 pixel PNG with clear red square pattern
+                # This is a small but visible test image to validate vision capabilities
+                tiny_image_base64 = "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAMElEQVR42mP8z8DwHwMxgImBQjDwBo4aNWrUqFGjRlEEhtEwHDVq1KhRo0aNGgUAAN0/Af9dX6MgAAAAAElFTkSuQmCC"
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Hi"},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/png;base64,{tiny_image_base64}"},
+                            },
+                        ],
+                    }
+                ]
                 response = self.client.chat.completions.create(model=self.model, messages=messages)
                 if response.choices and len(response.choices) > 0:
                     return True, "Chat model validation successful"
