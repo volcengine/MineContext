@@ -57,11 +57,18 @@ interface ScreenMonitorAPI {
   }>
 }
 
+interface dbAPI {
+  getVaultsByDocumentType: (documentType: VaultDocumentType | VaultDocumentType[]) => Promise<Vault[]>
+  getVaultByTitle: (title: string) => Promise<Vault[]>
+  getAllVaults: () => Promise<Vault[]>
+  [propName: string]: (...args: any[]) => any
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
     api: WindowApiType
-    dbAPI: any
+    dbAPI: dbAPI
     screenMonitorAPI: ScreenMonitorAPI
     fileService: any
     serverPushAPI: any

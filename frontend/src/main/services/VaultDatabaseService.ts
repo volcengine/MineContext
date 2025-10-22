@@ -3,15 +3,16 @@
 import { getLogger } from '@shared/logger/main'
 import type { Vault } from '@types'
 import { DB } from './Database'
+import { VaultDocumentType } from '@shared/enums/global-enum'
 // SPDX-License-Identifier: Apache-2.0
 const logger = getLogger('VaultDatabaseService')
 class VaultDatabaseService {
-  public getVaults(type: string = 'vaults'): Vault[] {
+  public getVaults(): Vault[] {
     try {
       const db = DB.getInstance()
-      const sql = `SELECT * FROM vaults WHERE is_deleted = 0 AND document_type = ? ORDER BY id DESC`
-      const rows = db.query<Vault>(sql, type)
-      logger.debug(`📊 Found ${rows.length} ${type}`)
+      const sql = `SELECT * FROM vaults WHERE is_deleted = 0 ORDER BY id DESC`
+      const rows = db.query<Vault>(sql)
+      logger.debug(`📊 Found all ${rows.length} vaults (not including deleted)`)
       return rows
     } catch (error) {
       logger.error('❌ Failed to query Vaults:', error)
@@ -28,6 +29,24 @@ class VaultDatabaseService {
       return row
     } catch (error) {
       logger.error('❌ Failed to query Vault by ID:', error)
+      throw error
+    }
+  }
+  // Query Vaults by document type
+  public getVaultsByDocumentType(documentType: VaultDocumentType | VaultDocumentType[]): Vault[] {
+    if (!documentType || (Array.isArray(documentType) && documentType.length === 0)) {
+      logger.warn('⚠️ getVaultsByTypes called with empty array.')
+      return []
+    }
+    try {
+      const placeholders = Array.isArray(documentType) ? documentType.map(() => '?').join(', ') : '?'
+      const db = DB.getInstance()
+      const sql = `SELECT * FROM vaults WHERE document_type IN (${placeholders}) AND is_deleted = 0 ORDER BY id DESC`
+      const rows = db.query<Vault>(sql, Array.isArray(documentType) ? documentType : [documentType])
+      logger.info(`📊 Found ${rows.length} Vaults for document type: ${documentType}`)
+      return rows
+    } catch (error) {
+      logger.error('❌ Failed to query Vaults by document type:', error)
       throw error
     }
   }

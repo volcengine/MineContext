@@ -299,6 +299,7 @@ export enum IpcChannel {
   Database_SoftDeleteVaultById = 'database:soft-delete-vault-by-id',
   Database_RestoreVaultById = 'database:restore-vault-by-id',
   Database_HardDeleteVaultById = 'database:hard-delete-vault-by-id',
+  Database_GetVaultsByDocumentType = 'database:get-vaults-by-document-type',
 
   // activity
   Database_GetAllActivities = 'database:get-all-activities',
