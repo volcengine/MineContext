@@ -323,9 +323,7 @@ class LLMClient:
             if self.llm_type == LLMType.CHAT:
                 # Test with a simple message
                 messages = [{"role": "user", "content": "Hi"}]
-                response = self.client.chat.completions.create(
-                    model=self.model, messages=messages, max_tokens=10, temperature=0.7
-                )
+                response = self.client.chat.completions.create(model=self.model, messages=messages)
                 if response.choices and len(response.choices) > 0:
                     return True, "Chat model validation successful"
                 else:
