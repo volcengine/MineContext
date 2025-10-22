@@ -171,16 +171,8 @@ async def manual_generate_debug_report(
         if report_content:
             from datetime import datetime
 
-            report_id = get_storage().insert_vaults(
-                title=f"Daily Report - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-                summary="",
-                content=report_content,
-                document_type=VaultType.DAILY_REPORT.value,
-            )
-
             return convert_resp(
                 data={
-                    "report_id": report_id,
                     "content": report_content,
                     "summary": "",
                     "message": "Report generated successfully",
