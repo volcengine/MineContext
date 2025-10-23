@@ -234,6 +234,34 @@ class DocumentProcessor(BaseContextProcessor):
                 processed_contexts = self._process_single_document(raw_context)
                 if processed_contexts:
                     self.storage.batch_upsert_processed_context(processed_contexts)
+
+                    # Record monitoring metrics
+                    try:
+                        from opencontext.monitoring import (
+                            increment_data_count,
+                            record_processing_metrics,
+                        )
+
+                        duration_ms = int((time.time() - time1) * 1000)
+                        record_processing_metrics(
+                            processor_name=self.get_name(),
+                            operation="process_document",
+                            duration_ms=duration_ms,
+                            context_count=len(processed_contexts),
+                        )
+
+                        # Record document count
+                        increment_data_count("document", count=1)
+
+                        # Record context count by type
+                        for context in processed_contexts:
+                            if context.context_type:
+                                increment_data_count(
+                                    "context", count=1, context_type=context.context_type.value
+                                )
+                    except ImportError:
+                        pass
+
                 time2 = time.time()
                 logger.info(
                     f"Processing document {raw_context.object_id} took: {time2 - time1:.2f} seconds"

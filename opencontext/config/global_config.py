@@ -141,6 +141,10 @@ class GlobalConfig:
             self._prompt_path = absolute_prompts_path
             self._language = language
             logger.info(f"Prompts loaded from: {self._prompt_path} (language: {language})")
+
+            # Load user prompts if available
+            self._prompt_manager.load_user_prompts()
+
             return True
         except Exception as e:
             logger.error(f"Failed to load prompts: {e}")

@@ -162,3 +162,9 @@ async def assistant_page(request: Request):
     return templates.TemplateResponse(
         "assistant.html", {"request": request, "title": "Intelligent Assistant"}
     )
+
+
+@router.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    """System settings page"""
+    return templates.TemplateResponse("settings.html", {"request": request, "title": "系统设置"})

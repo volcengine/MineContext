@@ -5,105 +5,22 @@
     <h1 class="h2">调试面板</h1>
 </div>
 
-<!-- 内容生成配置 -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">内容生成配置</h5>
-                <button id="save-config" class="btn btn-primary btn-sm">保存配置</button>
-            </div>
-            <div class="card-body">
-                <!-- Activity 配置 -->
-                <div class="row mb-3 pb-3 border-bottom">
-                    <div class="col-md-3">
-                        <h6>Activity 活动记录</h6>
-                        <small class="text-muted">实时活动跟踪</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="activity-enabled" checked>
-                            <label class="form-check-label" for="activity-enabled">启用</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">生成间隔(秒)</label>
-                        <input type="number" class="form-control form-control-sm" id="activity-interval" value="900" min="600">
-                        <small class="text-muted">最小: 600 (10分钟) | 推荐: 900-1800 (15-30分钟)</small>
-                    </div>
-                    <div class="col-md-2">
-                        <button id="generate-activity" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('activity')">手动生成</button>
-                    </div>
-                </div>
-
-                <!-- Tips 配置 -->
-                <div class="row mb-3 pb-3 border-bottom">
-                    <div class="col-md-3">
-                        <h6>Tips 智能提示</h6>
-                        <small class="text-muted">AI 智能建议</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="tips-enabled" checked>
-                            <label class="form-check-label" for="tips-enabled">启用</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">生成间隔(秒)</label>
-                        <input type="number" class="form-control form-control-sm" id="tips-interval" value="3600" min="1800">
-                        <small class="text-muted">最小: 1800 (30分钟) | 推荐: 3600-7200 (1-2小时)</small>
-                    </div>
-                    <div class="col-md-2">
-                        <button id="generate-tips" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('tips')">手动生成</button>
-                    </div>
-                </div>
-
-                <!-- Todos 配置 -->
-                <div class="row mb-3 pb-3 border-bottom">
-                    <div class="col-md-3">
-                        <h6>Todos 待办事项</h6>
-                        <small class="text-muted">任务提取</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="todos-enabled" checked>
-                            <label class="form-check-label" for="todos-enabled">启用</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">生成间隔(秒)</label>
-                        <input type="number" class="form-control form-control-sm" id="todos-interval" value="1800" min="1800">
-                        <small class="text-muted">最小: 1800 (30分钟) | 推荐: 1800-3600 (30-60分钟)</small>
-                    </div>
-                    <div class="col-md-2">
-                        <button id="generate-todos" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('todos')">手动生成</button>
-                    </div>
-                </div>
-
-                <!-- Report 配置 -->
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <h6>Report 日报</h6>
-                        <small class="text-muted">每日总结</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="report-enabled" checked>
-                            <label class="form-check-label" for="report-enabled">启用</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">生成时间</label>
-                        <input type="time" class="form-control form-control-sm" id="report-time" value="08:00">
-                        <small class="text-muted">每天固定时间生成</small>
-                    </div>
-                    <div class="col-md-2">
-                        <button id="generate-report" class="btn btn-outline-primary btn-sm mt-4" onclick="manualGenerate('report')">手动生成</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- 功能迁移提示 -->
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <h5 class="alert-heading"><i class="bi bi-info-circle"></i> 功能迁移提示</h5>
+    <p class="mb-2">
+        <strong>内容生成配置</strong> 和 <strong>Prompt编辑器</strong> 功能已迁移到 <a href="/settings" class="alert-link"><i class="bi bi-gear"></i> 系统设置</a> 页面。
+    </p>
+    <p class="mb-0">
+        在系统设置页面中，您可以：
+    </p>
+    <ul class="mb-0">
+        <li>配置生成间隔和启用/禁用各个生成功能</li>
+        <li>编辑和管理所有Prompts模板</li>
+        <li>查看历史记录并使用自定义Prompts重新生成</li>
+        <li>配置Debug模式和输出路径</li>
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
 <!-- 数据展示标签页 -->
@@ -130,11 +47,6 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="tips-tab" data-bs-toggle="tab" data-bs-target="#tips" type="button" role="tab">
                             提示 <span id="tips-count" class="badge bg-success">0</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="prompts-tab" data-bs-toggle="tab" data-bs-target="#prompts" type="button" role="tab">
-                            Prompt编辑器
                         </button>
                     </li>
                 </ul>
@@ -207,83 +119,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Prompt编辑器标签页 -->
-                    <div class="tab-pane fade" id="prompts" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <h6 class="mb-3">选择Prompt类型</h6>
-                                <div class="list-group" id="prompt-category-list">
-                                    <button class="list-group-item list-group-item-action active" data-category="tips">
-                                        <i class="bi bi-lightbulb"></i> 智能提示 (Tips)
-                                    </button>
-                                    <button class="list-group-item list-group-item-action" data-category="todo">
-                                        <i class="bi bi-check2-square"></i> 待办事项 (Todo)
-                                    </button>
-                                    <button class="list-group-item list-group-item-action" data-category="report">
-                                        <i class="bi bi-file-text"></i> 活动报告 (Report)
-                                    </button>
-                                    <button class="list-group-item list-group-item-action" data-category="activity">
-                                        <i class="bi bi-activity"></i> 实时活动 (Activity)
-                                    </button>
-                                </div>
-                                
-                                <div class="mt-4">
-                                    <h6 class="mb-3">操作</h6>
-                                    <div class="d-grid gap-2">
-                                        <button class="btn btn-sm btn-outline-success" onclick="savePrompts()">
-                                            <i class="bi bi-save"></i> 保存当前Prompts
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="testGenerateWithCustom()">
-                                            <i class="bi bi-play-circle"></i> 使用当前Prompt生成
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="exportPrompts()">
-                                            <i class="bi bi-download"></i> 导出所有Prompts
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="importPrompts()">
-                                            <i class="bi bi-upload"></i> 导入Prompts
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="resetToOriginal()">
-                                            <i class="bi bi-arrow-counterclockwise"></i> 恢复原始
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-9">
-                                <div id="prompt-editor-container">
-                                    <h5 id="current-prompt-title">智能提示 Prompts</h5>
-                                    
-                                    <div class="mt-3">
-                                        <label class="form-label"><strong>System Prompt:</strong></label>
-                                        <textarea id="system-prompt-editor" class="form-control" rows="10" style="font-family: monospace;"></textarea>
-                                    </div>
-                                    
-                                    <div class="mt-3">
-                                        <label class="form-label"><strong>User Prompt Template:</strong></label>
-                                        <textarea id="user-prompt-editor" class="form-control" rows="10" style="font-family: monospace;"></textarea>
-                                        <small class="text-muted">提示：User prompt 中可以使用 {variable} 形式的模板变量</small>
-                                    </div>
-                                    
-                                    <div class="mt-3">
-                                        <div class="alert alert-info" id="prompt-status" style="display: none;"></div>
-                                    </div>
-                                    
-                                    <div class="mt-3" id="generation-result" style="display: none;">
-                                        <h6>生成结果预览</h6>
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <pre id="generation-result-content" style="white-space: pre-wrap;"></pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 隐藏的文件输入框用于导入 -->
-                        <input type="file" id="prompt-import-input" accept=".json" style="display: none;" onchange="handlePromptImport(event)">
-                    </div>
                 </div>
             </div>
         </div>
@@ -295,141 +130,26 @@
 <script>
 // 页面加载时初始化
 document.addEventListener('DOMContentLoaded', function() {
-    loadConfig();
     loadReports();
-
-    // 事件监听
-    document.getElementById('save-config').addEventListener('click', saveConfig);
 
     // 标签页切换时加载数据
     document.getElementById('todos-tab').addEventListener('shown.bs.tab', loadTodos);
     document.getElementById('activities-tab').addEventListener('shown.bs.tab', loadActivities);
     document.getElementById('tips-tab').addEventListener('shown.bs.tab', loadTips);
-    document.getElementById('prompts-tab').addEventListener('shown.bs.tab', loadPromptEditor);
 
     // 待办状态过滤
     document.getElementById('todo-status-filter').addEventListener('change', loadTodos);
 });
-
-// 加载配置
-async function loadConfig() {
-    try {
-        const response = await fetch('/api/content_generation/config');
-        const data = await response.json();
-
-        if (data.code === 0 && data.data) {
-            const config = data.data;
-
-            // 填充 Activity 配置
-            document.getElementById('activity-enabled').checked = config.activity.enabled;
-            document.getElementById('activity-interval').value = config.activity.interval;
-
-            // 填充 Tips 配置
-            document.getElementById('tips-enabled').checked = config.tips.enabled;
-            document.getElementById('tips-interval').value = config.tips.interval;
-
-            // 填充 Todos 配置
-            document.getElementById('todos-enabled').checked = config.todos.enabled;
-            document.getElementById('todos-interval').value = config.todos.interval;
-
-            // 填充 Report 配置
-            document.getElementById('report-enabled').checked = config.report.enabled;
-            document.getElementById('report-time').value = config.report.time;
-        }
-    } catch (error) {
-        console.error('加载配置失败:', error);
-        showAlert('加载配置失败: ' + error.message, 'danger');
-    }
-}
-
-// 保存配置
-async function saveConfig() {
-    const button = document.getElementById('save-config');
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = '保存中...';
-
-    try {
-        const config = {
-            activity: {
-                enabled: document.getElementById('activity-enabled').checked,
-                interval: parseInt(document.getElementById('activity-interval').value)
-            },
-            tips: {
-                enabled: document.getElementById('tips-enabled').checked,
-                interval: parseInt(document.getElementById('tips-interval').value)
-            },
-            todos: {
-                enabled: document.getElementById('todos-enabled').checked,
-                interval: parseInt(document.getElementById('todos-interval').value)
-            },
-            report: {
-                enabled: document.getElementById('report-enabled').checked,
-                time: document.getElementById('report-time').value
-            }
-        };
-
-        const response = await fetch('/api/content_generation/config', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(config)
-        });
-
-        const data = await response.json();
-
-        if (data.code === 0) {
-            showAlert('配置保存成功!', 'success');
-        } else {
-            showAlert('配置保存失败: ' + data.message, 'danger');
-        }
-    } catch (error) {
-        showAlert('配置保存失败: ' + error.message, 'danger');
-    } finally {
-        button.disabled = false;
-        button.textContent = originalText;
-    }
-}
-
-// 手动生成
-async function manualGenerate(type) {
-    const button = document.getElementById(`generate-${type}`);
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = '生成中...';
-    
-    try {
-        const response = await fetch(`/api/debug/generate/${type}`, { method: 'POST' });
-        const data = await response.json();
-        
-        if (data.code === 0) {
-            showAlert(`${type}生成成功`, 'success');
-            // 刷新对应的数据
-            if (type === 'report') loadReports();
-            else if (type === 'todos') loadTodos();
-            else if (type === 'activity') loadActivities();
-            else if (type === 'tips') loadTips();
-        } else {
-            showAlert(`${type}生成失败: ` + data.message, 'warning');
-        }
-    } catch (error) {
-        showAlert(`${type}生成失败: ` + error.message, 'danger');
-    } finally {
-        button.disabled = false;
-        button.textContent = originalText;
-    }
-}
 
 // 加载报告
 async function loadReports() {
     try {
         const response = await fetch('/api/debug/reports?limit=20');
         const data = await response.json();
-        
+
         const listEl = document.getElementById('reports-list');
         const countEl = document.getElementById('reports-count');
-        
+
         if ((data.code === 0) && data.data.reports.length > 0) {
             listEl.innerHTML = data.data.reports.map(report => `
                 <div class="card mb-2">
@@ -460,10 +180,10 @@ async function loadTodos() {
         const url = status ? `/api/debug/todos?status=${status}&limit=20` : '/api/debug/todos?limit=20';
         const response = await fetch(url);
         const data = await response.json();
-        
+
         const listEl = document.getElementById('todos-list');
         const countEl = document.getElementById('todos-count');
-        
+
         if ((data.code === 0) && data.data.todos.length > 0) {
             listEl.innerHTML = data.data.todos.map(todo => `
                 <div class="card mb-2">
@@ -507,10 +227,10 @@ async function loadActivities() {
     try {
         const response = await fetch('/api/debug/activities?limit=20');
         const data = await response.json();
-        
+
         const listEl = document.getElementById('activities-list');
         const countEl = document.getElementById('activities-count');
-        
+
         if ((data.code === 0) && data.data.activities.length > 0) {
             listEl.innerHTML = data.data.activities.map(activity => {
                 let resourcesHtml = '';
@@ -528,11 +248,11 @@ async function loadActivities() {
                                             const filename = imagePath.split('/').pop();
                                             imagePath = `/screenshots/${filename}`;
                                         }
-                                        
+
                                         return `
                                             <div class="col-md-3 mb-2">
                                                 <div class="card">
-                                                    <img src="${imagePath}" class="card-img-top activity-image" 
+                                                    <img src="${imagePath}" class="card-img-top activity-image"
                                                          style="height: 100px; object-fit: cover; cursor: pointer;"
                                                          onclick="showImageModal('${imagePath}', '${resource.id}')"
                                                          onerror="handleImageError(this)">
@@ -560,7 +280,7 @@ async function loadActivities() {
                         </div>
                     `;
                 }
-                
+
                 return `
                     <div class="card mb-2">
                         <div class="card-body">
@@ -590,10 +310,10 @@ async function loadTips() {
     try {
         const response = await fetch('/api/debug/tips?limit=20');
         const data = await response.json();
-        
+
         const listEl = document.getElementById('tips-list');
         const countEl = document.getElementById('tips-count');
-        
+
         if ((data.code === 0) && data.data.tips.length > 0) {
             listEl.innerHTML = data.data.tips.map(tip => `
                 <div class="card mb-2">
@@ -619,7 +339,7 @@ async function toggleTodoStatus(todoId, newStatus) {
     try {
         const response = await fetch(`/api/debug/todos/${todoId}?status=${newStatus}`, { method: 'PATCH' });
         const data = await response.json();
-        
+
         if (data.code === 0) {
             showAlert('状态更新成功', 'success');
             loadTodos();
@@ -633,12 +353,11 @@ async function toggleTodoStatus(todoId, newStatus) {
 
 // 显示报告内容
 async function showReportContent(reportId) {
-    // 这里可以弹窗显示完整内容，暂时用alert简单实现
     try {
         const response = await fetch(`/api/debug/reports`);
         const data = await response.json();
         const report = data.data.reports.find(r => r.id === reportId);
-        
+
         if (report) {
             // 创建模态框显示内容
             const modal = document.createElement('div');
@@ -657,10 +376,10 @@ async function showReportContent(reportId) {
                 </div>
             `;
             document.body.appendChild(modal);
-            
+
             const bsModal = new bootstrap.Modal(modal);
             bsModal.show();
-            
+
             // 模态框关闭后删除元素
             modal.addEventListener('hidden.bs.modal', () => {
                 modal.remove();
@@ -692,7 +411,7 @@ function showImageModal(imagePath, imageId) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <img src="${imagePath}" class="img-fluid" style="max-width: 100%; height: auto;" 
+                    <img src="${imagePath}" class="img-fluid" style="max-width: 100%; height: auto;"
                          onerror="this.style.display='none'; this.nextElementSibling.innerHTML='<div class=&quot;text-danger p-3&quot;><i class=&quot;bi bi-exclamation-triangle&quot;></i><br>图片加载失败<br><small>${imagePath}</small></div>'">
                     <div></div>
                     <div class="mt-2">
@@ -707,10 +426,10 @@ function showImageModal(imagePath, imageId) {
         </div>
     `;
     document.body.appendChild(modal);
-    
+
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
-    
+
     // 模态框关闭后删除元素
     modal.addEventListener('hidden.bs.modal', () => {
         modal.remove();
@@ -725,273 +444,17 @@ function showAlert(message, type = 'info') {
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
+
     // 插入到页面顶部
     const content = document.querySelector('main');
     content.insertBefore(alertDiv, content.firstChild);
-    
+
     // 自动消失
     setTimeout(() => {
         if (alertDiv.parentNode) {
             alertDiv.remove();
         }
     }, 5000);
-}
-
-// ============== Prompt编辑器功能 ==============
-
-let currentCategory = 'tips';
-let originalPrompts = {};
-let customPrompts = {};
-
-// 初始化Prompt编辑器
-async function loadPromptEditor() {
-    // 初始化类别选择器
-    const categoryButtons = document.querySelectorAll('#prompt-category-list button');
-    categoryButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            categoryButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const category = btn.dataset.category;
-            loadPromptCategory(category);
-        });
-    });
-    
-    // 加载默认类别
-    await loadPromptCategory('tips');
-}
-
-// 加载指定类别的Prompts
-async function loadPromptCategory(category) {
-    currentCategory = category;
-    
-    try {
-        const response = await fetch(`/api/debug/prompts/${category}`);
-        const data = await response.json();
-        
-        if (data.code === 0) {
-            const prompts = data.data.prompts;
-            
-            // 保存原始prompts用于恢复
-            originalPrompts[category] = JSON.parse(JSON.stringify(prompts));
-            
-            // 如果没有自定义prompts，使用原始的
-            if (!customPrompts[category]) {
-                customPrompts[category] = JSON.parse(JSON.stringify(prompts));
-            }
-            
-            // 更新UI
-            document.getElementById('current-prompt-title').textContent = getCategoryTitle(category) + ' Prompts';
-            document.getElementById('system-prompt-editor').value = customPrompts[category].system || '';
-            document.getElementById('user-prompt-editor').value = customPrompts[category].user || '';
-            
-            showPromptStatus('Prompts加载成功', 'success');
-        } else {
-            showPromptStatus('加载失败: ' + data.message, 'danger');
-        }
-    } catch (error) {
-        showPromptStatus('加载失败: ' + error.message, 'danger');
-    }
-}
-
-// 获取类别标题
-function getCategoryTitle(category) {
-    const titles = {
-        'tips': '智能提示',
-        'todo': '待办事项',
-        'report': '活动报告',
-        'activity': '实时活动'
-    };
-    return titles[category] || category;
-}
-
-// 保存当前编辑的Prompts
-async function savePrompts() {
-    const systemPrompt = document.getElementById('system-prompt-editor').value;
-    const userPrompt = document.getElementById('user-prompt-editor').value;
-    
-    customPrompts[currentCategory] = {
-        system: systemPrompt,
-        user: userPrompt
-    };
-    
-    try {
-        const response = await fetch(`/api/debug/prompts/${currentCategory}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(customPrompts[currentCategory])
-        });
-        
-        const data = await response.json();
-        
-        if (data.code === 0) {
-            showPromptStatus('Prompts保存成功', 'success');
-        } else {
-            showPromptStatus('保存失败: ' + data.message, 'danger');
-        }
-    } catch (error) {
-        showPromptStatus('保存失败: ' + error.message, 'danger');
-    }
-}
-
-// 使用自定义Prompts生成内容
-async function testGenerateWithCustom() {
-    // 先保存当前编辑的内容
-    await savePrompts();
-    
-    const resultDiv = document.getElementById('generation-result');
-    const resultContent = document.getElementById('generation-result-content');
-    
-    resultDiv.style.display = 'block';
-    resultContent.textContent = '生成中...';
-    
-    try {
-        const response = await fetch(`/api/debug/generate/${currentCategory}/custom`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                prompts: {
-                    [`generation.${getCategoryPath(currentCategory)}`]: customPrompts[currentCategory]
-                }
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.code === 0) {
-            let resultText = '生成成功!\n\n';
-            
-            if (currentCategory === 'report') {
-                resultText += `摘要:\n${data.data.summary || '无'}\n\n内容:\n${data.data.content || '无内容'}`;
-            } else {
-                resultText += JSON.stringify(data.data, null, 2);
-            }
-            
-            resultContent.textContent = resultText;
-            showPromptStatus('使用自定义Prompts生成成功', 'success');
-            
-            // 刷新对应的数据列表
-            if (currentCategory === 'tips') loadTips();
-            else if (currentCategory === 'todo') loadTodos();
-            else if (currentCategory === 'activity') loadActivities();
-            else if (currentCategory === 'report') loadReports();
-        } else {
-            resultContent.textContent = '生成失败: ' + data.message;
-            showPromptStatus('生成失败: ' + data.message, 'danger');
-        }
-    } catch (error) {
-        resultContent.textContent = '生成失败: ' + error.message;
-        showPromptStatus('生成失败: ' + error.message, 'danger');
-    }
-}
-
-// 获取类别路径
-function getCategoryPath(category) {
-    const paths = {
-        'tips': 'smart_tip_generation',
-        'todo': 'todo_extraction',
-        'report': 'generation_report',
-        'activity': 'realtime_activity_monitor'
-    };
-    return paths[category] || category;
-}
-
-// 导出所有Prompts
-async function exportPrompts() {
-    try {
-        const response = await fetch('/api/debug/prompts/export');
-        const data = await response.json();
-        
-        if (data.code === 0) {
-            // 创建下载
-            const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `prompts_export_${new Date().getTime()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showPromptStatus('导出成功', 'success');
-        } else {
-            showPromptStatus('导出失败: ' + data.message, 'danger');
-        }
-    } catch (error) {
-        showPromptStatus('导出失败: ' + error.message, 'danger');
-    }
-}
-
-// 导入Prompts
-function importPrompts() {
-    document.getElementById('prompt-import-input').click();
-}
-
-// 处理导入文件
-async function handlePromptImport(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        
-        const response = await fetch('/api/debug/prompts/restore', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        
-        if (result.code === 200) {
-            showPromptStatus('导入成功，请刷新页面', 'success');
-            // 重新加载当前类别
-            setTimeout(() => loadPromptCategory(currentCategory), 1000);
-        } else {
-            showPromptStatus('导入失败: ' + result.message, 'danger');
-        }
-    } catch (error) {
-        showPromptStatus('导入失败: ' + error.message, 'danger');
-    }
-    
-    // 清空文件输入
-    event.target.value = '';
-}
-
-// 恢复到原始Prompts
-async function resetToOriginal() {
-    if (!confirm('确定要恢复到原始Prompts吗？当前修改将丢失。')) {
-        return;
-    }
-    
-    if (originalPrompts[currentCategory]) {
-        customPrompts[currentCategory] = JSON.parse(JSON.stringify(originalPrompts[currentCategory]));
-        document.getElementById('system-prompt-editor').value = customPrompts[currentCategory].system || '';
-        document.getElementById('user-prompt-editor').value = customPrompts[currentCategory].user || '';
-        
-        await savePrompts();
-        showPromptStatus('已恢复到原始Prompts', 'info');
-    }
-}
-
-// 显示Prompt编辑器状态
-function showPromptStatus(message, type) {
-    const statusDiv = document.getElementById('prompt-status');
-    statusDiv.className = `alert alert-${type}`;
-    statusDiv.textContent = message;
-    statusDiv.style.display = 'block';
-    
-    setTimeout(() => {
-        statusDiv.style.display = 'none';
-    }, 3000);
 }
 </script>
 {% endblock %}
