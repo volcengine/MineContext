@@ -35,27 +35,60 @@ const originalConsoleLog = console.log
 
 // Screenshot cleanup timer
 let cleanupIntervalId: NodeJS.Timeout | null = null
+let currentRetentionDays = 15 // Default retention days
+
+/**
+ * Get storage settings from backend
+ */
+async function getStorageSettings(): Promise<{ retention_days: number; auto_cleanup_enabled: boolean }> {
+  try {
+    const axios = await import('axios')
+    const response = await axios.default.get('http://127.0.0.1:8000/api/storage_settings/get')
+    if (response.data.code === 0 && response.data.data?.config) {
+      return {
+        retention_days: response.data.data.config.retention_days || 15,
+        auto_cleanup_enabled: response.data.data.config.auto_cleanup_enabled !== false
+      }
+    }
+  } catch (error) {
+    logger.warn('Failed to get storage settings from backend, using defaults:', error)
+  }
+  return { retention_days: 15, auto_cleanup_enabled: true }
+}
 
 /**
  * Start screenshot cleanup scheduled task
- * Runs once per day, cleaning up screenshots older than 15 days
+ * Runs once per day, cleaning up screenshots based on configured retention days
  */
-function startScreenshotCleanup() {
+async function startScreenshotCleanup() {
   // Clear existing timer if already running
   if (cleanupIntervalId) {
     clearInterval(cleanupIntervalId)
   }
 
+  // Get initial settings
+  const settings = await getStorageSettings()
+  currentRetentionDays = settings.retention_days
+
+  if (!settings.auto_cleanup_enabled) {
+    logger.info('Auto cleanup is disabled, skipping cleanup task')
+    return
+  }
+
   // Execute cleanup immediately
-  performCleanup()
+  await performCleanup()
 
   // Execute cleanup every 24 hours
   const oneDayInMs = 24 * 60 * 60 * 1000
-  cleanupIntervalId = setInterval(() => {
-    performCleanup()
+  cleanupIntervalId = setInterval(async () => {
+    const settings = await getStorageSettings()
+    if (settings.auto_cleanup_enabled) {
+      currentRetentionDays = settings.retention_days
+      await performCleanup()
+    }
   }, oneDayInMs)
 
-  logger.info('Screenshot cleanup task started, will run daily')
+  logger.info(`Screenshot cleanup task started, will run daily with ${currentRetentionDays} days retention`)
 }
 
 /**
@@ -63,8 +96,8 @@ function startScreenshotCleanup() {
  */
 async function performCleanup() {
   try {
-    logger.info('Starting screenshot cleanup...')
-    const result = await screenshotService.cleanupOldScreenshots(15) // Keep 15 days
+    logger.info(`Starting screenshot cleanup with ${currentRetentionDays} days retention...`)
+    const result = await screenshotService.cleanupOldScreenshots(currentRetentionDays)
     if (result.success) {
       logger.info(
         `Screenshot cleanup completed. Deleted ${result.deletedCount} directories, freed ${((result.deletedSize || 0) / 1024 / 1024).toFixed(2)} MB`

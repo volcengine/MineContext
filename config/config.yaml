@@ -134,6 +134,11 @@ processing:
 # Context storage module
 storage:
   enabled: true
+  # Storage management configuration
+  management:
+    retention_days: 15 # Screenshot retention period (days), range: 7-90
+    max_storage_size_mb: 5000 # Maximum storage size (MB), 0 means unlimited
+    auto_cleanup_enabled: true # Enable automatic cleanup
   backends:
     - name: "default_vector"
       storage_type: "vector_db"

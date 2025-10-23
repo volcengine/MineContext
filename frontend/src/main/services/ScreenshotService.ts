@@ -352,6 +352,92 @@ class ScreenshotService extends CaptureSourcesTools {
 
     return totalSize
   }
+
+  /**
+   * Get storage statistics
+   * @returns {Promise<{ success: boolean; usedSizeMb?: number; fileCount?: number; oldestDate?: string; newestDate?: string; error?: string }>}
+   */
+  async getStorageStats(): Promise<{
+    success: boolean
+    usedSizeMb?: number
+    fileCount?: number
+    oldestDate?: string
+    newestDate?: string
+    error?: string
+  }> {
+    try {
+      const userDataPath = app.getPath('userData')
+      const screenshotBasePath = path.join(userDataPath, 'Data', 'screenshot', 'activity')
+
+      // Check if directory exists
+      if (!fs.existsSync(screenshotBasePath)) {
+        logger.info('Screenshot directory does not exist')
+        return { success: true, usedSizeMb: 0, fileCount: 0 }
+      }
+
+      let totalSize = 0
+      let totalFiles = 0
+      let oldestDate: string | null = null
+      let newestDate: string | null = null
+
+      // Get all date directories
+      const dateDirs = await fs.promises.readdir(screenshotBasePath, { withFileTypes: true })
+
+      for (const dateDir of dateDirs) {
+        if (!dateDir.isDirectory()) continue
+
+        const dateDirName = dateDir.name
+        const dateDirPath = path.join(screenshotBasePath, dateDirName)
+
+        // Update oldest and newest dates
+        if (!oldestDate || dateDirName < oldestDate) {
+          oldestDate = dateDirName
+        }
+        if (!newestDate || dateDirName > newestDate) {
+          newestDate = dateDirName
+        }
+
+        // Get size and file count
+        const dirSize = await this.getDirectorySize(dateDirPath)
+        totalSize += dirSize
+
+        // Count files recursively
+        const countFiles = async (dirPath: string): Promise<number> => {
+          let count = 0
+          const items = await fs.promises.readdir(dirPath, { withFileTypes: true })
+
+          for (const item of items) {
+            const itemPath = path.join(dirPath, item.name)
+            if (item.isDirectory()) {
+              count += await countFiles(itemPath)
+            } else if (item.isFile() && path.extname(item.name).toLowerCase() === '.png') {
+              count++
+            }
+          }
+          return count
+        }
+
+        totalFiles += await countFiles(dateDirPath)
+      }
+
+      const usedSizeMb = totalSize / 1024 / 1024
+
+      logger.info(
+        `Storage stats: ${usedSizeMb.toFixed(2)} MB, ${totalFiles} files, oldest: ${oldestDate}, newest: ${newestDate}`
+      )
+
+      return {
+        success: true,
+        usedSizeMb,
+        fileCount: totalFiles,
+        oldestDate: oldestDate || '',
+        newestDate: newestDate || ''
+      }
+    } catch (error: any) {
+      logger.error('Failed to get storage stats:', error)
+      return { success: false, error: error.message }
+    }
+  }
 }
 
 export default new ScreenshotService()
