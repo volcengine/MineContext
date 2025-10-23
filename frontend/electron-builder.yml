@@ -62,7 +62,8 @@ npmRebuild: false
 nodeGypRebuild: false
 buildDependenciesFromSource: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: keshidong
+  repo: MineContext
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

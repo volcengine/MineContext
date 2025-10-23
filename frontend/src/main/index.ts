@@ -25,6 +25,7 @@ import { initLog } from '@shared/logger/init'
 import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
 import { ScreenMonitorTask } from './background/task/screen-monitor-task'
+import { autoUpdater } from "electron-updater"
 initLog()
 const logger = getLogger('MainEntry')
 
@@ -152,6 +153,28 @@ function createWindow() {
   return mainWindow
 }
 
+function checkForUpdates(win: BrowserWindow) {
+  autoUpdater.on('checking-for-update', () => {
+    logger.info('Checking for update...');
+  })
+  autoUpdater.on('update-available', (info) => {
+    logger.info(`Update available, version = ${info.version}.`);
+  })
+  autoUpdater.on('update-not-available', () => {
+    logger.info('Update not available.')
+  })
+  autoUpdater.on('error', (err) => {
+      logger.info('Error in auto-updater. ' + err)
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    logger.info(`update downloaded, version = ${info.version}`)
+    win.webContents.send('message', `A new version (${info.version}) is available, will auto-install next launch.`)
+  })
+
+  autoUpdater.checkForUpdates()
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -227,6 +250,8 @@ app.whenReady().then(() => {
   })
 
   registerIpc(mainWindow, app)
+
+  checkForUpdates(mainWindow)
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
