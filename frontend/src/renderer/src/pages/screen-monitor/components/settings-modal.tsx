@@ -137,7 +137,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="text-[14px] leading-[20px] text-[#42464e] mb-[4px]">Screen</div>
               <Form.Item field="screenSources">
                 <Checkbox.Group className="!grid grid-cols-3 gap-4 relative [&_label]:!mr-0 [&_.arco-checkbox-text]:!ml-0">
-                  {screenAllSources.map((source) => (
+                  {screenAllSources.map((source, index) => (
                     <Checkbox key={source.id} value={source.id}>
                       {({ checked }) => {
                         return (

@@ -12,6 +12,7 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    git clone https://github.com/YOUR_USERNAME/MineContext.git
    cd MineContext
    ```
+
 2. **Set up your environment**
 
    We recommend using [uv](https://docs.astral.sh/uv/) for faster dependency management:
@@ -39,9 +40,11 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install -e .
    ```
+
 3. **Configure and run**
 
    **If using uv:**
+
    ```bash
    # Start with default configuration
    uv run opencontext start
@@ -50,10 +53,11 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    uv run opencontext start --config /path/to/config.yaml
 
    # Start with custom port (useful for avoiding conflicts)
-   uv run opencontext start --port 8000
+   uv run opencontext start --port 1733
    ```
 
    **If using traditional venv:**
+
    ```bash
    # Make sure virtual environment is activated first
    source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -65,10 +69,11 @@ Thank you for your interest in contributing to MineContext! We welcome contribut
    opencontext start --config /path/to/config.yaml
 
    # Start with custom port
-   opencontext start --port 8000
+   opencontext start --port 1733
    ```
 
    **Available startup options:**
+
    - `--config`: Path to configuration file
    - `--host`: Host address (overrides config file)
    - `--port`: Port number (overrides config file)
@@ -87,21 +92,22 @@ Found a bug or have a feature request? [Create an issue](https://github.com/volc
 
 Use descriptive branch names with appropriate prefixes:
 
-| Prefix | Purpose | Example |
-|--------|---------|---------|
-| `feature/` or `feat/` | New features | `feature/add-notion-integration` |
-| `fix/` | Bug fixes | `fix/screenshot-capture-error` |
-| `hotfix/` | Critical production fixes | `hotfix/memory-leak` |
-| `docs/` | Documentation only | `docs/update-api-guide` |
-| `refactor/` | Code refactoring | `refactor/simplify-storage-layer` |
-| `test/` | Adding or updating tests | `test/add-processor-tests` |
-| `chore/` | Maintenance tasks | `chore/update-dependencies` |
+| Prefix                | Purpose                   | Example                           |
+| --------------------- | ------------------------- | --------------------------------- |
+| `feature/` or `feat/` | New features              | `feature/add-notion-integration`  |
+| `fix/`                | Bug fixes                 | `fix/screenshot-capture-error`    |
+| `hotfix/`             | Critical production fixes | `hotfix/memory-leak`              |
+| `docs/`               | Documentation only        | `docs/update-api-guide`           |
+| `refactor/`           | Code refactoring          | `refactor/simplify-storage-layer` |
+| `test/`               | Adding or updating tests  | `test/add-processor-tests`        |
+| `chore/`              | Maintenance tasks         | `chore/update-dependencies`       |
 
 ### Submitting Code
 
 1. **Create a branch**
 
    Follow the branch naming convention above:
+
    ```bash
    git checkout -b feature/your-feature-name
    # or
@@ -134,6 +140,7 @@ Use descriptive branch names with appropriate prefixes:
    ```
 
    If files are modified by the formatter:
+
    ```bash
    git add .  # Add the formatted changes
    git commit -m "feat: add your feature description"  # Commit again
@@ -146,6 +153,7 @@ Use descriptive branch names with appropriate prefixes:
    ```
 
    **Before submitting PR, ensure:**
+
    - ✅ All code is properly formatted (automatic if you set up pre-commit)
    - ✅ All tests pass
    - ✅ Documentation is updated if needed
@@ -169,6 +177,7 @@ pre-commit install
 ### How It Works
 
 When you run `git commit`, Black and isort will automatically format your code:
+
 - **Black**: Formats code style (spacing, line breaks, etc.)
 - **isort**: Sorts and organizes import statements
 
@@ -246,6 +255,7 @@ class MyCustomCapture(ICaptureComponent):
 ```
 
 **Key Data Structure - RawContextProperties**:
+
 ```python
 RawContextProperties(
     source=ContextSource.CUSTOM,  # Where data comes from
@@ -317,6 +327,7 @@ class MyCustomProcessor(BaseContextProcessor):
 **Key Data Structures**:
 
 **Input** - `RawContextProperties`:
+
 ```python
 context.source          # Where it came from
 context.content_text    # Text content
@@ -325,6 +336,7 @@ context.metadata        # Extra data
 ```
 
 **Output** - `ProcessedContext`:
+
 ```python
 ProcessedContext(
     properties=ContextProperties(...),  # Metadata (time, source)
@@ -350,6 +362,7 @@ ProcessedContext(
 ### Reference Examples
 
 See existing implementations for more details:
+
 - `opencontext/context_processing/processor/screenshot_processor.py` - Handles images
 - `opencontext/context_processing/processor/document_processor.py` - Handles documents
 
