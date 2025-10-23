@@ -15,7 +15,7 @@ import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 
 let backendLogFile: string | null = null
 let backendProcess: any = null
-let backendPort = 8000 // Dynamic port, starting from 8000
+let backendPort = 1733 // Dynamic port, starting from 1733
 let backendStatus: 'starting' | 'running' | 'stopped' | 'error' = 'stopped' // Backend service status
 
 const safeLog = {
@@ -64,7 +64,7 @@ function isPortAvailable(port: number): Promise<boolean> {
 }
 
 // Find an available port
-async function findAvailablePort(startPort: number = 8000, maxAttempts: number = 100): Promise<number> {
+async function findAvailablePort(startPort: number = 1733, maxAttempts: number = 100): Promise<number> {
   for (let port = startPort; port < startPort + maxAttempts; port++) {
     const available = await isPortAvailable(port)
     if (available) {
@@ -355,7 +355,7 @@ async function startBackendServer(mainWindow: BrowserWindow) {
 
   // First, find an available port
   try {
-    backendPort = await findAvailablePort(8000)
+    backendPort = await findAvailablePort(1733)
     logToBackendFile(`Selected backend port: ${backendPort}`)
   } catch (error: any) {
     logToBackendFile(`Failed to find available port: ${error.message}`)

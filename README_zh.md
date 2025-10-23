@@ -10,7 +10,6 @@
 
 中文 / [English](README.md)
 
-
 <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">社区实践</a> · <a href="https://github.com/volcengine/MineContext/issues">反馈问题</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcn2wgAfiyCVVwhvVYCXWNNdc">提交问卷</a>
 
 [![][release-shield]][release-link]
@@ -21,15 +20,14 @@
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
 
-
 <a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
 
 👋 加入我们的 [微信 / 飞书 / 小红书交流群](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
 🌍 加入我们的 [Discord 社区](https://discord.gg/tGj7RQ3nUR)
 
- <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">🖥️  Mac版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">💻 Windows版下载</a>
+<a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg">🖥️ Mac 版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2-setup.exe">💻 Windows 版下载</a>
+
 </div>
   
 目录
@@ -79,9 +77,6 @@ MineContext 是一个具有上下文感知能力的主动式 AI 伙伴。它基�
 
 ![feature.gif](src/feature.gif)
 
-
-
-
 # 🚀 核心功能
 
 MineContext 专注于四个核心功能：无负担收集、主动推送、智能浮现和上下文工程架构。
@@ -95,19 +90,19 @@ MineContext 专注于四个核心功能：无负担收集、主动推送、智�
 4. 🎯 上下文工程架构
    支持多模态、多源数据的完整生命周期——从捕获、处理和存储到管理、检索和消费——支持生成六种类型的智能上下文。
 
-
 # 🔏 隐私保护
 
 ## 本地存储
 
-MineContext非常注重用户隐私，所有数据都默认保存在本地如下路径，确保您的隐私和安全。
+MineContext 非常注重用户隐私，所有数据都默认保存在本地如下路径，确保您的隐私和安全。
 
 ```
 ~/Library/Application Support/MineContext/Data
 ```
 
 ## 本地模型
-此外我们支持了OpenAI API协议的自定义模型服务，您可以在MineContext中使用全本地模型，做到任何数据不上云。
+
+此外我们支持了 OpenAI API 协议的自定义模型服务，您可以在 MineContext 中使用全本地模型，做到任何数据不上云。
 
 # 🏁 快速开始
 
@@ -161,7 +156,7 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 ## 6. 后台调试
 
-MineContext 支持在`http://localhost:8000` 进行后台调试。
+MineContext 支持在`http://localhost:1733` 进行后台调试。
 
 1.支持查看 Token 用量与使用情况
 
@@ -253,6 +248,7 @@ source .venv/bin/activate
 ### 安装依赖
 
 由于包版本原因，目前不支持使用国内 PYPI 源，请输入以下命令，确保使用的是原始 PYPI 环境
+
 ```bash
 pip config unset global.index-url
 cd frontend
@@ -395,14 +391,14 @@ uv run opencontext start
 uv run opencontext start --config /path/to/config.yaml
 
 # 使用自定义端口启动
-uv run opencontext start --port 8000
+uv run opencontext start --port 1733
 ```
 
 **可用选项：**
 
 - `--config`：配置文件路径
 - `--host`：主机地址（默认：配置文件中的值或 `localhost`）
-- `--port`：端口号（默认：配置文件中的值或 `8000`）
+- `--port`：端口号（默认：配置文件中的值或 `1733`）
 
 **优先级**：命令行参数 > 配置文件 > 默认值
 
@@ -411,7 +407,7 @@ uv run opencontext start --port 8000
 ```bash
 source .venv/bin/activate  # Windows系统: .venv\Scripts\activate
 pip install -e .
-opencontext start --port 8000
+opencontext start --port 1733
 ```
 
 # 💎 MineContext 与我的世界
