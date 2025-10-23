@@ -120,6 +120,8 @@ const Settings: FC<Props> = (props: Props) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  // originalConfig from backend  
+  const [originalConfig, setOriginalConfig] = useState<any>(null)
 
   const ModelInfoList = ModelInfoMap()
   const [form] = Form.useForm()
@@ -139,12 +141,28 @@ const Settings: FC<Props> = (props: Props) => {
     return foundItem ? foundItem.option : []
   }, [modelPlatform])
 
+  // recover originalConfig when switch to custom
+  useEffect(() => {
+    if (isCustom && originalConfig) {
+      form.setFieldsValue({
+        modelId: originalConfig.modelId,
+        baseUrl: originalConfig.baseUrl,
+        apiKey: originalConfig.apiKey,
+        embeddingModelId: originalConfig.embeddingModelId,
+        embeddingBaseUrl: originalConfig.embeddingBaseUrl,
+        embeddingApiKey: originalConfig.embeddingApiKey
+      })
+    }
+  }, [isCustom, originalConfig])
+
   const getInfo = async () => {
     const res = await getModelInfo()
 
     if (res.data.config.apiKey === '') {
       setInit(false)
     } else {
+      // save originalConfig
+      setOriginalConfig(res.data.config)
       form.setFieldsValue(res.data.config)
       setInit(true)
     }
