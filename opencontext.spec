@@ -1,7 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
+import os
 
 is_windows = sys.platform.startswith("win")
+codesign_identity = os.environ.get("CODESIGN_IDENTITY")
+
+if codesign_identity:
+    print("Using codesign_identity:", codesign_identity)
+else:
+    print("No codesign_identity set, skipping code signing.")
+    codesign_identity = None  # 确保传给 EXE 时是 None
 
 a = Analysis(
     ['opencontext/cli.py'],
@@ -48,6 +56,6 @@ exe = EXE(
     runtime_tmpdir=None,
     console=True,
     disable_windowed_traceback=False,
-    codesign_identity=None,
+    codesign_identity=codesign_identity,
     icon=None,  # Disable icon to avoid Windows resource locking issues
 )

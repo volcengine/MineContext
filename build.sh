@@ -7,6 +7,24 @@ set -e
 
 echo "=== OpenContext Build Script ==="
 
+# if CODESIGN_IDENTITY exist, skip auto fetch
+if [ -z "$CODESIGN_IDENTITY" ]; then
+    echo "--> CODESIGN_IDENTITY not set, trying to auto-detect..."
+    # get the first valid Developer ID Application
+    CODESIGN_IDENTITY=$(security find-identity -v -p codesigning | head -n 1 | awk -F'"' '{print $2}')
+
+    if [ -z "$CODESIGN_IDENTITY" ]; then
+        echo "Error: No Developer ID Application identity found. Aborting build."
+        # exit 1
+    else
+        echo "--> Auto-detected codesign identity: $CODESIGN_IDENTITY"
+        export CODESIGN_IDENTITY
+    fi
+
+else
+    echo "--> Using existing CODESIGN_IDENTITY: $CODESIGN_IDENTITY"
+fi
+
 # 1. Dependency Check
 echo "--> Checking for python3..."
 if ! command -v python3 &> /dev/null; then
