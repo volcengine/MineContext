@@ -22,7 +22,6 @@ asarUnpack:
 win:
   executableName: MineContext
   icon: build/icon.ico
-  signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -32,11 +31,9 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   perMachine: false
-<<<<<<< Updated upstream
-=======
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
->>>>>>> Stashed changes
+  include: build/installer.nsh
 mac:
   extraResources:
     - from: externals/python/window_inspector/dist/window_inspector/window_inspector
