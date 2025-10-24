@@ -35,6 +35,21 @@ export function initAppDataDir() {
     app.setPath('userData', path.join(portableDir || app.getPath('exe'), 'data'))
     return
   }
+
+  // For Windows installer version, set userData to installation directory
+  if (isWin && !isPortable) {
+    const executablePath = app.getPath('exe')
+    const installDir = path.dirname(executablePath)
+    // Use 'data' subdirectory in installation directory
+    const dataDir = path.join(installDir, 'data')
+
+    // Check if we have write permission to the installation directory
+    if (hasWritePermission(installDir)) {
+      app.setPath('userData', dataDir)
+      return
+    }
+    // If no write permission, fall back to default AppData location
+  }
 }
 
 function getAppDataPathFromConfig() {
