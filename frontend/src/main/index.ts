@@ -17,7 +17,7 @@ import { registerIpc } from './ipc'
 import openInspector from './utils/inspector'
 import db from './services/DatabaseService'
 import screenshotService from './services/ScreenshotService'
-import { isDev } from './constant'
+import { isDev, isMac } from './constant'
 import icon from '../../resources/icon.png?asset'
 import { ensureBackendRunning, startBackendInBackground, stopBackendServerSync } from './backend'
 import { powerWatcher } from './background/os/Power'
@@ -96,9 +96,17 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     icon,
-    frame: false,
-    titleBarStyle: 'hidden',
-    trafficLightPosition: { x: 12, y: 12 },
+    // Use frameless window with custom titlebar only on macOS
+    ...(isMac
+      ? {
+          frame: false,
+          titleBarStyle: 'hidden',
+          trafficLightPosition: { x: 12, y: 12 }
+        }
+      : {
+          // On Windows/Linux, use default frame with window controls
+          frame: true
+        }),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,

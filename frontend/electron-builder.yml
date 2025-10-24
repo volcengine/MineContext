@@ -22,13 +22,17 @@ asarUnpack:
 win:
   executableName: MineContext
   icon: build/icon.ico
-  signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
   differentialPackage: false
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
 mac:
   extraResources:
     - from: externals/python/window_inspector/dist/window_inspector/window_inspector
