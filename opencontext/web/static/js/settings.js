@@ -447,9 +447,108 @@ async function resetAllSettings() {
     }
 }
 
+// ==================== 模型配置 ====================
+
+async function loadModelSettings() {
+    try {
+        const response = await fetch('/api/model_settings/get');
+        const data = await response.json();
+
+        if (data.code === 0 && data.data && data.data.config) {
+            const config = data.data.config;
+
+            // Fill VLM configuration
+            document.getElementById('modelPlatform').value = config.modelPlatform || '';
+            document.getElementById('modelId').value = config.modelId || '';
+            document.getElementById('baseUrl').value = config.baseUrl || '';
+            document.getElementById('apiKey').value = config.apiKey || '';
+
+            // Fill Embedding configuration
+            document.getElementById('embeddingModelId').value = config.embeddingModelId || '';
+
+            // Check if using separate embedding configuration
+            const hasSeparateConfig = config.embeddingBaseUrl || config.embeddingApiKey || config.embeddingModelPlatform;
+
+            if (hasSeparateConfig) {
+                document.getElementById('separateEmbedding').checked = true;
+                document.getElementById('embeddingModelPlatform').value = config.embeddingModelPlatform || '';
+                document.getElementById('embeddingBaseUrl').value = config.embeddingBaseUrl || '';
+                document.getElementById('embeddingApiKey').value = config.embeddingApiKey || '';
+                toggleEmbeddingConfig();
+            }
+        }
+    } catch (error) {
+        console.error('加载模型设置失败:', error);
+        showToast('加载模型设置失败', true);
+    }
+}
+
+function toggleEmbeddingConfig() {
+    const checkbox = document.getElementById('separateEmbedding');
+    const section = document.getElementById('embeddingConfigSection');
+    section.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+async function validateModelConfig() {
+    try {
+        showToast('正在测试连接...', false);
+
+        const response = await fetch('/api/model_settings/validate');
+
+        const data = await response.json();
+
+        if (data.code === 0) {
+            showToast('连接测试成功！VLM和Embedding模型均正常');
+        } else {
+            showToast('连接测试失败: ' + (data.message || '未知错误'), true);
+        }
+    } catch (error) {
+        console.error('模型配置测试失败:', error);
+        showToast('连接测试失败', true);
+    }
+}
+
+document.getElementById('modelForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const useSeparate = document.getElementById('separateEmbedding').checked;
+
+    const settings = {
+        config: {
+            modelPlatform: document.getElementById('modelPlatform').value,
+            modelId: document.getElementById('modelId').value,
+            baseUrl: document.getElementById('baseUrl').value,
+            apiKey: document.getElementById('apiKey').value,
+            embeddingModelId: document.getElementById('embeddingModelId').value,
+            embeddingBaseUrl: useSeparate ? document.getElementById('embeddingBaseUrl').value : null,
+            embeddingApiKey: useSeparate ? document.getElementById('embeddingApiKey').value : null,
+            embeddingModelPlatform: useSeparate ? document.getElementById('embeddingModelPlatform').value : null
+        }
+    };
+
+    try {
+        const response = await fetch('/api/model_settings/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        });
+        const data = await response.json();
+
+        if (data.code === 0) {
+            showToast('模型配置保存成功');
+        } else {
+            showToast('保存失败: ' + (data.message || '未知错误'), true);
+        }
+    } catch (error) {
+        console.error('保存模型设置失败:', error);
+        showToast('保存失败', true);
+    }
+});
+
 // ==================== 页面初始化 ====================
 
 document.addEventListener('DOMContentLoaded', function() {
+    loadModelSettings();
     loadCaptureSettings();
     loadProcessingSettings();
     loadGenerationSettings();
@@ -577,7 +676,7 @@ async function savePromptCategory(category) {
         const response = await fetch('/api/settings/prompts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentPrompts)
+            body: JSON.stringify({ prompts: currentPrompts })
         });
 
         const data = await response.json();
@@ -618,7 +717,7 @@ async function saveAllPrompts() {
         const response = await fetch('/api/settings/prompts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentPrompts)
+            body: JSON.stringify({ prompts: currentPrompts })
         });
 
         const data = await response.json();
@@ -874,3 +973,59 @@ function compareResults() {
 const originalLoadPrompts = loadPrompts;
 loadPrompts = loadPromptsToCategories;
 
+// ==================== Prompt 语言切换 ====================
+
+// 获取当前Prompt语言
+async function getCurrentPromptLanguage() {
+    try {
+        const response = await fetch('/api/settings/prompts/language');
+        const data = await response.json();
+        if (data.code === 0 && data.data) {
+            return data.data.language || 'zh';
+        }
+    } catch (error) {
+        console.error('获取Prompt语言失败:', error);
+    }
+    return 'zh'; // 默认中文
+}
+
+// 切换Prompt语言
+async function changePromptLanguage() {
+    const language = document.getElementById('promptLanguage').value;
+
+    if (!confirm(`确认切换到${language === 'zh' ? '中文' : '英文'}版本的Prompts吗？当前未保存的修改将丢失。`)) {
+        // 用户取消，恢复选择
+        const currentLang = await getCurrentPromptLanguage();
+        document.getElementById('promptLanguage').value = currentLang;
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/settings/prompts/language', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language: language })
+        });
+
+        const data = await response.json();
+        if (data.code === 0) {
+            showToast(`已切换到${language === 'zh' ? '中文' : '英文'}版本`);
+            // 重新加载Prompts
+            await loadPromptsToCategories();
+        } else {
+            showToast('切换语言失败: ' + (data.message || '未知错误'), true);
+        }
+    } catch (error) {
+        console.error('切换Prompt语言失败:', error);
+        showToast('切换语言失败', true);
+    }
+}
+
+// 页面加载时设置当前语言
+document.addEventListener('DOMContentLoaded', async function() {
+    const currentLang = await getCurrentPromptLanguage();
+    const langSelect = document.getElementById('promptLanguage');
+    if (langSelect) {
+        langSelect.value = currentLang;
+    }
+});

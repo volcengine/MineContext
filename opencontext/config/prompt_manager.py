@@ -98,7 +98,7 @@ class PromptManager:
 
     def save_prompts(self, prompts_data: dict) -> bool:
         """
-        Save prompts to user_prompts file
+        Save prompts to user_prompts file with proper multi-line formatting
         """
         user_prompts_path = self.get_user_prompts_path()
         if not user_prompts_path:
@@ -111,10 +111,31 @@ class PromptManager:
             if dir_name:
                 os.makedirs(dir_name, exist_ok=True)
 
-            # Save prompts to file
+            # Create a custom dumper class with proper string representation
+            class LiteralDumper(yaml.SafeDumper):
+                pass
+
+            def str_representer(dumper, data):
+                # Check if string has newlines or is long (>80 chars)
+                if "\n" in data or len(data) > 80:
+                    # Use literal style (|) for multi-line strings
+                    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+                # Use plain style for short single-line strings
+                return dumper.represent_scalar("tag:yaml.org,2002:str", data)
+
+            # Add the representer to our custom dumper
+            LiteralDumper.add_representer(str, str_representer)
+
+            # Save prompts to file using custom dumper
             with open(user_prompts_path, "w", encoding="utf-8") as f:
                 yaml.dump(
-                    prompts_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True
+                    prompts_data,
+                    f,
+                    Dumper=LiteralDumper,
+                    default_flow_style=False,
+                    sort_keys=False,
+                    allow_unicode=True,
+                    width=float("inf"),  # Prevent line wrapping
                 )
 
             logger.info(f"Prompts saved to: {user_prompts_path}")

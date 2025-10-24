@@ -8,7 +8,12 @@
 
     <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="capture-tab" data-bs-toggle="tab" data-bs-target="#capture" type="button" role="tab">
+            <button class="nav-link active" id="model-tab" data-bs-toggle="tab" data-bs-target="#model" type="button" role="tab">
+                <i class="bi bi-cpu"></i> 模型配置
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="capture-tab" data-bs-toggle="tab" data-bs-target="#capture" type="button" role="tab">
                 <i class="bi bi-camera"></i> 截图捕获
             </button>
         </li>
@@ -30,11 +35,82 @@
     </ul>
 
     <div class="tab-content" id="settingsTabContent">
-        <!-- 截图捕获设置 -->
-        <div class="tab-pane fade show active" id="capture" role="tabpanel">
+        <!-- 模型配置 -->
+        <div class="tab-pane fade show active" id="model" role="tabpanel">
             <div class="row mt-4">
                 <div class="col-md-8">
-                    <h4>截图捕获设置</h4>
+                    <h4>LLM 模型配置</h4>
+                    <form id="modelForm">
+                        <div class="mb-3">
+                            <label for="modelPlatform" class="form-label">模型平台</label>
+                            <select class="form-select" id="modelPlatform" required>
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                                <option value="doubao">豆包</option>
+                                <option value="qwen">通义千问</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modelId" class="form-label">模型 ID</label>
+                            <input type="text" class="form-control" id="modelId" placeholder="例如: gpt-4" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="baseUrl" class="form-label">Base URL</label>
+                            <input type="text" class="form-control" id="baseUrl" placeholder="例如: https://api.openai.com/v1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="apiKey" class="form-label">API Key</label>
+                            <input type="password" class="form-control" id="apiKey" required>
+                        </div>
+
+                        <h4 class="mt-4">Embedding 模型配置</h4>
+                        <div class="mb-3">
+                            <label for="embeddingModelId" class="form-label">Embedding 模型 ID</label>
+                            <input type="text" class="form-control" id="embeddingModelId" placeholder="例如: text-embedding-ada-002" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="separateEmbedding" onchange="toggleEmbeddingConfig()">
+                            <label class="form-check-label" for="separateEmbedding">使用独立的 Embedding 配置</label>
+                        </div>
+                        <div id="embeddingConfigSection" style="display: none;">
+                            <div class="mb-3">
+                                <label for="embeddingModelPlatform" class="form-label">Embedding 平台</label>
+                                <select class="form-select" id="embeddingModelPlatform">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="doubao">豆包</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="embeddingBaseUrl" class="form-label">Embedding Base URL</label>
+                                <input type="text" class="form-control" id="embeddingBaseUrl" placeholder="例如: https://api.openai.com/v1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="embeddingApiKey" class="form-label">Embedding API Key</label>
+                                <input type="password" class="form-control" id="embeddingApiKey">
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> 保存配置
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadModelSettings()">
+                                <i class="bi bi-arrow-clockwise"></i> 重置
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="validateModelConfig()">
+                                <i class="bi bi-check-circle"></i> 测试连接
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 截图捕获设置 -->
+        <div class="tab-pane fade" id="capture" role="tabpanel">
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <h4>截图捕获设置 (后端功能，与应用端冲突)</h4>
                     <form id="captureForm">
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="screenshot_enabled">
@@ -49,18 +125,21 @@
                             <input type="text" class="form-control" id="screenshot_path" placeholder="例如: ./screenshots">
                         </div>
 
-                        <h4 class="mt-4">文档监控设置</h4>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="vault_enabled">
-                            <label class="form-check-label" for="vault_enabled">启用文档监控</label>
-                        </div>
-                        <div class="mb-3">
-                            <label for="vault_interval" class="form-label">监控间隔（秒）</label>
-                            <input type="number" class="form-control" id="vault_interval" min="1">
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="vault_initial_scan">
-                            <label class="form-check-label" for="vault_initial_scan">初始扫描</label>
+                        <!-- 文档监控设置 - 已隐藏 -->
+                        <div style="display: none;">
+                            <h4 class="mt-4">文档监控设置</h4>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="vault_enabled">
+                                <label class="form-check-label" for="vault_enabled">启用文档监控</label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="vault_interval" class="form-label">监控间隔（秒）</label>
+                                <input type="number" class="form-control" id="vault_interval" min="1">
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="vault_initial_scan">
+                                <label class="form-check-label" for="vault_initial_scan">初始扫描</label>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -79,21 +158,24 @@
             <div class="row mt-4">
                 <div class="col-md-8">
                     <form id="processingForm">
-                        <h4>文档处理</h4>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="doc_enabled">
-                            <label class="form-check-label" for="doc_enabled">启用文档处理</label>
-                        </div>
-                        <div class="mb-3">
-                            <label for="doc_batch_size" class="form-label">批处理大小</label>
-                            <input type="number" class="form-control" id="doc_batch_size" min="1" max="100">
-                        </div>
-                        <div class="mb-3">
-                            <label for="doc_batch_timeout" class="form-label">批处理超时（秒）</label>
-                            <input type="number" class="form-control" id="doc_batch_timeout" min="1" max="60">
+                        <!-- 文档处理 - 已隐藏 -->
+                        <div style="display: none;">
+                            <h4>文档处理</h4>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="doc_enabled">
+                                <label class="form-check-label" for="doc_enabled">启用文档处理</label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="doc_batch_size" class="form-label">批处理大小</label>
+                                <input type="number" class="form-control" id="doc_batch_size" min="1" max="100">
+                            </div>
+                            <div class="mb-3">
+                                <label for="doc_batch_timeout" class="form-label">批处理超时（秒）</label>
+                                <input type="number" class="form-control" id="doc_batch_timeout" min="1" max="60">
+                            </div>
                         </div>
 
-                        <h4 class="mt-4">截图处理</h4>
+                        <h4>截图处理</h4>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="screenshot_proc_enabled">
                             <label class="form-check-label" for="screenshot_proc_enabled">启用截图处理</label>
@@ -107,14 +189,17 @@
                             <input type="number" class="form-control" id="screenshot_max_size" min="100" max="4096">
                         </div>
 
-                        <h4 class="mt-4">上下文合并</h4>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="merger_enabled">
-                            <label class="form-check-label" for="merger_enabled">启用上下文合并</label>
-                        </div>
-                        <div class="mb-3">
-                            <label for="merger_threshold" class="form-label">相似度阈值（0-1）</label>
-                            <input type="number" class="form-control" id="merger_threshold" min="0" max="1" step="0.01">
+                        <!-- 上下文合并 - 已隐藏 -->
+                        <div style="display: none;">
+                            <h4 class="mt-4">上下文合并</h4>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="merger_enabled">
+                                <label class="form-check-label" for="merger_enabled">启用上下文合并</label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="merger_threshold" class="form-label">相似度阈值（0-1）</label>
+                                <input type="number" class="form-control" id="merger_threshold" min="0" max="1" step="0.01">
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -209,7 +294,13 @@
             <div class="row mt-4">
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4>Prompts管理</h4>
+                        <div class="d-flex align-items-center gap-3">
+                            <h4 class="mb-0">Prompts管理</h4>
+                            <select class="form-select form-select-sm" style="width: 200px;" id="promptLanguage" onchange="changePromptLanguage()">
+                                <option value="zh">中文 (zh)</option>
+                                <option value="en">English (en)</option>
+                            </select>
+                        </div>
                         <div class="btn-group">
                             <button class="btn btn-primary" onclick="saveAllPrompts()">
                                 <i class="bi bi-save"></i> 保存全部

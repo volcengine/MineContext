@@ -204,6 +204,8 @@ class ConfigManager:
                 user_settings["processing"] = settings["processing"]
             if "logging" in settings:
                 user_settings["logging"] = settings["logging"]
+            if "prompts" in settings:
+                user_settings["prompts"] = settings["prompts"]
 
             # Save to file
             with open(user_setting_path, "w", encoding="utf-8") as f:

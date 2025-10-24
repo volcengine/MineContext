@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from opencontext.config.global_config import GlobalConfig
 from opencontext.llm.global_embedding_client import GlobalEmbeddingClient
+from opencontext.llm.global_vlm_client import GlobalVLMClient
 from opencontext.llm.llm_client import LLMClient, LLMType
 from opencontext.server.middleware.auth import auth_dependency
 from opencontext.server.utils import convert_resp
@@ -223,25 +224,23 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
             return convert_resp(code=500, status=500, message="Failed to update model settings")
 
 
-@router.post("/api/model_settings/validate")
-async def validate_llm_config(request: ValidateLLMRequest, _auth: str = auth_dependency):
-    """Validate LLM configuration without saving"""
+@router.get("/api/model_settings/validate")
+async def validate_llm_config(_auth: str = auth_dependency):
+    """Validate current LLM configuration from backend"""
     try:
+        # Get current configuration from backend
+        config = GlobalConfig.get_instance().get_config()
+        if not config:
+            return convert_resp(code=500, status=500, message="配置未初始化")
+
+        vlm_cfg = config.get("vlm_model", {})
+        emb_cfg = config.get("embedding_model", {})
+
         # Validate VLM
-        vlm_config = _build_llm_config(
-            request.baseUrl, request.apiKey, request.modelId, request.provider, LLMType.CHAT
-        )
-        vlm_valid, vlm_msg = LLMClient(llm_type=LLMType.CHAT, config=vlm_config).validate()
+        vlm_valid, vlm_msg = LLMClient(llm_type=LLMType.CHAT, config=vlm_cfg).validate()
 
         # Validate Embedding
-        emb_config = _build_llm_config(
-            request.embeddingBaseUrl or request.baseUrl,
-            request.embeddingApiKey or request.apiKey,
-            request.embeddingModelId,
-            request.embeddingProvider or request.provider,
-            LLMType.EMBEDDING,
-        )
-        emb_valid, emb_msg = LLMClient(llm_type=LLMType.EMBEDDING, config=emb_config).validate()
+        emb_valid, emb_msg = LLMClient(llm_type=LLMType.EMBEDDING, config=emb_cfg).validate()
 
         # Build error message
         if not vlm_valid or not emb_valid:
@@ -253,7 +252,7 @@ async def validate_llm_config(request: ValidateLLMRequest, _auth: str = auth_dep
             error_msg = "; ".join(errors)
             return convert_resp(code=400, status=400, message=error_msg)
 
-        return convert_resp(code=0, status=200, message="Validation successful")
+        return convert_resp(code=0, status=200, message="连接测试成功！VLM和Embedding模型均正常")
 
     except Exception as e:
         logger.exception(f"Validation failed: {e}")
@@ -442,6 +441,40 @@ async def export_prompts(_auth: str = auth_dependency):
     except Exception as e:
         logger.exception(f"Failed to export prompts: {e}")
         return convert_resp(code=500, status=500, message=f"Failed to export prompts: {str(e)}")
+
+
+@router.get("/api/settings/prompts/language")
+async def get_prompt_language(_auth: str = auth_dependency):
+    """Get current prompt language"""
+    try:
+        language = GlobalConfig.get_instance().get_language()
+        return convert_resp(data={"language": language})
+    except Exception as e:
+        logger.exception(f"Failed to get prompt language: {e}")
+        return convert_resp(code=500, status=500, message=f"Failed to get language: {str(e)}")
+
+
+class LanguageChangeRequest(BaseModel):
+    """Language change request"""
+
+    language: str = Field(..., pattern="^(zh|en)$")
+
+
+@router.post("/api/settings/prompts/language")
+async def change_prompt_language(request: LanguageChangeRequest, _auth: str = auth_dependency):
+    """Change prompt language"""
+    try:
+        # Update language setting and reload prompts
+        success = GlobalConfig.get_instance().set_language(request.language)
+
+        if not success:
+            return convert_resp(code=500, status=500, message="Failed to change language")
+
+        logger.info(f"Prompt language changed to: {request.language}")
+        return convert_resp(message=f"Language changed to {request.language}")
+    except Exception as e:
+        logger.exception(f"Failed to change prompt language: {e}")
+        return convert_resp(code=500, status=500, message=f"Failed to change language: {str(e)}")
 
 
 # ==================== Reset Settings ====================
