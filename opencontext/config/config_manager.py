@@ -198,6 +198,14 @@ class ConfigManager:
                 user_settings["embedding_model"] = settings["embedding_model"]
             if "content_generation" in settings:
                 user_settings["content_generation"] = settings["content_generation"]
+            if "capture" in settings:
+                user_settings["capture"] = settings["capture"]
+            if "processing" in settings:
+                user_settings["processing"] = settings["processing"]
+            if "logging" in settings:
+                user_settings["logging"] = settings["logging"]
+            if "prompts" in settings:
+                user_settings["prompts"] = settings["prompts"]
 
             # Save to file
             with open(user_setting_path, "w", encoding="utf-8") as f:
@@ -212,4 +220,33 @@ class ConfigManager:
             return True
         except Exception as e:
             logger.error(f"Failed to save user settings: {e}")
+            return False
+
+    def reset_user_settings(self) -> bool:
+        """
+        Reset user settings by deleting the user_setting.yaml file
+        """
+        if not self._config:
+            logger.error("Main configuration not loaded")
+            return False
+
+        user_setting_path = self._config.get("user_setting_path")
+        if not user_setting_path:
+            logger.error("user_setting_path not configured")
+            return False
+
+        try:
+            if os.path.exists(user_setting_path):
+                os.remove(user_setting_path)
+                logger.info(f"User settings file deleted: {user_setting_path}")
+            else:
+                logger.info(f"User settings file does not exist: {user_setting_path}")
+
+            # Reload config to apply defaults
+            if self._config_path:
+                self.load_config(self._config_path)
+
+            return True
+        except Exception as e:
+            logger.error(f"Failed to reset user settings: {e}")
             return False

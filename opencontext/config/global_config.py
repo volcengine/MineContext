@@ -141,6 +141,10 @@ class GlobalConfig:
             self._prompt_path = absolute_prompts_path
             self._language = language
             logger.info(f"Prompts loaded from: {self._prompt_path} (language: {language})")
+
+            # Load user prompts if available
+            self._prompt_manager.load_user_prompts()
+
             return True
         except Exception as e:
             logger.error(f"Failed to load prompts: {e}")
@@ -179,6 +183,55 @@ class GlobalConfig:
         if hasattr(self, "_language"):
             return self._language
         return "zh"
+
+    def set_language(self, language: str) -> bool:
+        """
+        Set the current language and reload prompts
+
+        Args:
+            language: Language code ('zh' or 'en')
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        if language not in ["zh", "en"]:
+            logger.error(f"Invalid language: {language}")
+            return False
+
+        try:
+            # Update language in memory
+            self._language = language
+
+            # Save to user settings
+            if self._config_manager:
+                settings = {"prompts": {"language": language}}
+                if not self._config_manager.save_user_settings(settings):
+                    logger.error("Failed to save language setting")
+                    return False
+
+                # Reload config to pick up the new language setting
+                self._config_manager.load_config(self._config_path)
+
+            # Reload prompt manager with new language
+            prompts_path = f"prompts_{language}.yaml"
+            base_dir = os.path.dirname(self._config_path)
+            absolute_prompts_path = os.path.join(base_dir, prompts_path)
+
+            if not os.path.exists(absolute_prompts_path):
+                logger.error(f"Prompt file not found: {absolute_prompts_path}")
+                return False
+
+            self._prompt_manager = PromptManager(absolute_prompts_path)
+            self._prompt_path = absolute_prompts_path
+            logger.info(f"Prompts reloaded from: {self._prompt_path} (language: {language})")
+
+            # Load user prompts if available
+            self._prompt_manager.load_user_prompts()
+
+            return True
+        except Exception as e:
+            logger.error(f"Failed to set language: {e}")
+            return False
 
     def get_config(self, path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """

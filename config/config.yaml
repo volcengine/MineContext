@@ -207,40 +207,8 @@ content_generation:
     time: "08:00" # Daily report generation time (HH:MM)
 
 tools:
-  # Entity processing and enhancement tools configuration
-  entity_tools:
-    enabled: true
-    # Entity normalizer configuration
-    entity_normalizer:
-      entity_config_path: "${CONTEXT_PATH:.}/config/runtime/entity_config.json"
-      similarity_threshold: 0.8
-      auto_learn: true
-      min_frequency: 3 # Minimum frequency for auto-learning
-
-    # Entity extractor configuration
-    entity_extractor:
-      extract_types: ["person", "product", "company", "technology"]
-      enable_context_patterns: true
-
-    # Context enhancement configuration
-    context_enhancement:
-      max_background_entities: 3 # Maximum number of background entities to fetch
-      background_cache_size: 100 # Background information cache size
-      enhance_summary: true # Whether to enhance the summary
-      suggest_merge: true # Whether to suggest merging
-
-    # User entity unifier configuration
-    user_entity_unifier:
-      unified_user_name: "current_user" # Unified user name
-      auto_detect_names: true # Whether to automatically detect names
-      enable_query_support: true # Whether to support queries like "what did I do today"
-
   # Operation tools configuration
   operation_tools:
-    # SQLite operation tools configuration
-    sqlite_operations:
-      enabled: true
-
     web_search_tool:
       enabled: true
       web_search:
@@ -248,36 +216,6 @@ tools:
         max_results: 5
         timeout: 10
 
-    web_viewer_tool:
-      enabled: true
-
 # Intelligent completion service configuration
 completion:
   enabled: true
-  # Completion configuration parameters
-  max_context_length: 500 # Maximum context length
-  max_suggestions: 3 # Maximum number of suggestions
-  min_trigger_length: 3 # Minimum trigger length
-  similarity_threshold: 0.7 # Similarity threshold
-
-  # Cache configuration
-  cache:
-    enabled: true
-    max_size: 1000 # Maximum number of cache entries
-    ttl_seconds: 300 # Cache time-to-live (seconds)
-    strategy: "hybrid" # Cache strategy: lru, ttl, hybrid
-
-  # Completion types configuration
-  completion_types:
-    semantic_continuation:
-      enabled: true
-      priority: 1
-    template_completion:
-      enabled: true
-      priority: 2
-    reference_suggestion:
-      enabled: true
-      priority: 3
-    context_aware:
-      enabled: true
-      priority: 4

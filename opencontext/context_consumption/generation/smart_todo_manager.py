@@ -14,17 +14,11 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TypedDict
 
-from opencontext.config.global_config import get_prompt_manager
+from opencontext.config.global_config import get_prompt_group
 from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ContextType, Vectorize
 from opencontext.storage.global_storage import get_storage
-from opencontext.storage.unified_storage import ActivityStorageManager
-from opencontext.tools.tool_definitions import (
-    ALL_PROFILE_TOOL_DEFINITIONS,
-    ALL_RETRIEVAL_TOOL_DEFINITIONS,
-    ALL_TOOL_DEFINITIONS,
-)
 from opencontext.utils.json_parser import parse_json_from_response
 from opencontext.utils.logging_utils import get_logger
 
@@ -54,20 +48,6 @@ class SmartTodoManager:
     Smart Todo Manager
     Intelligently identifies and generates to-do items based on user activity context.
     """
-
-    @property
-    def prompt_manager(self):
-        return get_prompt_manager()
-
-    @property
-    def storage(self):
-        """Get storage from the global singleton."""
-        return get_storage()
-
-    @property
-    def document_storage(self):
-        """Get document_storage from the global singleton."""
-        return self.storage
 
     def _map_priority_to_urgency(self, priority: str) -> int:
         """Map priority to a numerical urgency value."""
@@ -115,7 +95,7 @@ class SmartTodoManager:
                     except:
                         pass
 
-                todo_id = self.storage.insert_todo(
+                todo_id = get_storage().insert_todo(
                     content=content,
                     urgency=urgency,
                     end_time=deadline,
@@ -145,7 +125,7 @@ class SmartTodoManager:
             start_time = datetime.datetime.fromtimestamp(start)
             end_time = datetime.datetime.fromtimestamp(end)
             # Query recent activity records
-            activities = self.storage.get_activities(
+            activities = get_storage().get_activities(
                 start_time=start_time, end_time=end_time, limit=100
             )
             if not activities:
@@ -179,7 +159,7 @@ class SmartTodoManager:
         """Get historical todo records."""
         try:
             start_time = datetime.datetime.now() - datetime.timedelta(days=days)
-            todos = self.storage.get_todos(limit=limit, start_time=start_time)
+            todos = get_storage().get_todos(limit=limit, start_time=start_time)
             return todos
         except Exception as e:
             logger.exception(f"Failed to get historical todos: {e}")
@@ -201,7 +181,7 @@ class SmartTodoManager:
             if activity_insights.get("potential_todos", []):
                 for todo in activity_insights["potential_todos"]:
                     text = todo["description"]
-                    contexts = self.storage.search(
+                    contexts = get_storage().search(
                         query=Vectorize(text=text),
                         top_k=5,
                         context_types=context_types,
@@ -210,7 +190,7 @@ class SmartTodoManager:
                     ctxs = [ctx[0] for ctx in contexts]
                     all_contexts.extend(ctxs)
             else:
-                contexts = self.storage.get_all_processed_contexts(
+                contexts = get_storage().get_all_processed_contexts(
                     context_types=context_types, limit=80, offset=0, filter=filters
                 )
                 for context_type, context_list in contexts.items():
@@ -241,7 +221,7 @@ class SmartTodoManager:
         """
         try:
             # Get the prompt template for task extraction
-            prompt_group = self.prompt_manager.get_prompt_group("generation.todo_extraction")
+            prompt_group = get_prompt_group("generation.todo_extraction")
             system_prompt = prompt_group["system"]
             user_prompt_template = prompt_group["user"]
 

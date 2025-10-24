@@ -90,55 +90,54 @@ async def get_processing_metrics(
         )
 
 
-@router.get("/todo-stats")
-async def get_todo_stats(
+@router.get("/stage-timing")
+async def get_stage_timing_metrics(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
-    opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency,
 ):
     """
-    Get TODO task statistics
+    Get stage timing metrics (LLM API calls and processing stages)
     """
     try:
         monitor = get_monitor()
-        stats = monitor.get_todo_stats(hours=hours)
+        metrics = monitor.get_stage_timing_summary(hours=hours)
+        return {"success": True, "data": metrics}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get stage timing metrics: {str(e)}")
+
+
+@router.get("/data-stats")
+async def get_data_stats(
+    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
+    _auth: str = auth_dependency,
+):
+    """
+    Get data statistics (screenshots, documents, contexts)
+    """
+    try:
+        monitor = get_monitor()
+        stats = monitor.get_data_stats_summary(hours=hours)
         return {"success": True, "data": stats}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get TODO statistics: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get data statistics: {str(e)}")
 
 
-@router.get("/tips-count")
-async def get_tips_count(
+@router.get("/data-stats-trend")
+async def get_data_stats_trend(
     hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
-    opencontext: OpenContext = Depends(get_context_lab),
     _auth: str = auth_dependency,
 ):
     """
-    Get Tips count
+    Get data statistics trend with time series (screenshots, documents, contexts over time)
     """
     try:
         monitor = get_monitor()
-        count = monitor.get_tips_count(hours=hours)
-        return {"success": True, "data": count}
+        trend = monitor.get_data_stats_trend(hours=hours)
+        return {"success": True, "data": trend}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get Tips count: {str(e)}")
-
-
-@router.get("/activity-count")
-async def get_activity_count(
-    hours: int = Query(24, ge=1, le=168, description="Statistics time range (hours)"),
-    opencontext: OpenContext = Depends(get_context_lab),
-    _auth: str = auth_dependency,
-):
-    """
-    Get activity record count
-    """
-    try:
-        monitor = get_monitor()
-        count = monitor.get_activity_count(hours=hours)
-        return {"success": True, "data": count}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get activity count: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get data statistics trend: {str(e)}"
+        )
 
 
 @router.post("/refresh-context-stats")

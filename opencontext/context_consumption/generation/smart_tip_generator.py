@@ -13,14 +13,13 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, TypedDict
 
-from opencontext.config.global_config import get_prompt_manager
+from opencontext.config.global_config import get_prompt_group
 from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ProcessedContext
 from opencontext.models.enums import ContextType
 from opencontext.storage.base_storage import DocumentData
 from opencontext.storage.global_storage import get_storage
-from opencontext.storage.unified_storage import ActivityStorageManager
 from opencontext.tools.tool_definitions import ALL_TOOL_DEFINITIONS
 from opencontext.utils.logging_utils import get_logger
 
@@ -43,30 +42,6 @@ class SmartTipGenerator:
     Smart Tip Generator
     Generates personalized reminders and suggestions based on the user's recent activity patterns.
     """
-
-    def __init__(self):
-        self._activity_manager = None
-
-    @property
-    def prompt_manager(self):
-        return get_prompt_manager()
-
-    @property
-    def storage(self):
-        """Get storage from the global singleton."""
-        return get_storage()
-
-    @property
-    def document_storage(self):
-        """Get document_storage from the global singleton."""
-        return self.storage
-
-    @property
-    def activity_manager(self):
-        """Lazy initialize ActivityStorageManager."""
-        if self._activity_manager is None:
-            self._activity_manager = ActivityStorageManager(self.storage)
-        return self._activity_manager
 
     def generate_smart_tip(self, start_time: int, end_time: int) -> Optional[str]:
         """
@@ -92,7 +67,7 @@ class SmartTipGenerator:
                 return None
 
             # Store in the SQLite tips table
-            tip_id = self.storage.insert_tip(content=tip_content)
+            tip_id = get_storage().insert_tip(content=tip_content)
             logger.info(f"Smart tip saved to the tips table, ID: {tip_id}")
             from opencontext.managers.event_manager import EventType, publish_event
 
@@ -119,7 +94,7 @@ class SmartTipGenerator:
             start_time = end_time - datetime.timedelta(hours=hours)
 
             # Query recent activity records
-            activities = self.storage.get_activities(
+            activities = get_storage().get_activities(
                 start_time=start_time, end_time=end_time, limit=20
             )
             if not activities:
@@ -209,7 +184,7 @@ class SmartTipGenerator:
             start_time = today_start - datetime.timedelta(days=days - 1)
 
             # Use time parameters to filter and get recent tips
-            recent_tips = self.storage.get_tips(start_time=start_time, end_time=end_time, limit=24)
+            recent_tips = get_storage().get_tips(start_time=start_time, end_time=end_time, limit=24)
 
             return recent_tips
 
@@ -232,7 +207,7 @@ class SmartTipGenerator:
                 ContextType.STATE_CONTEXT.value,
             ]
 
-            all_contexts = self.storage.get_all_processed_contexts(
+            all_contexts = get_storage().get_all_processed_contexts(
                 context_types=context_types, limit=10000, offset=0, filter=filters
             )
 
@@ -272,7 +247,7 @@ class SmartTipGenerator:
             str: Smart tip content in Markdown format.
         """
         # Get the prompt template for tip generation
-        prompt_group = self.prompt_manager.get_prompt_group("generation.smart_tip_generation")
+        prompt_group = get_prompt_group("generation.smart_tip_generation")
         system_prompt = prompt_group["system"]
         user_prompt_template = prompt_group["user"]
 
@@ -385,7 +360,7 @@ class SmartTipGenerator:
                         tip_time = tip.metadata["start_time"]
                         if tip_time < cutoff_timestamp:
                             # Delete old tips
-                            self.document_storage.delete_document(tip.id)
+                            get_storage().delete_document(tip.id)
                             deleted_count += 1
                 except Exception as e:
                     logger.debug(f"Failed to delete tip {tip.id}: {e}")

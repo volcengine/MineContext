@@ -81,7 +81,15 @@ class LLMClient:
             raise ValueError(f"Unsupported LLM type for embedding generation: {self.llm_type}")
 
     def _openai_chat_completion(self, messages: List[Dict[str, Any]], **kwargs):
+        import time
+
+        request_start = time.time()
         try:
+            # Stage: LLM request preparation
+            from opencontext.monitoring import record_processing_stage
+
+            prep_start = time.time()
+
             temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
@@ -99,10 +107,20 @@ class LLMClient:
                 if self.provider == LLMProvider.DOUBAO.value:
                     create_params["extra_body"] = {"thinking": {"type": thinking}}
 
+            record_processing_stage(
+                "llm_request_prep", int((time.time() - prep_start) * 1000), status="success"
+            )
+
+            # Stage: LLM API call
+            api_start = time.time()
             response = self.client.chat.completions.create(**create_params)
-            # if hasattr(response.choices[0].message, 'reasoning_content'):
-            #     reasoning_content = response.choices[0].message.reasoning_content
-            #     print(f"chat reason content is {reasoning_content}")
+
+            record_processing_stage(
+                "chat_cost", int((time.time() - api_start) * 1000), status="success"
+            )
+
+            # Stage: Response parsing
+            parse_start = time.time()
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -117,15 +135,36 @@ class LLMClient:
                     )
                 except ImportError:
                     pass  # Monitoring module not installed or initialized
+
+            record_processing_stage(
+                "llm_response_parse", int((time.time() - parse_start) * 1000), status="success"
+            )
 
             return response
         except APIError as e:
             logger.error(f"OpenAI API error: {e}")
+            # Record failure
+            try:
+                from opencontext.monitoring import record_processing_stage
+
+                record_processing_stage(
+                    "chat_cost", int((time.time() - request_start) * 1000), status="failure"
+                )
+            except ImportError:
+                pass
             raise
 
     async def _openai_chat_completion_async(self, messages: List[Dict[str, Any]], **kwargs):
         """Async chat completion"""
+        import time
+
+        request_start = time.time()
         try:
+            # Stage: LLM request preparation
+            from opencontext.monitoring import record_processing_stage
+
+            prep_start = time.time()
+
             temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
@@ -143,10 +182,20 @@ class LLMClient:
                 if self.provider == LLMProvider.DOUBAO.value:
                     create_params["extra_body"] = {"thinking": {"type": thinking}}
 
+            record_processing_stage(
+                "llm_request_prep", int((time.time() - prep_start) * 1000), status="success"
+            )
+
+            # Stage: LLM API call
+            api_start = time.time()
             response = await self.async_client.chat.completions.create(**create_params)
-            # if hasattr(response.choices[0].message, 'reasoning_content'):
-            #     reasoning_content = response.choices[0].message.reasoning_content
-            #     print(f"chat reason content is {reasoning_content}")
+
+            record_processing_stage(
+                "chat_cost", int((time.time() - api_start) * 1000), status="success"
+            )
+
+            # Stage: Response parsing
+            parse_start = time.time()
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -162,9 +211,22 @@ class LLMClient:
                 except ImportError:
                     pass  # Monitoring module not installed or initialized
 
+            record_processing_stage(
+                "llm_response_parse", int((time.time() - parse_start) * 1000), status="success"
+            )
+
             return response
         except APIError as e:
             logger.exception(f"OpenAI API async error: {e}")
+            # Record failure
+            try:
+                from opencontext.monitoring import record_processing_stage
+
+                record_processing_stage(
+                    "chat_cost", int((time.time() - request_start) * 1000), status="failure"
+                )
+            except ImportError:
+                pass
             raise
 
     def _openai_chat_completion_stream(self, messages: List[Dict[str, Any]], **kwargs):

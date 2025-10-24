@@ -38,6 +38,7 @@ dependencies = [
     "volcengine",
     "pillow",
     "imagehash",
+    "python-multipart",
 ]
 
 [project.optional-dependencies]
