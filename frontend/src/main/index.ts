@@ -26,8 +26,12 @@ import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
 import { ScreenMonitorTask } from './background/task/screen-monitor-task'
 import { autoUpdater } from "electron-updater"
+import { IpcChannel } from '@shared/IpcChannel'
+
 initLog()
 const logger = getLogger('MainEntry')
+
+autoUpdater.logger = logger
 
 const isPackaged = app.isPackaged
 const actuallyDev = isDev && !isPackaged // true
@@ -172,7 +176,7 @@ function checkForUpdates(win: BrowserWindow) {
     win.webContents.send('message', `A new version (${info.version}) is available, will auto-install next launch.`)
   })
 
-  autoUpdater.checkForUpdates()
+  // autoUpdater.checkForUpdates()
 }
 
 // This method will be called when Electron has finished
@@ -246,10 +250,17 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      const win = createWindow()
+      win.webContents.send(IpcChannel.Notification_Send, { id: '123', type: 'info', message: "hello",
+  timestamp: new Date().getTime(), source: 'update' })
+    }
   })
 
   registerIpc(mainWindow, app)
+
+  mainWindow.webContents.send(IpcChannel.Notification_Send, { id: '123', type: 'info', message: "hello",
+  timestamp: new Date().getTime(), source: 'update' })
 
   checkForUpdates(mainWindow)
 })

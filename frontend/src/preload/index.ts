@@ -35,7 +35,10 @@ const api = {
     const wrappedCallback = (event, ...args) => callback(...args)
     ipcRenderer.on('app-activate', wrappedCallback)
     return () => ipcRenderer.removeListener('app-activate', wrappedCallback)
-  }
+  },
+  checkForUpdate: () => ipcRenderer.invoke(IpcChannel.App_CheckForUpdate),
+  quitAndInstall: () => ipcRenderer.invoke(IpcChannel.App_QuitAndInstall),
+  cancelDownload: () => ipcRenderer.invoke(IpcChannel.App_CancelDownload)
 }
 
 const dbAPI = {

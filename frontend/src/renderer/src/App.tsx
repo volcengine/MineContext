@@ -32,7 +32,7 @@ interface BackendStatusInfo {
 
 function AppContent(): React.ReactElement {
   const [backendStatus, setBackendStatus] = useState<BackendStatus>('starting')
-  const [showSetting, setShowSettings] = useState<boolean>(false)
+  const [showSetting, setShowSettings] = useState<boolean>(true)
 
   const checkInitialStatus = useMemoizedFn(async () => {
     try {
