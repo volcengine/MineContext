@@ -12,9 +12,11 @@ export default function UpdateAvailableButton() {
   useEffect(() => {
     ;(async () => {
       const { updateInfo: _updateInfo } = await window.api.checkForUpdate()
+      console.log("checkForUpdate", _updateInfo)
       setUpdateInfo(_updateInfo)
     })()
     return () => {
+      console.log("cancelDownload")
       window.api.cancelDownload()
     }
 
@@ -26,10 +28,12 @@ export default function UpdateAvailableButton() {
     const ipcRenderer = window.electron.ipcRenderer
 
     const f1 = ipcRenderer.on(IpcChannel.UpdateDownloaded, () => {
+      console.log("UpdateDownloaded")
       setIsDownloaded(true)
     })
 
     const f2 = ipcRenderer.on(IpcChannel.UpdateError, (_, err) => {
+      console.error("UpdateError", err)
       open.error?.({
         title: 'update error',
         content: err.message
