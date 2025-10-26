@@ -131,13 +131,13 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 获取豆包 API 之后需要在 [模型开通管理界面](https://console.volcengine.com/ark/region:ark+cn-beijing/model) 开通视觉语言模型和向量化两个模型。
 
-- 视觉语言模型: Doubao-Seed-1.6-flash
+- 视觉语言模型：Doubao-Seed-1.6-flash
   ![doubao-vlm-model](src/doubao-vlm-model.png)
 
-- 向量化模型: Doubao-embedding-large
+- 向量化模型：Doubao-embedding-large
   ![doubao-emb-model](src/doubao-emb-model.png)
 
-以下是获取了 API Key 后的填写流程:
+以下是获取了 API Key 后的填写流程：
 ![Enter API-Key](src/Enter-API-Key.gif)
 
 ## 4. 开始记录
@@ -302,10 +302,10 @@ opencontext/
 
 2. **管理器层** (`managers/`)
 
-   - `CaptureManager`: 管理所有上下文捕获源
-   - `ProcessorManager`: 协调上下文处理流水线
-   - `ConsumptionManager`: 处理上下文消费和生成
-   - `EventManager`: 事件驱动的系统协调
+   - `CaptureManager`：管理所有上下文捕获源
+   - `ProcessorManager`：协调上下文处理流水线
+   - `ConsumptionManager`：处理上下文消费和生成
+   - `EventManager`：事件驱动的系统协调
 
 3. **上下文捕获层** (`context_capture/`)
 
@@ -352,7 +352,7 @@ uv sync
 
 ### 配置
 
-1. **基本配置** (`config/config.yaml`):
+1. **基本配置** (`config/config.yaml`)：
 
 ```yaml
 server:
@@ -361,12 +361,12 @@ server:
   debug: false
 
 embedding_model:
-  provider: doubao # 选项: openai, doubao
+  provider: doubao # 选项：openai, doubao
   api_key: your-api-key
   model: doubao-embedding-large-text-240915
 
 vlm_model:
-  provider: doubao # 选项: openai, doubao
+  provider: doubao # 选项：openai, doubao
   api_key: your-api-key
   model: doubao-seed-1-6-flash-250828
 
@@ -377,9 +377,9 @@ capture:
     capture_interval: 5 # 截图间隔（秒）
 ```
 
-2. **提示模板** (`config/prompts_*.yaml`):
-   - `prompts_en.yaml`: 英文提示模板
-   - `prompts_zh.yaml`: 中文提示模板
+2. **提示模板** (`config/prompts_*.yaml`)：
+   - `prompts_en.yaml`：英文提示模板
+   - `prompts_zh.yaml`：中文提示模板
 
 ### 运行服务器
 
@@ -405,7 +405,7 @@ uv run opencontext start --port 1733
 或者，你也可以手动激活虚拟环境：
 
 ```bash
-source .venv/bin/activate  # Windows系统: .venv\Scripts\activate
+source .venv/bin/activate  # Windows系统：.venv\Scripts\activate
 pip install -e .
 opencontext start --port 1733
 ```
@@ -429,12 +429,12 @@ MineContext 的命名，也体现了团队的巧思。既是“我的上下文�
 
 我们将按照以下计划优先扩展上下文来源，热烈欢迎大家积极贡献代码。
 
-- P0: 数字生活和公共信息循环（PC 屏幕捕获和链接上传）
-- P1: 个人文本上下文循环（文件上传、文件跟踪）
-- P2: AI 和常见办公上下文循环（MCP、会议记录）
-- P3: 高质量信息获取循环（DeepResearch 和 RSS）
-- P4: 个人深度上下文循环（微信、QQ 聊天数据获取、手机截图）
-- P5: 物理世界上下文循环（智能穿戴同步、智能眼镜同步）
+- P0：数字生活和公共信息循环（PC 屏幕捕获和链接上传）
+- P1：个人文本上下文循环（文件上传、文件跟踪）
+- P2：AI 和常见办公上下文循环（MCP、会议记录）
+- P3：高质量信息获取循环（DeepResearch 和 RSS）
+- P4：个人深度上下文循环（微信、QQ 聊天数据获取、手机截图）
+- P5：物理世界上下文循环（智能穿戴同步、智能眼镜同步）
 
 | 上下文捕获能力   | 上下文来源       | 优先级 | 完成状态 |
 | :--------------- | :--------------- | :----- | :------- |
