@@ -14,32 +14,49 @@ from enum import Enum
 
 class ContextSource(str, Enum):
     """Context source enumeration"""
-
     SCREENSHOT = "screenshot"
     VAULT = "vault"
-    FILE = "file"
-    FOLDER = "folder"
-    DATA_STREAM = "data_stream"
-    CHAT = "chat"
-    AI_CONVERSATION = "ai_conversation"
-    TEXT = "text"
-    OTHER = "other"
+    LOCAL_FILE = "local_file"
+    WEB_LINK = "web_link"
+    INPUT = "input"
 
 
 class FileType(str, Enum):
     """File type enumeration"""
 
+    # 文档类型
     PDF = "pdf"
+    DOCX = "docx"
+    DOC = "doc"
+    PPTX = "pptx"
+    PPT = "ppt"
+
+    # 表格类型
     FAQ_XLSX = "faq.xlsx"
     XLSX = "xlsx"
+    XLS = "xls"
     CSV = "csv"
     JSONL = "jsonl"
     PARQUET = "parquet"
 
+    # 图片类型
+    PNG = "png"
+    JPG = "jpg"
+    JPEG = "jpeg"
+    GIF = "gif"
+    BMP = "bmp"
+    WEBP = "webp"
+
+    # 文本类型
+    MD = "md"
+    TXT = "txt"
+
 
 # Structured document type constants - these document types should be processed by specialized structured chunkers
+
 STRUCTURED_FILE_TYPES = {
     FileType.XLSX,
+    FileType.XLS,
     FileType.CSV,
     FileType.JSONL,
     FileType.PARQUET,
@@ -49,36 +66,12 @@ STRUCTURED_FILE_TYPES = {
 
 class ContentFormat(str, Enum):
     """Content format enumeration"""
-
-    UNSTRUCTURED = "unstructured"
-
-    # Text format
     TEXT = "text"
-
-    # Image format
     IMAGE = "image"
+    FILE = "file"
+    
+    
 
-    # Structured data (JSON, XML, etc.)
-    STRUCTURED = "structured"
-
-    # FAQ format
-    FAQ = "faq"
-
-    # PDF format
-    PDF = "pdf"
-
-    # Binary data
-    BINARY = "binary"
-
-    # Audio format
-    AUDIO = "audio"
-
-    # Video format
-    VIDEO = "video"
-
-    IMAGE_TEXT = "image_text"
-
-    VECTOR = "vector"
 
 
 class MergeType(str, Enum):
@@ -103,6 +96,8 @@ class ContextType(str, Enum):
     PROCEDURAL_CONTEXT = "procedural_context"
     # Status monitoring and progress information
     STATE_CONTEXT = "state_context"
+    # File context
+    KNOWLEDGE_CONTEXT = "knowledge_context"
 
 
 class VaultType(str, Enum):

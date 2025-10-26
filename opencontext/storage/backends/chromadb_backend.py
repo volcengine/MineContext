@@ -60,9 +60,14 @@ class ChromaDBBackend(IVectorStorageBackend):
             # Register exit handler
             atexit.register(self._cleanup)
 
-            # Register signal handlers
-            signal.signal(signal.SIGTERM, self._signal_handler)
-            signal.signal(signal.SIGINT, self._signal_handler)
+            # Register signal handlers (only works in main thread)
+            try:
+                signal.signal(signal.SIGTERM, self._signal_handler)
+                signal.signal(signal.SIGINT, self._signal_handler)
+                logger.debug("ChromaDB signal handlers registered")
+            except ValueError as e:
+                # Signal handlers can only be registered in the main thread
+                logger.debug(f"Cannot register signal handlers (not in main thread): {e}")
 
             self._cleanup_registered = True
             logger.debug("ChromaDB graceful shutdown handlers registered")

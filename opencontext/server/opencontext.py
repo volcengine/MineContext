@@ -183,12 +183,6 @@ class OpenContext:
     def add_context(self, context_data: RawContextProperties) -> bool:
         """
         Process a single context data item.
-
-        Args:
-            context_data: Raw context properties to process
-
-        Returns:
-            True if processing was successful, False otherwise
         """
         try:
             return self.processor_manager.process(context_data)
@@ -237,6 +231,13 @@ class OpenContext:
         return self.context_operations.add_screenshot(
             path, window, create_time, app, self.add_context
         )
+
+    def add_document(self, file_path: str) -> Optional[str]:
+        """Add a document to the system."""
+        if not self.context_operations:
+            logger.warning("Context operations not initialized.")
+            return "Context operations not initialized"
+        return self.context_operations.add_document(file_path, self.add_context)
 
     def search(
         self,

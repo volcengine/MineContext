@@ -25,35 +25,11 @@ class Chunk(BaseModel):
     """
     Represents a chunk split from a document or text
     """
-
     text: Optional[str] = None
     image: Optional[bytes] = None
     chunk_index: int = 0
-    source_document_id: Optional[str] = None
-    title: Optional[str] = None
-    summary: Optional[str] = None
-
-    # Position and reference information
-    start_position: Optional[int] = None  # start position in original document
-    end_position: Optional[int] = None  # end position in original document
-    page_number: Optional[int] = None  # page number (for paginated documents like PDF)
-    section_path: Optional[List[str]] = Field(
-        default_factory=list
-    )  # section path, e.g. ["Chapter 1", "Section 1.1"]
-
-    # Associated image and table references
-    referenced_images: Optional[List[str]] = Field(default_factory=list)  # referenced image ID list
-    referenced_tables: Optional[List[str]] = Field(default_factory=list)  # referenced table ID list
-
-    # Semantic information
-    semantic_type: Optional[str] = (
-        None  # semantic type, e.g. "introduction", "conclusion", "definition"
-    )
-    importance_score: Optional[int] = None  # importance score (1-10)
-    keywords: Optional[List[str]] = Field(default_factory=list)  # keywords
-
-    # General metadata (backward compatibility)
-    metadata: Optional[Dict[str, Any]] = None
+    keywords: List[str] = Field(default_factory=list)  # keywords
+    entities: List[str] = Field(default_factory=list)  # entities
 
 
 class RawContextProperties(BaseModel):
@@ -62,6 +38,7 @@ class RawContextProperties(BaseModel):
     create_time: datetime.datetime
     object_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     content_path: Optional[str] = None  # file path if ContentFormat is VIDEO or IMAGE; None if TEXT
+    content_type: Optional[str] = None  # content type, e.g. "text", "image", "video"
     content_text: Optional[str] = None  # text content if ContentFormat is TEXT; None otherwise
     filter_path: Optional[str] = None  # filter path
     additional_info: Optional[Dict[str, Any]] = None  # additional information
@@ -86,10 +63,10 @@ class ExtractedData(BaseModel):
     summary: Optional[str] = None
     keywords: List[str] = Field(default_factory=list)  # keywords
     entities: List[str] = Field(default_factory=list)  # entities
-    tags: List[str] = Field(default_factory=list)  # tags
+    # tags: List[str] = Field(default_factory=list)  # tags
     context_type: ContextType  # context type
-    confidence: int = 0  # confidence
-    importance: int = 0  # importance
+    # confidence: int = 0  # confidence
+    # importance: int = 0  # importance
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert model to dictionary"""
@@ -139,6 +116,8 @@ class Vectorize(BaseModel):
     image_path: Optional[str] = None
     text: Optional[str] = None
     vector: Optional[List[float]] = None
+    # Future extension for multimodal embedding:
+    # images: Optional[List[Any]] = None  # PIL Images or image data for multimodal models
 
     def get_vectorize_content(self) -> str:
         """Get vectorization content"""
@@ -357,3 +336,10 @@ class ProfileContextMetadata(BaseModel):
     def from_dict(cls, data: Dict[str, Any]) -> "ProfileContextMetadata":
         """Create model from dictionary"""
         return cls.model_validate(data)
+
+class KnowledgeContextMetadata(BaseModel):
+    """Knowledge context additional information"""
+    knowledge_source: str = ""
+    knowledge_file_path: str = ""
+    knowledge_title: str = ""
+    knowledge_raw_id: str = ""
