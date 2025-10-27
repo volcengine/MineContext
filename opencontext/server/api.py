@@ -20,6 +20,7 @@ from .routes import (
     content_generation,
     context,
     debug,
+    documents,
     events,
     health,
     monitoring,
@@ -49,3 +50,4 @@ router.include_router(agent_chat.router)
 router.include_router(completions.router)
 router.include_router(events.router)
 router.include_router(settings.router)
+router.include_router(documents.router)  # 新增：文档上传路由

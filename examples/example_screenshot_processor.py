@@ -153,7 +153,7 @@ async def process_screenshots_example(screenshot_paths: list[str]):
         traceback.print_exc()
 
     finally:
-        processor.shutdown(graceful=True)
+        processor.shutdown(_graceful=True)
 
 
 def main():

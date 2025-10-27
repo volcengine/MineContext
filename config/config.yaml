@@ -13,6 +13,16 @@ logging:
 
 user_setting_path: "${CONTEXT_PATH:.}/config/user_setting.yaml"
 
+# 文档处理配置
+document_processing:
+  enabled: true
+  batch_size: 3        # Number of images processed by VLM at once (recommended 2-5)
+  max_image_size: 1024 # Maximum image size (pixels), larger sizes increase accuracy but also API costs
+  dpi: 200             # DPI for converting PDF to images (recommended 150-300)
+
+  # Page-by-page detection configuration (to optimize VLM usage)
+  text_threshold_per_page: 50 # Scanned document threshold: pages with fewer characters than this value are considered scanned documents (requires VLM)
+
 vlm_model:
   base_url: "${LLM_BASE_URL}"
   api_key: "${LLM_API_KEY}"
@@ -65,11 +75,8 @@ processing:
   # Document processor configuration
   document_processor:
     enabled: true
-    batch_size: 10
-    batch_timeout: 5
-    use_cloud_chunker: false
-
-  # Screenshot processor configuration
+    batch_size: 5
+    batch_timeout: 30
   screenshot_processor:
     enabled: true
     dedup_cache_size: 30
