@@ -6,7 +6,7 @@
 
 ### MineContext: Create with Context, Clarity from Chaos
 
-An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
+An open-source, proactive context-aware AI partner, dedicated to bringing clarity and efficiency to your work, study and creation.
 
 [中文](README_zh.md) / English
 
