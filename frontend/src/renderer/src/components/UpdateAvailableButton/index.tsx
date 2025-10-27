@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { RefreshCw } from "lucide-react"
+import rocketSvg from '@renderer/assets/icons/rocket.svg'
 import { UpdateInfo } from 'electron-updater'
 import { IpcChannel } from '@shared/IpcChannel'
 import { useNotification } from '@renderer/context/NotificationProvider'
@@ -8,6 +8,7 @@ import { debounce } from 'lodash'
 export default function UpdateAvailableButton() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
   const [isDownloaded, setIsDownloaded] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const { open } = useNotification()
   useEffect(() => {
     ;(async () => {
@@ -50,22 +51,27 @@ export default function UpdateAvailableButton() {
 
   if (!updateInfo || !isDownloaded) return null
   return (
-    <div className="relative w-full flex items-center space-x-2 bg-white/60 backdrop-blur-md border border-white/40 shadow-sm rounded-xl px-2 py-4 hover:shadow-md transition cursor-pointer" onClick={handleClick}>
-      {/* 刷新图标（旋转动画） */}
-      <RefreshCw className="w-3 h-3 text-gray-500 animate-spin-slow" />
-
+      <div
+      className="relative w-full flex items-center bg-[#FFFEF9] justify-center rounded-[6px] px-2 py-1.5 bg-gradient-to-tr hover:from-[rgba(246,236,255,0.43)] to-[#FFFEF9] transition cursor-pointer"
+      onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <img src={rocketSvg} className="w-3 h-3" />
       {/* 文本内容 */}
-      <span className="text-gray-800 text-[11px] font-medium ml-1">
-        Update available
+      <span className="text-[#3F3F51] text-[12px] ml-1">
+        {!isHovered ? 'Update available' : 'Restart to update'}
       </span>
 
       {/* 版本号 */}
-      <span className="text-gray-500 text-[10px] bg-gray-100 rounded-sm px-2 py-0.5">
+      {
+        !isHovered ? <span className="pl-2 font-bytesans text-[10px] text-[#AEAFC2]">
         {updateInfo.version}
-      </span>
+      </span> : null
+      }
 
       {/* 蓝色提示点 */}
-      <span className="w-2 h-2 bg-blue-500 rounded-full ml-1 absolute top-[-2px] right-[-2px]"></span>
+      <span className="w-1.5 h-1.5 bg-[#5252FF] rounded-full absolute top-[-1px] right-[-1px]"></span>
     </div>
   );
 }

@@ -101,7 +101,7 @@ const Sidebar = () => {
       </div>
 
       <VaultTree className='flex-1' />
-      <div className="h-16 mt-2 mr-3">
+      <div className="mt-2 mr-3 mb-5">
         <UpdateAvailableButton />
       </div>
     </Sider>
