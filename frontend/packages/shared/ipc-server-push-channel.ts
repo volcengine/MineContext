@@ -4,5 +4,6 @@
 export enum IpcServerPushChannel {
   PushGetInitCheckData = 'push:get-init-check-data',
   PushPowerMonitor = 'push:power-monitor',
-  NotificationClick = 'push:IpcServerPushChannel.NotificationClick'
+  NotificationClick = 'push:IpcServerPushChannel.NotificationClick',
+  Tray_ToggleRecording = 'push:tray-toggle-recording'
 }

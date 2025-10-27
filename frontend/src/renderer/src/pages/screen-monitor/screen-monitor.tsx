@@ -24,6 +24,8 @@ import RecordingTimeline from './components/recording-timeline'
 import EmptyStatePlaceholder from './components/empty-state-placeholder'
 import SettingsModal from './components/settings-modal'
 import { getLogger } from '@shared/logger/renderer'
+import { IpcChannel } from '@shared/IpcChannel'
+import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 
 const logger = getLogger('ScreenMonitor')
 
@@ -274,6 +276,28 @@ const ScreenMonitor: React.FC = () => {
     }
   })
 
+  // Listen for tray toggle recording event
+  useEffect(() => {
+    const handleTrayToggleRecording = () => {
+      logger.info('Tray toggle recording event received')
+      if (isMonitoring) {
+        stopMonitoring()
+      } else {
+        startMonitoring()
+      }
+    }
+
+    // Listen for the event from main process
+    window.electron.ipcRenderer.on(IpcServerPushChannel.Tray_ToggleRecording, handleTrayToggleRecording)
+
+    return () => {
+      window.electron.ipcRenderer.removeListener(
+        IpcServerPushChannel.Tray_ToggleRecording,
+        handleTrayToggleRecording
+      )
+    }
+  }, [isMonitoring])
+
   const openSettings = useMemoizedFn(async () => {
     // Refresh the application list before opening settings
     try {
@@ -367,6 +391,18 @@ const ScreenMonitor: React.FC = () => {
       }
     }
   }, [isMonitoring, enableRecordingHours, checkCanRecord])
+
+  // Sync recording status to tray
+  useEffect(() => {
+    if (isToday) {
+      window.electron.ipcRenderer
+        .invoke(IpcChannel.Tray_UpdateRecordingStatus, isMonitoring && canRecord)
+        .catch((error) => {
+          logger.error('Failed to update tray recording status:', error)
+        })
+    }
+  }, [isMonitoring, canRecord, isToday])
+
   // Get sources
   const settingSources = useAtomValue(loadableCaptureSourcesFromSettingsAtom, { store: appStore })
   const settingScreenSources = useMemo(
