@@ -15,11 +15,6 @@ export default function UpdateAvailableButton() {
       console.log("checkForUpdate", _updateInfo)
       setUpdateInfo(_updateInfo)
     })()
-    return () => {
-      console.log("cancelDownload")
-      window.api.cancelDownload()
-    }
-
   }, [])
 
   useEffect(() => {
