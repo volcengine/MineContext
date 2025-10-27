@@ -4,7 +4,7 @@
   <img alt="MineContext" src="src/MineContext-Banner.svg" width="100%" height="auto">
 </picture>
 
-### MineContext: Create with Context,Clarity from Chaos
+### MineContext: Create with Context, Clarity from Chaos
 
 An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
 
