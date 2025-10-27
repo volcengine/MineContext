@@ -15,17 +15,13 @@ user_setting_path: "${CONTEXT_PATH:.}/config/user_setting.yaml"
 
 # 文档处理配置
 document_processing:
-  # 使用 VLM + Embedding 模型处理文档
-  # 优势：成本低，无需 GPU，使用 API 调用
-  # 适用：文档处理场景，支持 PDF、Word、图片等格式
   enabled: true
-  batch_size: 3        # VLM 一次处理的图像数量（建议 2-5）
-  max_image_size: 1024 # 图像最大尺寸（像素），较大的尺寸提高精度但增加 API 成本
-  dpi: 200             # PDF 转图像的 DPI（建议 150-300）
-  # 成本估算：每页约 0.01-0.05 元（取决于 VLM API 提供商）
+  batch_size: 3        # Number of images processed by VLM at once (recommended 2-5)
+  max_image_size: 1024 # Maximum image size (pixels), larger sizes increase accuracy but also API costs
+  dpi: 200             # DPI for converting PDF to images (recommended 150-300)
 
-  # 逐页检测配置（优化 VLM 使用）
-  text_threshold_per_page: 50 # 扫描件判断阈值：文本少于此值认为是扫描件（需要 VLM）
+  # Page-by-page detection configuration (to optimize VLM usage)
+  text_threshold_per_page: 50 # Scanned document threshold: pages with fewer characters than this value are considered scanned documents (requires VLM)
 
 vlm_model:
   base_url: "${LLM_BASE_URL}"
@@ -41,8 +37,6 @@ embedding_model:
   model: "${EMBEDDING_MODEL}"
   provider: ""
   output_dim: 2048
-  # 说明：Embedding 模型用于文本向量化
-  # 未来可扩展为支持多模态 embedding（同时处理文本和图像）
 
 # Context capture module
 capture:
@@ -81,10 +75,8 @@ processing:
   # Document processor configuration
   document_processor:
     enabled: true
-    batch_size: 5       # 文档批处理大小（建议 3-10）
-    batch_timeout: 30   # 批处理超时（秒，建议 20-60）
-    # 说明：文档 → 图像 → VLM 提取文本 → Embedding 向量化
-  # Screenshot processor configuration
+    batch_size: 5
+    batch_timeout: 30
   screenshot_processor:
     enabled: true
     dedup_cache_size: 30
