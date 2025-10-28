@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Modal, Image, Form, Message } from '@arco-design/web-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useSetting } from '@renderer/hooks/use-setting'
 import { useScreen, intervalRef } from '@renderer/hooks/use-screen'
 import dayjs from 'dayjs'
@@ -25,7 +26,6 @@ import EmptyStatePlaceholder from './components/empty-state-placeholder'
 import SettingsModal from './components/settings-modal'
 import { getLogger } from '@shared/logger/renderer'
 import { IpcChannel } from '@shared/IpcChannel'
-import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import type { RecordingStats } from './components/recording-stats-card'
 
 const logger = getLogger('ScreenMonitor')
@@ -44,6 +44,8 @@ export interface Activity {
 }
 
 const ScreenMonitor: React.FC = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const {
     recordInterval,
     recordingHours,
@@ -166,30 +168,28 @@ const ScreenMonitor: React.FC = () => {
   }
 
   // Start monitoring session
-  const startMonitoring = () => {
+  const startMonitoring = useMemoizedFn(() => {
     // Take screenshot, save locally, and send to backend
     startCapture()
     // Start polling for new activities
     startActivityPolling()
     // Start polling for recording stats
     startStatsPolling()
-  }
+  })
 
   // Stop monitoring
-  const stopMonitoring = () => {
-    if (isMonitoring) {
-      setIsMonitoring(false)
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-      // Stop polling for new activities
-      stopActivityPolling()
-      // Stop polling for recording stats
-      stopStatsPolling()
-      clearCache()
+  const stopMonitoring = useMemoizedFn(() => {
+    setIsMonitoring(false)
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
     }
-  }
+    // Stop polling for new activities
+    stopActivityPolling()
+    // Stop polling for recording stats
+    stopStatsPolling()
+    clearCache()
+  })
 
   // Pause monitoring (when screen is locked)
   const pauseMonitoring = useMemoizedFn(() => {
@@ -329,7 +329,7 @@ const ScreenMonitor: React.FC = () => {
     }
   })
 
-  // Listen for tray toggle recording event
+  // Listen for tray toggle recording event (from Router.tsx when already on this page)
   useEffect(() => {
     const handleTrayToggleRecording = () => {
       if (isMonitoring) {
@@ -339,16 +339,31 @@ const ScreenMonitor: React.FC = () => {
       }
     }
 
-    // Listen for the event from main process
-    window.electron.ipcRenderer.on(IpcServerPushChannel.Tray_ToggleRecording, handleTrayToggleRecording)
+    window.addEventListener('tray-toggle-recording', handleTrayToggleRecording)
 
     return () => {
-      window.electron.ipcRenderer.removeListener(
-        IpcServerPushChannel.Tray_ToggleRecording,
-        handleTrayToggleRecording
-      )
+      window.removeEventListener('tray-toggle-recording', handleTrayToggleRecording)
     }
-  }, [isMonitoring])
+  }, [isMonitoring, startMonitoring, stopMonitoring])
+
+  // Handle navigation state when coming from tray icon while on a different page
+  useEffect(() => {
+    const state = location.state as { toggleRecording?: boolean } | null
+    if (state?.toggleRecording) {
+      // Clear the navigation state first to prevent re-triggering
+      navigate(location.pathname, { replace: true, state: {} })
+
+      // Toggle recording based on current state
+      if (isMonitoring) {
+        stopMonitoring()
+      } else {
+        startMonitoring()
+      }
+    }
+    // Only depend on location.state to avoid re-triggering when isMonitoring changes
+    // startMonitoring and stopMonitoring are memoized so they're stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
 
   const openSettings = useMemoizedFn(async () => {
     // Refresh the application list before opening settings

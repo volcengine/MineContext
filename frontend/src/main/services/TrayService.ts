@@ -52,8 +52,26 @@ export class TrayService {
         this.trayIconRecording.setTemplateImage(true)
 
         logger.info('[Tray] macOS PNG icons loaded successfully')
+      } else if (process.platform === 'win32') {
+        // Windows uses ICO format with separate default and recording icons
+        const defaultIconPath = path.join(__dirname, '../../resources/navigation-lighter-default.ico')
+        const recordingIconPath = path.join(__dirname, '../../resources/navigation-lighter-record.ico')
+
+        const defaultIcon = nativeImage.createFromPath(defaultIconPath)
+        const recordingIcon = nativeImage.createFromPath(recordingIconPath)
+
+        if (defaultIcon.isEmpty() || recordingIcon.isEmpty()) {
+          logger.error('[Tray] Failed to load Windows ICO icons')
+          return
+        }
+
+        // Windows handles ICO sizing automatically, no need to resize
+        this.trayIcon = defaultIcon
+        this.trayIconRecording = recordingIcon
+
+        logger.info('[Tray] Windows ICO icons loaded successfully')
       } else {
-        // Other platforms use the standard PNG icon
+        // Other platforms (Linux) use the standard PNG icon
         const iconPath = path.join(__dirname, '../../resources/icon.png')
         logger.info(`[Tray] Loading tray icon from: ${iconPath}`)
 
@@ -65,9 +83,9 @@ export class TrayService {
         }
 
         this.trayIcon = originalIcon.resize({ width: 16, height: 16 })
-        this.trayIconRecording = this.trayIcon // Use same icon for non-macOS platforms
+        this.trayIconRecording = this.trayIcon // Use same icon for Linux
 
-        logger.info('[Tray] Non-macOS icon loaded successfully')
+        logger.info('[Tray] Linux icon loaded successfully')
       }
 
       logger.info('[Tray] All tray icons loaded successfully')
@@ -184,26 +202,6 @@ export class TrayService {
     return Menu.buildFromTemplate(menuTemplate)
   }
 
-  /**
-   * Toggle window visibility
-   */
-  private toggleWindow(): void {
-    try {
-      if (this.mainWindow.isVisible()) {
-        this.mainWindow.hide()
-      } else {
-        this.mainWindow.show()
-        this.mainWindow.focus()
-      }
-
-      // Update menu to reflect new window state
-      if (this.tray) {
-        this.tray.setContextMenu(this.buildContextMenu())
-      }
-    } catch (error) {
-      logger.error('Failed to toggle window:', error)
-    }
-  }
 
   /**
    * Toggle recording state

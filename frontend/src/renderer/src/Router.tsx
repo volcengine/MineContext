@@ -50,16 +50,11 @@ const AppContent: FC = () => {
     }
   }, [navigate])
 
-  // Listen for tray toggle recording event (global listener)
+  // Global listener for tray toggle recording - navigate to screen-monitor and pass toggle signal
   useEffect(() => {
     const handleTrayToggleRecording = () => {
-      // Navigate to screen-monitor page and let it handle the toggle
-      navigate('/screen-monitor')
-
-      // Dispatch the event after a short delay to ensure the component is mounted
-      setTimeout(() => {
-        window.electron.ipcRenderer.send('tray-toggle-recording-internal')
-      }, 100)
+      // Navigate to screen-monitor page with state indicating recording should be toggled
+      navigate('/screen-monitor', { state: { toggleRecording: true } })
     }
 
     window.electron.ipcRenderer.on(IpcServerPushChannel.Tray_ToggleRecording, handleTrayToggleRecording)
