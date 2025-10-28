@@ -18,5 +18,17 @@ export const serverPushAPI = {
     } catch (error) {
       logger.error('Error setting up powerMonitor event listener', error)
     }
+  },
+  pushScreenMonitorStatus: (callback: (data: any) => void): any => {
+    try {
+      ipcRenderer.on(IpcServerPushChannel.PushScreenMonitorStatus, (_, data) => {
+        callback(data)
+      })
+      return () => {
+        ipcRenderer.off(IpcServerPushChannel.PushScreenMonitorStatus, callback)
+      }
+    } catch (error) {
+      logger.error('Error setting up screenMonitorStatus event listener', error)
+    }
   }
 }

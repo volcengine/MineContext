@@ -4,11 +4,10 @@ import { useSetting } from '@renderer/hooks/use-setting'
 import { useScreen, intervalRef } from '@renderer/hooks/use-screen'
 import dayjs from 'dayjs'
 
-import { useMemoizedFn } from 'ahooks'
+import { useMemoizedFn, useMount } from 'ahooks'
 import { useCheckVisibleSources } from './hooks/useCheckVisibleSources'
 import {
   appStore,
-  CaptureSource,
   loadableCaptureSourcesAtom,
   loadableCaptureSourcesFromSettingsAtom,
   refreshCaptureSourcesAtom,
@@ -24,6 +23,8 @@ import RecordingTimeline from './components/recording-timeline'
 import EmptyStatePlaceholder from './components/empty-state-placeholder'
 import SettingsModal from './components/settings-modal'
 import { getLogger } from '@shared/logger/renderer'
+import { CaptureSource } from '@interface/common/source'
+import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
 
 const logger = getLogger('ScreenMonitor')
 
@@ -52,10 +53,10 @@ const ScreenMonitor: React.FC = () => {
     setApplyToDays
   } = useSetting()
   const {
-    isMonitoring,
-    setIsMonitoring,
+    // isMonitoring,
+    // setIsMonitoring,
     currentSession,
-    captureScreenshot,
+    // captureScreenshot,
     hasPermission,
     grantPermission,
     selectedImage,
@@ -63,6 +64,15 @@ const ScreenMonitor: React.FC = () => {
     getNewActivities,
     getActivitiesByDate
   } = useScreen()
+  const [isMonitoring, setIsMonitoring] = useState(false)
+  useMount(() => {
+    const unlisten = window.serverPushAPI.pushScreenMonitorStatus((data: string) => {
+      setIsMonitoring(data === 'running')
+    })
+    return () => {
+      unlisten()
+    }
+  })
   // Get selectable sources
   const sources = useAtomValue(loadableCaptureSourcesAtom, { store: appStore })
   // Used to update whether the optional application list has been read to render the page
@@ -73,7 +83,7 @@ const ScreenMonitor: React.FC = () => {
   const appAllSources = useMemo(() => {
     return (sources.state === 'hasData' ? sources.data.appSources : []).filter((v) => v.isVisible)
   }, [sources])
-  const { checkVisibleSources, clearCache } = useCheckVisibleSources()
+  // const { checkVisibleSources, clearCache } = useCheckVisibleSources()
 
   const [currentDate, setCurrentDate] = useState(dayjs().toDate())
   const isToday = dayjs(currentDate).isSame(dayjs(), 'day')
@@ -162,17 +172,18 @@ const ScreenMonitor: React.FC = () => {
   }
 
   // Stop monitoring
-  const stopMonitoring = () => {
+  const stopMonitoring = async () => {
     if (isMonitoring) {
-      setIsMonitoring(false)
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
+      // setIsMonitoring(false)
+      // if (intervalRef.current) {
+      //   clearInterval(intervalRef.current)
+      //   intervalRef.current = null
+      // }
       // Stop polling for new activities
       stopActivityPolling()
-      clearCache()
+      // clearCache()
     }
+    await window.screenMonitorAPI.stopTask()
   }
 
   // Pause monitoring (when screen is locked)
@@ -260,19 +271,19 @@ const ScreenMonitor: React.FC = () => {
   }, [stopActivityPolling])
 
   // Listen for lock/unlock screen events
-  useServiceHandler('lock-screen', () => {
-    isScreenLockedRef.current = true
-    if (isMonitoring) {
-      pauseMonitoring()
-    }
-  })
+  // useServiceHandler(POWER_MONITOR_KEY.LockScreen, () => {
+  //   isScreenLockedRef.current = true
+  //   if (isMonitoring) {
+  //     pauseMonitoring()
+  //   }
+  // })
 
-  useServiceHandler('unlock-screen', () => {
-    isScreenLockedRef.current = false
-    if (isMonitoring) {
-      resumeMonitoring()
-    }
-  })
+  // useServiceHandler(POWER_MONITOR_KEY.UnlockScreen, () => {
+  //   isScreenLockedRef.current = false
+  //   if (isMonitoring) {
+  //     resumeMonitoring()
+  //   }
+  // })
 
   const openSettings = useMemoizedFn(async () => {
     // Refresh the application list before opening settings
@@ -303,70 +314,70 @@ const ScreenMonitor: React.FC = () => {
   })
 
   // Check if recording is possible under the current settings
-  const [canRecord, setCanRecord] = useState(false)
-  const checkCanRecord = useMemoizedFn(() => {
-    if (enableRecordingHours) {
-      const now = dayjs()
-      const currentDay = now.day()
-      const currentHour = now.hour()
-      const currentMinute = now.minute()
+  // const [canRecord, setCanRecord] = useState(false)
+  // const checkCanRecord = useMemoizedFn(() => {
+  //   if (enableRecordingHours) {
+  //     const now = dayjs()
+  //     const currentDay = now.day()
+  //     const currentHour = now.hour()
+  //     const currentMinute = now.minute()
 
-      // Check if within the allowed date range
-      if (applyToDays === 'weekday') {
-        // 0 = Sunday, 6 = Saturday, 1-5 = Monday-Friday
-        if (currentDay === 0 || currentDay === 6) {
-          setCanRecord(false)
-          return false
-        }
-      }
+  //     // Check if within the allowed date range
+  //     if (applyToDays === 'weekday') {
+  //       // 0 = Sunday, 6 = Saturday, 1-5 = Monday-Friday
+  //       if (currentDay === 0 || currentDay === 6) {
+  //         setCanRecord(false)
+  //         return false
+  //       }
+  //     }
 
-      // Check if within the allowed time range
-      if (recordingHours && recordingHours.length === 2) {
-        const [startTime, endTime] = recordingHours
-        const [startHour, startMinute] = startTime.split(':').map(Number)
-        const [endHour, endMinute] = endTime.split(':').map(Number)
+  //     // Check if within the allowed time range
+  //     if (recordingHours && recordingHours.length === 2) {
+  //       const [startTime, endTime] = recordingHours
+  //       const [startHour, startMinute] = startTime.split(':').map(Number)
+  //       const [endHour, endMinute] = endTime.split(':').map(Number)
 
-        const currentTotalMinutes = currentHour * 60 + currentMinute
-        const startTotalMinutes = startHour * 60 + startMinute
-        const endTotalMinutes = endHour * 60 + endMinute
+  //       const currentTotalMinutes = currentHour * 60 + currentMinute
+  //       const startTotalMinutes = startHour * 60 + startMinute
+  //       const endTotalMinutes = endHour * 60 + endMinute
 
-        // If the end time is less than the start time, it spans across midnight
-        if (endTotalMinutes < startTotalMinutes) {
-          // The current time is after the start time or before the end time
-          const result = currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes
-          setCanRecord(result)
-          return result
-        } else {
-          // Normal time range
-          const result = currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes
-          setCanRecord(result)
-          return result
-        }
-      }
-    }
-    setCanRecord(true)
-    return true
-  })
+  //       // If the end time is less than the start time, it spans across midnight
+  //       if (endTotalMinutes < startTotalMinutes) {
+  //         // The current time is after the start time or before the end time
+  //         const result = currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes
+  //         setCanRecord(result)
+  //         return result
+  //       } else {
+  //         // Normal time range
+  //         const result = currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes
+  //         setCanRecord(result)
+  //         return result
+  //       }
+  //     }
+  //   }
+  //   setCanRecord(true)
+  //   return true
+  // })
 
   // Check recording status on component mount
-  useEffect(() => {
-    checkCanRecord()
-  }, [checkCanRecord])
+  // useEffect(() => {
+  //   checkCanRecord()
+  // }, [checkCanRecord])
 
   // Periodically check recording status
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
-    if (isMonitoring && enableRecordingHours) {
-      interval = setInterval(() => {
-        checkCanRecord()
-      }, 60000) // Check every minute
-    }
-    return () => {
-      if (interval) {
-        clearInterval(interval)
-      }
-    }
-  }, [isMonitoring, enableRecordingHours, checkCanRecord])
+  // useEffect(() => {
+  //   let interval: NodeJS.Timeout | null = null
+  //   if (isMonitoring && enableRecordingHours) {
+  //     interval = setInterval(() => {
+  //       checkCanRecord()
+  //     }, 60000) // Check every minute
+  //   }
+  //   return () => {
+  //     if (interval) {
+  //       clearInterval(interval)
+  //     }
+  //   }
+  // }, [isMonitoring, enableRecordingHours, checkCanRecord])
   // Get sources
   const settingSources = useAtomValue(loadableCaptureSourcesFromSettingsAtom, { store: appStore })
   const settingScreenSources = useMemo(
@@ -385,66 +396,82 @@ const ScreenMonitor: React.FC = () => {
     const screenList = screenAllSources?.filter((source) => screenIds?.includes(source.id)) || []
     const windowList = appAllSources?.filter((source) => windowIds?.includes(source.id)) || []
     const screenSources = screenList.map((source) => source.id)
+    const a = screenSources.length > 0 ? screenSources : [get(screenAllSources[0], 'id')].filter(Boolean)
+    const b = windowList.map((source) => source.id)
     form.setFieldsValue({
-      screenSources: screenSources.length > 0 ? screenSources : [get(screenAllSources[0], 'id')].filter(Boolean),
-      windowSources: windowList.map((source) => source.id)
+      screenSources: a,
+      windowSources: b
     })
+    await window.screenMonitorAPI.updateCurrentRecordApp([
+      ...(screenSources.length > 0 ? screenList : [get(screenAllSources, '0')].filter(Boolean)),
+      ...windowList
+    ])
   })
   // When the user has not selected any screen or window, the first screen is selected by default, but you need to wait for the settings to be saved successfully to start recording, which will lose a few seconds of screenshots
-  const getVisibleSources = useMemoizedFn(async () => {
-    const screenIds = settingScreenSources?.map((v) => v.id) || []
-    const windowIds = settingWindowSources?.map((v) => v.id) || []
-    // Get raw data
-    const screenSourcesData =
-      screenIds.length === 0 && windowIds.length === 0
-        ? [get(screenAllSources, '0')].filter(Boolean)
-        : screenAllSources?.filter((source) => screenIds?.includes(source.id)) || []
-    const windowSourcesData = appAllSources?.filter((source) => windowIds?.includes(source.id)) || []
+  // const getVisibleSources = useMemoizedFn(async () => {
+  //   const screenIds = settingScreenSources?.map((v) => v.id) || []
+  //   const windowIds = settingWindowSources?.map((v) => v.id) || []
+  //   // Get raw data
+  //   const screenSourcesData =
+  //     screenIds.length === 0 && windowIds.length === 0
+  //       ? [get(screenAllSources, '0')].filter(Boolean)
+  //       : screenAllSources?.filter((source) => screenIds?.includes(source.id)) || []
+  //   const windowSourcesData = appAllSources?.filter((source) => windowIds?.includes(source.id)) || []
 
-    const visibleScreenSources = await checkVisibleSources([...screenSourcesData, ...windowSourcesData])
-    const visibleSources = [...screenSourcesData, ...windowSourcesData].filter(
-      (source) => visibleScreenSources[source.id]
-    )
+  //   const visibleScreenSources = await checkVisibleSources([...screenSourcesData, ...windowSourcesData])
+  //   const visibleSources = [...screenSourcesData, ...windowSourcesData].filter(
+  //     (source) => visibleScreenSources[source.id]
+  //   )
 
-    //
-    if (visibleSources.length === 0) {
-      logger.debug('No selected apps are currently visible, skipping capture')
-      return []
-    }
-    return visibleSources
-  })
+  //   //
+  //   if (visibleSources.length === 0) {
+  //     logger.debug('No selected apps are currently visible, skipping capture')
+  //     return []
+  //   }
+  //   return visibleSources
+  // })
   // Start taking screenshots
+  useMount(async () => {
+    await window.screenMonitorAPI.updateModelConfig({
+      interval: recordInterval * 1000,
+      enableRecordingHours,
+      recordingHours,
+      applyToDays
+    })
+  })
   const startCapture = useMemoizedFn(async () => {
     setIsMonitoring(true)
     try {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-      // Take a screenshot immediately
-      const canRecordNow = checkCanRecord()
-      if (canRecordNow) {
-        const visibleSources = await getVisibleSources()
-        if (!visibleSources) {
-          return
-        }
-        await captureScreenshot(visibleSources)
-      }
-      // Set timer
-      intervalRef.current = setInterval(async () => {
-        // Check if the timer is still valid (to prevent execution after component unmount)
-        if (intervalRef.current) {
-          const canRecordNow = checkCanRecord()
-          // Check if within the allowed recording time range
-          if (canRecordNow) {
-            const visibleSources = await getVisibleSources()
-            if (!visibleSources) {
-              return
-            }
-            await captureScreenshot(visibleSources)
-          }
-        }
-      }, recordInterval * 1000)
+      // const canRecordNow = checkCanRecord()
+      // if (canRecordNow) {
+      //   const visibleSources = await getVisibleSources()
+      //   if (!visibleSources) {
+      //     return
+      //   }
+      //   await captureScreenshot(visibleSources)
+      // }
+      // // Set timer
+      // intervalRef.current = setInterval(async () => {
+      //   // Check if the timer is still valid (to prevent execution after component unmount)
+      //   if (intervalRef.current) {
+      //     const canRecordNow = checkCanRecord()
+      //     // Check if within the allowed recording time range
+      //     if (canRecordNow) {
+      //       const visibleSources = await getVisibleSources()
+      //       if (!visibleSources) {
+      //         return
+      //       }
+      //       await captureScreenshot(visibleSources)
+      //     }
+      //   }
+      // }, recordInterval * 1000)
+      await window.screenMonitorAPI.updateModelConfig({
+        interval: recordInterval * 1000,
+        enableRecordingHours,
+        recordingHours,
+        applyToDays
+      })
+      await window.screenMonitorAPI.startTask()
     } catch (error) {
       logger.error('Failed to start screenshot service', { error })
     }
@@ -465,6 +492,13 @@ const ScreenMonitor: React.FC = () => {
     })
     handleSaveSettings()
     await appStore.set(refreshCaptureSourcesFromSettingsAtom)
+    await window.screenMonitorAPI.updateModelConfig({
+      interval: recordInterval * 1000,
+      enableRecordingHours,
+      recordingHours,
+      applyToDays
+    })
+    await window.screenMonitorAPI.updateCurrentRecordApp([...screenList, ...windowList])
   })
 
   useEffect(() => {
@@ -513,7 +547,7 @@ const ScreenMonitor: React.FC = () => {
               <RecordingTimeline
                 isMonitoring={isMonitoring}
                 isToday={isToday}
-                canRecord={canRecord}
+                canRecord={true}
                 activities={activities}
               />
             ) : (

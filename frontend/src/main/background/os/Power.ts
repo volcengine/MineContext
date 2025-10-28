@@ -6,10 +6,25 @@ import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
 import { app, BrowserWindow, powerMonitor, powerSaveBlocker } from 'electron'
-import displaySleeper from 'displaysleeper'
 const logger = getLogger('Power')
 class Power {
   private blockerId?: number
+  private suspendCallbacks: ((...params: any[]) => void)[] = []
+  private resumeCallbacks: ((...params: any[]) => void)[] = []
+  private lockScreenCallbacks: ((...params: any[]) => void)[] = []
+  private unlockScreenCallbacks: ((...params: any[]) => void)[] = []
+  public registerSuspendCallback(callback: (...params: any[]) => void) {
+    this.suspendCallbacks.push(callback)
+  }
+  public registerResumeCallback(callback: (...params: any[]) => void) {
+    this.resumeCallbacks.push(callback)
+  }
+  public registerLockScreenCallback(callback: (...params: any[]) => void) {
+    this.lockScreenCallbacks.push(callback)
+  }
+  public registerUnlockScreenCallback(callback: (...params: any[]) => void) {
+    this.unlockScreenCallbacks.push(callback)
+  }
   run() {
     this.blockerId = powerSaveBlocker.start('prevent-app-suspension')
     app.on('window-all-closed', () => {
@@ -22,6 +37,7 @@ class Power {
     // Listen for macOS power events
     powerMonitor.on('suspend', () => {
       logger.info('💤 System is about to sleep')
+      this.suspendCallbacks.forEach((callback) => callback())
       BrowserWindow.getAllWindows().forEach((window) => {
         window.webContents.send(IpcServerPushChannel.PushPowerMonitor, { eventKey: POWER_MONITOR_KEY.Suspend })
       })
@@ -29,6 +45,7 @@ class Power {
 
     powerMonitor.on('resume', () => {
       logger.info('🌞 System has woken up')
+      this.resumeCallbacks.forEach((callback) => callback())
       BrowserWindow.getAllWindows().forEach((window) => {
         window.webContents.send(IpcServerPushChannel.PushPowerMonitor, { eventKey: POWER_MONITOR_KEY.Resume })
       })
@@ -36,6 +53,7 @@ class Power {
 
     powerMonitor.on('lock-screen', () => {
       logger.info('🔒 Screen is locked')
+      this.lockScreenCallbacks.forEach((callback) => callback())
       BrowserWindow.getAllWindows().forEach((window) => {
         window.webContents.send(IpcServerPushChannel.PushPowerMonitor, { eventKey: POWER_MONITOR_KEY.LockScreen })
       })
@@ -43,18 +61,12 @@ class Power {
 
     powerMonitor.on('unlock-screen', () => {
       logger.info('🔓 Screen is unlocked')
+      this.unlockScreenCallbacks.forEach((callback) => callback())
       BrowserWindow.getAllWindows().forEach((window) => {
         window.webContents.send(IpcServerPushChannel.PushPowerMonitor, { eventKey: POWER_MONITOR_KEY.UnlockScreen })
       })
     })
-    displaySleeper.on('sleep', () => {
-      console.log('😴 显示器睡眠了！')
-    })
 
-    displaySleeper.on('wake', () => {
-      console.log('👀 显示器醒了！')
-    })
-    // speed-limit-change
     powerMonitor.on('speed-limit-change', (e) => {
       monitor.info(`🔋 Power speed limit changed to ${e.limit}`)
     })
@@ -67,7 +79,8 @@ class Power {
       powerSaveBlocker.stop(this.blockerId)
       logger.info('🛑 powerSaveBlocker stopped')
     }
+    powerMonitor.removeAllListeners()
   }
 }
 const powerWatcher = new Power()
-export { powerWatcher }
+export { powerWatcher, Power }

@@ -323,5 +323,11 @@ export enum IpcChannel {
   // settings
   Screen_Monitor_Get_Settings = 'screen-monitor:get-settings',
   Screen_Monitor_Set_Settings = 'screen-monitor:set-settings',
-  Screen_Monitor_Clear_Settings = 'screen-monitor:clear-settings'
+  Screen_Monitor_Clear_Settings = 'screen-monitor:clear-settings',
+
+  // task
+  Task_Update_Model_Config = 'task:update-model-config',
+  Task_Start = 'task:start',
+  Task_Stop = 'task:stop',
+  Task_Update_Current_Record_App = 'task:update-current-record-app'
 }

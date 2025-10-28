@@ -16,7 +16,7 @@ import {
   ScreenshotRecord
 } from '@renderer/store/screen'
 import { captureScreenshotThunk } from '@renderer/store/thunk/screenThunk'
-import { CaptureSource } from '@renderer/atom/capture.atom'
+import { CaptureSource } from '@interface/common/source'
 import axiosInstance from '@renderer/services/axiosConfig'
 import { timeToISOTimeString } from '@renderer/utils/time'
 import { getLogger } from '@shared/logger/renderer'
