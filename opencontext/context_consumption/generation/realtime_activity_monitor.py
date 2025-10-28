@@ -114,6 +114,12 @@ class RealtimeActivityMonitor:
                 },
             )
 
+            # Reset recording statistics after activity is generated
+            from opencontext.monitoring import increment_recording_stat, reset_recording_stats
+
+            increment_recording_stat("activity", 1)
+            reset_recording_stats()
+
             logger.info(
                 f"Real-time activity summary saved to the activity table, ID: {activity_id}"
             )

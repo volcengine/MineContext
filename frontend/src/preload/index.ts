@@ -88,7 +88,8 @@ const screenMonitorAPI = {
     ipcRenderer.invoke(IpcChannel.Screen_Monitor_Get_Capture_All_Sources, thumbnailSize),
   getSettings: (key: string) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Get_Settings, key),
   setSettings: (key: string, value: unknown) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Set_Settings, key, value),
-  clearSettings: (key: string) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Clear_Settings, key)
+  clearSettings: (key: string) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Clear_Settings, key),
+  getRecordingStats: () => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Get_Recording_Stats)
 }
 
 const fileService = {

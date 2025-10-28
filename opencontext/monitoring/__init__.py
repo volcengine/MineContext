@@ -11,8 +11,10 @@ from .metrics_collector import MetricsCollector
 from .monitor import (
     Monitor,
     get_monitor,
+    get_recording_stats,
     increment_context_count,
     increment_data_count,
+    increment_recording_stat,
     increment_screenshot_count,
     initialize_monitor,
     record_processing_error,
@@ -20,6 +22,8 @@ from .monitor import (
     record_processing_stage,
     record_retrieval_metrics,
     record_token_usage,
+    reset_recording_stats,
+    record_screenshot_path,
 )
 
 __all__ = [
@@ -34,5 +38,9 @@ __all__ = [
     "increment_screenshot_count",
     "increment_context_count",
     "increment_data_count",
+    "increment_recording_stat",
+    "get_recording_stats",
+    "reset_recording_stats",
     "MetricsCollector",
+    "record_screenshot_path",
 ]
