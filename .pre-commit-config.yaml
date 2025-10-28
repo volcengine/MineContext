@@ -11,3 +11,10 @@ repos:
     hooks:
       - id: isort
         exclude: ^(frontend/|node_modules/)
+
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: Run frontend lint before commit
+        entry: bash -c "cd frontend && pnpm run typecheck"
+        language: system
