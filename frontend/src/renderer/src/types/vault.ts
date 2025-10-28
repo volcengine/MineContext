@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
+import { VaultDocumentType } from '@shared/enums/global-enum'
+
 // Vault type definition
 // Note entity
 export interface VaultEntity {
@@ -17,6 +19,7 @@ export interface Vault extends VaultEntity {
   is_deleted?: number // 0: not deleted, 1: deleted, defaults to 0 (not deleted)
   created_at?: string
   updated_at?: string
+  document_type?: VaultDocumentType
 }
 
 export interface VaultTreeNode extends Vault {

@@ -157,6 +157,11 @@ class ScreenshotProcessor(BaseContextProcessor):
                 resize_image(context.content_path, self._max_image_size, self._resize_quality)
             if not self._is_duplicate(context):
                 self._input_queue.put(context)
+                # Record screenshot path for UI display
+                from opencontext.monitoring import record_screenshot_path
+
+                if context.content_path:
+                    record_screenshot_path(context.content_path)
         except Exception as e:
             logger.exception(f"Error processing screenshot {context.content_path}: {e}")
             return False
@@ -207,6 +212,12 @@ class ScreenshotProcessor(BaseContextProcessor):
         """
         Batch process screenshots using Vision LLM
         """
+        from opencontext.monitoring import (
+            increment_data_count,
+            increment_recording_stat,
+            record_processing_metrics,
+        )
+
         start_time = time.time()
 
         prompt_group = self.prompt_manager.get_prompt_group(
@@ -217,10 +228,13 @@ class ScreenshotProcessor(BaseContextProcessor):
 
         if not system_prompt or not user_prompt_template:
             logger.error("Failed to get complete prompt for screenshot_contextual_batch.")
+            increment_recording_stat("failed", len(raw_contexts))
+            increment_recording_stat("processed", len(raw_contexts))
             return False
 
         # Prepare image data
         content = []
+        increment_data_count("screenshot", count=len(raw_contexts))
         for i in range(len(raw_contexts)):
             image_path = raw_contexts[i].content_path
             if not image_path or not os.path.exists(image_path):
@@ -241,6 +255,8 @@ class ScreenshotProcessor(BaseContextProcessor):
 
         if not content:
             logger.warning("No valid images for processing.")
+            increment_recording_stat("failed", len(raw_contexts))
+            increment_recording_stat("processed", len(raw_contexts))
             return False
 
         # Prepare historical context
@@ -285,6 +301,8 @@ class ScreenshotProcessor(BaseContextProcessor):
             record_processing_error(
                 error_msg, processor_name=self.get_name(), context_count=len(raw_contexts)
             )
+            increment_recording_stat("failed", len(raw_contexts))
+            increment_recording_stat("processed", len(raw_contexts))
             return False
 
         if not raw_llm_response:
@@ -294,6 +312,8 @@ class ScreenshotProcessor(BaseContextProcessor):
             record_processing_error(
                 error_msg, processor_name=self.get_name(), context_count=len(raw_contexts)
             )
+            increment_recording_stat("failed", len(raw_contexts))
+            increment_recording_stat("processed", len(raw_contexts))
             return False
 
         raw_resp = parse_json_from_response(raw_llm_response)
@@ -307,6 +327,8 @@ class ScreenshotProcessor(BaseContextProcessor):
             record_processing_error(
                 error_msg, processor_name=self.get_name(), context_count=len(raw_contexts)
             )
+            increment_recording_stat("failed", len(raw_contexts))
+            increment_recording_stat("processed", len(raw_contexts))
             return False
 
         newly_processed_contexts, removed_context_ids = await self._create_processed_contexts(
@@ -324,7 +346,6 @@ class ScreenshotProcessor(BaseContextProcessor):
 
         # Record successful processing metrics
         try:
-            from opencontext.monitoring import record_processing_metrics
 
             duration_ms = int((time.time() - start_time) * 1000)
             record_processing_metrics(
@@ -333,6 +354,17 @@ class ScreenshotProcessor(BaseContextProcessor):
                 duration_ms=duration_ms,
                 context_count=len(newly_processed_contexts),
             )
+
+            # Record context count by type
+            for context in newly_processed_contexts:
+                if context.extracted_data.context_type:
+                    increment_data_count(
+                        "context", count=1, context_type=context.extracted_data.context_type.value
+                    )
+
+            # Increment processed screenshots count
+            increment_recording_stat("processed", len(raw_contexts))
+
         except ImportError:
             pass
         return True

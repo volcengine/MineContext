@@ -12,7 +12,7 @@ import {
   updateVaultPositionThunk,
   renameVaultThunk,
   createFolderThunk
-} from '@renderer/store/thunk/vaultThunk'
+} from '@renderer/store/thunk/vault-thunk'
 import { Vault, VaultTreeNode } from '@renderer/types'
 import { findNodeById, findParentNodeById, collectAllNodeIds, getNodePath, traverseNodes } from '@renderer/utils/vault'
 import { getLogger } from '@shared/logger/renderer'

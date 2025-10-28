@@ -34,6 +34,7 @@ import { updateAppDataConfig } from './utils/init'
 import { localStoreService } from './services/LocalStoreService'
 import { activityService } from './services/ActivityService'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
+import { VaultDocumentType } from '@shared/enums/global-enum'
 
 const logger = getLogger('IPC')
 
@@ -350,9 +351,9 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
 
   // Database (better-sqlite3 同步操作)
   // 数据库相关的IPC处理器
-  ipcMain.handle(IpcChannel.Database_GetAllVaults, async (_, type: string = 'vaults') => {
+  ipcMain.handle(IpcChannel.Database_GetAllVaults, async () => {
     await ensureDbInitialized()
-    return db.getVaults(type)
+    return db.getVaults()
   })
 
   ipcMain.handle(IpcChannel.Database_GetVaultsByParentId, async (_, parentId: number) => {
@@ -410,6 +411,11 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   ipcMain.handle(IpcChannel.Database_RestoreVaultById, async (_, id: number) => {
     await ensureDbInitialized()
     return db.restoreVaultById(id)
+  })
+
+  ipcMain.handle(IpcChannel.Database_GetVaultsByDocumentType, async (_, documentType: VaultDocumentType) => {
+    await ensureDbInitialized()
+    return db.getVaultsByDocumentType(documentType)
   })
 
   // activity
@@ -532,4 +538,29 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
     return localStoreService.setSetting(key, value)
   })
   ipcMain.handle(IpcChannel.Screen_Monitor_Clear_Settings, (_, key: string) => localStoreService.clearSetting(key))
+
+  // Get recording statistics
+  ipcMain.handle(IpcChannel.Screen_Monitor_Get_Recording_Stats, async () => {
+    try {
+      const backendPort = getBackendPort()
+      const url = `http://127.0.0.1:${backendPort}/api/monitoring/recording-stats`
+
+      const response = await fetch(url, {
+        headers: {
+          'X-Auth-Token': 'minecontext_frontend_token'
+        }
+      })
+
+      if (!response.ok) {
+        logger.error(`Failed to get recording stats: HTTP ${response.status}`)
+        return null
+      }
+
+      const result = await response.json()
+      return result.success ? result.data : null
+    } catch (error) {
+      logger.error('Failed to get recording stats:', error)
+      return null
+    }
+  })
 }

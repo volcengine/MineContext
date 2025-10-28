@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  displaysleeper: link:../../../Library/pnpm/global/5/node_modules/displaysleeper
-
 importers:
 
   .:
@@ -71,9 +68,6 @@ importers:
       dayjs:
         specifier: ^1.11.18
         version: 1.11.18
-      displaysleeper:
-        specifier: link:../../../Library/pnpm/global/5/node_modules/displaysleeper
-        version: link:../../../Library/pnpm/global/5/node_modules/displaysleeper
       electron-log:
         specifier: ^5.4.3
         version: 5.4.3

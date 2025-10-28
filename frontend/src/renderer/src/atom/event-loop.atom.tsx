@@ -41,13 +41,13 @@ export const useServiceHandler = (eventKey: POWER_MONITOR_KEY, fn: (payload: any
     } else {
       emitter.on(eventKey, stableFn)
     }
-    logger.info('register event handler', eventKey, emitter.all.get(eventKey))
+    logger.info('register event handler', eventKey, !!emitter.all.get(eventKey))
     return () => {
       if (!scope) {
         emitter.off(eventKey, stableFn)
-        logger.info('unregister event handler', eventKey, emitter.all.get(eventKey))
+        logger.info('unregister event handler', eventKey, !!emitter.all.get(eventKey))
       } else {
-        logger.info('unregister event handler', `${eventKey}:${scope}`, emitter.all.get(`${eventKey}:${scope}`))
+        logger.info('unregister event handler', `${eventKey}:${scope}`, !!emitter.all.get(`${eventKey}:${scope}`))
       }
     }
   }, [eventKey, stableFn, scope])

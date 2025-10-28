@@ -32,7 +32,8 @@ const HomePage: React.FC = () => {
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>
       <Allotment separator={false} ref={controller} defaultSizes={defaultSizes}>
         <Allotment.Pane minSize={leftMinSize}>
-          <div className="relative py-2 h-full w-full overflow-hidden flex flex-col">
+          <div style={{ height: '8px', appRegion: 'drag' } as React.CSSProperties} />
+          <div className="relative pb-2 h-full w-full overflow-hidden flex flex-col">
             <div className="bg-white rounded-2xl h-full overflow-y-auto overflow-x-hidden pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <div className="flex w-full h-[648px] pt-5 px-4 pb-3 flex-col items-start gap-4 flex-shrink-0">
                 <div className="flex justify-between items-start self-stretch w-full">

@@ -11,7 +11,6 @@ import { PerformanceObserver, monitorEventLoopDelay, IntervalHistogram } from 'p
 import { is } from '@electron-toolkit/utils'
 import Logger from 'electron-log/main'
 import dayjs from 'dayjs'
-import { isDev } from '@main/constant'
 
 const log = Logger.create({ logId: 'performance' })
 log.transports.console.level = false
@@ -24,7 +23,7 @@ log.transports.file.resolvePathFn = () => {
   const name = `${process.type}-${day}.log`
   // Differentiate log storage locations for development and production environments
   const logDir = path.join(
-    !app.isPackaged && isDev ? 'backend' : app.getPath('userData'),
+    !app.isPackaged && is.dev ? 'backend' : app.getPath('userData'),
     'frontend-logs', // Store uniformly in the logs subdirectory
     'performance'
   )

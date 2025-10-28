@@ -107,6 +107,48 @@ class ContextOperations:
             logger.error(error_msg)
             return error_msg
 
+    def add_document(self, file_path: str, context_processor_callback) -> Optional[str]:
+        """Add a document to the system."""
+        import uuid
+        from pathlib import Path
+
+        # Validate inputs
+        if not file_path:
+            return "Document path cannot be empty"
+
+        path = Path(file_path).expanduser()
+        if not path.exists():
+            return f"Document path {file_path} does not exist"
+
+        if not path.is_file():
+            return f"Path {file_path} is not a file"
+
+        try:
+            # Create RawContextProperties
+            object_id = f"doc_{uuid.uuid4()}"
+
+            raw_context = RawContextProperties(
+                source=ContextSource.LOCAL_FILE,
+                content_format=ContentFormat.FILE,
+                create_time=datetime.datetime.now(),
+                object_id=object_id,
+                content_path=str(path),
+                additional_info={
+                    "filename": path.name,
+                    "file_size": path.stat().st_size,
+                    "file_extension": path.suffix,
+                },
+            )
+
+            # Call processor
+            if not context_processor_callback(raw_context):
+                return "Failed to add document"
+            return None
+        except Exception as e:
+            error_msg = f"Failed to process document: {e}"
+            logger.error(error_msg)
+            return error_msg
+
     def search(
         self,
         query: str,

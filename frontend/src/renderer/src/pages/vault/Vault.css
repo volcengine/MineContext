@@ -116,7 +116,6 @@
 
 .vault-page-container {
   height: calc(100vh - 8px);
-  margin-top: 8px;
   overflow-y: auto;
   padding: 20px;
   border-radius: 20px;

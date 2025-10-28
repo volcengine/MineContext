@@ -98,10 +98,10 @@ export const useHomeInfo = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const daily = await window.dbAPI.getAllVaults('daily')
+        const daily = await window.dbAPI.getVaultsByDocumentType('daily')
         setDailySummary(daily)
 
-        const weekly = await window.dbAPI.getAllVaults('weekly')
+        const weekly = await window.dbAPI.getVaultsByDocumentType('weekly')
         setWeeklySummary(weekly)
 
         const startOfDay = dayjs().startOf('day').toISOString()

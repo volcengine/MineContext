@@ -1,6 +1,6 @@
 {
   "name": "MineContext",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -23,14 +23,14 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "build:externals": "node -e \"if(process.platform!=='win32')require('child_process').execSync('chmod +x build-python.sh')\"",
-    "dev": "electron-vite dev",
+    "dev": "npm run copy-backend && npm run build && electron-vite dev",
     "build": "npm run build:externals && node build-python.js && npm run typecheck && node -e \"if(process.platform==='win32'){require('fs').rmSync('./dist',{recursive:true,force:true})}else{require('child_process').execSync('rm -rf ./dist')}\" && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run copy-backend && npm run build && electron-builder --win",
     "build:mac": "npm run copy-backend && npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
-    "rebuild": "electron-rebuild -f -w displaysleeper",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
     "copy-backend": "node scripts/copy-prebuilt-backend.js",
     "electron-pack": "npm run build && electron-builder --mac"
   },
@@ -55,7 +55,6 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.18",
-    "displaysleeper": "link:../../../Library/pnpm/global/5/node_modules/displaysleeper",
     "electron-log": "^5.4.3",
     "electron-store": "^10.1.0",
     "electron-updater": "^6.3.9",
@@ -144,9 +143,6 @@
     "onlyBuiltDependencies": [
       "electron",
       "esbuild"
-    ],
-    "overrides": {
-      "displaysleeper": "link:../../../Library/pnpm/global/5/node_modules/displaysleeper"
-    }
+    ]
   }
 }

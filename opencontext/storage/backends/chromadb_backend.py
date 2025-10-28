@@ -39,7 +39,8 @@ class ChromaDBBackend(IVectorStorageBackend):
 
     def __init__(self):
         self._client: Optional[chromadb.Client] = None
-        self._collections: Dict[str, chromadb.Collection] = {}  # context_type -> collection
+        # context_type -> collection
+        self._collections: Dict[str, chromadb.Collection] = {}
         self._initialized = False
         self._config = None
         self._is_server_mode = False
@@ -59,16 +60,22 @@ class ChromaDBBackend(IVectorStorageBackend):
             # Register exit handler
             atexit.register(self._cleanup)
 
-            # Register signal handlers
-            signal.signal(signal.SIGTERM, self._signal_handler)
-            signal.signal(signal.SIGINT, self._signal_handler)
+            # Register signal handlers (only works in main thread)
+            try:
+                signal.signal(signal.SIGTERM, self._signal_handler)
+                signal.signal(signal.SIGINT, self._signal_handler)
+                logger.debug("ChromaDB signal handlers registered")
+            except ValueError as e:
+                # Signal handlers can only be registered in the main thread
+                logger.debug(f"Cannot register signal handlers (not in main thread): {e}")
 
             self._cleanup_registered = True
             logger.debug("ChromaDB graceful shutdown handlers registered")
 
     def _signal_handler(self, signum, frame):
         """Handle system signals"""
-        logger.info(f"Received signal {signum}, safely shutting down ChromaDB...")
+        logger.info(
+            f"Received signal {signum}, safely shutting down ChromaDB...")
         self._cleanup()
 
     def _cleanup(self) -> None:
@@ -103,7 +110,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                         metadatas=write_op["metadatas"],
                         embeddings=write_op["embeddings"],
                     )
-                    logger.debug(f"Completed pending write: {len(write_op['ids'])} documents")
+                    logger.debug(
+                        f"Completed pending write: {len(write_op['ids'])} documents")
                 except Exception as e:
                     logger.error(f"Failed to flush write operation: {e}")
 
@@ -126,7 +134,7 @@ class ChromaDBBackend(IVectorStorageBackend):
                 # Server mode
                 self._is_server_mode = True
                 host = chroma_config.get("host", "localhost")
-                port = chroma_config.get("port", 8000)
+                port = chroma_config.get("port", 1733)
                 ssl = chroma_config.get("ssl", False)
                 headers = chroma_config.get("headers", {})
                 settings = chroma_config.get("settings", {})
@@ -135,16 +143,19 @@ class ChromaDBBackend(IVectorStorageBackend):
                 protocol = "https" if ssl else "http"
                 server_url = f"{protocol}://{host}:{port}"
 
-                logger.info(f"Initializing ChromaDB in server mode: {server_url}")
+                logger.info(
+                    f"Initializing ChromaDB in server mode: {server_url}")
 
                 # Create HTTP client and test connection
-                self._client = self._create_server_client(host, port, ssl, headers, settings)
+                self._client = self._create_server_client(
+                    host, port, ssl, headers, settings)
 
             else:
                 # Local persistence mode
                 self._is_server_mode = False
                 path = chroma_config.get("path", "./persist/chromadb")
-                logger.info(f"Initializing ChromaDB in local persistence mode: {path}")
+                logger.info(
+                    f"Initializing ChromaDB in local persistence mode: {path}")
 
                 if path:
                     self._client = chromadb.PersistentClient(path=path)
@@ -160,7 +171,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                 collection_name = f"{context_type}"
                 collection = self._client.get_or_create_collection(
                     name=collection_name,
-                    metadata={"hnsw:space": "cosine", "context_type": context_type},
+                    metadata={"hnsw:space": "cosine",
+                              "context_type": context_type},
                 )
                 self._collections[context_type] = collection
 
@@ -171,7 +183,8 @@ class ChromaDBBackend(IVectorStorageBackend):
             return True
 
         except Exception as e:
-            logger.exception(f"ChromaDB vector backend initialization failed: {e}")
+            logger.exception(
+                f"ChromaDB vector backend initialization failed: {e}")
             return False
 
     def _create_server_client(
@@ -185,7 +198,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                     port=port,
                     ssl=ssl,
                     headers=headers,
-                    settings=chromadb.Settings(**settings) if settings else None,
+                    settings=chromadb.Settings(
+                        **settings) if settings else None,
                 )
 
                 # Test connection
@@ -209,7 +223,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                     logger.error(
                         f"Could not connect to ChromaDB server {server_url} (all retries failed): {e}"
                     )
-                    raise RuntimeError(f"ChromaDB server connection failed: {e}")
+                    raise RuntimeError(
+                        f"ChromaDB server connection failed: {e}")
 
     def _check_connection(self) -> bool:
         """Check connection health"""
@@ -237,12 +252,13 @@ class ChromaDBBackend(IVectorStorageBackend):
             try:
                 chroma_config = self._config.get("config", {})
                 host = chroma_config.get("host", "localhost")
-                port = chroma_config.get("port", 8000)
+                port = chroma_config.get("port", 1733)
                 ssl = chroma_config.get("ssl", False)
                 headers = chroma_config.get("headers", {})
                 settings = chroma_config.get("settings", {})
 
-                self._client = self._create_server_client(host, port, ssl, headers, settings)
+                self._client = self._create_server_client(
+                    host, port, ssl, headers, settings)
 
                 # Re-initialize collections
                 self._collections.clear()
@@ -251,7 +267,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                     collection_name = f"{context_type}"
                     collection = self._client.get_or_create_collection(
                         name=collection_name,
-                        metadata={"hnsw:space": "cosine", "context_type": context_type},
+                        metadata={"hnsw:space": "cosine",
+                                  "context_type": context_type},
                     )
                     self._collections[context_type] = collection
 
@@ -298,7 +315,8 @@ class ChromaDBBackend(IVectorStorageBackend):
         )
 
         if context.extracted_data:
-            extracted_data_dict = context.extracted_data.model_dump(exclude_none=True)
+            extracted_data_dict = context.extracted_data.model_dump(
+                exclude_none=True)
             doc.update(extracted_data_dict)
 
         if context.metadata:
@@ -395,7 +413,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                     embeddings.append(embedding)
 
                 except Exception as e:
-                    logger.exception(f"Failed to process context {context.id}: {e}")
+                    logger.exception(
+                        f"Failed to process context {context.id}: {e}")
                     continue
 
             if not ids:
@@ -413,7 +432,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                         self._client.persist()
 
             except Exception as e:
-                logger.error(f"Batch storing context to {context_type} collection failed: {e}")
+                logger.error(
+                    f"Batch storing context to {context_type} collection failed: {e}")
 
                 # If write fails, record pending writes for later retry
                 with self._write_lock:
@@ -462,7 +482,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                 return self._chroma_result_to_context(doc)
 
         except Exception as e:
-            logger.debug(f"Failed to search context {id} in {context_type} collection: {e}")
+            logger.debug(
+                f"Failed to search context {id} in {context_type} collection: {e}")
             return None
 
     def get_all_processed_contexts(
@@ -513,7 +534,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                         }
                         if need_vector:
                             doc["embedding"] = results["embeddings"][i]
-                        context = self._chroma_result_to_context(doc, need_vector)
+                        context = self._chroma_result_to_context(
+                            doc, need_vector)
                         if context:
                             contexts.append(context)
 
@@ -521,7 +543,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                     result[context_type] = contexts
 
             except Exception as e:
-                logger.exception(f"Failed to get contexts from {context_type} collection: {e}")
+                logger.exception(
+                    f"Failed to get contexts from {context_type} collection: {e}")
                 continue
 
         return result
@@ -603,7 +626,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                         }
                         if need_vector:
                             doc["embedding"] = results["embeddings"][0][i]
-                        context = self._chroma_result_to_context(doc, need_vector)
+                        context = self._chroma_result_to_context(
+                            doc, need_vector)
                         if context:
                             distance = results["distances"][0][i]
                             score = 1 - distance  # Convert to similarity score
@@ -620,7 +644,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                     )
                     continue
                 else:
-                    logger.exception(f"Vector search failed in {context_type} collection: {e}")
+                    logger.exception(
+                        f"Vector search failed in {context_type} collection: {e}")
                     continue
 
         # Sort by score and limit results
@@ -665,7 +690,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                 # Import ProfileContextMetadata to get its field names
                 from opencontext.models.context import ProfileContextMetadata
 
-                metadata_field_names = set(ProfileContextMetadata.model_fields.keys())
+                metadata_field_names = set(
+                    ProfileContextMetadata.model_fields.keys())
             # Other context_types can add corresponding metadata models here
             # elif context_type_value == ContextType.ACTIVITY_CONTEXT.value:
             #     from opencontext.models.context import ActivityContextMetadata
@@ -700,9 +726,12 @@ class ChromaDBBackend(IVectorStorageBackend):
             # logger.info(f"extracted_data_dict: {extracted_data_dict}")
             # Create the nested Pydantic models and add them to the main context dict
             context_dict["id"] = doc_id
-            context_dict["extracted_data"] = ExtractedData.model_validate(extracted_data_dict)
-            context_dict["properties"] = ContextProperties.model_validate(properties_dict)
-            context_dict["vectorize"] = Vectorize.model_validate(vectorize_dict)
+            context_dict["extracted_data"] = ExtractedData.model_validate(
+                extracted_data_dict)
+            context_dict["properties"] = ContextProperties.model_validate(
+                properties_dict)
+            context_dict["vectorize"] = Vectorize.model_validate(
+                vectorize_dict)
 
             # If there are metadata fields, add to context_dict
             if metadata_dict:
@@ -714,7 +743,8 @@ class ChromaDBBackend(IVectorStorageBackend):
             return context
 
         except Exception as e:
-            logger.exception(f"Failed to convert ChromaDB result to ProcessedContext: {e}")
+            logger.exception(
+                f"Failed to convert ChromaDB result to ProcessedContext: {e}")
             return None
 
     def _build_where_clause(self, filters: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -780,7 +810,8 @@ class ChromaDBBackend(IVectorStorageBackend):
             count = collection.count()
             return count
         except Exception as e:
-            logger.warning(f"Failed to get record count for {context_type}: {e}")
+            logger.warning(
+                f"Failed to get record count for {context_type}: {e}")
             return 0
 
     def get_all_processed_context_counts(self) -> Dict[str, int]:
@@ -790,6 +821,7 @@ class ChromaDBBackend(IVectorStorageBackend):
 
         result = {}
         for context_type in self._collections.keys():
-            result[context_type] = self.get_processed_context_count(context_type)
+            result[context_type] = self.get_processed_context_count(
+                context_type)
 
         return result

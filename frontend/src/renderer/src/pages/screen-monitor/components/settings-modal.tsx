@@ -60,7 +60,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             Save
           </Button>
         </>
-      }>
+      }
+      style={{ width: 682 }}>
       <Form layout="vertical" form={form}>
         <div className="flex w-full flex-1 mt-5">
           <div className="flex flex-col flex-1 pr-[24px]">
@@ -135,23 +136,41 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="[&_.arco-checkbox]:!flex [&_.arco-checkbox]:!items-center">
               <div className="text-[14px] leading-[20px] text-[#42464e] mb-[4px]">Screen</div>
               <Form.Item field="screenSources">
-                <Checkbox.Group>
+                <Checkbox.Group className="!grid grid-cols-3 gap-4 relative [&_label]:!mr-0 [&_.arco-checkbox-text]:!ml-0">
                   {screenAllSources.map((source) => (
                     <Checkbox key={source.id} value={source.id}>
-                      <div className="flex items-center space-x-[4px]">
-                        {source.appIcon ? (
-                          <img
-                            src={source.appIcon || ''}
-                            alt=""
-                            className="w-[14px] h-[14px] inline-block object-cover"
-                          />
-                        ) : (
-                          <img src={screenIcon} alt="" className="w-[14px] h-[14px] inline-block object-cover" />
-                        )}
-                        <div className="text-[13px] leading-[22px] text-[#0b0b0f] !ml-[4px] line-clamp-1">
-                          {source.name}
-                        </div>
-                      </div>
+                      {({ checked }) => {
+                        return (
+                          <div className="flex flex-col items-center gap-[4px]">
+                            <div
+                              className={clsx(
+                                'w-[94px] h-[60px] min-w-[94px] min-h-[60px] rounded-[8px] overflow-hidden border relative',
+                                checked ? 'border-black' : 'border-transparent'
+                              )}>
+                              <img
+                                src={source.thumbnail || ''}
+                                alt="thumbnail"
+                                className="w-[94px] h-[60px] inline-block object-cover"
+                              />
+                              <Checkbox checked={checked} className="!absolute !top-[4px] !right-[4px]" />
+                            </div>
+                            <div className="flex items-center space-x-[4px]">
+                              {source.appIcon ? (
+                                <img
+                                  src={source.appIcon || ''}
+                                  alt=""
+                                  className="w-[14px] h-[14px] inline-block object-cover"
+                                />
+                              ) : (
+                                <img src={screenIcon} alt="" className="w-[14px] h-[14px] inline-block object-cover" />
+                              )}
+                              <div className="text-[13px] leading-[22px] text-[#0b0b0f] !ml-[4px] line-clamp-1">
+                                {source.name}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }}
                     </Checkbox>
                   ))}
                 </Checkbox.Group>

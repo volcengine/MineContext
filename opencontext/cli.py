@@ -57,7 +57,8 @@ app = FastAPI(title="OpenContext", version="1.0.0", lifespan=lifespan)
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost"],  # React dev server
+    allow_origins=["http://localhost:5173",
+                   "http://localhost"],  # React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -88,7 +89,8 @@ def _setup_static_files() -> None:
     print(f"Static path absolute: {static_path.resolve()}")
 
     if static_path.exists():
-        app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+        app.mount("/static", StaticFiles(directory=str(static_path)),
+                  name="static")
         print(f"Mounted static files from: {static_path}")
     else:
         print(f"Static path does not exist: {static_path}")
@@ -96,7 +98,8 @@ def _setup_static_files() -> None:
     # Mount screenshots directory
     screenshots_path = Path("./screenshots").resolve()
     if screenshots_path.exists():
-        app.mount("/screenshots", StaticFiles(directory=screenshots_path), name="screenshots")
+        app.mount("/screenshots",
+                  StaticFiles(directory=screenshots_path), name="screenshots")
 
 
 _setup_static_files()
@@ -126,7 +129,8 @@ def start_web_server(
     if workers > 1:
         logger.info(f"Starting with {workers} worker processes")
         # For multi-process mode, use import string to avoid the warning
-        uvicorn.run("opencontext.cli:app", host=host, port=port, log_level="info", workers=workers)
+        uvicorn.run("opencontext.cli:app", host=host, port=port,
+                    log_level="info", workers=workers)
     else:
         # For single process mode, use the existing instance
         app.state.context_lab_instance = context_lab_instance
@@ -143,13 +147,18 @@ def parse_args() -> argparse.Namespace:
         description="OpenContext - Context capture, processing, storage and consumption system"
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(
+        dest="command", help="Available commands")
 
     # Start command
-    start_parser = subparsers.add_parser("start", help="Start OpenContext server")
-    start_parser.add_argument("--config", type=str, help="Configuration file path")
-    start_parser.add_argument("--host", type=str, help="Host address (overrides config file)")
-    start_parser.add_argument("--port", type=int, help="Port number (overrides config file)")
+    start_parser = subparsers.add_parser(
+        "start", help="Start OpenContext server")
+    start_parser.add_argument("--config", type=str,
+                              help="Configuration file path")
+    start_parser.add_argument(
+        "--host", type=str, help="Host address (overrides config file)")
+    start_parser.add_argument(
+        "--port", type=int, help="Port number (overrides config file)")
     start_parser.add_argument(
         "--workers", type=int, default=1, help="Number of worker processes (default: 1)"
     )
@@ -216,7 +225,7 @@ def handle_start(args: argparse.Namespace) -> int:
     if web_config.get("enabled", True):
         # Command line arguments override config file
         host = args.host if args.host else web_config.get("host", "localhost")
-        port = args.port if args.port else web_config.get("port", 8000)
+        port = args.port if args.port else web_config.get("port", 1733)
 
         try:
             logger.info(f"Starting web server on {host}:{port}")

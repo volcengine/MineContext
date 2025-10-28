@@ -4,14 +4,13 @@
   <img alt="MineContext" src="src/MineContext-Banner.svg" width="100%" height="auto">
 </picture>
 
-### MineContext：Create with Context,Clarity from Chaos
+### MineContext: Create with Context, Clarity from Chaos
 
-An open-source,proactive context-aware AI partner,dedicated to bringing clarity and efficiency to your work, study and creation.
+An open-source, proactive context-aware AI partner, dedicated to bringing clarity and efficiency to your work, study and creation.
 
 [中文](README_zh.md) / English
 
-
- <a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">Community Best Practice</a> · <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
+<a href="https://bytedance.larkoffice.com/wiki/Hn6ewRnAwiSro7kkH6Sc1DMFnng">Community Best Practice</a> · <a href="https://github.com/volcengine/MineContext/issues">Report Issues</a> · <a href="https://bytedance.larkoffice.com/share/base/form/shrcnPAjJtlufuhBZGegll41NOh">Feedback</a>
 
 [![][release-shield]][release-link]
 [![][github-stars-shield]][github-stars-link]
@@ -21,16 +20,13 @@ An open-source,proactive context-aware AI partner,dedicated to bringing clarity 
 [![][last-commit-shield]][last-commit-shield-link]
 [![][wechat-shield]][wechat-shield-link]
 
-
 <a href="https://trendshift.io/repositories/15157" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15157" alt="volcengine%2FMineContext | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
 
 👋 Join our [WeChat / Lark / Red Note Group](https://bytedance.larkoffice.com/wiki/Hg6VwrxnTiXtWUkgHexcFTqrnpg)
 
 🌍 Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
 
-[App Download for Mac](https://github.com/volcengine/MineContext/releases/download/0.1.2/MineContext-0.1.2.dmg)
-
+<a href="https://github.com/volcengine/MineContext/releases/download/0.1.3/MacOS.arm.MineContext-0.1.3.dmg">🖥️ Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.3/Windows.MineContext-0.1.3-setup.exe">💻 Download for Windows</a>
 
 </div>
 
@@ -83,8 +79,6 @@ MineContext is a proactive context-aware AI partner. By utilizing screenshots an
 
 ![feature.gif](src/feature.gif)
 
-
-
 # 🚀 Key Features
 
 MineContext focuses on four key features: effortless collection, intelligent resurfacing, proactive delivery, and a context engineering architecture.
@@ -98,18 +92,18 @@ MineContext focuses on four key features: effortless collection, intelligent res
 4. 🎯 Context Engineering Architecture
    Supports the complete lifecycle of multimodal, multi-source data—from capture, processing, and storage to management, retrieval, and consumption—enabling the generation of six types of intelligent context.
 
-
 # 🔏 Privacy Protection
 
-##  Local-First
-MineContext places a high priority on user privacy. By default, all data is stored locally in the following path to ensure your privacy and security.
+## Local-First
 
+MineContext places a high priority on user privacy. By default, all data is stored locally in the following path to ensure your privacy and security.
 
 ```
 ~/Library/Application Support/MineContext/Data
 ```
 
-## Local AI model 
+## Local AI model
+
 In addition, we support custom model services based on the OpenAI API protocol. You can use fully local models in MineContext, ensuring that any data does not leave your local environment.
 
 # 🏁 Quick Start
@@ -167,7 +161,7 @@ Of course, here is the English translation of the provided text:
 
 ## 6. Backend Debugging
 
-MineContext supports backend debugging, which can be accessed at `http://localhost:8000`.
+MineContext supports backend debugging, which can be accessed at `http://localhost:1733`.
 
 1.View Token Consumption and Usage
 ![后台调试1](src/backend-web-1.png)
@@ -401,14 +395,14 @@ uv run opencontext start
 uv run opencontext start --config /path/to/config.yaml
 
 # Start with custom port (useful for avoiding conflicts)
-uv run opencontext start --port 8000
+uv run opencontext start --port 1733
 ```
 
 **Available Options:**
 
 - `--config`: Path to configuration file
 - `--host`: Host address (default: from config or `localhost`)
-- `--port`: Port number (default: from config or `8000`)
+- `--port`: Port number (default: from config or `1733`)
 
 **Priority**: Command-line arguments > Config file > Default values
 
@@ -417,7 +411,7 @@ Alternatively, you can activate the virtual environment manually:
 ```bash
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
-opencontext start --port 8000
+opencontext start --port 1733
 ```
 
 # 💎 The Philosophy Behind the Name

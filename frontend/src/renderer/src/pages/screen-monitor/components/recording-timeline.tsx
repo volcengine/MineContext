@@ -4,6 +4,7 @@ import { Activity } from '../screen-monitor'
 import { ActivityTimelineItem } from './activitie-timeline-item'
 import { formatTime } from '@renderer/utils/time'
 import { SCREEN_INTERVAL_TIME } from '../constant'
+import RecordingStatsCard, { RecordingStats } from './recording-stats-card'
 import dayjs from 'dayjs'
 
 const { Text } = Typography
@@ -14,9 +15,24 @@ interface RecordingTimelineProps {
   isToday: boolean
   canRecord: boolean
   activities: Activity[]
+  recordingStats: RecordingStats | null
 }
 
-const RecordingTimeline: React.FC<RecordingTimelineProps> = ({ isMonitoring, isToday, canRecord, activities }) => {
+const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
+  isMonitoring,
+  isToday,
+  canRecord,
+  activities,
+  recordingStats
+}) => {
+  console.log('[RecordingTimeline] Props:', {
+    isMonitoring,
+    isToday,
+    canRecord,
+    hasRecordingStats: !!recordingStats,
+    recordingStats
+  })
+
   return (
     <div className="mt-5">
       <Timeline labelPosition="relative">
@@ -24,14 +40,19 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({ isMonitoring, isT
           <TimelineItem label="Now">
             {isMonitoring ? (
               canRecord ? (
-                <div className="w-full text-sm">
-                  <Text className="[&_.arco-typography]: !font-bold [&_.arco-typography]: !text-[#5252FF] [&_.arco-typography]: !text-xs">
-                    Recording screen...
-                  </Text>
-                  <div className="text-[#C9C9D4]">
-                    Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen analysis.
+                <>
+                  <div className="w-full text-sm">
+                    <Text className="[&_.arco-typography]: !font-bold [&_.arco-typography]: !text-[#5252FF] [&_.arco-typography]: !text-xs">
+                      Recording screen...
+                    </Text>
+                    <div className="text-[#C9C9D4]">
+                      Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen
+                      analysis.
+                    </div>
                   </div>
-                </div>
+                  {console.log('[RecordingTimeline] About to render RecordingStatsCard')}
+                  <RecordingStatsCard stats={recordingStats} />
+                </>
               ) : (
                 <div className="w-full text-sm">
                   <Text className="[&_.arco-typography]: !font-bold [&_.arco-typography]: !text-[#FF4D4F] [&_.arco-typography]: !text-xs">

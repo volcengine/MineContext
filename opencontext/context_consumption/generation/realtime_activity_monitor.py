@@ -14,12 +14,12 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, TypedDict
 
-from opencontext.config.global_config import get_prompt_manager
+from opencontext.config.global_config import get_prompt_group
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ProcessedContext
 from opencontext.models.enums import ContentFormat, ContextType
 from opencontext.storage.global_storage import get_storage
-from opencontext.storage.unified_storage import ActivityStorageManager
 from opencontext.tools.tool_definitions import (
     ALL_PROFILE_TOOL_DEFINITIONS,
     ALL_RETRIEVAL_TOOL_DEFINITIONS,
@@ -57,30 +57,6 @@ class RealtimeActivityMonitor:
     Generates a summary of recent activity, including the most valuable context information.
     """
 
-    def __init__(self):
-        self._activity_manager = None
-
-    @property
-    def prompt_manager(self):
-        return get_prompt_manager()
-
-    @property
-    def storage(self):
-        """Get storage from the global singleton."""
-        return get_storage()
-
-    @property
-    def document_storage(self):
-        """Get document_storage from the global singleton."""
-        return self.storage
-
-    @property
-    def activity_manager(self):
-        """Lazy initialize ActivityStorageManager."""
-        if self._activity_manager is None:
-            self._activity_manager = ActivityStorageManager(self.storage)
-        return self._activity_manager
-
     def generate_realtime_activity_summary(
         self, start_time: int, end_time: int
     ) -> Optional[Dict[str, Any]]:
@@ -117,7 +93,7 @@ class RealtimeActivityMonitor:
             }
 
             # Save to the activity table, including metadata
-            activity_id = self.storage.insert_activity(
+            activity_id = get_storage().insert_activity(
                 title=summary_result["title"],
                 content=summary_result["description"],
                 resources=json.dumps(resource_data, ensure_ascii=False) if resource_data else None,
@@ -137,6 +113,12 @@ class RealtimeActivityMonitor:
                     "content": summary_result.get("content", ""),
                 },
             )
+
+            # Reset recording statistics after activity is generated
+            from opencontext.monitoring import increment_recording_stat, reset_recording_stats
+
+            increment_recording_stat("activity", 1)
+            reset_recording_stats()
 
             logger.info(
                 f"Real-time activity summary saved to the activity table, ID: {activity_id}"
@@ -165,7 +147,7 @@ class RealtimeActivityMonitor:
                 ContextType.INTENT_CONTEXT.value,
                 ContextType.STATE_CONTEXT.value,
             ]
-            all_contexts = self.storage.get_all_processed_contexts(
+            all_contexts = get_storage().get_all_processed_contexts(
                 context_types=context_types, limit=10000, offset=0, filter=filters
             )
             return all_contexts
@@ -180,9 +162,7 @@ class RealtimeActivityMonitor:
         """Generate an activity summary, including categories, insights, and the most valuable context IDs."""
         try:
             # Get the prompt template for the real-time activity monitor
-            prompt_group = self.prompt_manager.get_prompt_group(
-                "generation.realtime_activity_monitor"
-            )
+            prompt_group = get_prompt_group("generation.realtime_activity_monitor")
             system_prompt = prompt_group["system"]
             user_prompt_template = prompt_group["user"]
             # Prepare context data
@@ -217,6 +197,22 @@ class RealtimeActivityMonitor:
                 tools=ALL_RETRIEVAL_TOOL_DEFINITIONS + ALL_PROFILE_TOOL_DEFINITIONS,
                 temperature=0.1,
             )
+
+            # Save debug information
+            DebugHelper.save_generation_debug(
+                task_type="activity",
+                messages=messages,
+                response=response,
+                metadata={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "num_context_types": len(context_data),
+                    "total_contexts": (
+                        sum(len(v) for v in context_data.values()) if context_data else 0
+                    ),
+                },
+            )
+
             try:
                 from opencontext.utils.json_parser import parse_json_from_response
 

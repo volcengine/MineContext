@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Vault } from '@renderer/types/vault'
+import { VaultDocumentType } from '@shared/enums/global-enum'
 
 // Vault database operations
 export const getAllVaults = async () => {
   try {
-    const vaults = await window.dbAPI.getAllVaults()
+    const vaults = await window.dbAPI.getVaultsByDocumentType([VaultDocumentType.DailyReport, VaultDocumentType.Vaults])
     return vaults
   } catch (error) {
     console.error('Failed to get all vaults:', error)

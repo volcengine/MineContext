@@ -40,7 +40,6 @@ class ScheduleNextTask {
     }
 
     if (immediate) {
-      console.log('立即执行补偿任务...')
       run()
     } else {
       // 正常调度
@@ -94,6 +93,12 @@ class ScreenMonitorTask extends ScheduleNextTask {
       logger.info('render notify ScreenMonitorTask stop')
       ScreenMonitorTask.globalStatus = 'stopped'
       this.stopTask()
+    })
+    ipcMain.handle(IpcChannel.Task_Check_Can_Record, () => {
+      return {
+        canRecord: this.checkCanRecord(),
+        status: this.status
+      }
     })
     powerWatcher.registerResumeCallback(() => {
       logger.info('ScreenMonitorTask resume')
@@ -230,7 +235,7 @@ class ScreenMonitorTask extends ScheduleNextTask {
       logger.error('Failed to upload screenshot:', error)
     }
   }
-  // 在 ScreenMonitorTask 类中
+
   private checkCanRecord = () => {
     const { enableRecordingHours, applyToDays, recordingHours } = this.modelConfig
 

@@ -117,129 +117,6 @@ class ConfigManager:
         """
         return self._config_path
 
-    def save_config(self, config_path: Optional[str] = None) -> bool:
-        """
-        Save configuration
-
-        Args:
-            config_path (Optional[str], optional): Configuration file path. If None, the path used for loading will be used.
-
-        Returns:
-            bool: Whether the save was successful
-        """
-        if self._config is None:
-            logger.error("Configuration not loaded, cannot save")
-            return False
-
-        if config_path is None:
-            if self._config_path is None:
-                logger.error("Configuration file path not specified, cannot save")
-                return False
-
-            config_path = self._config_path
-        logger.info(f"Saving configuration to: {config_path}")
-        try:
-            # Create directory (if it doesn't exist)
-            dir_name = os.path.dirname(config_path)
-            if dir_name:
-                os.makedirs(dir_name, exist_ok=True)
-
-            # Use the configuration dictionary directly
-            config_dict = self._config
-
-            # Save configuration
-            with open(config_path, "w", encoding="utf-8") as f:
-                yaml.dump(config_dict, f, default_flow_style=False, sort_keys=False)
-
-            logger.info(f"Configuration saved successfully: {config_path}")
-            return True
-        except Exception as e:
-            logger.exception(f"Exception while saving configuration: {str(e)}")
-            return False
-
-    def get_default_config(self) -> Dict[str, Any]:
-        """
-        Get default configuration
-
-        Returns:
-            Dict[str, Any]: Default configuration dictionary
-        """
-        return {
-            "capture": {
-                "enabled": True,
-                "screenshot": {
-                    "enabled": True,
-                    "interval": 5,
-                },
-                "file_monitor": {
-                    "enabled": True,
-                    "paths": ["~/Documents"],
-                },
-            },
-            "processing": {
-                "enabled": True,
-            },
-            "storage": {
-                "enabled": True,
-            },
-            "consumption": {
-                "enabled": True,
-            },
-            "web": {
-                "enabled": True,
-                "host": "127.0.0.1",
-                "port": 8000,
-            },
-            "logging": {
-                "level": "INFO",
-            },
-        }
-
-    def update_config(self, config: Dict[str, Any]) -> None:
-        """
-        Update configuration
-
-        Args:
-            config (Dict[str, Any]): New configuration dictionary
-        """
-        self._config = config
-
-    def get_consumption_config(self) -> Optional[Dict[str, Any]]:
-        """
-        Get consumption configuration
-
-        Returns:
-            Optional[Dict[str, Any]]: Consumption configuration, or None if not loaded
-        """
-        if self._config is None:
-            return None
-
-        return self._config.get("consumption")
-
-    def get_web_config(self) -> Optional[Dict[str, Any]]:
-        """
-        Get Web UI configuration
-
-        Returns:
-            Optional[Dict[str, Any]]: Web UI configuration, or None if not loaded
-        """
-        if self._config is None:
-            return None
-
-        return self._config.get("web")
-
-    def get_logging_config(self) -> Optional[Dict[str, Any]]:
-        """
-        Get logging configuration
-
-        Returns:
-            Optional[Dict[str, Any]]: Logging configuration, or None if not loaded
-        """
-        if self._config is None:
-            return None
-
-        return self._config.get("logging")
-
     def deep_merge(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
         """
         Deep merge two dictionaries
@@ -321,6 +198,14 @@ class ConfigManager:
                 user_settings["embedding_model"] = settings["embedding_model"]
             if "content_generation" in settings:
                 user_settings["content_generation"] = settings["content_generation"]
+            if "capture" in settings:
+                user_settings["capture"] = settings["capture"]
+            if "processing" in settings:
+                user_settings["processing"] = settings["processing"]
+            if "logging" in settings:
+                user_settings["logging"] = settings["logging"]
+            if "prompts" in settings:
+                user_settings["prompts"] = settings["prompts"]
 
             # Save to file
             with open(user_setting_path, "w", encoding="utf-8") as f:
@@ -335,4 +220,33 @@ class ConfigManager:
             return True
         except Exception as e:
             logger.error(f"Failed to save user settings: {e}")
+            return False
+
+    def reset_user_settings(self) -> bool:
+        """
+        Reset user settings by deleting the user_setting.yaml file
+        """
+        if not self._config:
+            logger.error("Main configuration not loaded")
+            return False
+
+        user_setting_path = self._config.get("user_setting_path")
+        if not user_setting_path:
+            logger.error("user_setting_path not configured")
+            return False
+
+        try:
+            if os.path.exists(user_setting_path):
+                os.remove(user_setting_path)
+                logger.info(f"User settings file deleted: {user_setting_path}")
+            else:
+                logger.info(f"User settings file does not exist: {user_setting_path}")
+
+            # Reload config to apply defaults
+            if self._config_path:
+                self.load_config(self._config_path)
+
+            return True
+        except Exception as e:
+            logger.error(f"Failed to reset user settings: {e}")
             return False

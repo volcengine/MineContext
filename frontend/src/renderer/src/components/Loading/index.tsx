@@ -65,6 +65,7 @@ const LoadingComponent = ({ backendStatus }: { backendStatus: BackendStatus }) =
         background:
           'linear-gradient(165.9deg, rgb(209, 192, 211) -3.95%, rgb(217, 218, 233) 3.32%, rgb(242, 242, 242) 23.35%, rgb(253, 252, 248) 71.67%, rgb(249, 250, 236) 76.64%, rgb(255, 236, 221) 83.97%)'
       }}>
+      <div style={{ appRegion: 'drag' } as React.CSSProperties} className="absolute top-0 left-0 w-full h-[30px]" />
       <img src={logo} alt="Logo" className="w-[100px] h-[100px]" />
       <Title className="text-white text-[32px] font-bold" style={{ marginBottom: '40px', marginTop: '24px' }}>
         Welcome to MineContext

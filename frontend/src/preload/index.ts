@@ -9,6 +9,7 @@ import type { Vault } from 'src/renderer/src/types/vault'
 import { Notification } from 'src/renderer/src/types/notification'
 import { serverPushAPI } from './server-push-api'
 import { CaptureSource } from '@interface/common/source'
+import { VaultDocumentType } from '@shared/enums/global-enum'
 
 // Custom APIs for renderer
 const api = {
@@ -41,7 +42,7 @@ const dbAPI = {
   getAllActivities: () => ipcRenderer.invoke(IpcChannel.Database_GetAllActivities),
   getNewActivities: (startTime: string, endTime?: string) =>
     ipcRenderer.invoke(IpcChannel.Database_GetNewActivities, startTime, endTime),
-  getAllVaults: (type?: string) => ipcRenderer.invoke(IpcChannel.Database_GetAllVaults, type),
+  getAllVaults: () => ipcRenderer.invoke(IpcChannel.Database_GetAllVaults),
   getVaultsByParentId: (parentId: number | null) =>
     ipcRenderer.invoke(IpcChannel.Database_GetVaultsByParentId, parentId),
   getVaultById: (id: number) => ipcRenderer.invoke(IpcChannel.Database_GetVaultById, id),
@@ -56,6 +57,8 @@ const dbAPI = {
   hardDeleteVaultById: (id: number) => ipcRenderer.invoke(IpcChannel.Database_HardDeleteVaultById, id),
   createFolder: (title: string, parentId?: number) =>
     ipcRenderer.invoke(IpcChannel.Database_CreateFolder, title, parentId),
+  getVaultsByDocumentType: (documentType: VaultDocumentType | VaultDocumentType[]) =>
+    ipcRenderer.invoke(IpcChannel.Database_GetVaultsByDocumentType, documentType),
   getLatestActivity: () => ipcRenderer.invoke(IpcChannel.Database_GetLatestActivity),
 
   // tasks
@@ -87,12 +90,14 @@ const screenMonitorAPI = {
   getSettings: (key: string) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Get_Settings, key),
   setSettings: (key: string, value: unknown) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Set_Settings, key, value),
   clearSettings: (key: string) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Clear_Settings, key),
+  getRecordingStats: () => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Get_Recording_Stats),
   updateModelConfig: (config: Record<string, unknown>) =>
     ipcRenderer.invoke(IpcChannel.Task_Update_Model_Config, config),
   startTask: () => ipcRenderer.invoke(IpcChannel.Task_Start),
   stopTask: () => ipcRenderer.invoke(IpcChannel.Task_Stop),
   updateCurrentRecordApp: (appInfo: CaptureSource[]) =>
-    ipcRenderer.invoke(IpcChannel.Task_Update_Current_Record_App, appInfo)
+    ipcRenderer.invoke(IpcChannel.Task_Update_Current_Record_App, appInfo),
+  checkCanRecord: () => ipcRenderer.invoke(IpcChannel.Task_Check_Can_Record)
 }
 
 const fileService = {
