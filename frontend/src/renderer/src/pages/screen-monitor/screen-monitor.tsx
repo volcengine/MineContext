@@ -26,6 +26,7 @@ import SettingsModal from './components/settings-modal'
 import { getLogger } from '@shared/logger/renderer'
 import { IpcChannel } from '@shared/IpcChannel'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
+import type { RecordingStats } from './components/recording-stats-card'
 
 const logger = getLogger('ScreenMonitor')
 
@@ -82,7 +83,9 @@ const ScreenMonitor: React.FC = () => {
   const screenshots = currentSession?.screenshots || {}
   const [settingsVisible, setSettingsVisible] = useState(false)
   const [activities, setActivities] = useState<Activity[]>([])
+  const [recordingStats, setRecordingStats] = useState<RecordingStats | null>(null)
   const activityPollingRef = useRef<NodeJS.Timeout | null>(null)
+  const statsPollingRef = useRef<NodeJS.Timeout | null>(null)
   const lastCheckedTimeRef = useRef<string>(
     activities.length > 0
       ? activities[activities.length - 1].end_time || activities[activities.length - 1].start_time
@@ -130,11 +133,18 @@ const ScreenMonitor: React.FC = () => {
       if (isToday) {
         // If switched to today and monitoring, start polling
         startActivityPolling()
+        startStatsPolling()
       } else {
         // If switched to historical date, stop polling
         stopActivityPolling()
+        stopStatsPolling()
       }
+    } else {
+      // If not monitoring, stop all polling
+      stopActivityPolling()
+      stopStatsPolling()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate, isMonitoring, isToday])
 
   const handlePreviousDay = () => {
@@ -161,6 +171,8 @@ const ScreenMonitor: React.FC = () => {
     startCapture()
     // Start polling for new activities
     startActivityPolling()
+    // Start polling for recording stats
+    startStatsPolling()
   }
 
   // Stop monitoring
@@ -173,6 +185,8 @@ const ScreenMonitor: React.FC = () => {
       }
       // Stop polling for new activities
       stopActivityPolling()
+      // Stop polling for recording stats
+      stopStatsPolling()
       clearCache()
     }
   }
@@ -185,6 +199,7 @@ const ScreenMonitor: React.FC = () => {
       intervalRef.current = null
     }
     stopActivityPolling()
+    stopStatsPolling()
   })
 
   // Resume monitoring (when screen is unlocked)
@@ -195,6 +210,8 @@ const ScreenMonitor: React.FC = () => {
       startCapture()
       // Resume activity polling
       startActivityPolling()
+      // Resume stats polling
+      startStatsPolling()
     }
   })
 
@@ -254,12 +271,51 @@ const ScreenMonitor: React.FC = () => {
     }
   })
 
+  // Start polling for recording stats
+  const startStatsPolling = useMemoizedFn(() => {
+    if (statsPollingRef.current) {
+      clearInterval(statsPollingRef.current)
+    }
+
+    const fetchStats = async () => {
+      try {
+        if (!isToday || !isMonitoring) {
+          logger.debug('Skip fetching stats: isToday=%s, isMonitoring=%s', isToday, isMonitoring)
+          return
+        }
+        logger.debug('Fetching recording stats...')
+        const stats = await window.screenMonitorAPI.getRecordingStats()
+        logger.debug('Received recording stats:', stats)
+        if (stats) {
+          setRecordingStats(stats)
+        }
+      } catch (error) {
+        logger.error('Failed to fetch recording stats', { error })
+      }
+    }
+
+    // Execute immediately
+    fetchStats()
+    // Poll every 5 seconds
+    statsPollingRef.current = setInterval(fetchStats, 5000)
+  })
+
+  // Stop polling for recording stats
+  const stopStatsPolling = useMemoizedFn(() => {
+    if (statsPollingRef.current) {
+      clearInterval(statsPollingRef.current)
+      statsPollingRef.current = null
+    }
+    setRecordingStats(null)
+  })
+
   // Clean up polling on component unmount
   useEffect(() => {
     return () => {
       stopActivityPolling()
+      stopStatsPolling()
     }
-  }, [stopActivityPolling])
+  }, [stopActivityPolling, stopStatsPolling])
 
   // Listen for lock/unlock screen events
   useServiceHandler('lock-screen', () => {
@@ -552,6 +608,7 @@ const ScreenMonitor: React.FC = () => {
                 isToday={isToday}
                 canRecord={canRecord}
                 activities={activities}
+                recordingStats={recordingStats}
               />
             ) : (
               <EmptyStatePlaceholder

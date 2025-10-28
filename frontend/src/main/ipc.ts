@@ -566,4 +566,29 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
       logger.info('Tray hidden')
     }
   })
+
+  // Get recording statistics
+  ipcMain.handle(IpcChannel.Screen_Monitor_Get_Recording_Stats, async () => {
+    try {
+      const backendPort = getBackendPort()
+      const url = `http://127.0.0.1:${backendPort}/api/monitoring/recording-stats`
+
+      const response = await fetch(url, {
+        headers: {
+          'X-Auth-Token': 'minecontext_frontend_token'
+        }
+      })
+
+      if (!response.ok) {
+        logger.error(`Failed to get recording stats: HTTP ${response.status}`)
+        return null
+      }
+
+      const result = await response.json()
+      return result.success ? result.data : null
+    } catch (error) {
+      logger.error('Failed to get recording stats:', error)
+      return null
+    }
+  })
 }

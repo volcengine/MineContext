@@ -327,5 +327,6 @@ export enum IpcChannel {
   // settings
   Screen_Monitor_Get_Settings = 'screen-monitor:get-settings',
   Screen_Monitor_Set_Settings = 'screen-monitor:set-settings',
-  Screen_Monitor_Clear_Settings = 'screen-monitor:clear-settings'
+  Screen_Monitor_Clear_Settings = 'screen-monitor:clear-settings',
+  Screen_Monitor_Get_Recording_Stats = 'screen-monitor:get-recording-stats'
 }
