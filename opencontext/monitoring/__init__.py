@@ -23,6 +23,7 @@ from .monitor import (
     record_retrieval_metrics,
     record_token_usage,
     reset_recording_stats,
+    record_screenshot_path,
 )
 
 __all__ = [
@@ -41,4 +42,5 @@ __all__ = [
     "get_recording_stats",
     "reset_recording_stats",
     "MetricsCollector",
+    "record_screenshot_path",
 ]

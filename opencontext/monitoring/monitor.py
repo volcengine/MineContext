@@ -78,14 +78,12 @@ class ProcessingError:
 class RecordingSessionStats:
     """Recording session statistics"""
 
-    received_screenshots: int = 0
-    processing_screenshots: int = 0
     processed_screenshots: int = 0
-    succeeded_screenshots: int = 0
     failed_screenshots: int = 0
     generated_activities: int = 0
     last_activity_time: Optional[datetime] = None
     session_start_time: datetime = field(default_factory=datetime.now)
+    recent_screenshot_paths: deque = field(default_factory=lambda: deque(maxlen=5))
 
 
 class Monitor:
@@ -589,29 +587,24 @@ class Monitor:
     def increment_recording_stat(self, stat_type: str, count: int = 1):
         """Increment recording session statistics"""
         with self._lock:
-            if stat_type == "received":
-                self._recording_stats.received_screenshots += count
-            elif stat_type == "processing":
-                self._recording_stats.processing_screenshots += count
-            elif stat_type == "processed":
+            if stat_type == "processed":
                 self._recording_stats.processed_screenshots += count
-                self._recording_stats.processing_screenshots -= count
-            elif stat_type == "succeeded":
-                self._recording_stats.succeeded_screenshots += count
             elif stat_type == "failed":
                 self._recording_stats.failed_screenshots += count
             elif stat_type == "activity":
                 self._recording_stats.generated_activities += count
                 self._recording_stats.last_activity_time = datetime.now()
 
+    def record_screenshot_path(self, screenshot_path: str):
+        """Record a screenshot path to recent screenshots list"""
+        with self._lock:
+            self._recording_stats.recent_screenshot_paths.append(screenshot_path)
+
     def get_recording_stats(self) -> Dict[str, Any]:
         """Get current recording session statistics"""
         with self._lock:
             stats = {
-                "received_screenshots": self._recording_stats.received_screenshots,
-                "processing_screenshots": self._recording_stats.processing_screenshots,
                 "processed_screenshots": self._recording_stats.processed_screenshots,
-                "succeeded_screenshots": self._recording_stats.succeeded_screenshots,
                 "failed_screenshots": self._recording_stats.failed_screenshots,
                 "generated_activities": self._recording_stats.generated_activities,
                 "last_activity_time": (
@@ -659,6 +652,9 @@ class Monitor:
                 if e.timestamp >= session_start and e.processor_name == "screenshot_processor"
             ]
             stats["recent_errors"] = recent_errors[-5:]  # Last 5 errors
+
+            # Get recent screenshots (最多5张)
+            stats["recent_screenshots"] = list(self._recording_stats.recent_screenshot_paths)
 
             return stats
 
@@ -781,3 +777,8 @@ def get_recording_stats() -> Dict[str, Any]:
 def reset_recording_stats():
     """Global function: Reset recording session statistics"""
     get_monitor().reset_recording_stats()
+
+
+def record_screenshot_path(screenshot_path: str):
+    """Global function: Record a screenshot path"""
+    get_monitor().record_screenshot_path(screenshot_path)

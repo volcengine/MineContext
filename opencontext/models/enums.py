@@ -256,6 +256,8 @@ def get_context_descriptions():
     """Get formatted context type descriptions"""
     descriptions = []
     for context_type in ContextType:
+        if context_type not in ContextDescriptions:
+            continue
         desc = ContextDescriptions[context_type]
         descriptions.append(f"- {context_type.value}: {desc['description']}")
     return "\n".join(descriptions)
@@ -298,6 +300,8 @@ def get_context_type_descriptions_for_prompts():
     """
     descriptions = []
     for context_type in ContextType:
+        if context_type not in ContextDescriptions:
+            continue
         desc = ContextDescriptions[context_type]
         descriptions.append(f"*   `{context_type.value}`: {desc['description']}")
     return "\n            ".join(descriptions)
@@ -310,6 +314,8 @@ def get_context_type_descriptions_for_extraction():
     """
     descriptions = []
     for context_type in ContextType:
+        if context_type not in ContextDescriptions:
+            continue
         desc = ContextDescriptions[context_type]
         # Provide more detailed guidance for extraction scenarios, including identification indicators and examples
         key_indicators = desc.get("key_indicators", [])
@@ -337,6 +343,8 @@ def get_context_type_descriptions_for_retrieval():
     """
     descriptions = []
     for context_type in ContextType:
+        if context_type not in ContextDescriptions:
+            continue
         desc = ContextDescriptions[context_type]
         # Provide more focused descriptions for retrieval scenarios, highlighting purpose and classification priority
         description_parts = [f"`{context_type.value}`: {desc['description']}"]

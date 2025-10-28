@@ -157,10 +157,11 @@ class ScreenshotProcessor(BaseContextProcessor):
                 resize_image(context.content_path, self._max_image_size, self._resize_quality)
             if not self._is_duplicate(context):
                 self._input_queue.put(context)
-                # Increment received screenshot count
-                from opencontext.monitoring import increment_recording_stat
+                # Record screenshot path for UI display
+                from opencontext.monitoring import record_screenshot_path
 
-                increment_recording_stat("received", 1)
+                if context.content_path:
+                    record_screenshot_path(context.content_path)
         except Exception as e:
             logger.exception(f"Error processing screenshot {context.content_path}: {e}")
             return False
@@ -218,9 +219,6 @@ class ScreenshotProcessor(BaseContextProcessor):
         )
 
         start_time = time.time()
-
-        # Increment processing count
-        increment_recording_stat("processing", len(raw_contexts))
 
         prompt_group = self.prompt_manager.get_prompt_group(
             "processing.extraction.screenshot_contextual_batch"
@@ -364,8 +362,7 @@ class ScreenshotProcessor(BaseContextProcessor):
                         "context", count=1, context_type=context.extracted_data.context_type.value
                     )
 
-            # Increment succeeded screenshots count
-            increment_recording_stat("succeeded", len(raw_contexts))
+            # Increment processed screenshots count
             increment_recording_stat("processed", len(raw_contexts))
 
         except ImportError:

@@ -56,10 +56,7 @@ interface ScreenMonitorAPI {
     error?: string
   }>
   getRecordingStats: () => Promise<{
-    received_screenshots: number
-    processing_screenshots: number
     processed_screenshots: number
-    succeeded_screenshots: number
     failed_screenshots: number
     generated_activities: number
     next_activity_eta_seconds: number
@@ -70,6 +67,7 @@ interface ScreenMonitorAPI {
       processor_name: string
       timestamp: string
     }>
+    recent_screenshots: string[]
   } | null>
 }
 
