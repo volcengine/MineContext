@@ -62,6 +62,7 @@
     "express": "^5.1.0",
     "jotai": "^2.14.0",
     "lucide-react": "^0.542.0",
+    "mitt": "^3.0.1",
     "node-cron": "^4.2.1",
     "node-screenshots": "^0.2.1",
     "os-proxy-config": "^1.1.2",

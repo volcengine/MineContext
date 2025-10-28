@@ -5,10 +5,11 @@ import { app, desktopCapturer, shell, systemPreferences } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import { getLogger } from '@shared/logger/main'
-import { isMac } from '@main/constant'
+import { isDev, isMac } from '@main/constant'
 import { getCacheDir } from '@main/utils/file'
 import { CaptureSourcesTools } from '@main/utils/get-capture-sources'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import { get } from 'lodash'
 
 const logger = getLogger('ScreenshotService')
 
@@ -49,46 +50,53 @@ class ScreenshotService extends CaptureSourcesTools {
    * @returns {Promise<{ success: boolean; filePath?: string; error?: string }>} - Returns the file path if the operation is successful, otherwise returns an error message.
    */
   async takeScreenshot(
-    groupIntervalTime: string,
-    sourceId: string
-  ): Promise<{ success: boolean; screenshotInfo?: { url: string; date: string; timestamp: number }; error?: string }> {
+    sourceId: string,
+    batchTime: Dayjs
+    // groupIntervalTime?: string,
+  ): Promise<{ success: boolean; screenshotInfo?: { url: string }; error?: string }> {
     try {
       const res = await this.takeSourceScreenshotTools(sourceId)
       if (res.success) {
         const source = res.source as any
         const thumbnail = source.thumbnail
         if (!thumbnail || thumbnail.isEmpty()) {
-          logger.info(`[ScreenshotService] Skipping invalid thumbnail source`, source)
+          logger.warn(`Skipping invalid thumbnail source`, source)
+          return { success: false, error: 'Invalid thumbnail source' }
         }
 
-        const pngBuffer = thumbnail.toPNG()
-        if (pngBuffer.length === 0) {
-          logger.info(`[ScreenshotService] Thumbnail is an empty buffer: ${source.name}`)
+        const image = thumbnail.toPNG()
+        if (image.length === 0) {
+          logger.info(`Thumbnail is an empty buffer: ${source.name}`)
+          return { success: false, error: 'Empty thumbnail buffer' }
         }
-
-        const image = source.thumbnail.toPNG()
-        // logger.info(
-        //   `[ScreenshotService] start Screenshot image size: ---***${dayjs().format('YYYY-MM-DD HH:mm:ss')}***--- ${image.length}`
-        // )
+        const timestamp = batchTime || dayjs()
         const userDataPath = app.getPath('userData')
-        const dateString = dayjs().format('YYYYMMDD')
-        const timestamp = dayjs().valueOf()
-        const activityPath = path.join(
-          userDataPath,
-          'Data',
-          'screenshot',
-          'activity',
-          dateString,
-          `${groupIntervalTime}-${sourceId.split(':').join('-')}`
-        )
+        const time = timestamp.format('YYYY-MM-DD')
+        const currentTime = timestamp.format('HH-mm-ss')
+        // const timestamp = dayjs().valueOf()
+        const appName = get(source, 'sourceName', sourceId.split(':').join('-'))
+        const activityPath = !isDev
+          ? path.join(userDataPath, 'Data', 'screenshot', 'activity', time, currentTime)
+          : path.join(process.cwd(), 'backend', 'screenshot', 'activity', time, currentTime)
+        console.log(activityPath)
         await fs.promises.mkdir(activityPath, { recursive: true })
-        const filePath = path.join(activityPath, `${timestamp}.png`)
+        const filePath = path.join(
+          activityPath,
+          `${appName === sourceId.split(':').join('-') ? appName : sourceId.split(':').join('-')}-${appName}.png`
+        )
         await fs.promises.writeFile(filePath, image)
-        await fs.promises.access(filePath)
+        // let base64 = ''
+        // try {
+        //   base64 = `data:image/png;base64,${image.toString('base64')}`
+        // } catch (error) {
+        //   logger.warn('takeScreenshot error', error)
+        // }
+
         const screenshotInfo = {
-          url: filePath,
-          date: dateString,
-          timestamp: timestamp
+          url: filePath
+          // date: dateString,
+          // timestamp: timestamp
+          // base64: base64 ? base64 : null
         }
         // logger.info(
         //   `[ScreenshotService] end Screenshot taken: ---***${dayjs().format('YYYY-MM-DD HH:mm:ss')}***--- ${filePath}`

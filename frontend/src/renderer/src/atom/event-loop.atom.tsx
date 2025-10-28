@@ -1,76 +1,65 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ReactNode, useEffect, useRef } from 'react'
-import { Provider, atom, useAtomValue, useSetAtom, createStore } from 'jotai'
+import { FC, PropsWithChildren, useEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
+import mitt from 'mitt'
+import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
+import { getLogger } from '@shared/logger/renderer'
+const logger = getLogger('EventLoopAtom')
+type Events<T extends string> = {
+  [key in T]: (data: any) => void
+}
 
-// Create an independent store for the event system
-export const eventLoopStore = createStore()
+const emitter = mitt<Events<POWER_MONITOR_KEY | `${POWER_MONITOR_KEY}:${string}`>>()
 
-// ---------------------------
-// 1. Global storage: key -> handlers[]
-// ---------------------------
-export const serviceDataAtom = atom<Record<string, ((payload: any) => void)[]>>({})
+export const ServiceProvider: FC<PropsWithChildren> = (props) => {
+  const { children } = props
 
-// ---------------------------
-// 2. Provider: Listen and dispatch uniformly
-// ---------------------------
-export const ServiceProvider = ({ children }: { children: ReactNode }) => {
-  const handlers = useAtomValue(serviceDataAtom, { store: eventLoopStore })
-  const handlersRef = useRef(handlers)
-
-  useEffect(() => {
-    handlersRef.current = handlers
-  }, [handlers])
-
-  const stableHandler = useMemoizedFn((raw: string) => {
-    let parsed: { key: string; payload?: any } | null = null
-
-    try {
-      // If it's already an object, use it directly
-      if (typeof raw === 'object' && raw !== null) {
-        parsed = raw as { key: string; payload?: any }
-      } else if (typeof raw === 'string') {
-        // Try JSON parsing
-        parsed = JSON.parse(raw)
-      }
-    } catch {
-      // Try simple splitting
-      if (typeof raw === 'string') {
-        const [key, payload] = raw.split(':')
-        parsed = { key, payload }
-      }
-    }
-
-    if (!parsed?.key) {
-      console.warn('[ServiceProvider] Invalid data received:', raw)
-      return
-    }
-
-    const list = handlersRef.current[parsed.key] || []
-    list.forEach((fn) => fn(parsed!.payload))
+  const stableHandler = useMemoizedFn((raw: Record<string, any>) => {
+    const { eventKey, data } = raw
+    emitter.emit(eventKey as POWER_MONITOR_KEY, data)
   })
 
   useEffect(() => {
     window.serverPushAPI.powerMonitor(stableHandler)
   }, [stableHandler])
 
-  return <Provider store={eventLoopStore}>{children}</Provider>
+  return <>{children}</>
 }
 
-// ---------------------------
-// 3. Hook: Register directly within a component
-// ---------------------------
-export const useServiceHandler = (key: string, fn: (payload: any) => void) => {
-  const setHandlers = useSetAtom(serviceDataAtom, { store: eventLoopStore })
+export const useServiceHandler = (eventKey: POWER_MONITOR_KEY, fn: (payload: any) => void, scope?: string) => {
   const stableFn = useMemoizedFn(fn)
 
   useEffect(() => {
-    // Register
-    setHandlers((prev) => {
-      const list = prev[key] || []
-      return { ...prev, [key]: [...list, stableFn] }
-    })
-  }, [key, setHandlers, stableFn])
+    if (scope) {
+      if (emitter.all.get(`${eventKey}:${scope}`)) {
+        return
+      } else {
+        emitter.on(`${eventKey}:${scope}`, stableFn)
+      }
+    } else {
+      emitter.on(eventKey, stableFn)
+    }
+    logger.info('register event handler', eventKey, !!emitter.all.get(eventKey))
+    return () => {
+      if (!scope) {
+        emitter.off(eventKey, stableFn)
+        logger.info('unregister event handler', eventKey, !!emitter.all.get(eventKey))
+      } else {
+        logger.info('unregister event handler', `${eventKey}:${scope}`, !!emitter.all.get(`${eventKey}:${scope}`))
+      }
+    }
+  }, [eventKey, stableFn, scope])
+}
+export interface ObservableTaskProps {
+  active: (...params: any[]) => void
+  inactive: (...params: any[]) => void
+}
+export const useObservableTask = (props: ObservableTaskProps, scope?: string) => {
+  const { active, inactive } = props
+  useServiceHandler(POWER_MONITOR_KEY.LockScreen, inactive, scope)
+  useServiceHandler(POWER_MONITOR_KEY.UnlockScreen, active, scope)
+  useServiceHandler(POWER_MONITOR_KEY.Suspend, inactive, scope)
+  useServiceHandler(POWER_MONITOR_KEY.Resume, active, scope)
 }

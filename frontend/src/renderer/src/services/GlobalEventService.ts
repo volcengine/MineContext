@@ -7,17 +7,14 @@ import { Notification } from '@renderer/types/notification'
 import { addEvent } from '@renderer/store/events'
 import { removeMarkdownSymbols } from '@renderer/utils/time'
 import { PushDataTypes } from '@renderer/constant/feed'
-
-// Define polling intervals (in milliseconds)
+import { getLogger } from '@shared/logger/renderer'
+const logger = getLogger('GlobalEventService')
 const NORMAL_POLLING_INTERVAL = 30 * 1000 // Normal: 30 seconds
-const LOCKED_POLLING_INTERVAL = 300 * 1000 // Locked: 5 minutes
 
 class GlobalEventService {
   private static instance: GlobalEventService
   private pollingTimer: NodeJS.Timeout | null = null
   private notificationQueue: NotificationQueue
-  private isLocked = false
-  private currentDispatch: any = null
 
   private constructor() {
     this.notificationQueue = NotificationQueue.getInstance()
@@ -30,46 +27,27 @@ class GlobalEventService {
     return GlobalEventService.instance
   }
 
-  // Set the screen lock state
-  public setLocked(locked: boolean): void {
-    if (this.isLocked === locked) return
-
-    this.isLocked = locked
-    console.log(`GlobalEventService: Screen ${locked ? 'locked' : 'unlocked'}, adjusting polling interval`)
-
-    // Restart polling to apply the new interval
-    if (this.pollingTimer && this.currentDispatch) {
-      this.stopPolling()
-      this.startPolling(this.currentDispatch)
-    }
-  }
-
   // Start polling
   public startPolling(dispatch): void {
     if (this.pollingTimer) {
       this.stopPolling()
     }
-
-    this.currentDispatch = dispatch
-    const interval = this.isLocked ? LOCKED_POLLING_INTERVAL : NORMAL_POLLING_INTERVAL
-
+    logger.info('Global event polling started')
     // Execute immediately
     this.fetchEvents(dispatch)
 
     // Set polling timer
     this.pollingTimer = setInterval(() => {
       this.fetchEvents(dispatch)
-    }, interval)
-
-    console.log('Global event polling started, interval:', interval, 'ms')
+    }, NORMAL_POLLING_INTERVAL)
   }
 
   // Stop polling
   public stopPolling(): void {
     if (this.pollingTimer) {
+      logger.info('Global event polling stopped')
       clearInterval(this.pollingTimer)
       this.pollingTimer = null
-      console.log('Global event polling stopped')
     }
   }
 
@@ -85,7 +63,9 @@ class GlobalEventService {
         this.processEventsToNotifications(res.data.data.events)
       }
     } catch (error) {
-      console.error('Error fetching global events:', error)
+      logger.error('Error fetching global events:', error)
+    } finally {
+      logger.info('Global event polling completed')
     }
   }
 

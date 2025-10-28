@@ -17,3 +17,4 @@ __pycache__
 .venv/
 uv.lock
 uv.toml
+.idea
