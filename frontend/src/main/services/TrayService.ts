@@ -5,6 +5,7 @@ import { app, BrowserWindow, Menu, nativeImage, NativeImage, Tray } from 'electr
 import path from 'path'
 import { getLogger } from '@shared/logger/main'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
+import screenshotService from './ScreenshotService'
 
 const logger = getLogger('TrayService')
 
@@ -13,37 +14,65 @@ export class TrayService {
   private mainWindow: BrowserWindow
   private isRecording: boolean = false
   private trayIcon: NativeImage | null = null
+  private trayIconRecording: NativeImage | null = null
 
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow
-    this.loadIcon()
+    this.loadIcons()
   }
 
   /**
-   * Load tray icon
+   * Load tray icons (default and recording states)
    */
-  private loadIcon() {
+  private loadIcons() {
     try {
-      const iconPath = path.join(__dirname, '../../resources/icon.png')
-      logger.info(`Loading tray icon from: ${iconPath}`)
-
-      const originalIcon = nativeImage.createFromPath(iconPath)
-
-      if (originalIcon.isEmpty()) {
-        logger.error('Failed to load icon from path')
-        return
-      }
-
-      // Simple resize for tray
       if (process.platform === 'darwin') {
-        this.trayIcon = originalIcon.resize({ width: 18, height: 18 })
+        // macOS uses one set of PNG icons
+        // Electron automatically loads @2x versions for Retina displays
+        const defaultIconPath = path.join(__dirname, '../../resources/navigation-darker-default.png')
+        const recordingIconPath = path.join(__dirname, '../../resources/navigation-darker-record.png')
+
+        // Load icons - these are 54x54 (3x resolution for 18x18 display size)
+        const defaultIcon = nativeImage.createFromPath(defaultIconPath)
+        const recordingIcon = nativeImage.createFromPath(recordingIconPath)
+
+        if (defaultIcon.isEmpty() || recordingIcon.isEmpty()) {
+          logger.error('[Tray] Failed to load PNG icons')
+          return
+        }
+
+        // Resize to 18x18 for display (icons are 54x54 which is 3x)
+        // This ensures crisp rendering on all displays
+        this.trayIcon = defaultIcon.resize({ width: 18, height: 18 })
+        this.trayIconRecording = recordingIcon.resize({ width: 18, height: 18 })
+
+        // Set as template image for macOS to enable automatic color adjustment
+        // This makes the icon white on dark menu bar and black on light menu bar
+        this.trayIcon.setTemplateImage(true)
+        this.trayIconRecording.setTemplateImage(true)
+
+        logger.info('[Tray] macOS PNG icons loaded successfully')
       } else {
+        // Other platforms use the standard PNG icon
+        const iconPath = path.join(__dirname, '../../resources/icon.png')
+        logger.info(`[Tray] Loading tray icon from: ${iconPath}`)
+
+        const originalIcon = nativeImage.createFromPath(iconPath)
+
+        if (originalIcon.isEmpty()) {
+          logger.error('[Tray] Failed to load icon from path')
+          return
+        }
+
         this.trayIcon = originalIcon.resize({ width: 16, height: 16 })
+        this.trayIconRecording = this.trayIcon // Use same icon for non-macOS platforms
+
+        logger.info('[Tray] Non-macOS icon loaded successfully')
       }
 
-      logger.info('Tray icon loaded successfully')
+      logger.info('[Tray] All tray icons loaded successfully')
     } catch (error) {
-      logger.error('Failed to load tray icon:', error)
+      logger.error('[Tray] Failed to load tray icons:', error)
     }
   }
 
@@ -59,7 +88,7 @@ export class TrayService {
     try {
       if (!this.trayIcon) {
         logger.info('Tray icon not loaded, loading now')
-        this.loadIcon()
+        this.loadIcons()
       }
 
       if (!this.trayIcon || this.trayIcon.isEmpty()) {
@@ -118,7 +147,6 @@ export class TrayService {
    * Build the context menu based on current state
    */
   private buildContextMenu(): Menu {
-    const isWindowVisible = this.mainWindow.isVisible()
     const recordingStatusLabel = this.isRecording ? '录制中' : '已暂停'
 
     const menuTemplate: Electron.MenuItemConstructorOptions[] = [
@@ -130,9 +158,10 @@ export class TrayService {
         type: 'separator'
       },
       {
-        label: isWindowVisible ? '隐藏主窗口' : '显示主窗口',
+        label: '显示主窗口',
         click: () => {
-          this.toggleWindow()
+          this.mainWindow.show()
+          this.mainWindow.focus()
         }
       },
       {
@@ -179,8 +208,23 @@ export class TrayService {
   /**
    * Toggle recording state
    */
-  private toggleRecording(): void {
+  private async toggleRecording(): Promise<void> {
     try {
+      // If not recording (i.e., trying to start recording), check permissions first
+      if (!this.isRecording) {
+        const hasPermission = await screenshotService.checkPermissions()
+
+        if (!hasPermission) {
+          logger.info('No screen recording permission, showing window and navigating to screen monitor')
+          // Show main window
+          this.mainWindow.show()
+          this.mainWindow.focus()
+          // Send navigation event to renderer
+          this.mainWindow.webContents.send(IpcServerPushChannel.Tray_NavigateToScreenMonitor)
+          return
+        }
+      }
+
       // Send event to renderer process to toggle recording
       this.mainWindow.webContents.send(IpcServerPushChannel.Tray_ToggleRecording)
       logger.info('Sent toggle recording event to renderer')
@@ -210,6 +254,13 @@ export class TrayService {
     this.isRecording = isRecording
 
     if (this.tray) {
+      // Update icon based on recording status
+      const icon = isRecording ? this.trayIconRecording : this.trayIcon
+      if (icon) {
+        this.tray.setImage(icon)
+        logger.info(`Tray icon updated for recording status: ${isRecording}`)
+      }
+
       // Update tooltip
       const tooltip = isRecording ? 'MineContext - 录制中' : 'MineContext - 已暂停'
       this.tray.setToolTip(tooltip)

@@ -23,7 +23,7 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "build:externals": "node -e \"if(process.platform!=='win32')require('child_process').execSync('chmod +x build-python.sh')\"",
-    "dev": "npm run copy-backend && npm run build && electron-vite dev",
+    "dev": "electron-vite dev",
     "build": "npm run build:externals && node build-python.js && npm run typecheck && node -e \"if(process.platform==='win32'){require('fs').rmSync('./dist',{recursive:true,force:true})}else{require('child_process').execSync('rm -rf ./dist')}\" && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",

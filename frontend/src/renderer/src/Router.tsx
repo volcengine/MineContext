@@ -4,7 +4,7 @@
 // import '@renderer/databases'
 
 import { FC, useEffect, useMemo } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom'
 
 import HomePage from './pages/home/home-page'
 import VaultPage from './pages/vault/Vault'
@@ -18,8 +18,10 @@ import 'allotment/dist/style.css'
 import { useEvents } from './hooks/use-events'
 import GlobalEventService from './services/GlobalEventService'
 import { useServiceHandler } from './atom/event-loop.atom'
+import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 
-const Router: FC = () => {
+const AppContent: FC = () => {
+  const navigate = useNavigate()
   const { startPolling, stopPolling } = useEvents()
   const eventService = GlobalEventService.getInstance()
 
@@ -32,11 +34,47 @@ const Router: FC = () => {
     eventService.setLocked(false)
   })
 
+  // Listen for tray navigation event
+  useEffect(() => {
+    const handleNavigateToScreenMonitor = () => {
+      navigate('/screen-monitor')
+    }
+
+    window.electron.ipcRenderer.on(IpcServerPushChannel.Tray_NavigateToScreenMonitor, handleNavigateToScreenMonitor)
+
+    return () => {
+      window.electron.ipcRenderer.removeListener(
+        IpcServerPushChannel.Tray_NavigateToScreenMonitor,
+        handleNavigateToScreenMonitor
+      )
+    }
+  }, [navigate])
+
+  // Listen for tray toggle recording event (global listener)
+  useEffect(() => {
+    const handleTrayToggleRecording = () => {
+      // Navigate to screen-monitor page and let it handle the toggle
+      navigate('/screen-monitor')
+
+      // Dispatch the event after a short delay to ensure the component is mounted
+      setTimeout(() => {
+        window.electron.ipcRenderer.send('tray-toggle-recording-internal')
+      }, 100)
+    }
+
+    window.electron.ipcRenderer.on(IpcServerPushChannel.Tray_ToggleRecording, handleTrayToggleRecording)
+
+    return () => {
+      window.electron.ipcRenderer.removeListener(IpcServerPushChannel.Tray_ToggleRecording, handleTrayToggleRecording)
+    }
+  }, [navigate])
+
   useEffect(() => {
     startPolling()
 
     return () => stopPolling()
   }, [])
+
   const routes = useMemo(() => {
     return (
       <Routes>
@@ -51,18 +89,24 @@ const Router: FC = () => {
   }, [])
 
   return (
+    <div
+      className="flex h-screen"
+      style={{
+        height: '100vh',
+        background:
+          'linear-gradient(165.9deg, #CEC1D2 -3.95%, #D9DAE8 3.32%, #F2F2F2 23.35%, #F2F0E6 71.67%, #F9FAED 76.64%, #FFEDDF 83.97%)'
+      }}>
+      <div style={{ appRegion: 'drag', width: '12px', height: '100%' } as React.CSSProperties} />
+      <Sidebar />
+      <div className="flex-1 flex flex-col pr-2">{routes}</div>
+    </div>
+  )
+}
+
+const Router: FC = () => {
+  return (
     <HashRouter>
-      <div
-        className="flex h-screen"
-        style={{
-          height: '100vh',
-          background:
-            'linear-gradient(165.9deg, #CEC1D2 -3.95%, #D9DAE8 3.32%, #F2F2F2 23.35%, #F2F0E6 71.67%, #F9FAED 76.64%, #FFEDDF 83.97%)'
-        }}>
-        <div style={{ appRegion: 'drag', width: '12px', height: '100%' } as React.CSSProperties} />
-        <Sidebar />
-        <div className="flex-1 flex flex-col pr-2">{routes}</div>
-      </div>
+      <AppContent />
     </HashRouter>
   )
 }

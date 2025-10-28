@@ -280,12 +280,9 @@ const ScreenMonitor: React.FC = () => {
     const fetchStats = async () => {
       try {
         if (!isToday || !isMonitoring) {
-          logger.debug('Skip fetching stats: isToday=%s, isMonitoring=%s', isToday, isMonitoring)
           return
         }
-        logger.debug('Fetching recording stats...')
         const stats = await window.screenMonitorAPI.getRecordingStats()
-        logger.debug('Received recording stats:', stats)
         if (stats) {
           setRecordingStats(stats)
         }
@@ -335,7 +332,6 @@ const ScreenMonitor: React.FC = () => {
   // Listen for tray toggle recording event
   useEffect(() => {
     const handleTrayToggleRecording = () => {
-      logger.info('Tray toggle recording event received')
       if (isMonitoring) {
         stopMonitoring()
       } else {
