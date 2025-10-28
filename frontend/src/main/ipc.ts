@@ -35,6 +35,7 @@ import { localStoreService } from './services/LocalStoreService'
 import { activityService } from './services/ActivityService'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { VaultDocumentType } from '@shared/enums/global-enum'
+import { type Dayjs } from 'dayjs'
 
 const logger = getLogger('IPC')
 
@@ -481,8 +482,8 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
     screenshotService.openPrefs()
   })
 
-  ipcMain.handle(IpcChannel.Screen_Monitor_Take_Screenshot, (_, groupIntervalTime: string, sourceId: string) =>
-    screenshotService.takeScreenshot(groupIntervalTime, sourceId)
+  ipcMain.handle(IpcChannel.Screen_Monitor_Take_Screenshot, (_, sourceId: string, batchTime: Dayjs) =>
+    screenshotService.takeScreenshot(sourceId, batchTime)
   )
 
   ipcMain.handle(IpcChannel.Screen_Monitor_Take_Source_Screenshot, (_, sourceId: string) =>

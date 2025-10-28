@@ -20,8 +20,7 @@ import { CaptureSourcesProvider } from './atom/capture.atom'
 import Settings from './pages/settings/settings'
 import { ServiceProvider, useObservableTask } from './atom/event-loop.atom'
 import { getLogger } from '@shared/logger/renderer'
-import { useMemoizedFn, useMount } from 'ahooks'
-import dayjs from 'dayjs'
+import { useMemoizedFn } from 'ahooks'
 
 const logger = getLogger('App.tsx')
 const isEnglish = true // Hardcode for now, will change later
