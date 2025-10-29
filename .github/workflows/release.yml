@@ -112,8 +112,7 @@ jobs:
       - name: Build Windows Backend
         if: matrix.os == 'windows-latest'
         run: |
-          python3 -m venv .venv
-          .venv/bin/activate
+          .venv\Scripts\activate
 
           ./build.bat
 
