@@ -40,6 +40,7 @@ jobs:
           fi
 
       - name: Set package.json version
+        working-directory: frontend
         shell: bash
         run: |
           TAG="${{ steps.get-tag.outputs.tag }}"
