@@ -147,6 +147,9 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@24.7.2)
+      '@electron/notarize':
+        specifier: ^2.5.0
+        version: 2.5.0
       '@milkdown/crepe':
         specifier: ^7.15.5
         version: 7.15.5(prosemirror-model@1.25.3)(prosemirror-state@1.4.3)(prosemirror-view@1.40.1)(typescript@5.9.2)

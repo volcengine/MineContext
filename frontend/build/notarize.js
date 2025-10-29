@@ -1,4 +1,3 @@
-require('dotenv').config()
 const { notarize } = require('@electron/notarize')
 
 exports.default = async function notarizing(context) {
@@ -21,5 +20,5 @@ exports.default = async function notarizing(context) {
     teamId: process.env.APPLE_TEAM_ID
   })
 
-  console.log('  • Notarized app:', appPath)
+  console.log('Notarized app:', appPath)
 }

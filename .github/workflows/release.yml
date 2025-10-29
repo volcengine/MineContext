@@ -84,7 +84,16 @@ jobs:
       # 获取 pnpm 缓存目录
       - name: Get pnpm store directory
         id: pnpm-store
-        run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            # Windows 使用 PowerShell 语法
+            $dir = pnpm store path
+            echo "dir=$dir" | Out-File -Encoding utf8 -Append $env:GITHUB_OUTPUT
+          else
+            # macOS / Linux 使用 bash
+            echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
 
       # 缓存 pnpm 依赖
       - name: Cache pnpm dependencies
@@ -144,6 +153,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
+          workingDirectory: frontend
           draft: true
           allowUpdates: true
           makeLatest: false

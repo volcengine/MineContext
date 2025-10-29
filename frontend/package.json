@@ -106,6 +106,7 @@
     "dexie-react-hooks": "^1.1.7",
     "electron": "^37.2.3",
     "electron-builder": "^25.1.8",
+    "@electron/notarize": "^2.5.0",
     "electron-rebuild": "^3.2.9",
     "electron-vite": "^4.0.0",
     "eslint": "^9.31.0",
