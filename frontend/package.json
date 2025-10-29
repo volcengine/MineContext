@@ -38,6 +38,7 @@
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.14",
     "@ai-sdk/react": "^2.0.30",
+    "@arco-design/color": "0.4.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@radix-ui/react-avatar": "^1.1.10",
