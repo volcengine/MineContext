@@ -85,14 +85,7 @@ jobs:
       - name: Get pnpm store directory
         id: pnpm-store
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            # Windows 使用 PowerShell 语法
-            $dir = pnpm store path
-            echo "dir=$dir" | Out-File -Encoding utf8 -Append $env:GITHUB_OUTPUT
-          else
-            # macOS / Linux 使用 bash
-            echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-          fi
+          echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
         shell: bash
 
       # 缓存 pnpm 依赖
