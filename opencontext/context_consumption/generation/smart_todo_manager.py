@@ -104,9 +104,21 @@ class SmartTodoManager:
                 )
                 todo_ids.append(todo_id)
 
-            logger.info(
-                f"Smart Todo tasks have been saved to the todo table, {len(todo_ids)} tasks."
-            )
+                # Store todo embedding to vector database for future deduplication
+                if task.get("_embedding"):
+                    try:
+                        get_storage().upsert_todo_embedding(
+                            todo_id=todo_id,
+                            content=content,
+                            embedding=task["_embedding"],
+                            metadata={
+                                "urgency": urgency,
+                                "priority": task.get("priority", "medium"),
+                            },
+                        )
+                        logger.debug(f"Stored embedding for todo {todo_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to store todo embedding for {todo_id}: {e}")
 
             # Return the complete result for external event processing
             return {
@@ -273,7 +285,10 @@ class SmartTodoManager:
             tasks = parse_json_from_response(task_response)
             tasks = self._post_process_tasks(tasks)
 
-            logger.info(f"Identified {len(tasks)} tasks from the context.")
+            # Apply vector-based deduplication
+            tasks = self._deduplicate_with_vector_search(tasks, similarity_threshold=0.85)
+
+            logger.info(f"Identified {len(tasks)} tasks from the context after deduplication.")
             return tasks
 
         except Exception as e:
@@ -352,6 +367,102 @@ class SmartTodoManager:
         except Exception as e:
             logger.debug(f"Failed to process deadline for task {task.get('title', 'unknown')}: {e}")
             return task
+
+    def _deduplicate_with_vector_search(
+        self, new_tasks: List[Dict], similarity_threshold: float = 0.85
+    ) -> List[Dict]:
+        """Deduplicate new todos using vector similarity search"""
+        from opencontext.llm.global_embedding_client import do_vectorize
+        from opencontext.models.context import Vectorize
+        from opencontext.storage.global_storage import get_storage
+
+        if not new_tasks:
+            return []
+
+        storage = get_storage()
+        filtered_tasks = []
+        filtered_count = 0
+
+        for task in new_tasks:
+            task_text = task.get("description", "")
+            if not task_text.strip():
+                continue
+
+            # Generate embedding for the task
+            try:
+                todo_vectorize = Vectorize(text=task_text)
+                do_vectorize(todo_vectorize)
+                if not todo_vectorize.vector:
+                    # If embedding generation fails, conservatively keep the task
+                    logger.warning(f"Unable to generate embedding for todo: {task_text[:50]}...")
+                    continue
+
+                task_embedding = todo_vectorize.vector
+
+            except Exception as e:
+                continue
+
+            # Search for similar historical todos
+            similar_todos = storage.search_similar_todos(
+                query_embedding=task_embedding,
+                top_k=5,
+                similarity_threshold=similarity_threshold,
+            )
+
+            if similar_todos:
+                # Found similar historical todo, filter out
+                most_similar = similar_todos[0]
+                logger.info(
+                    f"🚫 Todo filtered (duplicate with historical task): "
+                    f"New='{task_text}' | "
+                    f"Historical='{most_similar[1]}' | "
+                    f"Similarity={most_similar[2]:.3f}"
+                )
+                filtered_count += 1
+                continue
+
+            # Compare with already approved todos in this batch
+            is_duplicate_in_batch = False
+            for existing_task in filtered_tasks:
+                existing_text = existing_task.get("description", "")
+                try:
+                    # Reuse the embedding that was already computed and cached
+                    existing_embedding = existing_task.get("_embedding")
+                    if not existing_embedding:
+                        continue
+                    similarity = self._cosine_similarity(task_embedding, existing_embedding)
+
+                    if similarity >= similarity_threshold:
+                        logger.info(
+                            f"🚫 Todo filtered (duplicate within batch): "
+                            f"'{task_text}' vs '{existing_text}' | "
+                            f"Similarity={similarity:.3f}"
+                        )
+                        is_duplicate_in_batch = True
+                        filtered_count += 1
+                        break
+                except Exception as e:
+                    continue
+
+            if not is_duplicate_in_batch:
+                task["_embedding"] = task_embedding
+                filtered_tasks.append(task)
+        return filtered_tasks
+
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """Calculate cosine similarity between two vectors"""
+        try:
+            import numpy as np
+
+            v1 = np.array(vec1)
+            v2 = np.array(vec2)
+            norm_product = np.linalg.norm(v1) * np.linalg.norm(v2)
+            if norm_product == 0:
+                return 0.0
+            return float(np.dot(v1, v2) / norm_product)
+        except Exception as e:
+            logger.error(f"Failed to calculate cosine similarity: {e}")
+            return 0.0
 
     def _process_task_people(self, task: Dict) -> Dict:
         """Process task personnel information."""

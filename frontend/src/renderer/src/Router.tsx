@@ -16,22 +16,15 @@ import AIDemo from './pages/ai-demo/ai-demo'
 import Sidebar from './components/Sidebar'
 import 'allotment/dist/style.css'
 import { useEvents } from './hooks/use-events'
-import GlobalEventService from './services/GlobalEventService'
-import { useServiceHandler } from './atom/event-loop.atom'
+import { useObservableTask } from './atom/event-loop.atom'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 
 const AppContent: FC = () => {
   const navigate = useNavigate()
   const { startPolling, stopPolling } = useEvents()
-  const eventService = GlobalEventService.getInstance()
-
-  // Listen for screen lock events to adjust polling frequency
-  useServiceHandler('lock-screen', () => {
-    eventService.setLocked(true)
-  })
-
-  useServiceHandler('unlock-screen', () => {
-    eventService.setLocked(false)
+  useObservableTask({
+    active: startPolling,
+    inactive: stopPolling
   })
 
   // Listen for tray navigation event

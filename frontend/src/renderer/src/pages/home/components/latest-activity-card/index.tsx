@@ -8,6 +8,7 @@ import { useMount, useRequest } from 'ahooks'
 import { ActivityTimelineItem } from '@renderer/pages/screen-monitor/components/activitie-timeline-item'
 import { isEmpty } from 'lodash'
 import { useServiceHandler } from '@renderer/atom/event-loop.atom'
+import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
 
 interface LatestActivityCardProps {
   title: string
@@ -46,12 +47,12 @@ const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   }
 
   // Listen for screen lock events
-  useServiceHandler('lock-screen', () => {
+  useServiceHandler(POWER_MONITOR_KEY.LockScreen, () => {
     isLockedRef.current = true
     startPolling(LOCKED_INTERVAL)
   })
 
-  useServiceHandler('unlock-screen', () => {
+  useServiceHandler(POWER_MONITOR_KEY.UnlockScreen, () => {
     isLockedRef.current = false
     startPolling(NORMAL_INTERVAL)
   })

@@ -25,6 +25,7 @@ import { initLog } from '@shared/logger/init'
 import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
 import { TrayService } from './services/TrayService'
+import { ScreenMonitorTask } from './background/task/screen-monitor-task'
 initLog()
 const logger = getLogger('MainEntry')
 
@@ -175,6 +176,7 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 let server: any
+const task = new ScreenMonitorTask()
 app.whenReady().then(() => {
   logger.info('app_started', { argv: process.argv, version: app.getVersion() })
   monitor.start(5000)
@@ -217,6 +219,7 @@ app.whenReady().then(() => {
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
 
@@ -230,7 +233,7 @@ app.whenReady().then(() => {
 
   const mainWindow = createWindow()
   openInspector(mainWindow)
-  powerWatcher.run(mainWindow)
+  powerWatcher.run()
   startBackendInBackground(mainWindow)
 
   // Initialize tray service
@@ -240,6 +243,7 @@ app.whenReady().then(() => {
 
   // Start screenshot cleanup scheduled task
   startScreenshotCleanup()
+  task.init()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -266,6 +270,7 @@ app.on('window-all-closed', () => {
   monitor.stop()
   // Don't quit the app when windows are closed - keep running in tray
   // App will only quit when user clicks "Quit" from tray menu
+  task.unregister()
   logger.info('All windows closed, app continues running in tray')
 })
 

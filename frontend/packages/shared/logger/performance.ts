@@ -282,6 +282,15 @@ class PerformanceMonitor {
     this.eventLoopHistogram?.disable()
     log.info('⏹️ Performance Monitor Stopped')
   }
+  info(msg: string): void {
+    log.info(msg)
+  }
+  warn(msg: string): void {
+    log.warn(msg)
+  }
+  error(msg: string): void {
+    log.error(msg)
+  }
 }
 
 const monitor = new PerformanceMonitor()

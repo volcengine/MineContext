@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { CaptureSource } from '@renderer/atom/capture.atom'
+import { CaptureSource } from '@interface/common/source'
 
 const formatName = (sources?: CaptureSource[]) => {
   const appGroups = new Map<string, CaptureSource>()

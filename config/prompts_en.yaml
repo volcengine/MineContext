@@ -839,7 +839,7 @@ generation:
         Only extract "tasks users are explicitly required to execute" or "tasks users proactively commit to do"
       - **Avoid Noise**: Strictly exclude routine activities not related to users
       - **Return Empty If No Tasks**: If no tasks are extracted, return empty array []
-      - **Intelligent Deduplication**: Combined with historical tasks, avoid generating duplicate tasks with similar semantics or same substance
+      - **Strict Deduplication (Highest Priority)**: Must perform deduplication check before generating each task to avoid duplicate tasks
       - **Quality Control** (important):
         " Task description must be specific and clear, including clear action verbs and target objects
         " Avoid vague descriptions such as "communicate XX", "understand XX", "contact XX"

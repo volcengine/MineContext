@@ -1,24 +1,12 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
+import { CaptureSource } from '@interface/common/source'
 import { formatName } from '@renderer/utils/format-mame'
 import { atom, createStore, Provider } from 'jotai'
 import { loadable } from 'jotai/utils'
 import { get } from 'lodash'
 import { FC, PropsWithChildren } from 'react'
-export interface CaptureSource {
-  id: string
-  name: string
-  type: 'screen' | 'window'
-  thumbnail: string | null
-  appIcon: string | null
-  isVisible: boolean
-  // Optional properties for windows added from the native module
-  isVirtual?: boolean
-  appName?: string
-  windowTitle?: string
-  windowId?: number
-}
 
 const fetchCaptureSources = async () => {
   if (!window.screenMonitorAPI || !window.screenMonitorAPI.getCaptureAllSources) {
