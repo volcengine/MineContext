@@ -65,9 +65,11 @@ export class TrayService {
           return
         }
 
-        // Windows handles ICO sizing automatically, no need to resize
-        this.trayIcon = defaultIcon
-        this.trayIconRecording = recordingIcon
+        // Resize to 16x16 for Windows tray (standard tray icon size on Windows)
+        // Even though ICO files can contain multiple sizes, explicitly resizing
+        // ensures the correct size is used for the system tray
+        this.trayIcon = defaultIcon.resize({ width: 16, height: 16 })
+        this.trayIconRecording = recordingIcon.resize({ width: 16, height: 16 })
 
         logger.info('[Tray] Windows ICO icons loaded successfully')
       } else {
