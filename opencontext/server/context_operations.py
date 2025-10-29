@@ -191,7 +191,6 @@ class ContextOperations:
                                 "title": context.extracted_data.title,
                                 "summary": context.extracted_data.summary,
                                 "context_type": context.extracted_data.context_type.value,
-                                "tags": context.extracted_data.tags,
                                 "keywords": context.extracted_data.keywords,
                             },
                             "properties": {"create_time": context.properties.create_time},

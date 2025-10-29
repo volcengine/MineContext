@@ -37,14 +37,12 @@ class ContextIn(BaseModel):
     content_format: ContentFormat
     data: Any
     metadata: Optional[dict] = {}
-    tags: Optional[List[str]] = []
 
 
 class UpdateContextIn(BaseModel):
     title: Optional[str] = None
     summary: Optional[str] = None
     keywords: Optional[List[str]] = None
-    tags: Optional[List[str]] = None
 
 
 class QueryIn(BaseModel):
