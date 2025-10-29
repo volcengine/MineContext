@@ -46,7 +46,8 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: build/notarize.js
+  notarize:
+    teamId: ${APPLE_TEAM_ID}
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -61,6 +62,7 @@ appImage:
 npmRebuild: false
 nodeGypRebuild: false
 buildDependenciesFromSource: false
+afterSign: scripts/notarize.js
 publish:
   provider: github
   owner: keshidong
