@@ -11,7 +11,6 @@ import datetime
 import json
 from typing import Any, Dict, List, Optional
 
-from opencontext.config import GlobalConfig
 from opencontext.config.global_config import get_prompt_group
 from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages_async
