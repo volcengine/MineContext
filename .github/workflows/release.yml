@@ -82,14 +82,22 @@ jobs:
         working-directory: frontend
         run: pnpm install --frozen-lockfile
 
-      - name: Build Mac
+      - name: Build Mac Backend
         if: matrix.os == 'macos-latest'
         run: |
-          sudo -H pip install setuptools
           chmod +x ./build.sh
           ./build.sh
 
-          cd ./frontend
+      - name: Build Windows Backend
+        if: matrix.os == 'windows-latest'
+        run: |
+          chmod +x ./build.bat
+          ./build.bat
+
+      - name: Build Mac
+        if: matrix.os == 'macos-latest'
+        working-directory: frontend
+        run: |
           pnpm run build:mac
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -102,11 +110,8 @@ jobs:
 
       - name: Build Windows
         if: matrix.os == 'windows-latest'
+        working-directory: frontend
         run: |
-          chmod +x ./build.sh
-          ./build.sh
-
-          cd ./frontend
           pnpm run build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
