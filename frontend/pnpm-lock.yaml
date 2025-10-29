@@ -14,6 +14,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.30
         version: 2.0.30(react@19.1.1)(zod@3.25.76)
+      '@arco-design/color':
+        specifier: 0.4.0
+        version: 0.4.0
       '@electron-toolkit/preload':
         specifier: ^3.0.2
         version: 3.0.2(electron@37.3.0)
