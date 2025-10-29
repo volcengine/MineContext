@@ -112,10 +112,7 @@ jobs:
       - name: Build Windows Backend
         if: matrix.os == 'windows-latest'
         run: |
-          uv sync
-
-          python3 -m venv .venv
-          source .venv/bin/activate
+          .venv/bin/activate
           chmod +x ./build.bat
 
           ./build.bat
