@@ -39,7 +39,7 @@ jobs:
             ./build.sh
 
             cd frontend
-            npm run dist:mac
+            npm run build:mac
           elif [ "$RUNNER_OS" == "Windows" ]; then
             # 运行后端构建脚本
             echo "Running build.bat ..."
@@ -47,7 +47,7 @@ jobs:
             ./build.bat
 
             cd frontend
-            npm run dist:win
+            npm run build:win
           fi
 
       # 📤 上传打包产物到 GitHub Release
