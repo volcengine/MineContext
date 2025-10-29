@@ -302,6 +302,43 @@ class UnifiedStorage:
             logger.exception(f"Vector search failed: {e}")
             return []
 
+    def upsert_todo_embedding(
+        self,
+        todo_id: int,
+        content: str,
+        embedding: List[float],
+        metadata: Optional[Dict] = None,
+    ) -> bool:
+        """Store todo embedding to vector database for deduplication"""
+        if not self._initialized or not self._vector_backend:
+            logger.warning("Storage not initialized, cannot store todo embedding")
+            return False
+
+        return self._vector_backend.upsert_todo_embedding(todo_id, content, embedding, metadata)
+
+    def search_similar_todos(
+        self,
+        query_embedding: List[float],
+        top_k: int = 10,
+        similarity_threshold: float = 0.85,
+    ) -> List[Tuple[int, str, float]]:
+        """Search for similar todos using vector similarity"""
+        if not self._initialized or not self._vector_backend:
+            logger.warning("Storage not initialized, cannot search todos")
+            return []
+
+        return self._vector_backend.search_similar_todos(
+            query_embedding, top_k, similarity_threshold
+        )
+
+    def delete_todo_embedding(self, todo_id: int) -> bool:
+        """Delete todo embedding from vector database"""
+        if not self._initialized or not self._vector_backend:
+            logger.warning("Storage not initialized, cannot delete todo embedding")
+            return False
+
+        return self._vector_backend.delete_todo_embedding(todo_id)
+
     def get_document(self, doc_id: str) -> Optional[DocumentData]:
         """Get document"""
         if not self._initialized:

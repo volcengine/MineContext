@@ -14,7 +14,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from opencontext.models.context import ProcessedContext, RawContextProperties, Vectorize
-from opencontext.models.enums import ContentFormat, ContextSource
+from opencontext.models.enums import ContentFormat, ContextSource, ContextType
 from opencontext.storage.global_storage import get_storage
 from opencontext.utils.logging_utils import get_logger
 
@@ -216,7 +216,8 @@ class ContextOperations:
             raise RuntimeError("Storage not initialized")
 
         try:
-            return self.storage.get_vector_collection_names()
+            collection_names = self.storage.get_vector_collection_names()
+            return [name for name in collection_names if name in ContextType]
         except Exception as e:
             logger.exception(f"Failed to get context types: {e}")
             raise RuntimeError(f"Failed to get context types: {str(e)}") from e
