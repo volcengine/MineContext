@@ -3,6 +3,7 @@
 
 import { Layout } from '@arco-design/web-react'
 import VaultTree from '@renderer/components/vault-tree'
+import UpdateAvailableButton from '@renderer/components/UpdateAvailableButton'
 import { useNavigation } from '@renderer/hooks/use-navigation'
 import logo from '/src/assets/icons/logo.svg'
 import homeIcon from '/src/assets/icons/home.svg'
@@ -99,7 +100,10 @@ const Sidebar = () => {
         ))}
       </div>
 
-      <VaultTree />
+      <VaultTree className='flex-1' />
+      <div className="mt-2 mr-3 mb-5">
+        <UpdateAvailableButton />
+      </div>
     </Sider>
   )
 }

@@ -44,7 +44,7 @@ const HomePage: React.FC = () => {
                         Chaos.👏
                       </Title>
                       <Text type="secondary" style={{ fontSize: 12 }}>
-                        Home is where MineContext proactively delivers your daily summaries, todos, tips and other
+                        Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other
                         insights—emerging from all your collected Contexts ✨
                       </Text>
                     </div>
