@@ -61,7 +61,7 @@ appImage:
 npmRebuild: false
 nodeGypRebuild: false
 buildDependenciesFromSource: false
-afterSign: scripts/notarize.js
+afterSign: build/notarize.js
 publish:
   provider: github
   owner: keshidong
