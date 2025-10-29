@@ -1,6 +1,6 @@
 {
   "name": "MineContext",
-  "version": "0.1.4",
+  "version": "0.1.8",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -29,7 +29,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run copy-backend && npm run build && electron-builder --win",
     "build:mac": "npm run copy-backend && npm run build && electron-builder --mac",
-    "publish": "npm run copy-backend && npm run build && electron-builder -p always",
+    "publish": "npm run copy-backend && npm run build && electron-builder --mac --win -p always",
     "build:linux": "npm run build && electron-builder --linux",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "copy-backend": "node scripts/copy-prebuilt-backend.js",

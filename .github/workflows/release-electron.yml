@@ -1,0 +1,64 @@
+name: Release Electron App
+
+on:
+  push:
+    tags:
+      - 'v*'   # 当推送 v1.0.0 这类 tag 时触发
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      # 🧩 拉取代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ⚙️ 设置 Node 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 📦 安装依赖
+      - name: Install dependencies
+        run: npm ci
+
+      # 🛠️ 打包应用（mac 和 win 自动区分）
+      - name: Build Electron App
+        run: |
+
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            # 运行后端构建脚本
+            echo "Running build.sh ..."
+            chmod +x build.sh
+            ./build.sh
+
+            cd frontend
+            npm run dist:mac
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            # 运行后端构建脚本
+            echo "Running build.bat ..."
+            chmod +x build.bat
+            ./build.bat
+
+            cd frontend
+            npm run dist:win
+          fi
+
+      # 📤 上传打包产物到 GitHub Release
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/*.dmg
+            dist/**/*.exe
+            dist/**/*.blockmap
+            dist/**/*.yml
+            dist/**/*.sha512
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
