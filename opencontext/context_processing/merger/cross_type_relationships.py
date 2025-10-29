@@ -268,7 +268,6 @@ class CrossTypeRelationshipManager:
             summary=converted_summary,
             keywords=self._adapt_keywords(context.extracted_data.keywords, transition),
             entities=context.extracted_data.entities.copy(),  # Keep entities
-            tags=self._adapt_tags(context.extracted_data.tags, transition, target_type),
             context_type=target_type,
             confidence=new_confidence,
             importance=new_importance,
@@ -341,31 +340,6 @@ class CrossTypeRelationshipManager:
                 adapted_keywords.append(keyword)
 
         return adapted_keywords[:10]  # Limit number of keywords
-
-    def _adapt_tags(
-        self, tags: List[str], transition: CrossTypeTransition, target_type: ContextType
-    ) -> List[str]:
-        """Adapt tags"""
-        adapted_tags = tags.copy()
-
-        # Add conversion marker
-        adapted_tags.append(f"converted_from_{transition.value}")
-
-        # Add corresponding tags based on target type
-        type_tags = {
-            ContextType.ACTIVITY_CONTEXT: ["ActivityRecord"],
-            ContextType.ENTITY_CONTEXT: ["PersonalProfile"],
-            ContextType.SEMANTIC_CONTEXT: ["ConceptualKnowledge"],
-            ContextType.PROCEDURAL_CONTEXT: ["OperationalGuide"],
-            ContextType.INTENT_CONTEXT: ["IntentPlanning"],
-        }
-
-        target_tags = type_tags.get(target_type, [])
-        for tag in target_tags:
-            if tag not in adapted_tags:
-                adapted_tags.append(tag)
-
-        return adapted_tags[:8]  # Limit number of tags
 
     def get_conversion_statistics(self) -> Dict:
         """Get conversion statistics"""

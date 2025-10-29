@@ -158,7 +158,7 @@ async function handleSearch(event) {
     const topK = parseInt(document.getElementById('topK').value) || 10;
     const startTime = document.getElementById('startTime').value;
     const endTime = document.getElementById('endTime').value;
-    const tags = document.getElementById('entities').value;
+    const entities = document.getElementById('entities').value;
     const keywords = document.getElementById('keywords').value;
     
     // 获取选中的上下文类型
@@ -189,10 +189,10 @@ async function handleSearch(event) {
             filters.create_time_ts = filters.create_time_ts || {};
             filters.create_time_ts.$lte = new Date(endTime).getTime() / 1000;
         }
-        if (tags) {
-            const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
-            if (tagList.length > 0) {
-                filters.tags = {"$in": tagList};
+        if (entities) {
+            const entityList = entities.split(',').map(e => e.trim()).filter(e => e);
+            if (entityList.length > 0) {
+                filters.entities = {"$in": entityList};
             }
         }
         if (keywords) {
@@ -289,10 +289,6 @@ function displayResults(results) {
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <small class="text-muted">创建时间: ${createTime}</small>
-                        ${context.extracted_data.tags && context.extracted_data.tags.length > 0 ? 
-                            `<div class="mt-1">${context.extracted_data.tags.map(tag => `<span class="badge bg-light text-dark me-1">${tag}</span>`).join('')}</div>` 
-                            : ''
-                        }
                     </div>
                     <div>
                         <button onclick="viewContext('${context.id}', '${context.extracted_data.context_type}')" class="btn btn-sm btn-outline-primary">查看详情</button>

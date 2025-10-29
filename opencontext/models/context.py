@@ -63,10 +63,9 @@ class ExtractedData(BaseModel):
     summary: Optional[str] = None
     keywords: List[str] = Field(default_factory=list)  # keywords
     entities: List[str] = Field(default_factory=list)  # entities
-    # tags: List[str] = Field(default_factory=list)  # tags
     context_type: ContextType  # context type
-    # confidence: int = 0  # confidence
-    # importance: int = 0  # importance
+    confidence: int = 0  # confidence
+    importance: int = 0  # importance
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert model to dictionary"""
@@ -251,7 +250,6 @@ class ProcessedContextModel(BaseModel):
     summary: Optional[str] = None
     keywords: List[str] = []
     entities: List[str] = []
-    tags: List[str] = []
     context_type: str
     confidence: int
     importance: int
@@ -290,7 +288,6 @@ class ProcessedContextModel(BaseModel):
             summary=pc.extracted_data.summary,
             keywords=pc.extracted_data.keywords,
             entities=pc.extracted_data.entities,
-            tags=pc.extracted_data.tags,
             context_type=pc.extracted_data.context_type.value,
             confidence=pc.extracted_data.confidence,
             importance=pc.extracted_data.importance,
