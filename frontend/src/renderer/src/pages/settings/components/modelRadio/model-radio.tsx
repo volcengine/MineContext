@@ -1,14 +1,13 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ModelInfoMap } from '../../constants'
+import { ModelInfoList } from '../../constants'
 interface ModelRadioProps {
   value?: string
   onChange?: (v: string) => void
 }
 
 const ModelRadio = ({ value, onChange }: ModelRadioProps) => {
-  const ModelInfoList = ModelInfoMap()
   return (
     <div className="w-[100px] flex items-center justify-between gap-[16px]">
       {ModelInfoList?.map((item) => {

@@ -36,6 +36,7 @@ export const initLog = () => {
   log.transports.file.level = isDev ? 'debug' : 'info'
   log.transports.file.format = '{text}' // ✨ Set format to '{text}' to allow the hook to fully control the output content
   log.transports.file.maxSize = 50 * 1024 * 1024 // 50 MB
+  log.transports.file.sync = false
   log.transports.file.resolvePathFn = () => {
     // ✨ Dynamically generate log paths, split by "process-date"
     const day = dayjs().format('YYYY-MM-DD')
@@ -60,7 +61,14 @@ export const initLog = () => {
   })
 
   // --- Core Hook: Format all logs as NDJSON ---
+
+  const hookProcessed = Symbol.for('electron-log-hook-processed')
+
   log.hooks.push((m) => {
+    if ((m as any)[hookProcessed]) {
+      return m
+    }
+
     const arr = Array.isArray(m.data) ? m.data : m.data == null ? [] : [m.data]
 
     let msg = ''
@@ -99,6 +107,8 @@ export const initLog = () => {
 
     // Use the formatted JSON string as the final log content
     m.data = [JSON.stringify(out)]
+    ;(m as any)[hookProcessed] = true
+
     return m
   })
 }
