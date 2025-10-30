@@ -309,10 +309,12 @@ class RealtimeActivityMonitor:
         for context in contexts:
             if context.id in recommended_ids:
                 continue
-            if context.extracted_data.context_type != ContextType.ACTIVITY_CONTEXT or context.properties.content_format != ContentFormat.IMAGE:
+            if context.extracted_data.context_type != ContextType.ACTIVITY_CONTEXT:
                 continue
             if context.properties.raw_properties:
                 for prop in context.properties.raw_properties:
+                    if prop.content_format != ContentFormat.IMAGE:
+                        continue
                     if prop.object_id in sources:
                         continue
                     if not self._is_exist_screenshot(prop.content_path):
