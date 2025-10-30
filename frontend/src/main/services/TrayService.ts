@@ -53,25 +53,26 @@ export class TrayService {
 
         logger.info('[Tray] macOS PNG icons loaded successfully')
       } else if (process.platform === 'win32') {
-        // Windows uses ICO format with separate default and recording icons
-        const defaultIconPath = path.join(__dirname, '../../resources/navigation-lighter-default.ico')
-        const recordingIconPath = path.join(__dirname, '../../resources/navigation-lighter-record.ico')
+        // Windows uses PNG format for better quality on high-DPI displays
+        const defaultIconPath = path.join(__dirname, '../../resources/navigation-lighter-default.png')
+        const recordingIconPath = path.join(__dirname, '../../resources/navigation-lighter-record.png')
 
+        // Load icons - these are 54x54 (high resolution for crisp display)
         const defaultIcon = nativeImage.createFromPath(defaultIconPath)
         const recordingIcon = nativeImage.createFromPath(recordingIconPath)
 
         if (defaultIcon.isEmpty() || recordingIcon.isEmpty()) {
-          logger.error('[Tray] Failed to load Windows ICO icons')
+          logger.error('[Tray] Failed to load Windows PNG icons')
           return
         }
 
-        // Resize to 16x16 for Windows tray (standard tray icon size on Windows)
-        // Even though ICO files can contain multiple sizes, explicitly resizing
-        // ensures the correct size is used for the system tray
-        this.trayIcon = defaultIcon.resize({ width: 16, height: 16 })
-        this.trayIconRecording = recordingIcon.resize({ width: 16, height: 16 })
+        // Resize to 32x32 for Windows tray to support high-DPI displays
+        // 54x54 source ensures crisp rendering even at 200% scaling
+        // Windows will automatically scale down for lower DPI displays
+        this.trayIcon = defaultIcon.resize({ width: 32, height: 32 })
+        this.trayIconRecording = recordingIcon.resize({ width: 32, height: 32 })
 
-        logger.info('[Tray] Windows ICO icons loaded successfully')
+        logger.info('[Tray] Windows PNG icons loaded successfully')
       } else {
         // Other platforms (Linux) use the standard PNG icon
         const iconPath = path.join(__dirname, '../../resources/icon.png')
@@ -125,9 +126,10 @@ export class TrayService {
 
       // Platform-specific behavior
       if (process.platform === 'win32') {
-        // Windows: Only respond to right-click
+        // Windows: Left click shows window, right click shows menu
         this.tray.on('click', () => {
-          // No action on left click as per requirements
+          this.mainWindow.show()
+          this.mainWindow.focus()
         })
 
         this.tray.on('right-click', () => {
