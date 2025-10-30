@@ -157,7 +157,6 @@ After restarting the application, please first set your screen sharing area in [
 ## 5. Forget it
 
 After starting the recording, your context will gradually be collected. It will take some time to generate value. So, forget about it and focus on other tasks with peace of mind. MineContext will generate to-dos, prompts, summaries, and activities for you in the background. Of course, you can also engage in proactive Q&A through [Chat with AI].
-Of course, here is the English translation of the provided text:
 
 ## 6. Backend Debugging
 
