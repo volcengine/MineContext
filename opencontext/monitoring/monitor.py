@@ -187,6 +187,21 @@ class Monitor:
             if len(self._processing_by_type[key]) > 100:
                 self._processing_by_type[key] = self._processing_by_type[key][-100:]
 
+        # Also update Prometheus metrics (best-effort)
+        try:
+            from opencontext.server.metrics import PIPELINE_STAGE_DURATION, PIPELINE_PROCESSED_TOTAL
+
+            PIPELINE_STAGE_DURATION.labels(
+                processor=processor_name,
+                operation=operation,
+                context_type=context_type or "unknown",
+            ).observe(duration_ms / 1000.0)
+            PIPELINE_PROCESSED_TOTAL.labels(
+                processor=processor_name, operation=operation
+            ).inc(context_count)
+        except Exception:
+            pass
+
     def record_retrieval_metrics(
         self, operation: str, duration_ms: int, snippets_count: int = 0, query: Optional[str] = None
     ):

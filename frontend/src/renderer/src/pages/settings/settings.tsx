@@ -9,7 +9,6 @@ import ModelRadio from './components/modelRadio/model-radio'
 import { ModelInfoMap, ModelTypeList, BaseUrl, embeddingModels } from './constants'
 import { getModelInfo, updateModelSettings } from '../../services/Settings'
 import checkIcon from '../../assets/icons/check.svg'
-import loadingGif from '@renderer/assets/images/loading.gif'
 
 const FormItem = Form.Item
 const { Text } = Typography
@@ -112,7 +111,6 @@ const Settings: FC<Props> = (props: Props) => {
   const [showCheckIcon, setShowCheckIcon] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
 
   const ModelInfoList = ModelInfoMap()
   const [form] = Form.useForm()
@@ -151,7 +149,6 @@ const Settings: FC<Props> = (props: Props) => {
   const submit = async () => {
     setErrorMessage(null)
     setSuccessMessage(null)
-    setIsLoading(true)
 
     try {
       const values = await form.validate().catch(() => {}) // only need backend's error
@@ -211,7 +208,7 @@ const Settings: FC<Props> = (props: Props) => {
         setErrorMessage(null)
       }, 5000)
     } finally {
-      setIsLoading(false)
+      // noop
     }
   }
 
