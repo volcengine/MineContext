@@ -1,7 +1,6 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import { once } from 'lodash'
 import { ReactNode } from 'react'
 import openAI from '../../assets/images/settings/OpenAI.png'
 import doubao from '../../assets/images/settings/doubao.png'
@@ -32,7 +31,7 @@ export interface ModelInfo {
   option?: OptionInfo[]
 }
 
-export const ModelInfoMap = once((): ModelInfo[] => [
+export const ModelInfoList = [
   {
     icon: <img src={doubao} className="!max-w-none w-[24px] h-[24px]" />,
     key: 'Doubao',
@@ -76,4 +75,4 @@ export const ModelInfoMap = once((): ModelInfo[] => [
     key: 'Custom',
     value: 'custom'
   }
-])
+]
