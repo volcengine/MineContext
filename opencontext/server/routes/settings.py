@@ -156,19 +156,18 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
             emb_url = cfg.embeddingBaseUrl or cfg.baseUrl
             emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
 
-            # Validation
-            if not vlm_key:
-                return convert_resp(code=400, status=400, message="VLM API key cannot be empty")
-            if not emb_key:
-                return convert_resp(
-                    code=400, status=400, message="Embedding API key cannot be empty"
-                )
+            # Basic validation (existence of required fields)
+            if not cfg.baseUrl:
+                return convert_resp(code=400, status=400, message="VLM base URL cannot be empty")
             if not cfg.modelId:
                 return convert_resp(code=400, status=400, message="VLM model ID cannot be empty")
             if not cfg.embeddingModelId:
                 return convert_resp(
                     code=400, status=400, message="Embedding model ID cannot be empty"
                 )
+
+            # Note: API key validation is delegated to LLMClient
+            # Some providers (Ollama, LocalAI, etc.) don't require API keys
 
             # Validate VLM
             vlm_config = _build_llm_config(
@@ -202,23 +201,21 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
 
             config_mgr.load_config(config_mgr.get_config_path())
 
-            # Reinitialize clients
-            if not GlobalVLMClient.get_instance().reinitialize():
-                return convert_resp(
-                    code=500, status=500, message="Failed to reinitialize VLM client"
-                )
-            if not GlobalEmbeddingClient.get_instance().reinitialize():
-                return convert_resp(
-                    code=500, status=500, message="Failed to reinitialize embedding client"
-                )
+            # Reinitialize clients and check for success
+            vlm_reinitialized = GlobalVLMClient.get_instance().reinitialize()
+            emb_reinitialized = GlobalEmbeddingClient.get_instance().reinitialize()
 
-            logger.info("Model settings updated successfully")
+            if not vlm_reinitialized or not emb_reinitialized:
+                error_message = "Failed to reinitialize clients. Please check model settings."
+                logger.error(error_message)
+                return convert_resp(code=400, status=400, message=error_message)
+
+            logger.info("Model settings updated and clients reinitialized successfully.")
             return convert_resp(
                 data=UpdateModelSettingsResponse(
-                    success=True, message="Model settings updated successfully"
+                    success=True, message="Model settings updated and clients reinitialized"
                 ).model_dump()
             )
-
         except Exception as e:
             logger.exception(f"Failed to update model settings: {e}")
             return convert_resp(code=500, status=500, message="Failed to update model settings")

@@ -21,6 +21,25 @@ logger = get_logger(__name__)
 class LLMProvider(Enum):
     OPENAI = "openai"
     DOUBAO = "doubao"
+    OLLAMA = "ollama"
+    LOCALAI = "localai"
+    LLAMACPP = "llamacpp"
+    CUSTOM = "custom"
+
+    @classmethod
+    def is_api_key_optional(cls, provider: str) -> bool:
+        """
+        Check if the provider allows optional API keys.
+        Some local providers like Ollama, LocalAI don't require authentication.
+
+        Args:
+            provider: Provider name (case-insensitive)
+
+        Returns:
+            True if API key is optional for this provider
+        """
+        optional_providers = [cls.OLLAMA.value, cls.LOCALAI.value, cls.LLAMACPP.value]
+        return provider.lower() in optional_providers
 
 
 class LLMType(Enum):
@@ -36,9 +55,17 @@ class LLMClient:
         self.api_key = config.get("api_key")
         self.base_url = config.get("base_url")
         self.timeout = config.get("timeout", 300)
-        self.provider = config.get("provider", LLMProvider.OPENAI.value)
-        if not self.api_key or not self.base_url or not self.model:
-            raise ValueError("API key, base URL, and model must be provided")
+        self.provider = config.get("provider") or LLMProvider.OPENAI.value
+        # Validate required fields
+        if not self.base_url or not self.model:
+            raise ValueError("Base URL and model must be provided for LLMClient")
+
+        # Check if API key is required for this provider
+        if not LLMProvider.is_api_key_optional(self.provider) and not self.api_key:
+            raise ValueError(
+                f"API key must be provided for '{self.provider}' provider. "
+                f"Only local providers like Ollama, LocalAI, LlamaCPP can work without API keys."
+            )
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
         self.async_client = AsyncOpenAI(
             api_key=self.api_key, base_url=self.base_url, timeout=self.timeout

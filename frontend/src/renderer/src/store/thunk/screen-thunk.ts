@@ -67,6 +67,7 @@ export const captureScreenshotThunk =
       }
 
       // Read image Base64 data
+      await new Promise((resolve) => setTimeout(resolve, 200))
       const imageBase64 = await window.screenMonitorAPI.readImageAsBase64(result.screenshotInfo.url)
       if (!imageBase64.success || !imageBase64.data) {
         throw new Error(imageBase64.error || 'Failed to read image data.')

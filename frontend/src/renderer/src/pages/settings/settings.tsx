@@ -8,7 +8,7 @@ import { find } from 'lodash'
 import ModelRadio from './components/modelRadio/model-radio'
 import { ModelInfoMap, ModelTypeList, BaseUrl, embeddingModels } from './constants'
 import { getModelInfo, updateModelSettings } from '../../services/Settings'
-import loadingGif from '@renderer/assets/images/loading.gif'
+import checkIcon from '../../assets/icons/check.svg'
 
 const FormItem = Form.Item
 const { Text } = Typography
@@ -53,14 +53,10 @@ const CustomFormItems = () => {
               className="[&_.arco-input-inner-wrapper]: !w-[574px]"
             />
           </FormItem>
-          <FormItem
-            field="apiKey"
-            className="[&_.arco-form-item]: !mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
-            requiredSymbol={false}>
+          <FormItem field="apiKey" className="[&_.arco-form-item]: !mb-0" requiredSymbol={false}>
             <Input
               addBefore={<InputBeforeDiv label="API Key" />}
-              placeholder="Enter your API Key"
+              placeholder="Enter your API Key (optional for Ollama/LocalAI)"
               allowClear
               className="[&_.arco-input-inner-wrapper]: !w-[574px]"
             />
@@ -94,14 +90,10 @@ const CustomFormItems = () => {
               className="[&_.arco-input-inner-wrapper]: !w-[574px]"
             />
           </FormItem>
-          <FormItem
-            field="embeddingApiKey"
-            className="[&_.arco-form-item]: !mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
-            requiredSymbol={false}>
+          <FormItem field="embeddingApiKey" className="[&_.arco-form-item]: !mb-0" requiredSymbol={false}>
             <Input
               addBefore={<InputBeforeDiv label="API Key" />}
-              placeholder="Enter your API Key"
+              placeholder="Enter your API Key (optional for Ollama/LocalAI)"
               allowClear
               className="[&_.arco-input-inner-wrapper]: !w-[574px]"
             />
@@ -116,12 +108,9 @@ const CustomFormItems = () => {
 const Settings: FC<Props> = (props: Props) => {
   const { onOk } = props
   const [init, setInit] = useState<undefined | boolean>(undefined)
-  const [, setShowCheckIcon] = useState(false)
+  const [showCheckIcon, setShowCheckIcon] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  // originalConfig from backend  
-  const [originalConfig, setOriginalConfig] = useState<any>(null)
 
   const ModelInfoList = ModelInfoMap()
   const [form] = Form.useForm()
@@ -141,28 +130,14 @@ const Settings: FC<Props> = (props: Props) => {
     return foundItem ? foundItem.option : []
   }, [modelPlatform])
 
-  // recover originalConfig when switch to custom
-  useEffect(() => {
-    if (isCustom && originalConfig) {
-      form.setFieldsValue({
-        modelId: originalConfig.modelId,
-        baseUrl: originalConfig.baseUrl,
-        apiKey: originalConfig.apiKey,
-        embeddingModelId: originalConfig.embeddingModelId,
-        embeddingBaseUrl: originalConfig.embeddingBaseUrl,
-        embeddingApiKey: originalConfig.embeddingApiKey
-      })
-    }
-  }, [isCustom, originalConfig])
-
   const getInfo = async () => {
     const res = await getModelInfo()
 
-    if (res.data.config.apiKey === '') {
+    // Check if model is configured based on modelId, not apiKey
+    // API key can be empty for local providers like Ollama, LocalAI, etc.
+    if (!res.data.config.modelId || res.data.config.modelId === '') {
       setInit(false)
     } else {
-      // save originalConfig
-      setOriginalConfig(res.data.config)
       form.setFieldsValue(res.data.config)
       setInit(true)
     }
@@ -174,7 +149,6 @@ const Settings: FC<Props> = (props: Props) => {
   const submit = async () => {
     setErrorMessage(null)
     setSuccessMessage(null)
-    setIsLoading(true)
 
     try {
       const values = await form.validate().catch(() => {}) // only need backend's error
@@ -234,13 +208,12 @@ const Settings: FC<Props> = (props: Props) => {
         setErrorMessage(null)
       }, 5000)
     } finally {
-      setIsLoading(false)
+      // noop
     }
   }
 
   return (
-    <div className="fixed top-0 left-0 flex flex-col h-full overflow-y-hidden pr-2 pb-2 pl-0 rounded-[20px] relative">
-      <div style={{ height: '8px', appRegion: 'drag' } as React.CSSProperties} />
+    <div className="fixed top-0 left-0 flex flex-col h-full overflow-y-hidden p-[8px] pl-0 rounded-[20px] relative ">
       <div className="bg-white rounded-[16px] pl-6 h-[calc(100%-8px)] flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
         <div className="mb-[12px]">
           <div className="mt-[26px] mb-[10px] text-[24px] font-bold text-[#000]">{'Select a AI model to start'}</div>
@@ -309,12 +282,12 @@ const Settings: FC<Props> = (props: Props) => {
 
             {/* Success and Error Messages */}
             {successMessage && (
-              <div className="mb-4 p-3 bg-green-50 w-[574px] border border-green-200 rounded-md text-green-800 text-sm">
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-800 text-sm">
                 {successMessage}
               </div>
             )}
             {errorMessage && (
-              <div className="mb-4 p-3 bg-red-50 border w-[574px] border-red-200 rounded-md text-red-800 text-sm">
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
                 {errorMessage}
               </div>
             )}
@@ -323,28 +296,23 @@ const Settings: FC<Props> = (props: Props) => {
               <Space>
                 {/* Determine if it is a routing page or a guide */}
                 {!init ? (
-                  <div className="flex items-center gap-[8px]">
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      onClick={submit}
-                      disabled={isLoading}
-                      className="[&_.arco-btn-primary]: !bg-[#000]">
-                      Get started
-                    </Button>
-                    {isLoading && <img src={loadingGif} alt="loading" className="w-6 h-6" />}
-                  </div>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    onClick={submit}
+                    className="[&_.arco-btn-primary]: !bg-[#000]">
+                    Get started
+                  </Button>
                 ) : (
                   <div className="flex items-center gap-[8px]">
                     <Button
                       type="primary"
                       className="[&_.arco-btn-primary]: !bg-[#000]"
                       htmlType="submit"
-                      onClick={submit}
-                      disabled={isLoading}>
+                      onClick={submit}>
                       Save
                     </Button>
-                    {isLoading && <img src={loadingGif} alt="loading" className="w-6 h-6" />}
+                    {showCheckIcon && <img src={checkIcon} alt="check" className="w-[20px] h-[20px] mr-[8px]" />}
                   </div>
                 )}
               </Space>
