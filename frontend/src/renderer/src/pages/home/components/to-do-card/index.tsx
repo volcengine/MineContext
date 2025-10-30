@@ -127,7 +127,7 @@ const ToDoCard: React.FC = () => {
         }
       }}>
       <div className="gap-2 flex-1 flex items-center">
-        <Radio checked={!!task.status} onClick={() => handleToggleTaskStatus(task)} />
+        <Radio className="self-start mt-0.5" checked={!!task.status} onClick={() => handleToggleTaskStatus(task)} />
         <div
           className={`font-roboto text-sm font-normal text-[#3F3F51] leading-[22px] max-w-[800px] tracking-[0.042px] whitespace-normal break-words ${task.status && 'line-through'}`}
           onClick={() => handleEditToDoList(task)}>
