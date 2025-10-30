@@ -429,7 +429,6 @@ class ScreenshotProcessor(BaseContextProcessor):
             elif merge_type == "new":
                 # Independent new item
                 merged_ids = result.get("merged_ids", [])
-                logger.debug(f"new item ids: {merged_ids}")
                 if merged_ids and merged_ids[0] in all_items_map:
                     result_contexts.append(all_items_map[merged_ids[0]])
                     self._processed_cache[context_type.value][merged_ids[0]] = all_items_map[merged_ids[0]]
