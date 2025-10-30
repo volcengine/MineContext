@@ -79,11 +79,8 @@ class RealtimeActivityMonitor:
             if not summary_result:
                 return None
 
-            representative_contexts = self._find_contexts_by_ids(
-                all_context, summary_result.get("representative_context_ids", [])
-            )
             resource_data = self._extract_resource_data_from_contexts(
-                representative_contexts, max_count=5
+                all_context, summary_result.get("representative_context_ids", []), max_count=20
             )
 
             # Prepare metadata
@@ -287,14 +284,14 @@ class RealtimeActivityMonitor:
             return contexts[:5]
 
     def _extract_resource_data_from_contexts(
-        self, contexts: List[ProcessedContext], max_count: int = 5
+        self, contexts: List[ProcessedContext], recommended_ids: List[str], max_count: int = 20
     ) -> List[Dict[str, Any]]:
         """Extract screenshots from contexts, prioritizing the most relevant ones."""
         sources_data: List[Dict[str, Any]] = []
         sources: Set[str] = set()
-
-        for context in contexts:
-            try:
+        context_dict = {ctx.id: ctx for ctx in contexts}
+        for id in recommended_ids:
+            if id in context_dict and context_dict[id].properties.raw_properties:
                 for prop in context.properties.raw_properties:
                     if prop.object_id in sources:
                         continue
@@ -307,12 +304,28 @@ class RealtimeActivityMonitor:
                     else:
                         continue
                     sources.add(prop.object_id)
-            except Exception as e:
-                logger.debug(
-                    f"Failed to extract screenshot from context {getattr(context, 'id', 'unknown')}: {e}"
-                )
+                    if len(sources_data) >= max_count:
+                        return sources_data[:max_count]
+        for context in contexts:
+            if context.id in recommended_ids:
                 continue
-
+            if context.extracted_data.context_type != ContextType.ACTIVITY_CONTEXT:
+                continue
+            if context.properties.raw_properties:
+                for prop in context.properties.raw_properties:
+                    if prop.content_format != ContentFormat.IMAGE:
+                        continue
+                    if prop.object_id in sources:
+                        continue
+                    if not self._is_exist_screenshot(prop.content_path):
+                        continue
+                    sources_data.append(
+                        {"type": "image", "id": prop.object_id, "path": prop.content_path}
+                    )
+                    sources.add(prop.object_id)
+                    break
+            if len(sources_data) >= max_count:
+                return sources_data[:max_count]
         logger.info(
             f"Extracted {len(sources_data)} screenshots from {len(contexts)} representative contexts."
         )

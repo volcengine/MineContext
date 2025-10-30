@@ -81,7 +81,6 @@ class SmartTodoManager:
 
                 content = task.get("description", "")
                 reason = task.get("reason", "")
-                logger.info(f"Generated Todo Task: {task}")
                 urgency = self._map_priority_to_urgency(task.get("priority", "normal"))
 
                 deadline = None
