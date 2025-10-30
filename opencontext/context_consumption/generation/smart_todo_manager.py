@@ -14,16 +14,11 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TypedDict
 
-from opencontext.config.global_config import get_prompt_manager
+from opencontext.config.global_config import get_prompt_group
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages
 from opencontext.models.context import ContextType, Vectorize
 from opencontext.storage.global_storage import get_storage
-from opencontext.storage.unified_storage import ActivityStorageManager
-from opencontext.tools.tool_definitions import (
-    ALL_PROFILE_TOOL_DEFINITIONS,
-    ALL_RETRIEVAL_TOOL_DEFINITIONS,
-    ALL_TOOL_DEFINITIONS,
-)
 from opencontext.utils.json_parser import parse_json_from_response
 from opencontext.utils.logging_utils import get_logger
 
@@ -53,20 +48,6 @@ class SmartTodoManager:
     Smart Todo Manager
     Intelligently identifies and generates to-do items based on user activity context.
     """
-
-    @property
-    def prompt_manager(self):
-        return get_prompt_manager()
-
-    @property
-    def storage(self):
-        """Get storage from the global singleton."""
-        return get_storage()
-
-    @property
-    def document_storage(self):
-        """Get document_storage from the global singleton."""
-        return self.storage
 
     def _map_priority_to_urgency(self, priority: str) -> int:
         """Map priority to a numerical urgency value."""
@@ -114,7 +95,7 @@ class SmartTodoManager:
                     except:
                         pass
 
-                todo_id = self.storage.insert_todo(
+                todo_id = get_storage().insert_todo(
                     content=content,
                     urgency=urgency,
                     end_time=deadline,
@@ -123,9 +104,21 @@ class SmartTodoManager:
                 )
                 todo_ids.append(todo_id)
 
-            logger.info(
-                f"Smart Todo tasks have been saved to the todo table, {len(todo_ids)} tasks."
-            )
+                # Store todo embedding to vector database for future deduplication
+                if task.get("_embedding"):
+                    try:
+                        get_storage().upsert_todo_embedding(
+                            todo_id=todo_id,
+                            content=content,
+                            embedding=task["_embedding"],
+                            metadata={
+                                "urgency": urgency,
+                                "priority": task.get("priority", "medium"),
+                            },
+                        )
+                        logger.debug(f"Stored embedding for todo {todo_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to store todo embedding for {todo_id}: {e}")
 
             # Return the complete result for external event processing
             return {
@@ -144,7 +137,7 @@ class SmartTodoManager:
             start_time = datetime.datetime.fromtimestamp(start)
             end_time = datetime.datetime.fromtimestamp(end)
             # Query recent activity records
-            activities = self.storage.get_activities(
+            activities = get_storage().get_activities(
                 start_time=start_time, end_time=end_time, limit=100
             )
             if not activities:
@@ -178,7 +171,7 @@ class SmartTodoManager:
         """Get historical todo records."""
         try:
             start_time = datetime.datetime.now() - datetime.timedelta(days=days)
-            todos = self.storage.get_todos(limit=limit, start_time=start_time)
+            todos = get_storage().get_todos(limit=limit, start_time=start_time)
             return todos
         except Exception as e:
             logger.exception(f"Failed to get historical todos: {e}")
@@ -200,7 +193,7 @@ class SmartTodoManager:
             if activity_insights.get("potential_todos", []):
                 for todo in activity_insights["potential_todos"]:
                     text = todo["description"]
-                    contexts = self.storage.search(
+                    contexts = get_storage().search(
                         query=Vectorize(text=text),
                         top_k=5,
                         context_types=context_types,
@@ -209,7 +202,7 @@ class SmartTodoManager:
                     ctxs = [ctx[0] for ctx in contexts]
                     all_contexts.extend(ctxs)
             else:
-                contexts = self.storage.get_all_processed_contexts(
+                contexts = get_storage().get_all_processed_contexts(
                     context_types=context_types, limit=80, offset=0, filter=filters
                 )
                 for context_type, context_list in contexts.items():
@@ -240,7 +233,7 @@ class SmartTodoManager:
         """
         try:
             # Get the prompt template for task extraction
-            prompt_group = self.prompt_manager.get_prompt_group("generation.todo_extraction")
+            prompt_group = get_prompt_group("generation.todo_extraction")
             system_prompt = prompt_group["system"]
             user_prompt_template = prompt_group["user"]
 
@@ -275,10 +268,27 @@ class SmartTodoManager:
                 messages,
                 temperature=0.1,
             )
+
+            # Save debug information
+            DebugHelper.save_generation_debug(
+                task_type="todo",
+                messages=messages,
+                response=task_response,
+                metadata={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "num_contexts": len(context_data) if context_data else 0,
+                    "num_historical_todos": len(historical_todos) if historical_todos else 0,
+                },
+            )
+
             tasks = parse_json_from_response(task_response)
             tasks = self._post_process_tasks(tasks)
 
-            logger.info(f"Identified {len(tasks)} tasks from the context.")
+            # Apply vector-based deduplication
+            tasks = self._deduplicate_with_vector_search(tasks, similarity_threshold=0.85)
+
+            logger.info(f"Identified {len(tasks)} tasks from the context after deduplication.")
             return tasks
 
         except Exception as e:
@@ -291,6 +301,8 @@ class SmartTodoManager:
 
         for task in tasks:
             try:
+                if not task.get("description", "") or not task.get("description", "").strip():
+                    continue
                 # Ensure necessary fields exist
                 processed_task = {
                     "title": task.get("title", "Untitled Task"),
@@ -355,6 +367,102 @@ class SmartTodoManager:
         except Exception as e:
             logger.debug(f"Failed to process deadline for task {task.get('title', 'unknown')}: {e}")
             return task
+
+    def _deduplicate_with_vector_search(
+        self, new_tasks: List[Dict], similarity_threshold: float = 0.85
+    ) -> List[Dict]:
+        """Deduplicate new todos using vector similarity search"""
+        from opencontext.llm.global_embedding_client import do_vectorize
+        from opencontext.models.context import Vectorize
+        from opencontext.storage.global_storage import get_storage
+
+        if not new_tasks:
+            return []
+
+        storage = get_storage()
+        filtered_tasks = []
+        filtered_count = 0
+
+        for task in new_tasks:
+            task_text = task.get("description", "")
+            if not task_text.strip():
+                continue
+
+            # Generate embedding for the task
+            try:
+                todo_vectorize = Vectorize(text=task_text)
+                do_vectorize(todo_vectorize)
+                if not todo_vectorize.vector:
+                    # If embedding generation fails, conservatively keep the task
+                    logger.warning(f"Unable to generate embedding for todo: {task_text[:50]}...")
+                    continue
+
+                task_embedding = todo_vectorize.vector
+
+            except Exception as e:
+                continue
+
+            # Search for similar historical todos
+            similar_todos = storage.search_similar_todos(
+                query_embedding=task_embedding,
+                top_k=5,
+                similarity_threshold=similarity_threshold,
+            )
+
+            if similar_todos:
+                # Found similar historical todo, filter out
+                most_similar = similar_todos[0]
+                logger.info(
+                    f"🚫 Todo filtered (duplicate with historical task): "
+                    f"New='{task_text}' | "
+                    f"Historical='{most_similar[1]}' | "
+                    f"Similarity={most_similar[2]:.3f}"
+                )
+                filtered_count += 1
+                continue
+
+            # Compare with already approved todos in this batch
+            is_duplicate_in_batch = False
+            for existing_task in filtered_tasks:
+                existing_text = existing_task.get("description", "")
+                try:
+                    # Reuse the embedding that was already computed and cached
+                    existing_embedding = existing_task.get("_embedding")
+                    if not existing_embedding:
+                        continue
+                    similarity = self._cosine_similarity(task_embedding, existing_embedding)
+
+                    if similarity >= similarity_threshold:
+                        logger.info(
+                            f"🚫 Todo filtered (duplicate within batch): "
+                            f"'{task_text}' vs '{existing_text}' | "
+                            f"Similarity={similarity:.3f}"
+                        )
+                        is_duplicate_in_batch = True
+                        filtered_count += 1
+                        break
+                except Exception as e:
+                    continue
+
+            if not is_duplicate_in_batch:
+                task["_embedding"] = task_embedding
+                filtered_tasks.append(task)
+        return filtered_tasks
+
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """Calculate cosine similarity between two vectors"""
+        try:
+            import numpy as np
+
+            v1 = np.array(vec1)
+            v2 = np.array(vec2)
+            norm_product = np.linalg.norm(v1) * np.linalg.norm(v2)
+            if norm_product == 0:
+                return 0.0
+            return float(np.dot(v1, v2) / norm_product)
+        except Exception as e:
+            logger.error(f"Failed to calculate cosine similarity: {e}")
+            return 0.0
 
     def _process_task_people(self, task: Dict) -> Dict:
         """Process task personnel information."""

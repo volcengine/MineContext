@@ -75,7 +75,7 @@ class ExecutorNode(BaseNode):
                 (datetime.now() - plan.steps[0].start_time).total_seconds() if plan.steps else 0
             ),
         )
-        print(f"Task execution completed, {len(outputs)} successful, {len(errors)} failed")
+        # print(f"Task execution completed, {len(outputs)} successful, {len(errors)} failed")
         await self.streaming_manager.emit(
             StreamEvent(
                 type=EventType.DONE,

@@ -37,7 +37,6 @@ class ContextProcessorManager:
             "errors": 0,
         }
         self._routing_table: Dict[ContextSource, List[str]] = {}
-        self._default_chain_by_format: Dict[ContentFormat, List[str]] = {}
         self._define_routing()
         self._lock = Lock()
         self._max_workers = max_workers
@@ -92,20 +91,13 @@ class ContextProcessorManager:
         """
         self._routing_table = {
             ContextSource.SCREENSHOT: "screenshot_processor",
-            ContextSource.FILE: "document_processor",
+            ContextSource.LOCAL_FILE: "document_processor",
             ContextSource.VAULT: "document_processor",
         }
-        self._default_chain_by_format = {}
 
     def register_processor(self, processor: IContextProcessor) -> bool:
         """
         Register processing component
-
-        Args:
-            processor (IContextProcessor): Processing component instance
-
-        Returns:
-            bool: Whether registration succeeded
         """
         processor_name = processor.get_name()
 
@@ -123,9 +115,6 @@ class ContextProcessorManager:
     def set_merger(self, merger: IContextProcessor) -> None:
         """
         Set merger component
-
-        Args:
-            merger (IContextProcessor): Merger component instance
         """
         self._merger = merger
         logger.info(f"Merger component '{merger.get_name()}' has been set")
@@ -146,9 +135,6 @@ class ContextProcessorManager:
         # 1. Dynamically select preprocessing chain based on input type (excluding merger and embedding)
         processor_name = self._routing_table.get(initial_input.source)
         if not processor_name:
-            processor_name = self._default_chain_by_format.get(initial_input.content_format, [])
-
-        if not processor_name:
             logger.error(
                 f"No processing component defined for source_type='{initial_input.source}' or content_format='{initial_input.content_format}', no processing will be performed"
             )
@@ -158,18 +144,14 @@ class ContextProcessorManager:
 
         processor = self._processors.get(processor_name)
         if not processor or not processor.can_process(initial_input):
-            logger.error(
-                f"Processor '{processor_name}' in processing chain not registered or does not support processing input type {initial_input.source}"
-            )
+            logger.error( f"Processor '{processor_name}' in processing chain not registered or does not support processing input type {initial_input.source}")
             return False
 
         try:
             return processor.process(initial_input)
         except Exception as e:
-            logger.exception(
-                f"Processing component '{processor_name}' encountered exception while processing data: {e}"
-            )
-        return false
+            logger.exception(f"Processing component '{processor_name}' encountered exception while processing data: {e}")
+            return False
 
     def batch_process(
         self, initial_inputs: List[RawContextProperties]

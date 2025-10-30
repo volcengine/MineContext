@@ -6,6 +6,7 @@
     <title>系统监控 - MineContext</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
@@ -30,7 +31,7 @@
         }
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 350px;
             margin: 20px 0;
         }
         .refresh-btn {
@@ -45,22 +46,16 @@
         .loading.active {
             display: inline-block;
         }
-        .todo-stats {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 10px;
-        }
-        .todo-stat-item {
-            text-align: center;
-        }
-        .todo-stat-value {
-            font-size: 1.8rem;
+        .metric-value {
+            font-size: 2.5rem;
             font-weight: bold;
         }
-        .todo-stat-label {
+        .metric-label {
             font-size: 0.9rem;
             color: #6c757d;
+        }
+        .time-range-selector {
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -78,7 +73,7 @@
         </div>
     </nav>
 
-    <!-- 主内容区域 - 全屏显示 -->
+    <!-- 主内容区域 -->
     <div class="container-fluid px-4">
         <!-- 刷新按钮 -->
         <button class="btn btn-primary refresh-btn" onclick="refreshAllData()">
@@ -91,78 +86,72 @@
             <div class="col-12">
                 <h1 class="text-center mb-4">OpenContext 系统监控</h1>
                 <div class="alert alert-info">
-                    <strong>系统运行时间:</strong> <span id="uptime">加载中...</span> | 
+                    <strong>系统运行时间:</strong> <span id="uptime">加载中...</span> |
                     <strong>最后更新:</strong> <span id="lastUpdate">加载中...</span>
                 </div>
             </div>
         </div>
 
-        <!-- 概览统计卡片 -->
-        <div class="row mb-4 align-items-stretch">
-            <div class="col-md-3">
-                <div class="card metric-card">
+        <!-- 核心指标卡片 - 2个（Token消耗 + Context统计，带时间范围选择） -->
+        <div class="row mb-4">
+            <!-- Token 消耗统计 -->
+            <div class="col-md-6">
+                <div class="card metric-card border-primary">
                     <div class="card-body">
-                        <h5 class="card-title text-primary">总Token消耗</h5>
-                        <h3 class="card-text text-center" id="totalTokens">-</h3>
-                        <small class="text-muted d-block text-center">24小时内</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card metric-card">
-                    <div class="card-body">
-                        <h5 class="card-title text-success">TODO任务</h5>
-                        <div class="todo-stats">
-                            <div class="todo-stat-item">
-                                <div class="todo-stat-value text-success" id="todoCompleted">-</div>
-                                <div class="todo-stat-label">已完成</div>
-                            </div>
-                            <div class="todo-stat-item">
-                                <div class="todo-stat-value text-warning" id="todoPending">-</div>
-                                <div class="todo-stat-label">未完成</div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-primary mb-0">Token 消耗统计</h5>
+                            <div class="btn-group time-range-selector" role="group">
+                                <input type="radio" class="btn-check" name="tokenTimeRange" id="token24h" value="24" checked>
+                                <label class="btn btn-outline-primary btn-sm" for="token24h">24小时</label>
+
+                                <input type="radio" class="btn-check" name="tokenTimeRange" id="token7d" value="168">
+                                <label class="btn btn-outline-primary btn-sm" for="token7d">7天</label>
                             </div>
                         </div>
-                        <small class="text-muted d-block text-center">24小时内</small>
+                        <div class="metric-value text-center text-primary" id="totalTokens">-</div>
+                        <small class="metric-label d-block text-center">总消耗 Token</small>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card metric-card">
+
+            <!-- Context 统计 -->
+            <div class="col-md-6">
+                <div class="card metric-card border-success">
                     <div class="card-body">
-                        <h5 class="card-title text-warning">Tips提示</h5>
-                        <h3 class="card-text text-center" id="totalTips">-</h3>
-                        <small class="text-muted d-block text-center">24小时内</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card metric-card">
-                    <div class="card-body">
-                        <h5 class="card-title text-info">活动记录</h5>
-                        <h3 class="card-text text-center" id="totalActivities">-</h3>
-                        <small class="text-muted d-block text-center">24小时内</small>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-success mb-0">Context 统计</h5>
+                            <div class="btn-group time-range-selector" role="group">
+                                <input type="radio" class="btn-check" name="contextTimeRange" id="context24h" value="24" checked>
+                                <label class="btn btn-outline-success btn-sm" for="context24h">近24h新增</label>
+
+                                <input type="radio" class="btn-check" name="contextTimeRange" id="contextAll" value="all">
+                                <label class="btn btn-outline-success btn-sm" for="contextAll">全部记录</label>
+                            </div>
+                        </div>
+                        <div class="metric-value text-center text-success" id="totalContexts">-</div>
+                        <small class="metric-label d-block text-center" id="contextLabel">24小时内新增</small>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 图表区域 -->
-        <div class="row">
-            <!-- 上下文类型分布 -->
+        <!-- 图表区域 - 2个 -->
+        <div class="row mb-4">
+            <!-- 环节耗时分布 -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5>上下文类型分布</h5>
+                        <h5>环节耗时分布</h5>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
-                            <canvas id="contextTypeChart"></canvas>
+                            <canvas id="stageTimingChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Token使用分布 -->
+            <!-- 模型Token使用分布 -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -177,24 +166,12 @@
             </div>
         </div>
 
-        <div class="row mt-4">
-            <!-- 处理错误日志 -->
-            <div class="col-md-6">
+        <!-- Context 类型分布图表 -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>处理错误日志</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="processingErrorsChart">加载中...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 上下文记录统计 -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>上下文记录总览</h5>
+                        <h5 id="contextChartTitle">Context 类型分布（24小时新增）</h5>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -205,42 +182,31 @@
             </div>
         </div>
 
-        <!-- 详细数据表格 -->
-        <div class="row mt-4 mb-5">
+        <!-- 数据处理监控 -->
+        <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>详细统计数据</h5>
+                        <h5>数据处理监控（24小时）</h5>
                     </div>
                     <div class="card-body">
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" data-bs-toggle="tab" href="#tokenDetails">Token详情</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#processingDetails">处理详情</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#contextDetails">上下文详情</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#errorDetails">处理错误</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content mt-3">
-                            <div class="tab-pane fade show active" id="tokenDetails">
-                                <div id="tokenDetailsContent">加载中...</div>
-                            </div>
-                            <div class="tab-pane fade" id="processingDetails">
-                                <div id="processingDetailsContent">加载中...</div>
-                            </div>
-                            <div class="tab-pane fade" id="contextDetails">
-                                <div id="contextDetailsContent">加载中...</div>
-                            </div>
-                            <div class="tab-pane fade" id="errorDetails">
-                                <div id="errorDetailsContent">加载中...</div>
-                            </div>
+                        <div class="chart-container">
+                            <canvas id="dataProcessingTrendChart"></canvas>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 处理错误日志 -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>处理错误日志（最近1天，最多20条）</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="processingErrorsChart">加载中...</div>
                     </div>
                 </div>
             </div>
@@ -249,10 +215,28 @@
 
     <script>
         let charts = {};
+        let currentTokenTimeRange = 24; // Default 24 hours
+        let currentContextTimeRange = '24'; // Default 24 hours, 'all' for all records
 
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
+
+            // 监听 Token 时间范围切换
+            document.querySelectorAll('input[name="tokenTimeRange"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    currentTokenTimeRange = parseInt(this.value);
+                    loadTokenData();
+                });
+            });
+
+            // 监听 Context 时间范围切换
+            document.querySelectorAll('input[name="contextTimeRange"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    currentContextTimeRange = this.value;
+                    loadContextData();
+                });
+            });
         });
 
         async function refreshAllData() {
@@ -275,40 +259,67 @@
                 const overview = await fetchData('/api/monitoring/overview');
                 updateOverview(overview.data);
 
-                // 获取上下文类型统计
-                const contextTypes = await fetchData('/api/monitoring/context-types');
-                updateContextTypeChart(contextTypes.data);
-                updateContextStatsChart(contextTypes.data);
+                // 获取Token数据
+                await loadTokenData();
 
-                // 获取Token使用统计
-                const tokenUsage = await fetchData('/api/monitoring/token-usage');
-                updateTokenUsageChart(tokenUsage.data);
+                // 获取Context数据
+                await loadContextData();
 
-                // 获取处理性能
-                const processing = await fetchData('/api/monitoring/processing');
+                // 获取环节耗时
+                const stageTiming = await fetchData('/api/monitoring/stage-timing');
+                updateStageTimingChart(stageTiming.data);
 
-                // 获取TODO统计
-                const todoStats = await fetchData('/api/monitoring/todo-stats');
-                updateTodoStats(todoStats.data);
+                // 获取数据统计（用于 Context 统计）
+                const dataStats = await fetchData('/api/monitoring/data-stats?hours=24');
+                // Context 统计在 loadContextData 中处理
 
-                // 获取Tips数量
-                const tipsCount = await fetchData('/api/monitoring/tips-count');
-                updateTipsCount(tipsCount.data);
+                // 获取数据处理趋势（用于趋势图）
+                const dataTrend = await fetchData('/api/monitoring/data-stats-trend?hours=24');
+                updateDataProcessingTrend(dataTrend.data);
 
-                // 获取Activity数量
-                const activityCount = await fetchData('/api/monitoring/activity-count');
-                updateActivityCount(activityCount.data);
-
-                // 获取处理错误
-                const processingErrors = await fetchData('/api/monitoring/processing-errors?hours=1&top=5');
+                // 获取处理错误（最近1天，最多20条）
+                const processingErrors = await fetchData('/api/monitoring/processing-errors?hours=24&top=20');
                 updateProcessingErrorsChart(processingErrors.data);
-
-                // 更新详细信息
-                updateDetailTables(tokenUsage.data, processing.data, contextTypes.data, processingErrors.data);
 
             } catch (error) {
                 console.error('Failed to load monitoring data:', error);
                 showError('加载监控数据失败: ' + error.message);
+            }
+        }
+
+        async function loadTokenData() {
+            try {
+                const tokenUsage = await fetchData(`/api/monitoring/token-usage?hours=${currentTokenTimeRange}`);
+                updateTokenDisplay(tokenUsage.data);
+                updateTokenUsageChart(tokenUsage.data);
+            } catch (error) {
+                console.error('Failed to load token data:', error);
+            }
+        }
+
+        async function loadContextData() {
+            try {
+                let url, chartTitle, label;
+
+                if (currentContextTimeRange === 'all') {
+                    // 获取全部记录
+                    const overview = await fetchData('/api/monitoring/overview');
+                    const contextTypes = overview.data.context_types || {};
+                    const total = Object.values(contextTypes).reduce((sum, count) => sum + count, 0);
+
+                    updateContextDisplay(total, '全部记录');
+                    updateContextChart(contextTypes, 'Context 类型分布（全部记录）');
+                } else {
+                    // 获取24小时新增
+                    const dataStats = await fetchData('/api/monitoring/data-stats?hours=24');
+                    const contextTypes = dataStats.data.by_context_type || {};
+                    const total = Object.values(contextTypes).reduce((sum, count) => sum + count, 0);
+
+                    updateContextDisplay(total, '24小时内新增');
+                    updateContextChart(contextTypes, 'Context 类型分布（24小时新增）');
+                }
+            } catch (error) {
+                console.error('Failed to load context data:', error);
             }
         }
 
@@ -323,97 +334,71 @@
         function updateOverview(data) {
             document.getElementById('uptime').textContent = data.uptime_formatted || '未知';
             document.getElementById('lastUpdate').textContent = new Date(data.last_updated).toLocaleString();
-            document.getElementById('totalTokens').textContent = data.token_usage?.total_tokens?.toLocaleString() || '0';
         }
 
-        function updateTodoStats(data) {
-            document.getElementById('todoCompleted').textContent = data.completed || '0';
-            document.getElementById('todoPending').textContent = data.pending || '0';
+        function updateTokenDisplay(data) {
+            document.getElementById('totalTokens').textContent = data.total_tokens?.toLocaleString() || '0';
         }
 
-        function updateTipsCount(data) {
-            document.getElementById('totalTips').textContent = data.total || '0';
+        function updateContextDisplay(total, label) {
+            document.getElementById('totalContexts').textContent = total.toLocaleString();
+            document.getElementById('contextLabel').textContent = label;
         }
 
-        function updateActivityCount(data) {
-            document.getElementById('totalActivities').textContent = data.total || '0';
-        }
+        function updateContextChart(contextTypes, chartTitle) {
+            const ctx = document.getElementById('contextStatsChart').getContext('2d');
+            const types = Object.keys(contextTypes);
+            const counts = Object.values(contextTypes);
 
-        function updateProcessingErrorsChart(data) {
-            let errorHtml = '<div class="table-responsive"><table class="table table-striped table-hover"><thead><tr><th width="20%">时间</th><th width="15%">处理器</th><th width="50%">错误信息</th><th width="15%">上下文数</th></tr></thead><tbody>';
+            // 更新图表标题
+            document.getElementById('contextChartTitle').textContent = chartTitle;
 
-            if (data.errors && data.errors.length > 0) {
-                for (const error of data.errors) {
-                    const timestamp = new Date(error.timestamp).toLocaleString();
-                    const processorName = error.processor_name || '-';
-                    errorHtml += `<tr>
-                        <td><small>${timestamp}</small></td>
-                        <td><small>${processorName}</small></td>
-                        <td><small class="text-break">${error.error_message}</small></td>
-                        <td class="text-center">${error.context_count}</td>
-                    </tr>`;
-                }
-            } else {
-                errorHtml += '<tr><td colspan="4" class="text-center text-muted">近1小时内无处理错误 ✓</td></tr>';
+            if (charts.contextStats) {
+                charts.contextStats.destroy();
             }
 
-            errorHtml += '</tbody></table></div>';
-            if (data.total_errors > 0) {
-                errorHtml += `<div class="text-end text-muted mt-2"><small>近1小时共 ${data.total_errors} 条错误</small></div>`;
-            }
-            document.getElementById('processingErrorsChart').innerHTML = errorHtml;
-        }
-
-        function updateContextTypeChart(data) {
-            const ctx = document.getElementById('contextTypeChart').getContext('2d');
-            const labels = Object.keys(data);
-            const values = Object.values(data);
-            
-            if (charts.contextType) {
-                charts.contextType.destroy();
-            }
-            
-            charts.contextType = new Chart(ctx, {
-                type: 'doughnut',
+            charts.contextStats = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: types,
                     datasets: [{
-                        data: values,
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
-                        ]
+                        label: '数量',
+                        data: counts,
+                        backgroundColor: '#FF6384'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
                         }
                     }
                 }
             });
         }
 
-        function updateContextStatsChart(data) {
-            const ctx = document.getElementById('contextStatsChart').getContext('2d');
-            const labels = Object.keys(data);
-            const values = Object.values(data);
-            
-            if (charts.contextStats) {
-                charts.contextStats.destroy();
+        function updateStageTimingChart(data) {
+            const ctx = document.getElementById('stageTimingChart').getContext('2d');
+            const stages = Object.keys(data.by_stage || {});
+            const avgDurations = stages.map(stage => data.by_stage[stage].avg_duration);
+
+            if (charts.stageTiming) {
+                charts.stageTiming.destroy();
             }
-            
-            charts.contextStats = new Chart(ctx, {
+
+            charts.stageTiming = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: stages,
                     datasets: [{
-                        label: '记录数量',
-                        data: values,
-                        backgroundColor: '#9966FF'
+                        label: '平均耗时 (ms)',
+                        data: avgDurations,
+                        backgroundColor: '#36A2EB'
                     }]
                 },
                 options: {
@@ -432,11 +417,11 @@
             const ctx = document.getElementById('tokenUsageChart').getContext('2d');
             const models = Object.keys(data.by_model || {});
             const tokenCounts = models.map(model => data.by_model[model].total_tokens);
-            
+
             if (charts.tokenUsage) {
                 charts.tokenUsage.destroy();
             }
-            
+
             charts.tokenUsage = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -444,7 +429,7 @@
                     datasets: [{
                         label: 'Token消耗',
                         data: tokenCounts,
-                        backgroundColor: '#36A2EB'
+                        backgroundColor: '#4BC0C0'
                     }]
                 },
                 options: {
@@ -459,69 +444,148 @@
             });
         }
 
-        function updateDetailTables(tokenData, processingData, contextData, errorData) {
-            // Token详情
-            let tokenHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>模型</th><th>调用次数</th><th>总Token</th><th>输入Token</th><th>输出Token</th></tr></thead><tbody>';
-            for (const [model, stats] of Object.entries(tokenData.by_model || {})) {
-                tokenHtml += `<tr>
-                    <td>${model}</td>
-                    <td>${stats.count}</td>
-                    <td>${stats.total_tokens.toLocaleString()}</td>
-                    <td>${stats.prompt_tokens.toLocaleString()}</td>
-                    <td>${stats.completion_tokens.toLocaleString()}</td>
-                </tr>`;
+        function updateDataStats(data) {
+            // 只处理数据处理量趋势图
+            updateDataProcessingTrend(data);
+        }
+
+        function updateDataProcessingTrend(data) {
+            const ctx = document.getElementById('dataProcessingTrendChart').getContext('2d');
+
+            // 使用真实的趋势数据
+            const trend = data.trend || { screenshot: [], document: [], context: [] };
+            const timestamps = data.timestamps || [];
+
+            // 生成过去24小时的完整时间序列（每小时一个点）
+            const now = new Date();
+            const labels = [];
+            const timeMap = {};
+
+            // 创建完整的24小时时间序列
+            for (let i = 23; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+                // 使用与后端一致的格式：YYYY-MM-DD HH:00:00（空格，不是T）
+                const year = time.getFullYear();
+                const month = String(time.getMonth() + 1).padStart(2, '0');
+                const day = String(time.getDate()).padStart(2, '0');
+                const hour = String(time.getHours()).padStart(2, '0');
+                const timeStr = `${year}-${month}-${day} ${hour}:00:00`;
+                const label = time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                labels.push(label);
+                timeMap[timeStr] = labels.length - 1;
             }
-            tokenHtml += '</tbody></table></div>';
-            document.getElementById('tokenDetailsContent').innerHTML = tokenHtml;
 
-            // 处理详情
-            let processingHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>处理器</th><th>操作次数</th><th>平均耗时(ms)</th><th>处理上下文数</th></tr></thead><tbody>';
-            for (const [processor, stats] of Object.entries(processingData.by_processor || {})) {
-                processingHtml += `<tr>
-                    <td>${processor}</td>
-                    <td>${stats.count}</td>
-                    <td>${Math.round(stats.avg_duration)}</td>
-                    <td>${stats.contexts}</td>
-                </tr>`;
+            // 初始化数据数组（全部为0）
+            const screenshotData = new Array(labels.length).fill(0);
+            const documentData = new Array(labels.length).fill(0);
+            const contextData = new Array(labels.length).fill(0);
+
+            // 填充真实数据
+            if (trend.screenshot) {
+                trend.screenshot.forEach(item => {
+                    const idx = timeMap[item.timestamp];
+                    if (idx !== undefined) {
+                        screenshotData[idx] = item.count;
+                    }
+                });
             }
-            processingHtml += '</tbody></table></div>';
-            document.getElementById('processingDetailsContent').innerHTML = processingHtml;
 
-            // 上下文详情
-            let contextHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>上下文类型</th><th>记录数量</th><th>占比</th></tr></thead><tbody>';
-            const total = Object.values(contextData).reduce((sum, count) => sum + count, 0);
-            for (const [type, count] of Object.entries(contextData)) {
-                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : '0';
-                contextHtml += `<tr>
-                    <td>${type}</td>
-                    <td>${count.toLocaleString()}</td>
-                    <td>${percentage}%</td>
-                </tr>`;
+            if (trend.document) {
+                trend.document.forEach(item => {
+                    const idx = timeMap[item.timestamp];
+                    if (idx !== undefined) {
+                        documentData[idx] = item.count;
+                    }
+                });
             }
-            contextHtml += '</tbody></table></div>';
-            document.getElementById('contextDetailsContent').innerHTML = contextHtml;
 
-            // 处理错误详情（Tab页）
-            let errorHtml = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>时间</th><th>处理器</th><th>错误信息</th><th>上下文数</th></tr></thead><tbody>';
+            if (trend.context) {
+                trend.context.forEach(item => {
+                    const idx = timeMap[item.timestamp];
+                    if (idx !== undefined) {
+                        contextData[idx] = item.count;
+                    }
+                });
+            }
 
-            if (errorData.errors && errorData.errors.length > 0) {
-                for (const error of errorData.errors) {
+            if (charts.dataProcessingTrend) {
+                charts.dataProcessingTrend.destroy();
+            }
+
+            charts.dataProcessingTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '图片/截图',
+                            data: screenshotData,
+                            borderColor: '#36A2EB',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: '文档文件',
+                            data: documentData,
+                            borderColor: '#FF9F40',
+                            backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: '处理完成的Context',
+                            data: contextData,
+                            borderColor: '#9966FF',
+                            backgroundColor: 'rgba(153, 102, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateProcessingErrorsChart(data) {
+            let errorHtml = '<div class="table-responsive"><table class="table table-striped table-hover"><thead><tr><th width="20%">时间</th><th width="15%">处理器</th><th width="50%">错误信息</th><th width="15%">上下文数</th></tr></thead><tbody>';
+
+            if (data.errors && data.errors.length > 0) {
+                for (const error of data.errors) {
                     const timestamp = new Date(error.timestamp).toLocaleString();
                     const processorName = error.processor_name || '-';
                     errorHtml += `<tr>
-                        <td>${timestamp}</td>
-                        <td>${processorName}</td>
-                        <td class="text-break">${error.error_message}</td>
+                        <td><small>${timestamp}</small></td>
+                        <td><small>${processorName}</small></td>
+                        <td><small class="text-break">${error.error_message}</small></td>
                         <td class="text-center">${error.context_count}</td>
                     </tr>`;
                 }
             } else {
-                errorHtml += '<tr><td colspan="4" class="text-center text-muted">近1小时内无处理错误 ✓</td></tr>';
+                errorHtml += '<tr><td colspan="4" class="text-center text-success"><i class="bi bi-check-circle"></i> 近1天内无处理错误</td></tr>';
             }
 
             errorHtml += '</tbody></table></div>';
-            errorHtml += `<div class="text-end text-muted mt-2"><small>共 ${errorData.total_errors || 0} 条错误</small></div>`;
-            document.getElementById('errorDetailsContent').innerHTML = errorHtml;
+            if (data.total_errors > 0) {
+                errorHtml += `<div class="text-end text-muted mt-2"><small>共 ${data.total_errors} 条错误，显示最近 ${data.errors.length} 条</small></div>`;
+            }
+            document.getElementById('processingErrorsChart').innerHTML = errorHtml;
         }
 
         function showError(message) {
@@ -532,7 +596,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
-            
+
             setTimeout(() => {
                 alertDiv.remove();
             }, 5000);

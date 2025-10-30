@@ -302,6 +302,43 @@ class UnifiedStorage:
             logger.exception(f"Vector search failed: {e}")
             return []
 
+    def upsert_todo_embedding(
+        self,
+        todo_id: int,
+        content: str,
+        embedding: List[float],
+        metadata: Optional[Dict] = None,
+    ) -> bool:
+        """Store todo embedding to vector database for deduplication"""
+        if not self._initialized or not self._vector_backend:
+            logger.warning("Storage not initialized, cannot store todo embedding")
+            return False
+
+        return self._vector_backend.upsert_todo_embedding(todo_id, content, embedding, metadata)
+
+    def search_similar_todos(
+        self,
+        query_embedding: List[float],
+        top_k: int = 10,
+        similarity_threshold: float = 0.85,
+    ) -> List[Tuple[int, str, float]]:
+        """Search for similar todos using vector similarity"""
+        if not self._initialized or not self._vector_backend:
+            logger.warning("Storage not initialized, cannot search todos")
+            return []
+
+        return self._vector_backend.search_similar_todos(
+            query_embedding, top_k, similarity_threshold
+        )
+
+    def delete_todo_embedding(self, todo_id: int) -> bool:
+        """Delete todo embedding from vector database"""
+        if not self._initialized or not self._vector_backend:
+            logger.warning("Storage not initialized, cannot delete todo embedding")
+            return False
+
+        return self._vector_backend.delete_todo_embedding(todo_id)
+
     def get_document(self, doc_id: str) -> Optional[DocumentData]:
         """Get document"""
         if not self._initialized:
@@ -563,39 +600,57 @@ class UnifiedStorage:
             todo_id=todo_id, status=status, end_time=end_time
         )
 
-
-class ActivityStorageManager:
-    """
-    Activity generated document storage manager
-    Specialized for handling activity generated markdown content and image storage
-    """
-
-    def __init__(self, unified_storage: UnifiedStorage):
-        self.unified_storage = unified_storage
-        self.logger = get_logger(__name__)
-
-    def search_activities(
-        self, query: str, limit: int = 10, filters: Optional[Dict[str, Any]] = None
-    ) -> Optional[QueryResult]:
-        """Search activity documents"""
-        # Add activity specific filter
-        activity_filters = {"content_type": "activity_markdown"}
-        if filters:
-            activity_filters.update(filters)
-
-        return self.unified_storage.query_documents(
-            query=query, limit=limit, filters=activity_filters, storage_type=StorageType.DOCUMENT_DB
+    # Monitoring data operations - delegated to document backend
+    def save_monitoring_token_usage(
+        self, model: str, prompt_tokens: int, completion_tokens: int, total_tokens: int
+    ) -> bool:
+        """Save token usage monitoring data"""
+        return self._document_backend.save_monitoring_token_usage(
+            model, prompt_tokens, completion_tokens, total_tokens
         )
 
-    def _generate_id(self) -> str:
-        """Generate unique ID"""
-        import time
-        import uuid
+    def save_monitoring_stage_timing(
+        self,
+        stage_name: str,
+        duration_ms: int,
+        status: str = "success",
+        metadata: Optional[str] = None,
+    ) -> bool:
+        """Save stage timing monitoring data"""
+        return self._document_backend.save_monitoring_stage_timing(
+            stage_name, duration_ms, status, metadata
+        )
 
-        return f"{int(time.time())}_{str(uuid.uuid4())[:8]}"
+    def save_monitoring_data_stats(
+        self,
+        data_type: str,
+        count: int = 1,
+        context_type: Optional[str] = None,
+        metadata: Optional[str] = None,
+    ) -> bool:
+        """Save data statistics monitoring data"""
+        return self._document_backend.save_monitoring_data_stats(
+            data_type, count, context_type, metadata
+        )
 
-    def _get_current_timestamp(self) -> str:
-        """Get current timestamp"""
-        from datetime import datetime
+    def query_monitoring_token_usage(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Query token usage monitoring data"""
+        return self._document_backend.query_monitoring_token_usage(hours)
 
-        return datetime.now().isoformat()
+    def query_monitoring_stage_timing(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Query stage timing monitoring data"""
+        return self._document_backend.query_monitoring_stage_timing(hours)
+
+    def query_monitoring_data_stats(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Query data statistics monitoring data"""
+        return self._document_backend.query_monitoring_data_stats(hours)
+
+    def query_monitoring_data_stats_trend(
+        self, hours: int = 24, interval_hours: int = 1
+    ) -> List[Dict[str, Any]]:
+        """Query data statistics trend with time grouping"""
+        return self._document_backend.query_monitoring_data_stats_trend(hours, interval_hours)
+
+    def cleanup_old_monitoring_data(self, days: int = 7) -> bool:
+        """Clean up monitoring data older than specified days"""
+        return self._document_backend.cleanup_old_monitoring_data(days)

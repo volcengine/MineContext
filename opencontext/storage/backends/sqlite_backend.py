@@ -11,7 +11,7 @@ SQLite document note storage backend implementation
 import json
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
 
 from opencontext.storage.base_storage import (
@@ -159,6 +159,60 @@ class SQLiteBackend(IDocumentStorageBackend):
         """
         )
 
+        # Monitoring tables
+        # Token usage tracking - keep 7 days of data
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS monitoring_token_usage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                time_bucket TEXT NOT NULL,
+                model TEXT NOT NULL,
+                prompt_tokens INTEGER DEFAULT 0,
+                completion_tokens INTEGER DEFAULT 0,
+                total_tokens INTEGER DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(time_bucket, model)
+            )
+        """
+        )
+
+        # Stage timing tracking - LLM API calls and processing stages
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS monitoring_stage_timing (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                time_bucket TEXT NOT NULL,
+                stage_name TEXT NOT NULL,
+                count INTEGER DEFAULT 1,
+                total_duration_ms INTEGER NOT NULL,
+                min_duration_ms INTEGER NOT NULL,
+                max_duration_ms INTEGER NOT NULL,
+                avg_duration_ms INTEGER NOT NULL,
+                success_count INTEGER DEFAULT 0,
+                error_count INTEGER DEFAULT 0,
+                metadata TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(time_bucket, stage_name)
+            )
+        """
+        )
+
+        # Data statistics tracking - images/screenshots and documents
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS monitoring_data_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                time_bucket TEXT NOT NULL,
+                data_type TEXT NOT NULL,
+                count INTEGER DEFAULT 1,
+                context_type TEXT,
+                metadata TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(time_bucket, data_type, context_type)
+            )
+        """
+        )
+
         # New table indexes
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_vaults_created ON vaults (created_at)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_vaults_type ON vaults (document_type)")
@@ -171,6 +225,26 @@ class SQLiteBackend(IDocumentStorageBackend):
             "CREATE INDEX IF NOT EXISTS idx_activity_time ON activity (start_time, end_time)"
         )
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_tips_time ON tips (created_at)")
+
+        # Monitoring table indexes
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_monitoring_token_created ON monitoring_token_usage (created_at)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_monitoring_token_model ON monitoring_token_usage (model)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_monitoring_stage_created ON monitoring_stage_timing (created_at)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_monitoring_stage_name ON monitoring_stage_timing (stage_name)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_monitoring_data_created ON monitoring_data_stats (created_at)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_monitoring_data_type ON monitoring_data_stats (data_type)"
+        )
 
         self.connection.commit()
 
@@ -733,6 +807,381 @@ class SQLiteBackend(IDocumentStorageBackend):
 
     def get_storage_type(self) -> StorageType:
         return StorageType.DOCUMENT_DB
+
+    # Monitoring data operations
+    def save_monitoring_token_usage(
+        self, model: str, prompt_tokens: int, completion_tokens: int, total_tokens: int
+    ) -> bool:
+        """Save token usage monitoring data (aggregated by hour using UPSERT)"""
+        if not self._initialized:
+            return False
+
+        try:
+            cursor = self.connection.cursor()
+
+            # Calculate time bucket (hour precision)
+            now = datetime.now()
+            time_bucket = now.strftime("%Y-%m-%d %H:00:00")
+
+            # Use INSERT ... ON CONFLICT to update or insert
+            cursor.execute(
+                """
+                INSERT INTO monitoring_token_usage (time_bucket, model, prompt_tokens, completion_tokens, total_tokens, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(time_bucket, model)
+                DO UPDATE SET
+                    prompt_tokens = prompt_tokens + ?,
+                    completion_tokens = completion_tokens + ?,
+                    total_tokens = total_tokens + ?
+                """,
+                (
+                    time_bucket,
+                    model,
+                    prompt_tokens,
+                    completion_tokens,
+                    total_tokens,
+                    now,
+                    prompt_tokens,
+                    completion_tokens,
+                    total_tokens,
+                ),
+            )
+
+            self.connection.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save token usage: {e}")
+            try:
+                self.connection.rollback()
+            except:
+                pass
+            return False
+
+    def save_monitoring_stage_timing(
+        self,
+        stage_name: str,
+        duration_ms: int,
+        status: str = "success",
+        metadata: Optional[str] = None,
+    ) -> bool:
+        """Save stage timing monitoring data (aggregated by hour using UPSERT)"""
+        if not self._initialized:
+            return False
+
+        try:
+            cursor = self.connection.cursor()
+
+            # Calculate time bucket (hour precision)
+            now = datetime.now()
+            time_bucket = now.strftime("%Y-%m-%d %H:00:00")
+
+            # First, get existing stats if any
+            cursor.execute(
+                """
+                SELECT count, total_duration_ms, min_duration_ms, max_duration_ms, success_count, error_count
+                FROM monitoring_stage_timing
+                WHERE time_bucket = ? AND stage_name = ?
+                """,
+                (time_bucket, stage_name),
+            )
+            existing = cursor.fetchone()
+
+            if existing:
+                # Update existing record with aggregated stats
+                old_count, old_total, old_min, old_max, old_success, old_error = existing
+                new_count = old_count + 1
+                new_total = old_total + duration_ms
+                new_min = min(old_min, duration_ms)
+                new_max = max(old_max, duration_ms)
+                new_avg = new_total // new_count
+                new_success = old_success + (1 if status == "success" else 0)
+                new_error = old_error + (0 if status == "success" else 1)
+
+                cursor.execute(
+                    """
+                    UPDATE monitoring_stage_timing
+                    SET count = ?,
+                        total_duration_ms = ?,
+                        min_duration_ms = ?,
+                        max_duration_ms = ?,
+                        avg_duration_ms = ?,
+                        success_count = ?,
+                        error_count = ?
+                    WHERE time_bucket = ? AND stage_name = ?
+                    """,
+                    (
+                        new_count,
+                        new_total,
+                        new_min,
+                        new_max,
+                        new_avg,
+                        new_success,
+                        new_error,
+                        time_bucket,
+                        stage_name,
+                    ),
+                )
+            else:
+                # Insert new record
+                cursor.execute(
+                    """
+                    INSERT INTO monitoring_stage_timing
+                    (time_bucket, stage_name, count, total_duration_ms, min_duration_ms, max_duration_ms, avg_duration_ms, success_count, error_count, metadata, created_at)
+                    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        time_bucket,
+                        stage_name,
+                        duration_ms,
+                        duration_ms,
+                        duration_ms,
+                        duration_ms,
+                        1 if status == "success" else 0,
+                        0 if status == "success" else 1,
+                        metadata,
+                        now,
+                    ),
+                )
+
+            self.connection.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save stage timing: {e}")
+            try:
+                self.connection.rollback()
+            except:
+                pass
+            return False
+
+    def save_monitoring_data_stats(
+        self,
+        data_type: str,
+        count: int = 1,
+        context_type: Optional[str] = None,
+        metadata: Optional[str] = None,
+    ) -> bool:
+        """Save data statistics monitoring data (aggregated by hour using UPSERT)"""
+        if not self._initialized:
+            return False
+
+        try:
+            cursor = self.connection.cursor()
+
+            # Calculate time bucket (hour precision)
+            now = datetime.now()
+            time_bucket = now.strftime("%Y-%m-%d %H:00:00")
+
+            # Use INSERT ... ON CONFLICT to update or insert
+            # First, try to get existing count
+            cursor.execute(
+                """
+                INSERT INTO monitoring_data_stats (time_bucket, data_type, count, context_type, metadata, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(time_bucket, data_type, context_type)
+                DO UPDATE SET count = count + ?
+                """,
+                (time_bucket, data_type, count, context_type, metadata, now, count),
+            )
+
+            self.connection.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save data stats: {e}")
+            try:
+                self.connection.rollback()
+            except:
+                pass
+            return False
+
+    def query_monitoring_token_usage(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Query token usage monitoring data"""
+        if not self._initialized:
+            return []
+
+        try:
+            cutoff_time = datetime.now() - timedelta(hours=hours)
+            cutoff_bucket = cutoff_time.strftime("%Y-%m-%d %H:00:00")
+            cursor = self.connection.cursor()
+            cursor.execute(
+                """
+                SELECT model, prompt_tokens, completion_tokens, total_tokens, time_bucket
+                FROM monitoring_token_usage
+                WHERE time_bucket >= ?
+                ORDER BY time_bucket DESC
+                """,
+                (cutoff_bucket,),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "model": row[0],
+                    "prompt_tokens": row[1],
+                    "completion_tokens": row[2],
+                    "total_tokens": row[3],
+                    "time_bucket": row[4],
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Failed to query token usage: {e}")
+            return []
+
+    def query_monitoring_stage_timing(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Query stage timing monitoring data"""
+        if not self._initialized:
+            return []
+
+        try:
+            cutoff_time = datetime.now() - timedelta(hours=hours)
+            cutoff_bucket = cutoff_time.strftime("%Y-%m-%d %H:00:00")
+            cursor = self.connection.cursor()
+            cursor.execute(
+                """
+                SELECT stage_name, count, total_duration_ms, min_duration_ms, max_duration_ms, avg_duration_ms, success_count, error_count, time_bucket
+                FROM monitoring_stage_timing
+                WHERE time_bucket >= ?
+                ORDER BY time_bucket DESC
+                """,
+                (cutoff_bucket,),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "stage_name": row[0],
+                    "count": row[1],
+                    "total_duration": row[2],
+                    "min_duration": row[3],
+                    "max_duration": row[4],
+                    "duration_ms": row[5],  # avg_duration_ms
+                    "success_count": row[6],
+                    "error_count": row[7],
+                    "status": "success" if row[6] > 0 else "error",  # Backward compatibility
+                    "time_bucket": row[8],
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Failed to query stage timing: {e}")
+            return []
+
+    def query_monitoring_data_stats(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Query data statistics monitoring data"""
+        if not self._initialized:
+            return []
+
+        try:
+            cutoff_time = datetime.now() - timedelta(hours=hours)
+            cutoff_bucket = cutoff_time.strftime("%Y-%m-%d %H:00:00")
+            cursor = self.connection.cursor()
+            cursor.execute(
+                """
+                SELECT data_type, SUM(count) as total_count, context_type
+                FROM monitoring_data_stats
+                WHERE time_bucket >= ?
+                GROUP BY data_type, context_type
+                """,
+                (cutoff_bucket,),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "data_type": row[0],
+                    "count": row[1],
+                    "context_type": row[2],
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Failed to query data stats: {e}")
+            return []
+
+    def query_monitoring_data_stats_trend(
+        self, hours: int = 24, interval_hours: int = 1
+    ) -> List[Dict[str, Any]]:
+        """Query data statistics trend with time grouping
+
+        Args:
+            hours: Time range in hours
+            interval_hours: Group interval in hours (default 1 hour)
+
+        Returns:
+            List of records with timestamp, data_type, count
+        """
+        if not self._initialized:
+            return []
+
+        try:
+            cutoff_time = datetime.now() - timedelta(hours=hours)
+            cutoff_bucket = cutoff_time.strftime("%Y-%m-%d %H:00:00")
+            cursor = self.connection.cursor()
+
+            # Query using time_bucket directly (already hourly grouped)
+            cursor.execute(
+                """
+                SELECT
+                    time_bucket,
+                    data_type,
+                    SUM(count) as total_count,
+                    context_type
+                FROM monitoring_data_stats
+                WHERE time_bucket >= ?
+                GROUP BY time_bucket, data_type, context_type
+                ORDER BY time_bucket ASC
+                """,
+                (cutoff_bucket,),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "timestamp": row[0],
+                    "data_type": row[1],
+                    "count": row[2],
+                    "context_type": row[3],
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Failed to query data stats trend: {e}")
+            return []
+
+    def cleanup_old_monitoring_data(self, days: int = 7) -> bool:
+        """Clean up monitoring data older than specified days"""
+        if not self._initialized:
+            return False
+
+        try:
+            cutoff_time = datetime.now() - timedelta(days=days)
+            cutoff_bucket = cutoff_time.strftime("%Y-%m-%d %H:00:00")
+            cursor = self.connection.cursor()
+
+            # Clean up token usage data (use time_bucket)
+            cursor.execute(
+                "DELETE FROM monitoring_token_usage WHERE time_bucket < ?",
+                (cutoff_bucket,),
+            )
+
+            # Clean up stage timing data (use time_bucket)
+            cursor.execute(
+                "DELETE FROM monitoring_stage_timing WHERE time_bucket < ?",
+                (cutoff_bucket,),
+            )
+
+            # Clean up data stats (use time_bucket)
+            cursor.execute(
+                "DELETE FROM monitoring_data_stats WHERE time_bucket < ?",
+                (cutoff_bucket,),
+            )
+
+            self.connection.commit()
+            logger.info(f"Cleaned up monitoring data older than {days} days")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cleanup old monitoring data: {e}")
+            try:
+                self.connection.rollback()
+            except:
+                pass
+            return False
 
     def query(
         self, query: str, limit: int = 10, filters: Optional[Dict[str, Any]] = None

@@ -129,6 +129,55 @@ class IVectorStorageBackend(IStorageBackend):
         """Vector similarity search"""
 
     @abstractmethod
+    def upsert_todo_embedding(
+        self,
+        todo_id: int,
+        content: str,
+        embedding: List[float],
+        metadata: Optional[Dict] = None,
+    ) -> bool:
+        """Store todo embedding to vector database for deduplication
+
+        Args:
+            todo_id: Todo ID
+            content: Todo content text
+            embedding: Text embedding vector
+            metadata: Optional metadata (urgency, priority, etc.)
+
+        Returns:
+            True if successful, False otherwise
+        """
+
+    @abstractmethod
+    def search_similar_todos(
+        self,
+        query_embedding: List[float],
+        top_k: int = 10,
+        similarity_threshold: float = 0.85,
+    ) -> List[Tuple[int, str, float]]:
+        """Search for similar todos using vector similarity
+
+        Args:
+            query_embedding: Query embedding vector
+            top_k: Maximum number of results to return
+            similarity_threshold: Minimum similarity threshold (0-1)
+
+        Returns:
+            List of (todo_id, content, similarity_score) tuples
+        """
+
+    @abstractmethod
+    def delete_todo_embedding(self, todo_id: int) -> bool:
+        """Delete todo embedding from vector database
+
+        Args:
+            todo_id: Todo ID to delete
+
+        Returns:
+            True if successful, False otherwise
+        """
+
+    @abstractmethod
     def get_processed_context_count(self, context_type: str) -> int:
         """Get record count for specified context_type"""
 

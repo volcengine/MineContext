@@ -39,7 +39,8 @@ class ChromaDBBackend(IVectorStorageBackend):
 
     def __init__(self):
         self._client: Optional[chromadb.Client] = None
-        self._collections: Dict[str, chromadb.Collection] = {}  # context_type -> collection
+        # context_type -> collection
+        self._collections: Dict[str, chromadb.Collection] = {}
         self._initialized = False
         self._config = None
         self._is_server_mode = False
@@ -59,9 +60,14 @@ class ChromaDBBackend(IVectorStorageBackend):
             # Register exit handler
             atexit.register(self._cleanup)
 
-            # Register signal handlers
-            signal.signal(signal.SIGTERM, self._signal_handler)
-            signal.signal(signal.SIGINT, self._signal_handler)
+            # Register signal handlers (only works in main thread)
+            try:
+                signal.signal(signal.SIGTERM, self._signal_handler)
+                signal.signal(signal.SIGINT, self._signal_handler)
+                logger.debug("ChromaDB signal handlers registered")
+            except ValueError as e:
+                # Signal handlers can only be registered in the main thread
+                logger.debug(f"Cannot register signal handlers (not in main thread): {e}")
 
             self._cleanup_registered = True
             logger.debug("ChromaDB graceful shutdown handlers registered")
@@ -126,7 +132,7 @@ class ChromaDBBackend(IVectorStorageBackend):
                 # Server mode
                 self._is_server_mode = True
                 host = chroma_config.get("host", "localhost")
-                port = chroma_config.get("port", 8000)
+                port = chroma_config.get("port", 1733)
                 ssl = chroma_config.get("ssl", False)
                 headers = chroma_config.get("headers", {})
                 settings = chroma_config.get("settings", {})
@@ -163,6 +169,16 @@ class ChromaDBBackend(IVectorStorageBackend):
                     metadata={"hnsw:space": "cosine", "context_type": context_type},
                 )
                 self._collections[context_type] = collection
+
+            # Create dedicated todo collection for deduplication
+            todo_collection = self._client.get_or_create_collection(
+                name="todo",
+                metadata={
+                    "hnsw:space": "cosine",
+                    "description": "Todo embeddings for deduplication",
+                },
+            )
+            self._collections["todo"] = todo_collection
 
             self._initialized = True
             logger.info(
@@ -237,7 +253,7 @@ class ChromaDBBackend(IVectorStorageBackend):
             try:
                 chroma_config = self._config.get("config", {})
                 host = chroma_config.get("host", "localhost")
-                port = chroma_config.get("port", 8000)
+                port = chroma_config.get("port", 1733)
                 ssl = chroma_config.get("ssl", False)
                 headers = chroma_config.get("headers", {})
                 settings = chroma_config.get("settings", {})
@@ -793,3 +809,124 @@ class ChromaDBBackend(IVectorStorageBackend):
             result[context_type] = self.get_processed_context_count(context_type)
 
         return result
+
+    def upsert_todo_embedding(
+        self,
+        todo_id: int,
+        content: str,
+        embedding: List[float],
+        metadata: Optional[Dict] = None,
+    ) -> bool:
+        """Store todo embedding to vector database for deduplication"""
+        if not self._initialized:
+            logger.warning("ChromaDB not initialized, cannot store todo embedding")
+            return False
+
+        try:
+            collection = self._collections.get("todo")
+            if not collection:
+                logger.error("Todo collection not found")
+                return False
+
+            # Prepare metadata
+            meta = {
+                "todo_id": todo_id,
+                "content": content,
+                "created_at": datetime.datetime.now().isoformat(),
+            }
+            if metadata:
+                meta.update(metadata)
+
+            # Store to vector database
+            collection.upsert(
+                ids=[f"todo_{todo_id}"],
+                embeddings=[embedding],
+                metadatas=[meta],
+            )
+
+            logger.debug(f"Stored todo embedding: id={todo_id}, content='{content[:50]}...'")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to store todo embedding (id={todo_id}): {e}")
+            return False
+
+    def search_similar_todos(
+        self,
+        query_embedding: List[float],
+        top_k: int = 10,
+        similarity_threshold: float = 0.85,
+    ) -> List[Tuple[int, str, float]]:
+        """Search for similar todos using vector similarity
+
+        Args:
+            query_embedding: Query embedding vector
+            top_k: Maximum number of results to return
+            similarity_threshold: Minimum similarity threshold (0-1)
+
+        Returns:
+            List of (todo_id, content, similarity_score) tuples
+        """
+        if not self._initialized:
+            logger.warning("ChromaDB not initialized, cannot search todos")
+            return []
+
+        try:
+            collection = self._collections.get("todo")
+            if not collection:
+                logger.error("Todo collection not found")
+                return []
+
+            # Check if collection is empty
+            count = collection.count()
+            if count == 0:
+                logger.debug("Todo collection is empty, no similar todos found")
+                return []
+
+            # Query vector database
+            results = collection.query(
+                query_embeddings=[query_embedding],
+                n_results=min(top_k, count),
+                include=["metadatas", "distances"],
+            )
+
+            similar_todos = []
+            if results and results["ids"] and results["ids"][0]:
+                for i in range(len(results["ids"][0])):
+                    distance = results["distances"][0][i]
+                    similarity = 1 - distance  # Convert distance to similarity
+
+                    if similarity >= similarity_threshold:
+                        metadata = results["metadatas"][0][i]
+                        similar_todos.append(
+                            (
+                                metadata["todo_id"],
+                                metadata["content"],
+                                similarity,
+                            )
+                        )
+            return similar_todos
+
+        except Exception as e:
+            logger.error(f"Failed to search similar todos: {e}")
+            return []
+
+    def delete_todo_embedding(self, todo_id: int) -> bool:
+        """Delete todo embedding from vector database"""
+        if not self._initialized:
+            logger.warning("ChromaDB not initialized, cannot delete todo embedding")
+            return False
+
+        try:
+            collection = self._collections.get("todo")
+            if not collection:
+                logger.error("Todo collection not found")
+                return False
+
+            collection.delete(ids=[f"todo_{todo_id}"])
+            logger.debug(f"Deleted todo embedding: id={todo_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to delete todo embedding (id={todo_id}): {e}")
+            return False

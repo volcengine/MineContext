@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 24.2.0
+    rev: 24.8.0
     hooks:
       - id: black
         language_version: python3
@@ -11,3 +11,10 @@ repos:
     hooks:
       - id: isort
         exclude: ^(frontend/|node_modules/)
+
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: Run frontend lint before commit
+        entry: bash -c "cd frontend && pnpm run typecheck"
+        language: system

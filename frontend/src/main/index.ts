@@ -17,12 +17,14 @@ import { registerIpc } from './ipc'
 import openInspector from './utils/inspector'
 import db from './services/DatabaseService'
 import screenshotService from './services/ScreenshotService'
-import { isDev } from './constant'
+import { isDev, isMac } from './constant'
 import icon from '../../resources/icon.png?asset'
 import { ensureBackendRunning, startBackendInBackground, stopBackendServerSync } from './backend'
 import { powerWatcher } from './background/os/Power'
 import { initLog } from '@shared/logger/init'
 import { getLogger } from '@shared/logger/main'
+import { monitor } from '@shared/logger/performance'
+import { ScreenMonitorTask } from './background/task/screen-monitor-task'
 initLog()
 const logger = getLogger('MainEntry')
 
@@ -94,7 +96,18 @@ function createWindow() {
     height: 660,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
+    // Use frameless window with custom titlebar only on macOS
+    ...(isMac
+      ? {
+          frame: false,
+          titleBarStyle: 'hidden',
+          trafficLightPosition: { x: 12, y: 12 }
+        }
+      : {
+          // On Windows/Linux, use default frame with window controls
+          frame: true
+        }),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -143,9 +156,10 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 let server: any
+const task = new ScreenMonitorTask()
 app.whenReady().then(() => {
   logger.info('app_started', { argv: process.argv, version: app.getVersion() })
-
+  monitor.start(5000)
   protocol.registerBufferProtocol('vikingdb', (request, callback) => {
     try {
       let filePath = request.url.replace('vikingdb://', '')
@@ -185,6 +199,7 @@ app.whenReady().then(() => {
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
 
@@ -198,11 +213,12 @@ app.whenReady().then(() => {
 
   const mainWindow = createWindow()
   openInspector(mainWindow)
-  powerWatcher.run(mainWindow)
+  powerWatcher.run()
   startBackendInBackground(mainWindow)
 
   // Start screenshot cleanup scheduled task
   startScreenshotCleanup()
+  task.init()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -217,6 +233,8 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  monitor.stop()
+  task.unregister()
   if (process.platform !== 'darwin') {
     // Restore the original console.log to avoid "Object has been destroyed" errors during exit
     console.log = originalConsoleLog

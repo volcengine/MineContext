@@ -156,7 +156,6 @@ class ProfileContextStrategy(ContextTypeAwareStrategy):
         # Merge entities and keywords, maintaining uniqueness
         merged_entities = list(set(target.extracted_data.entities))
         merged_keywords = list(set(target.extracted_data.keywords))
-        merged_tags = list(set(target.extracted_data.tags))
 
         for source in sources:
             merged_entities.extend(
@@ -165,7 +164,6 @@ class ProfileContextStrategy(ContextTypeAwareStrategy):
             merged_keywords.extend(
                 [k for k in source.extracted_data.keywords if k not in merged_keywords]
             )
-            merged_tags.extend([t for t in source.extracted_data.tags if t not in merged_tags])
 
         # Generate merged title and summary
         merged_title = self._merge_profile_titles(target, sources)
@@ -187,7 +185,6 @@ class ProfileContextStrategy(ContextTypeAwareStrategy):
                 "summary": merged_summary,
                 "entities": merged_entities,
                 "keywords": merged_keywords,
-                "tags": merged_tags,
                 "importance": merged_importance,
                 "confidence": merged_confidence,
             },
@@ -239,7 +236,6 @@ class ProfileContextStrategy(ContextTypeAwareStrategy):
             summary=merged_data["summary"],
             keywords=merged_data["keywords"],
             entities=merged_data["entities"],
-            tags=merged_data["tags"],
             context_type=target.extracted_data.context_type,
             confidence=merged_data["confidence"],
             importance=merged_data["importance"],
@@ -343,7 +339,6 @@ class ActivityContextStrategy(ContextTypeAwareStrategy):
         merged_keywords = self._merge_with_frequency(
             [ctx.extracted_data.keywords for ctx in all_contexts]
         )
-        merged_tags = list(set([tag for ctx in all_contexts for tag in ctx.extracted_data.tags]))
 
         # 生成活动序列摘要
         merged_title = f"活动序列: {start_time.strftime('%Y-%m-%d %H:%M')} - {end_time.strftime('%Y-%m-%d %H:%M')}"
@@ -363,7 +358,6 @@ class ActivityContextStrategy(ContextTypeAwareStrategy):
                 "summary": merged_summary,
                 "entities": merged_entities,
                 "keywords": merged_keywords,
-                "tags": merged_tags,
                 "importance": merged_importance,
                 "confidence": merged_confidence,
             },
@@ -417,7 +411,6 @@ class ActivityContextStrategy(ContextTypeAwareStrategy):
             summary=merged_data["summary"],
             keywords=merged_data["keywords"],
             entities=merged_data["entities"],
-            tags=merged_data["tags"],
             context_type=target.extracted_data.context_type,
             confidence=merged_data["confidence"],
             importance=merged_data["importance"],
@@ -507,7 +500,6 @@ class StateContextStrategy(ContextTypeAwareStrategy):
         merged_keywords = self._extract_state_trends(
             [ctx.extracted_data.keywords for ctx in all_contexts]
         )
-        merged_tags = list(set([tag for ctx in all_contexts for tag in ctx.extracted_data.tags]))
 
         # 生成状态趋势摘要
         merged_title = f"状态监控: {merged_entities[0] if merged_entities else '系统'} ({start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')})"
@@ -527,7 +519,6 @@ class StateContextStrategy(ContextTypeAwareStrategy):
                 "summary": merged_summary,
                 "entities": merged_entities,
                 "keywords": merged_keywords,
-                "tags": merged_tags,
                 "importance": merged_importance,
                 "confidence": merged_confidence,
             },
@@ -605,7 +596,6 @@ class StateContextStrategy(ContextTypeAwareStrategy):
             summary=merged_data["summary"],
             keywords=merged_data["keywords"],
             entities=merged_data["entities"],
-            tags=merged_data["tags"],
             context_type=target.extracted_data.context_type,
             confidence=merged_data["confidence"],
             importance=merged_data["importance"],
@@ -704,7 +694,6 @@ class IntentContextStrategy(ContextTypeAwareStrategy):
         merged_keywords = self._merge_intent_keywords(
             [ctx.extracted_data.keywords for ctx in all_contexts]
         )
-        merged_tags = list(set([tag for ctx in all_contexts for tag in ctx.extracted_data.tags]))
 
         # 生成整合后的意图描述
         merged_title = self._create_integrated_intent_title(all_contexts)
@@ -724,7 +713,6 @@ class IntentContextStrategy(ContextTypeAwareStrategy):
                 "summary": merged_summary,
                 "entities": merged_entities,
                 "keywords": merged_keywords,
-                "tags": merged_tags,
                 "importance": merged_importance,
                 "confidence": merged_confidence,
             },
@@ -835,7 +823,6 @@ class IntentContextStrategy(ContextTypeAwareStrategy):
             summary=merged_data["summary"],
             keywords=merged_data["keywords"],
             entities=merged_data["entities"],
-            tags=merged_data["tags"],
             context_type=target.extracted_data.context_type,
             confidence=merged_data["confidence"],
             importance=merged_data["importance"],
@@ -926,9 +913,6 @@ class SemanticContextStrategy(ContextTypeAwareStrategy):
         merged_keywords = self._merge_semantic_keywords(
             [target.extracted_data.keywords] + [s.extracted_data.keywords for s in sources]
         )
-        merged_tags = list(
-            set([tag for ctx in [target] + sources for tag in ctx.extracted_data.tags])
-        )
 
         # 生成综合的概念描述
         merged_title = self._create_semantic_title(target, sources)
@@ -950,7 +934,6 @@ class SemanticContextStrategy(ContextTypeAwareStrategy):
                 "summary": merged_summary,
                 "entities": merged_entities,
                 "keywords": merged_keywords,
-                "tags": merged_tags,
                 "importance": merged_importance,
                 "confidence": merged_confidence,
             },
@@ -1051,7 +1034,6 @@ class SemanticContextStrategy(ContextTypeAwareStrategy):
             summary=merged_data["summary"],
             keywords=merged_data["keywords"],
             entities=merged_data["entities"],
-            tags=merged_data["tags"],
             context_type=target.extracted_data.context_type,
             confidence=merged_data["confidence"],
             importance=merged_data["importance"],
@@ -1139,9 +1121,6 @@ class ProceduralContextStrategy(ContextTypeAwareStrategy):
         merged_keywords = self._merge_procedural_keywords(
             [target.extracted_data.keywords] + [s.extracted_data.keywords for s in sources]
         )
-        merged_tags = list(
-            set([tag for ctx in [target] + sources for tag in ctx.extracted_data.tags])
-        )
 
         # 生成整合的流程描述
         merged_title = self._create_procedural_title(target, sources)
@@ -1163,7 +1142,6 @@ class ProceduralContextStrategy(ContextTypeAwareStrategy):
                 "summary": merged_summary,
                 "entities": merged_entities,
                 "keywords": merged_keywords,
-                "tags": merged_tags,
                 "importance": merged_importance,
                 "confidence": merged_confidence,
             },
@@ -1264,7 +1242,6 @@ class ProceduralContextStrategy(ContextTypeAwareStrategy):
             summary=merged_data["summary"],
             keywords=merged_data["keywords"],
             entities=merged_data["entities"],
-            tags=merged_data["tags"],
             context_type=target.extracted_data.context_type,
             confidence=merged_data["confidence"],
             importance=merged_data["importance"],

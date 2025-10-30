@@ -11,8 +11,8 @@ import datetime
 import json
 from typing import Any, Dict, List, Optional
 
-from opencontext.config import GlobalConfig
-from opencontext.config.global_config import get_prompt_manager
+from opencontext.config.global_config import get_prompt_group
+from opencontext.context_consumption.generation.debug_helper import DebugHelper
 from opencontext.llm.global_vlm_client import generate_with_messages_async
 from opencontext.models.enums import ContextType
 from opencontext.storage.global_storage import get_storage
@@ -30,15 +30,6 @@ class ReportGenerator:
 
     def __init__(self):
         self.tools_executor = ToolsExecutor()
-
-    @property
-    def prompt_manager(self):
-        return get_prompt_manager()
-
-    @property
-    def storage(self):
-        """Get storage from the global singleton."""
-        return get_storage()
 
     async def generate_report(self, start_time: int, end_time: int) -> str:
         """
@@ -177,7 +168,7 @@ class ReportGenerator:
         if not contexts:
             return ""
         try:
-            prompt_group = self.prompt_manager.get_prompt_group("generation.generation_report")
+            prompt_group = get_prompt_group("generation.generation_report")
 
             start_time_str = self._format_timestamp(start_time)
             end_time_str = self._format_timestamp(end_time)
@@ -200,6 +191,20 @@ class ReportGenerator:
             summary = await generate_with_messages_async(
                 messages, enable_executor=False, temperature=0.2
             )
+
+            # Save debug information (sync call within async function)
+            DebugHelper.save_generation_debug(
+                task_type="report",
+                messages=messages,
+                response=summary,
+                metadata={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "num_contexts": len(contexts),
+                    "is_hourly_summary": True,
+                },
+            )
+
             return summary
         except Exception as e:
             logger.error(f"Failed to generate hourly summary: {e}")
@@ -228,7 +233,7 @@ class ReportGenerator:
         You can use the search tool to get background information on important entities, but please control the search scope to avoid excessive retrieval."""
 
         # Get the standard prompt
-        prompt_group = self.prompt_manager.get_prompt_group("generation.generation_report")
+        prompt_group = get_prompt_group("generation.generation_report")
         system_prompt = prompt_group["system"]
 
         messages = [
@@ -260,7 +265,7 @@ class ReportGenerator:
             context_types = [ContextType.ACTIVITY_CONTEXT.value, ContextType.SEMANTIC_CONTEXT.value]
 
             # Get all relevant contexts
-            all_contexts = self.storage.get_all_processed_contexts(
+            all_contexts = get_storage().get_all_processed_contexts(
                 context_types=context_types, limit=1000, offset=0, filter=filters
             )
 
@@ -290,7 +295,7 @@ class ReportGenerator:
         Use a large model to generate an activity report, supporting tool calls to get background information.
         """
         # Get the prompt template
-        prompt_group = self.prompt_manager.get_prompt_group("generation.generation_report")
+        prompt_group = get_prompt_group("generation.generation_report")
         system_prompt = prompt_group["system"]
         user_prompt_template = prompt_group["user"]
 
@@ -318,6 +323,20 @@ class ReportGenerator:
             tools=ALL_TOOL_DEFINITIONS,
             temperature=0.1,
         )
+
+        # Save debug information (sync call within async function)
+        DebugHelper.save_generation_debug(
+            task_type="report",
+            messages=messages,
+            response=report,
+            metadata={
+                "start_time": start_time,
+                "end_time": end_time,
+                "num_contexts": len(contexts),
+                "is_hourly_summary": False,
+            },
+        )
+
         return report
 
     def _format_timestamp(self, timestamp: int) -> str:

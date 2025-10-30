@@ -8,10 +8,20 @@ enabled: true
 
 # Logging configuration
 logging:
-  level: DEBUG  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
-  log_path: "${CONTEXT_PATH:.}/logs/opencontext.log"  # Log file path
+  level: DEBUG # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_path: "${CONTEXT_PATH:.}/logs/opencontext.log" # Log file path
 
 user_setting_path: "${CONTEXT_PATH:.}/config/user_setting.yaml"
+
+# 文档处理配置
+document_processing:
+  enabled: true
+  batch_size: 3        # Number of images processed by VLM at once (recommended 2-5)
+  max_image_size: 1024 # Maximum image size (pixels), larger sizes increase accuracy but also API costs
+  dpi: 200             # DPI for converting PDF to images (recommended 150-300)
+
+  # Page-by-page detection configuration (to optimize VLM usage)
+  text_threshold_per_page: 50 # Scanned document threshold: pages with fewer characters than this value are considered scanned documents (requires VLM)
 
 vlm_model:
   base_url: "${LLM_BASE_URL}"
@@ -34,7 +44,7 @@ capture:
   # Screenshot capture
   screenshot:
     enabled: false
-    capture_interval: 5  # Screenshot interval (seconds)
+    capture_interval: 5 # Screenshot interval (seconds)
     storage_path: "${CONTEXT_PATH:.}/screenshots" # Screenshot save directory
 
   # File monitoring
@@ -43,7 +53,7 @@ capture:
     recursive: true
     initial_scan: true
     monitor_paths: "./doc"
-    capture_interval: 30  # File monitoring interval (seconds)
+    capture_interval: 30 # File monitoring interval (seconds)
     # file_patterns:
     #   - "*.txt"
     #   - "*.md"
@@ -56,8 +66,8 @@ capture:
   # Vaults document monitoring
   vault_document_monitor:
     enabled: false
-    monitor_interval: 30  # Monitoring interval (seconds)
-    initial_scan: true    # Whether to perform an initial scan
+    monitor_interval: 30 # Monitoring interval (seconds)
+    initial_scan: true # Whether to perform an initial scan
 
 # Context processing module
 processing:
@@ -65,19 +75,16 @@ processing:
   # Document processor configuration
   document_processor:
     enabled: true
-    batch_size: 10
-    batch_timeout: 5
-    use_cloud_chunker: false
-    
-  # Screenshot processor configuration
+    batch_size: 5
+    batch_timeout: 30
   screenshot_processor:
     enabled: true
     dedup_cache_size: 30
     similarity_hash_threshold: 5
-    batch_size: 20  # Increase batch size to improve throughput
-    batch_timeout: 10  # Reduce timeout to improve response speed
-    max_image_size: 1920  # Limit image size to reduce memory usage
-    resize_quality: 85  # Balance quality and performance
+    batch_size: 20 # Increase batch size to improve throughput
+    batch_timeout: 10 # Reduce timeout to improve response speed
+    max_image_size: 1920 # Limit image size to reduce memory usage
+    resize_quality: 85 # Balance quality and performance
     enabled_delete: true
     max_raw_properties: 5
 
@@ -87,44 +94,44 @@ processing:
     # Basic configuration
     similarity_threshold: 0.90
     associative_similarity_threshold: 0.6
-    
+
     # Intelligent merging configuration
-    use_intelligent_merging: true  # Enable intelligent strategy merging
-    enable_memory_management: true  # Enable memory management
-    cleanup_interval_hours: 24     # Cleanup check interval
-    
+    use_intelligent_merging: true # Enable intelligent strategy merging
+    enable_memory_management: true # Enable memory management
+    cleanup_interval_hours: 24 # Cleanup check interval
+
     # Cross-type association configuration
-    enable_cross_type_processing: true    # Enable cross-type processing
-    conversion_confidence_threshold: 0.8  # Conversion confidence threshold
-    max_conversions_per_session: 10       # Maximum conversions per session
-    
+    enable_cross_type_processing: true # Enable cross-type processing
+    conversion_confidence_threshold: 0.8 # Conversion confidence threshold
+    max_conversions_per_session: 10 # Maximum conversions per session
+
     # Type-specific configuration
     # Profile type configuration
     ENTITY_CONTEXT_similarity_threshold: 0.85
     ENTITY_CONTEXT_retention_days: 365
     ENTITY_CONTEXT_max_merge_count: 5
-    
+
     # Activity type configuration
     activity_context_similarity_threshold: 0.80
     activity_context_retention_days: 90
     activity_context_max_merge_count: 3
     activity_context_time_window_hours: 24
-    
-    # Intent type configuration  
+
+    # Intent type configuration
     intent_context_similarity_threshold: 0.75
     intent_context_retention_days: 180
     intent_context_max_merge_count: 4
-    
+
     # Semantic type configuration
     semantic_context_similarity_threshold: 0.72
     semantic_context_retention_days: 180
     semantic_context_max_merge_count: 6
-    
+
     # Procedural type configuration
     procedural_context_similarity_threshold: 0.75
     procedural_context_retention_days: 120
     procedural_context_max_merge_count: 4
-    
+
     # State type configuration
     state_context_similarity_threshold: 0.70
     state_context_retention_days: 7
@@ -139,10 +146,10 @@ storage:
       storage_type: "vector_db"
       backend: "chromadb"
       config:
-        mode: "local"  # Options: "local", "server"
+        mode: "local" # Options: "local", "server"
         path: "${CONTEXT_PATH:.}/persist/chromadb"
         collection_prefix: "opencontext"
-    
+
     - name: "document_store"
       storage_type: "document_db"
       backend: "sqlite"
@@ -156,12 +163,12 @@ consumption:
 # web server
 web:
   host: "127.0.0.1"
-  port: 8000
+  port: 1733
 
 # API authentication configuration
 api_auth:
-  enabled: false  # Enable authentication in production environment for security
-  api_keys: 
+  enabled: false # Enable authentication in production environment for security
+  api_keys:
     - "${CONTEXT_API_KEY:test}"
   excluded_paths:
     - "/health"
@@ -184,96 +191,38 @@ prompts:
 
 # Content generation service configuration
 content_generation:
+  # Debug configuration
+  debug:
+    enabled: false # Enable debug mode to save generation messages and responses
+    output_path: "${CONTEXT_PATH:.}/debug/generation" # Debug output directory
+
   # Task configurations
   activity:
     enabled: true
-    interval: 900  # Seconds, minimum 600 (10 minutes), recommended 900-1800 (15-30 minutes)
+    interval: 900 # Seconds, minimum 600 (10 minutes), recommended 900-1800 (15-30 minutes)
 
   tips:
     enabled: true
-    interval: 3600  # Seconds, minimum 1800 (30 minutes), recommended 3600-7200 (1-2 hours)
+    interval: 3600 # Seconds, minimum 1800 (30 minutes), recommended 3600-7200 (1-2 hours)
 
   todos:
     enabled: true
-    interval: 1800  # Seconds, minimum 1800 (30 minutes), recommended 1800-3600 (30-60 minutes)
+    interval: 1800 # Seconds, minimum 1800 (30 minutes), recommended 1800-3600 (30-60 minutes)
 
   report:
     enabled: true
-    time: "08:00"  # Daily report generation time (HH:MM)
-
+    time: "08:00" # Daily report generation time (HH:MM)
 
 tools:
-  # Entity processing and enhancement tools configuration
-  entity_tools:
-    enabled: true
-    # Entity normalizer configuration
-    entity_normalizer:
-      entity_config_path: "${CONTEXT_PATH:.}/config/runtime/entity_config.json"
-      similarity_threshold: 0.8
-      auto_learn: true
-      min_frequency: 3  # Minimum frequency for auto-learning
-    
-    # Entity extractor configuration  
-    entity_extractor:
-      extract_types: ["person", "product", "company", "technology"]
-      enable_context_patterns: true
-      
-    # Context enhancement configuration
-    context_enhancement:
-      max_background_entities: 3  # Maximum number of background entities to fetch
-      background_cache_size: 100  # Background information cache size
-      enhance_summary: true  # Whether to enhance the summary
-      suggest_merge: true   # Whether to suggest merging
-      
-    # User entity unifier configuration
-    user_entity_unifier:
-      unified_user_name: "current_user"  # Unified user name
-      auto_detect_names: true  # Whether to automatically detect names
-      enable_query_support: true  # Whether to support queries like "what did I do today"
-
   # Operation tools configuration
-  operation_tools:      
-    # SQLite operation tools configuration
-    sqlite_operations:
-      enabled: true
-    
+  operation_tools:
     web_search_tool:
       enabled: true
       web_search:
         engine: duckduckgo
         max_results: 5
         timeout: 10
-    
-    web_viewer_tool:
-      enabled: true
 
 # Intelligent completion service configuration
 completion:
   enabled: true
-  # Completion configuration parameters
-  max_context_length: 500     # Maximum context length
-  max_suggestions: 3          # Maximum number of suggestions
-  min_trigger_length: 3       # Minimum trigger length
-  similarity_threshold: 0.7   # Similarity threshold
-  
-  # Cache configuration
-  cache:
-    enabled: true
-    max_size: 1000            # Maximum number of cache entries
-    ttl_seconds: 300          # Cache time-to-live (seconds)
-    strategy: "hybrid"        # Cache strategy: lru, ttl, hybrid
-  
-  # Completion types configuration
-  completion_types:
-    semantic_continuation:
-      enabled: true
-      priority: 1
-    template_completion:
-      enabled: true
-      priority: 2
-    reference_suggestion:
-      enabled: true
-      priority: 3
-    context_aware:
-      enabled: true
-      priority: 4

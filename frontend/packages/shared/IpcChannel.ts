@@ -299,6 +299,7 @@ export enum IpcChannel {
   Database_SoftDeleteVaultById = 'database:soft-delete-vault-by-id',
   Database_RestoreVaultById = 'database:restore-vault-by-id',
   Database_HardDeleteVaultById = 'database:hard-delete-vault-by-id',
+  Database_GetVaultsByDocumentType = 'database:get-vaults-by-document-type',
 
   // activity
   Database_GetAllActivities = 'database:get-all-activities',
@@ -323,5 +324,13 @@ export enum IpcChannel {
   // settings
   Screen_Monitor_Get_Settings = 'screen-monitor:get-settings',
   Screen_Monitor_Set_Settings = 'screen-monitor:set-settings',
-  Screen_Monitor_Clear_Settings = 'screen-monitor:clear-settings'
+  Screen_Monitor_Clear_Settings = 'screen-monitor:clear-settings',
+  Screen_Monitor_Get_Recording_Stats = 'screen-monitor:get-recording-stats',
+
+  // task
+  Task_Update_Model_Config = 'task:update-model-config',
+  Task_Start = 'task:start',
+  Task_Stop = 'task:stop',
+  Task_Update_Current_Record_App = 'task:update-current-record-app',
+  Task_Check_Can_Record = 'task:check-can-record'
 }

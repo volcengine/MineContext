@@ -16,7 +16,7 @@ import {
   Form,
   Tooltip
 } from '@arco-design/web-react'
-import { IconDelete, IconEdit } from '@arco-design/web-react/icon'
+import { IconDelete } from '@arco-design/web-react/icon'
 import { Task, useHomeInfo } from '@renderer/hooks/use-home-info'
 import { useRef, useState } from 'react'
 import taskEmpty from '@renderer/assets/images/task-empty.svg'
@@ -128,22 +128,19 @@ const ToDoCard: React.FC = () => {
       }}>
       <div className="gap-2 flex-1 flex items-center">
         <Radio checked={!!task.status} onClick={() => handleToggleTaskStatus(task)} />
-          <div
-            className={`font-roboto text-sm font-normal text-[#3F3F51] leading-[22px] max-w-[800px] tracking-[0.042px] whitespace-normal break-words ${task.status && 'line-through'}`}
-            onClick={() => handleEditToDoList(task)}>
-            {task.content}
-          </div>
+        <div
+          className={`font-roboto text-sm font-normal text-[#3F3F51] leading-[22px] max-w-[800px] tracking-[0.042px] whitespace-normal break-words ${task.status && 'line-through'}`}
+          onClick={() => handleEditToDoList(task)}>
+          {task.content}
+        </div>
       </div>
       <div className={`flex items-center ml-2 gap-3 ${isTaskHover === task.id ? 'opacity-100' : 'opacity-0'}`}>
-        <Tooltip
-          content="Copied!"
-          position="top"
-          popupVisible={copiedTaskId === task.id}>
+        <Tooltip content="Copied!" position="top" popupVisible={copiedTaskId === task.id}>
           <Button
             type="text"
             size="small"
             className="[&_.arco-btn-size-small]: !w-[14px] !h-[14px]"
-            icon={<img src={copyIcon} alt="copyIcon" className='w-[14px] h-[14px]' />}
+            icon={<img src={copyIcon} alt="copyIcon" className="w-[14px] h-[14px]" />}
             onClick={() => handleCopyContent(task.content, task.id)}
             disabled={!!task.status}
           />
@@ -169,7 +166,7 @@ const ToDoCard: React.FC = () => {
             size="small"
             icon={<IconDelete />}
             className="[&_.arco-btn-size-small]: !w-[13px] !h-[13px]"
-            style={{ color: '#f53f3f'}}
+            style={{ color: '#f53f3f' }}
             onClick={() => {
               setIsDeleting(true)
             }}

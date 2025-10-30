@@ -38,13 +38,14 @@ dependencies = [
     "volcengine",
     "pillow",
     "imagehash",
-    "google-generativeai",
-    "python-dotenv",
+    "pypdfium2>=4.30.0",
+    "python-docx>=1.0.0",
+    "python-multipart"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "black>=24.0.0",
+    "black>=24.8.0",
     "isort>=5.13.0",
     "pre-commit>=3.6.0",
 ]

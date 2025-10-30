@@ -5,22 +5,16 @@ __pycache__
 /screenshots
 /logs
 /persist
+/debug
 /dist/*
 /venv/*
 /test_storage
 /config/runtime
 /test_script
-/config/user_setting.yaml
-/config/config.yaml
+/config/user*
 .DS_Store
 
 .venv/
 uv.lock
-
-# Environment variables
-.env
-.env.local
-
-⚙️ work_phases
-🗄️ archive
-🧠 knowledge_base
+uv.toml
+.idea

@@ -103,7 +103,7 @@ export class ChatStreamService {
 
     try {
       // Use the baseURL of axiosInstance to ensure consistent ports
-      const baseUrl = axiosInstance.defaults.baseURL || 'http://127.0.0.1:8000'
+      const baseUrl = axiosInstance.defaults.baseURL || 'http://127.0.0.1:1733'
       const response = await fetch(`${baseUrl}/api/agent/chat/stream`, {
         method: 'POST',
         headers: {
