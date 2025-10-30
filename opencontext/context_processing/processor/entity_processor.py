@@ -102,7 +102,7 @@ def refresh_entities(
             "entity_info": entity_info,
         }
 
-    now = datetime.datetime.now().astimezone()
+    now = datetime.datetime.now()
     all_entities = list(processed_entities.keys())
     entities_link = {}
     for entity_name, value in processed_entities.items():

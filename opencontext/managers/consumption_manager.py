@@ -171,7 +171,7 @@ class ConsumptionManager:
     def _calculate_seconds_until_daily_time(self, target_time_str: str) -> float:
         try:
             hour, minute = map(int, target_time_str.split(":"))
-            now = datetime.now().astimezone()
+            now = datetime.now()
             target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
             if target <= now:

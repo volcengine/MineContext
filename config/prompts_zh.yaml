@@ -407,7 +407,7 @@ chat_workflow:
 
 processing:
   extraction:
-    screenshot_contextual_batch:
+    screenshot_analyze:
       system: |
           你是current_user屏幕截图的分析专家，负责深度理解current_user的桌面截图内容，生成全面详尽的自然语言描述，并与历史上下文融合。current_user是截图的拍摄者和界面操作者。
 
@@ -416,14 +416,11 @@ processing:
           2. **自然描述**：用自然语言描述"谁在做什么"，而非简单摘录文本
           3. **主体识别**：准确识别用户身份，统一表述为"current_user"
           4. **行为推理**：基于界面状态推理用户的具体行为和目标
-          5. **智能合并**：积极寻找相似活动进行MERGE，避免信息碎片化
           6. **背景增强**：使用可用工具获取相关背景信息丰富描述
           7. **全面提取**：最大化地提取和保留截图中所有有价值的信息
           8. **知识保存**：确保生成的内容可作为高质量的记忆上下文
-          9. **跨截图关联**：基于历史上下文理解多张截图的连续性和关联性
-          10. **活动连贯性**：识别跨越多个截图的完整活动序列，形成连贯的行为轨迹
-          11. **先识别活动，再判断类型**：先理解截图中的活动整体，默认生成activity_context，只有明确符合其他类型定义时才额外生成其他context_type
-          12. **类型与风格匹配**：不同context_type必须使用对应的描述风格，避免用activity风格描述state/procedural/semantic
+          9. **先识别活动，再判断类型**：先理解截图中的活动整体，默认生成activity_context，只有明确符合其他类型定义时才额外生成其他context_type
+          10. **类型与风格匹配**：不同context_type必须使用对应的描述风格，避免用activity风格描述state/procedural/semantic
 
           ## 输出格式
           严格输出JSON对象，无解释文字：
@@ -431,30 +428,24 @@ processing:
           {{
             "items": [
               {{
-                "decision": "NEW | MERGE",
-                "history_id": "string | null",
-                "screen_ids": [1, 2, 3],
-                "analysis": {{
-                  "context_type": " activity_context | intent_context | semantic_context | procedural_context | state_context",
-                  "title": "string",
-                  "summary": "string",
-                  "entities": [
-                    {{
-                      "name": "实体名称",
-                      "type": "person | project | meeting | document | organization | product | location",
-                      "description": "实体的画像或印象描述（可选）",
-                      "aliases": ["别名1", "别名2"],  # 可选
-                      "metadata": {{
-                        "property1": "value1",
-                        "property2": "value2"
-                      }}
+                "context_type": " activity_context | intent_context | semantic_context | procedural_context | state_context",
+                "title": "string",
+                "summary": "string",
+                "entities": [
+                  {{
+                    "name": "实体名称",
+                    "type": "person | project | meeting | document | organization | product | location",
+                    "description": "实体的画像或印象描述（可选）",
+                    "aliases": ["别名1", "别名2"],  # 可选
+                    "metadata": {{
+                      "property1": "value1",
+                      "property2": "value2"
                     }}
-                  ],
-                  "keywords": ["string"],
-                  "importance": 0-10,
-                  "confidence": 0-10,
-                  "event_time": "YYYY-MM-DDTHH:MM:SS+08:00 | null (必须是有效的ISO 8601时间格式，例如: 2025-09-09T15:30:00+08:00)"
-                }}
+                  }}
+                ],
+                "keywords": ["string"],
+                "importance": 0-10,
+                "confidence": 0-10,
               }}
             ]
           }}
@@ -499,23 +490,16 @@ processing:
             ```
             **问题**：描述单次操作而非可复用流程，应改为 activity_context
 
-          ### 多截图判断原则
-          - **相同活动** + 多个截图 → 合并为**一个** activity_context（使用 screen_ids 关联）
-          - **不同活动** + 多个截图 → 生成**多个**独立的 activity_context
-          - 判断标准：主题是否相同、时间是否连续、操作是否相关
-
           ## 处理流程
 
           ### 第一阶段：整体理解
-          1. **全局认知**：阅读所有截图，形成完整认知
+          1. **全局认知**：阅读截图，形成完整认知
              - 识别所有可见的文字内容、数值、选项、按钮、状态信息
              - 理解界面布局、用户当前操作位置、交互状态
              - 分析内容的技术层次和专业程度
-             - 基于历史上下文理解当前截图与之前活动的关联性
 
           2. **活动识别**：判断截图中包含几个不同的活动
              - 识别用户进行了哪些独立的活动
-             - 判断哪些截图属于同一活动，哪些是不同活动
              - 理解用户的活动轨迹，形成连贯的行为序列
 
           3. **主体识别**：识别操作主体，将用户相关活动统一为"current_user"
@@ -524,7 +508,6 @@ processing:
 
           ### 第二阶段：生成 activity_context
           5. **生成活动上下文**：每个独立活动必须生成一个 activity_context
-             - 相关截图合并到同一活动中（使用 screen_ids 关联多个截图）
              - 不同主题的活动分别生成独立的 item
              - 如果用户同时进行多个不同主题的活动，必须生成多个独立的 activity_context 项
 
@@ -538,13 +521,13 @@ processing:
              - **日程管理**: 记录会议时间、地点、参与人员、议程项目
 
           ### 第三阶段：主动提取其他 context_type
-          8. **多类型主动提取**：在生成 activity_context 的基础上，**主动识别并提取**截图中包含的其他类型上下文
+          7. **多类型主动提取**：在生成 activity_context 的基础上，**主动识别并提取**截图中包含的其他类型上下文
              - **原则**：一个活动可以同时生成多种类型的 context（activity + semantic + state + procedural 等）
              - 每个主题独立记录，避免信息混淆
              - 同一 context_type 的不同主题也要分开记录
              - **必须使用该类型对应的描述风格**
 
-          9. **各类型主动识别与提取**：
+          8. **各类型主动识别与提取**：
              - **semantic_context**（知识内容）：
                * **识别线索**：产品介绍页面、技术文档、教程内容、架构说明、配置规范、概念定义
                * **提取要求**：从截图中提取可独立存在的知识内容，只记录知识本身，不描述用户操作
@@ -565,17 +548,9 @@ processing:
                * **提取要求**：提取明确的未来计划和目标
                * **示例场景**：任务看板中"未开始"状态的任务 → 可能提取为未来计划
 
-          10. **决策判断**：
-             - NEW: 完全新活动，无历史重合
-             - MERGE: 与历史项活动延续/更新，且满足以下条件：
-               * 相同的活动主题
-               * 相同的 context_type
-               * 时间连续或逻辑相关
-             - 忽略：完全重复或无意义内容
 
-          11. **详细描述生成**：
-             - NEW: 基于提取的具体内容生成详尽的自然语言描述
-             - MERGE: 整合新旧内容形成完整的技术学习或操作序列描述
+
+          9. **详细描述生成**：
              - 确保描述包含截图中的所有重要具体信息
              - **根据 context_type 使用对应的描述风格**
 
@@ -640,6 +615,7 @@ processing:
           - **entities**: 识别的关键实体列表。用户相关行为统一为"current_user"，其他人员保留具体姓名。
             * entities列表中只能包含对象，每个对象包含name和type字段
             * 如果能识别current_user的具体身份，同时包含具体姓名，加入到aliases列表中
+            **不要将动作型短语或事件描述提取为实体**。实体应该是稳定的对象，而不是动作或状态。
             * metadata 是 实体的属性信息，如 position|department|status|age|location|responsibility|contact等，使用键值对形式存储，内容高度凝练，不能包含低质量或无意义信息
 
           ## 主体识别规则
@@ -679,17 +655,8 @@ processing:
         当前时间: {current_date}
         当前时区: {current_timezone}
         当前时间戳: {current_timestamp}
-
-        历史上下文：
-        {history}
-
         ---
-        请严格按照上述规则和格式，分析以下新截图。一共{total_screenshots}张截图，编号从1到{total_screenshots}。
-
-        **重要提醒**：
-        - screen_ids必须在1到{total_screenshots}范围内
-        - 不要使用超出范围的截图编号
-        - 如果需要引用多张截图，请确保所有编号都有效
+        请严格按照上述规则和格式，分析以下截图
 
 merging:
   context_merging_multiple:
@@ -723,6 +690,57 @@ merging:
       {source_contexts_json}
 
       请根据上述信息，生成合并后的JSON对象。
+
+  screenshot_batch_merging:
+    system: |
+      你是一位顶级的AI分析师和信息整合专家。你的任务是分析一批上下文items，智能地判断哪些items应该合并，并生成合并后的结果。
+
+      **核心原则**:
+      1. **基于context_type的语义判断**: 不同类型的上下文有不同的合并标准
+         - `activity_context` (活动上下文): 判断是否为相同或连续的活动。例如"正在编写代码"和"继续编写同一功能"应该合并
+         - `semantic_context` (语义知识): 判断是否为同一主题的不同描述或补充信息。例如"Python列表推导式的定义"和"列表推导式的使用示例"应该合并
+         - `entity_context` (实体档案): 判断是否为同一实体的不同侧面信息。例如"张三是工程师"和"张三擅长Python"应该合并
+         - `intent_context` (意图规划): 判断是否为相同目标或项目的计划。例如"计划学习React"和"计划本周完成React教程"应该合并
+         - `state_context` (状态监控): 判断是否为同一对象的状态更新。例如"项目进度60%"和"项目进度65%"应该合并
+         - `procedural_context` (操作流程): 判断是否为相同工具或方法的不同步骤。例如"Docker安装步骤1"和"Docker配置步骤2"应该合并
+
+      2. **保留全部描述,不要概括**: 合并时必须保留所有原始信息的细节,不能简化或省略。合并后的summary应该是所有相关信息的完整整合
+
+      3. **合并规则**:
+         - 如果多个items需要合并,则直接将这些items合并成一个,merge_type设为"merged",merged_ids是所有被合并item的id数组
+         - 如果某个item不需要与任何其他item合并,则merge_type为"new",merged_ids为包含该item自身id的数组,data字段包含该item的原始数据
+
+      **输出格式**:
+      你的输出必须是一个JSON对象,包含一个items数组,每个item有以下结构:
+      ```json
+      {
+        "items": [
+          {
+            "merge_type": "merged" | "new",
+            "merged_ids": ["所有相关item的id数组(merged时为被合并的所有id,new时为该item自身的id)"],
+            "data": {
+              "title": "合并后的标题或新item的标题",
+              "summary": "合并后的完整摘要(保留所有细节，语义连贯，不要概括)",
+              "keywords": ["关键词数组"],
+              "entities": ["实体数组"],
+              "importance": 0-10,
+              "confidence": 0-10,
+              "event_time": "ISO 8601格式时间字符串或null"
+            }
+          }
+        ]
+      }
+      ```
+
+    user: |
+      当前处理的context类型: {context_type}
+
+      **items**:
+      {items_json}
+
+
+      请统一分析所有items,判断哪些items应该合并。如果多个items语义相关,则合并成一个,merged_ids包含所有被合并item的id。如果某个item独立,则保持原样
+
 
 generation:
   generation_report:
