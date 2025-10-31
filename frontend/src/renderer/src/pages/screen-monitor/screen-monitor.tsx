@@ -398,49 +398,6 @@ const ScreenMonitor: React.FC = () => {
     setIsMonitoring(result.status === 'running')
     return result
   })
-  // const checkCanRecord = useMemoizedFn(() => {
-  //   if (enableRecordingHours) {
-  //     const now = dayjs()
-  //     const currentDay = now.day()
-  //     const currentHour = now.hour()
-  //     const currentMinute = now.minute()
-
-  //     // Check if within the allowed date range
-  //     if (applyToDays === 'weekday') {
-  //       // 0 = Sunday, 6 = Saturday, 1-5 = Monday-Friday
-  //       if (currentDay === 0 || currentDay === 6) {
-  //         setCanRecord(false)
-  //         return false
-  //       }
-  //     }
-
-  //     // Check if within the allowed time range
-  //     if (recordingHours && recordingHours.length === 2) {
-  //       const [startTime, endTime] = recordingHours
-  //       const [startHour, startMinute] = startTime.split(':').map(Number)
-  //       const [endHour, endMinute] = endTime.split(':').map(Number)
-
-  //       const currentTotalMinutes = currentHour * 60 + currentMinute
-  //       const startTotalMinutes = startHour * 60 + startMinute
-  //       const endTotalMinutes = endHour * 60 + endMinute
-
-  //       // If the end time is less than the start time, it spans across midnight
-  //       if (endTotalMinutes < startTotalMinutes) {
-  //         // The current time is after the start time or before the end time
-  //         const result = currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes
-  //         setCanRecord(result)
-  //         return result
-  //       } else {
-  //         // Normal time range
-  //         const result = currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes
-  //         setCanRecord(result)
-  //         return result
-  //       }
-  //     }
-  //   }
-  //   setCanRecord(true)
-  //   return true
-  // })
 
   // Check recording status on component mount
   useEffect(() => {
@@ -495,7 +452,7 @@ const ScreenMonitor: React.FC = () => {
       windowSources: windowList.map((source) => source.id)
     })
     await window.screenMonitorAPI.updateCurrentRecordApp([
-      ...(screenList.length > 0 ? screenList : [get(screenList, 0)].filter(Boolean)),
+      ...(screenList.length > 0 ? screenList : [get(screenAllSources, 0)].filter(Boolean)),
       ...windowList
     ])
   })
