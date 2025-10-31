@@ -35,6 +35,7 @@ import { localStoreService } from './services/LocalStoreService'
 import { activityService } from './services/ActivityService'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { VaultDocumentType } from '@shared/enums/global-enum'
+import { getTrayService } from './index'
 import { type Dayjs } from 'dayjs'
 
 const logger = getLogger('IPC')
@@ -539,6 +540,33 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
     return localStoreService.setSetting(key, value)
   })
   ipcMain.handle(IpcChannel.Screen_Monitor_Clear_Settings, (_, key: string) => localStoreService.clearSetting(key))
+
+  // Tray related handlers
+  ipcMain.handle(IpcChannel.Tray_UpdateRecordingStatus, (_, isRecording: boolean) => {
+    const trayService = getTrayService()
+    if (trayService) {
+      trayService.updateRecordingStatus(isRecording)
+      logger.info(`Tray recording status updated: ${isRecording}`)
+    } else {
+      logger.warn('Tray service not available')
+    }
+  })
+
+  ipcMain.handle(IpcChannel.Tray_Show, () => {
+    const trayService = getTrayService()
+    if (trayService && !trayService.exists()) {
+      trayService.create()
+      logger.info('Tray shown')
+    }
+  })
+
+  ipcMain.handle(IpcChannel.Tray_Hide, () => {
+    const trayService = getTrayService()
+    if (trayService) {
+      trayService.destroy()
+      logger.info('Tray hidden')
+    }
+  })
 
   // Get recording statistics
   ipcMain.handle(IpcChannel.Screen_Monitor_Get_Recording_Stats, async () => {

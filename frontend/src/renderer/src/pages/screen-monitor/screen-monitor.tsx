@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Modal, Image, Form, Message } from '@arco-design/web-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useSetting } from '@renderer/hooks/use-setting'
 import { useScreen } from '@renderer/hooks/use-screen'
 import dayjs from 'dayjs'
@@ -22,6 +23,7 @@ import RecordingTimeline from './components/recording-timeline'
 import EmptyStatePlaceholder from './components/empty-state-placeholder'
 import SettingsModal from './components/settings-modal'
 import { getLogger } from '@shared/logger/renderer'
+import { IpcChannel } from '@shared/IpcChannel'
 import type { RecordingStats } from './components/recording-stats-card'
 import { CaptureSource } from '@interface/common/source'
 
@@ -41,6 +43,8 @@ export interface Activity {
 }
 
 const ScreenMonitor: React.FC = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const {
     recordInterval,
     recordingHours,
@@ -269,12 +273,9 @@ const ScreenMonitor: React.FC = () => {
     const fetchStats = async () => {
       try {
         if (!isToday || !isMonitoring) {
-          logger.debug('Skip fetching stats: isToday=%s, isMonitoring=%s', isToday, isMonitoring)
           return
         }
-        logger.debug('Fetching recording stats...')
         const stats = await window.screenMonitorAPI.getRecordingStats()
-        logger.debug('Received recording stats:', stats)
         if (stats) {
           setRecordingStats(stats)
         }
@@ -324,6 +325,42 @@ const ScreenMonitor: React.FC = () => {
     },
     'screen-monitor'
   )
+
+  // Listen for tray toggle recording event (from Router.tsx when already on this page)
+  useEffect(() => {
+    const handleTrayToggleRecording = () => {
+      if (isMonitoring) {
+        stopMonitoring()
+      } else {
+        startMonitoring()
+      }
+    }
+
+    window.addEventListener('tray-toggle-recording', handleTrayToggleRecording)
+
+    return () => {
+      window.removeEventListener('tray-toggle-recording', handleTrayToggleRecording)
+    }
+  }, [isMonitoring, startMonitoring, stopMonitoring])
+
+  // Handle navigation state when coming from tray icon while on a different page
+  useEffect(() => {
+    const state = location.state as { toggleRecording?: boolean } | null
+    if (state?.toggleRecording) {
+      // Clear the navigation state first to prevent re-triggering
+      navigate(location.pathname, { replace: true, state: {} })
+
+      // Toggle recording based on current state
+      if (isMonitoring) {
+        stopMonitoring()
+      } else {
+        startMonitoring()
+      }
+    }
+    // Only depend on location.state to avoid re-triggering when isMonitoring changes
+    // startMonitoring and stopMonitoring are memoized so they're stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
 
   const openSettings = useMemoizedFn(async () => {
     // Refresh the application list before opening settings
@@ -424,6 +461,18 @@ const ScreenMonitor: React.FC = () => {
       }
     }
   }, [isMonitoring, enableRecordingHours, checkCanRecord])
+
+  // Sync recording status to tray
+  useEffect(() => {
+    if (isToday) {
+      window.electron.ipcRenderer
+        .invoke(IpcChannel.Tray_UpdateRecordingStatus, isMonitoring && canRecord)
+        .catch((error) => {
+          logger.error('Failed to update tray recording status:', error)
+        })
+    }
+  }, [isMonitoring, canRecord, isToday])
+
   // Get sources
   const settingSources = useAtomValue(loadableCaptureSourcesFromSettingsAtom, { store: appStore })
   const settingScreenSources = useMemo(
