@@ -284,7 +284,6 @@ class SmartTipGenerator:
             messages,
             max_calls=2,
             tools=ALL_TOOL_DEFINITIONS,
-            temperature=0.1,
         )
 
         # Save debug information

@@ -348,10 +348,6 @@
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <label for="temperature" class="form-label">温度: <span id="tempValue">0.7</span></label>
-                        <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="0.7" onInput="updateTempValue(this.value)">
-                    </div>
                 </div>
             </div>
         </div>
@@ -410,11 +406,7 @@
             const content = document.getElementById('settingsContent');
             content.classList.toggle('show');
         }
-        
-        function updateTempValue(value) {
-            document.getElementById('tempValue').textContent = value;
-        }
-        
+
         function adjustTextareaHeight(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
@@ -525,8 +517,7 @@
                     messages: requestMessages,
                     enable_tools: document.getElementById('enableTools').checked,
                     always_approve_sqlite: document.getElementById('alwaysApproveSqlite').checked,
-                    thinking: document.getElementById('thinkingMode').checked,
-                    temperature: parseFloat(document.getElementById('temperature').value)
+                    thinking: document.getElementById('thinkingMode').checked
                 };
                 
                 // Send request
@@ -640,8 +631,7 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     messages: [{"role": "user", "content": "Hello"}],
-                    enable_tools: false,
-                    temperature: 0.7
+                    enable_tools: false
                 })
             }).then(response => {
                 console.log('Response status:', response.status);

@@ -88,14 +88,12 @@ class LLMClient:
         try:
             # Stage: LLM request preparation
 
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
             }
             if tools:
                 create_params["tools"] = tools
@@ -148,15 +146,12 @@ class LLMClient:
 
         request_start = time.time()
         try:
-            # Stage: LLM request preparation
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
             }
             if tools:
                 create_params["tools"] = tools
@@ -172,9 +167,6 @@ class LLMClient:
             record_processing_stage(
                 "chat_cost", int((time.time() - api_start) * 1000), status="success"
             )
-
-            # Stage: Response parsing
-            parse_start = time.time()
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -205,14 +197,12 @@ class LLMClient:
     def _openai_chat_completion_stream(self, messages: List[Dict[str, Any]], **kwargs):
         """Sync stream chat completion"""
         try:
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
                 "stream": True,
             }
             if tools:
@@ -232,7 +222,6 @@ class LLMClient:
     async def _openai_chat_completion_stream_async(self, messages: List[Dict[str, Any]], **kwargs):
         """Async stream chat completion - async generator"""
         try:
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
@@ -246,7 +235,6 @@ class LLMClient:
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
                 "stream": True,
             }
             if tools:

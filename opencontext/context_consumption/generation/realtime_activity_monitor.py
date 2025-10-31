@@ -186,11 +186,8 @@ class RealtimeActivityMonitor:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
-            response = generate_with_messages(
-                messages,
-                temperature=0.1,
-            )
-            print("response:", response)
+            response = generate_with_messages(messages)
+            # print("response:", response)
 
             # Save debug information
             DebugHelper.save_generation_debug(

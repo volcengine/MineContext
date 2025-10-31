@@ -207,7 +207,7 @@ async def generate_activity(
         ]
 
         print("Calling LLM to generate activity summary...")
-        response = generate_with_messages(messages, temperature=0.1)
+        response = generate_with_messages(messages)
 
         # Parse response
         activity_result = parse_json_from_response(response)
@@ -303,7 +303,7 @@ async def generate_todos(
         ]
 
         print("Calling LLM to extract todo tasks...")
-        response = generate_with_messages(messages, temperature=0.1)
+        response = generate_with_messages(messages)
 
         # Parse response
         tasks = parse_json_from_response(response)
@@ -396,7 +396,7 @@ async def generate_tips(
         ]
 
         print("Calling LLM to generate smart tips...")
-        tip_content = generate_with_messages(messages, temperature=0.1)
+        tip_content = generate_with_messages(messages)
 
         if tip_content and len(tip_content.strip()) >= 10:
             print(f"\n✓ Tips Generated:")
@@ -463,7 +463,7 @@ async def generate_report(
         ]
 
         print("Calling LLM to generate comprehensive report...")
-        report = await generate_with_messages_async(messages, temperature=0.1)
+        report = await generate_with_messages_async(messages)
 
         if report:
             print(f"\n✓ Report Generated ({len(report)} characters)")
