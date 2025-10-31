@@ -72,18 +72,33 @@ class CPUProfiler {
       fs.mkdirSync(this.outDir, { recursive: true })
     }
   }
-
-  public start(label: string = 'profile'): void {
+  private postAsync(method: string, params?: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!this.session) {
+        return reject(new Error('CPUProfiler session is not connected or null.'))
+      }
+      this.session.post(method, params, (err, result) => {
+        if (err) return reject(err)
+        resolve(result)
+      })
+    })
+  }
+  public async start(label: string = 'profile'): Promise<void> {
     if (this.isProfiling) return
     this.session = new inspector.Session()
     try {
       this.session.connect()
-      this.session.post('Profiler.enable')
-      this.session.post('Profiler.start')
+      await this.postAsync('Profiler.enable')
+      await this.postAsync('Profiler.start')
       this.isProfiling = true
       log.warn(`[Profiler] 🚀 Started CPU Profile, label: ${label}`)
     } catch (err: any) {
       log.error(`[Profiler] ❌ Failed to start: ${err.message}`)
+      try {
+        this.session?.disconnect()
+      } catch {}
+      this.session = null
+      this.isProfiling = false
     }
   }
 
@@ -125,7 +140,7 @@ class PerformanceMonitor {
 
   constructor() {
     this.profiler = new CPUProfiler(
-      path.join(!app.isPackaged && is.dev ? 'backend' : app.getPath('userData'), 'profiles')
+      path.join(!app.isPackaged && is.dev ? 'backend' : app.getPath('userData'), 'frontend-logs', 'profiles')
     )
     this.setupPerformanceObserver()
   }
@@ -181,7 +196,7 @@ class PerformanceMonitor {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
   }
 
-  private detectAnomalies(metrics: IMetrics): IAnomaly[] {
+  private async detectAnomalies(metrics: IMetrics): Promise<IAnomaly[]> {
     const anomalies: IAnomaly[] = []
     if (metrics.process.cpu > this.thresholds.cpu) {
       anomalies.push({
@@ -219,13 +234,35 @@ class PerformanceMonitor {
         suggestion: 'Check for memory leaks, large object caching, or unreleased resources.'
       })
     }
+    // if (metrics.eventLoop && metrics.eventLoop.mean > this.thresholds.eventLoopLag) {
+    //   anomalies.push({
+    //     type: 'EVENT_LOOP_LAG',
+    //     severity: metrics.eventLoop.mean > 1000 ? 'CRITICAL' : 'WARNING',
+    //     message: `High Event Loop Lag: mean=${metrics.eventLoop.mean}ms, max=${metrics.eventLoop.max}ms, p99=${metrics.eventLoop.p99}ms`,
+    //     suggestion: 'Check for synchronous blocking code or intensive computations.'
+    //   })
+    // }
     if (metrics.eventLoop && metrics.eventLoop.mean > this.thresholds.eventLoopLag) {
-      anomalies.push({
+      const isCritical = metrics.eventLoop.mean > 1000
+      const anomaly: IAnomaly = {
         type: 'EVENT_LOOP_LAG',
-        severity: metrics.eventLoop.mean > 1000 ? 'CRITICAL' : 'WARNING',
+        severity: isCritical ? 'CRITICAL' : 'WARNING',
         message: `High Event Loop Lag: mean=${metrics.eventLoop.mean}ms, max=${metrics.eventLoop.max}ms, p99=${metrics.eventLoop.p99}ms`,
-        suggestion: 'Check for synchronous blocking code or intensive computations.'
-      })
+        suggestion: 'Auto-triggered CPU profile. Check for synchronous blocking code or intensive computations.'
+      }
+      anomalies.push(anomaly)
+
+      if (!this.profiler.isProfiling) {
+        log.warn(`[Profiler] Triggering profile due to high event loop lag: ${anomaly.message}`)
+        await this.profiler.start('eventloop-lag-trigger')
+
+        setTimeout(() => {
+          this.profiler.stop('eventloop-lag-trigger').then((profilePath) => {
+            if (profilePath)
+              log.warn(`[Profiler] Profile for event loop lag completed, triggered by: ${anomaly.message}`)
+          })
+        }, 15000)
+      }
     }
     if (metrics.v8.numberOfDetachedContexts > 5) {
       anomalies.push({
@@ -247,7 +284,7 @@ class PerformanceMonitor {
       eventLoop: this.getEventLoopStats()!,
       v8: this.getV8HeapStats()
     }
-    const anomalies = this.detectAnomalies(metrics)
+    const anomalies = await this.detectAnomalies(metrics)
     this.logMetrics(metrics, anomalies)
     this.baseline.cpu = metrics.process.cpu
     this.baseline.memory = metrics.process.memory

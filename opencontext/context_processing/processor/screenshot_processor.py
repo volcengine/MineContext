@@ -170,6 +170,11 @@ class ScreenshotProcessor(BaseContextProcessor):
         return True
 
     def _run_processing_loop(self):
+        from opencontext.monitoring import (
+            increment_data_count,
+            increment_recording_stat,
+            record_processing_metrics,
+        )
         """Background processing loop for handling screenshots in input queue."""
         unprocessed_contexts = []
         last_process_time = int(time.time())
