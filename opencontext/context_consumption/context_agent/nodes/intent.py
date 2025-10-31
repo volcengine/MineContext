@@ -83,8 +83,6 @@ class IntentNode(BaseNode):
         ]
         response = await generate_with_messages_async(
             messages,
-            temperature=0.1,
-            max_tokens=50,
             thinking="disabled",
         )
         response = response.strip().lower()
@@ -123,7 +121,7 @@ class IntentNode(BaseNode):
         # Use streaming generation
         full_content = ""
         chunk_index = 0
-        async for chunk in generate_stream_for_agent(messages, temperature=0.7):
+        async for chunk in generate_stream_for_agent(messages):
             if chunk.choices and len(chunk.choices) > 0:
                 delta = chunk.choices[0].delta
                 if hasattr(delta, "content") and delta.content:
@@ -184,7 +182,6 @@ class IntentNode(BaseNode):
         ]
         response = await generate_with_messages_async(
             messages,
-            temperature=0.1,
             thinking="disabled",
         )
         response = response.strip().lower()
@@ -239,7 +236,7 @@ class IntentNode(BaseNode):
             ]
 
             response = await generate_with_messages_async(
-                messages, temperature=0.1, thinking="disabled"
+                messages, thinking="disabled"
             )
 
             result = parse_json_from_response(response.strip())

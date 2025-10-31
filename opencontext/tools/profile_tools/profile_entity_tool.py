@@ -547,7 +547,7 @@ class ProfileEntityTool(BaseTool):
             ]
             from opencontext.llm.global_vlm_client import generate_with_messages
 
-            response = generate_with_messages(messages, temperature=0.1, thinking="disabled")
+            response = generate_with_messages(messages, thinking="disabled")
             result = parse_json_from_response(response)
             if "entity_canonical_name" in result and result["entity_canonical_name"]:
                 old_entity_data.entity_canonical_name = result["entity_canonical_name"]
@@ -603,8 +603,6 @@ class ProfileEntityTool(BaseTool):
 
             response = generate_with_messages(
                 messages,
-                temperature=0.1,
-                max_tokens=200,
                 thinking="disabled",
             )
             result = parse_json_from_response(response)

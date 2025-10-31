@@ -28,8 +28,6 @@ vlm_model:
   api_key: "${LLM_API_KEY}"
   model: "${LLM_MODEL}"
   provider: ""
-  # max_tokens: 4096
-  temperature: 0.7
 
 embedding_model:
   base_url: "${EMBEDDING_BASE_URL}"

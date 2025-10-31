@@ -268,7 +268,7 @@ class CompletionService:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt},
             ]
-            response = generate_with_messages(messages, temperature=0.7)
+            response = generate_with_messages(messages)
 
             if response and response.choices:
                 content = response.choices[0].message.content.strip()

@@ -204,11 +204,7 @@ class DocumentTextChunker(BaseChunker):
             ]
 
             # Async LLM call
-            response = await generate_with_messages_async(
-                messages=messages,
-                max_tokens=4096,
-                temperature=0.3,
-            )
+            response = await generate_with_messages_async(messages=messages)
 
             # Parse JSON response
             chunks = parse_json_from_response(response)
@@ -294,8 +290,6 @@ class DocumentTextChunker(BaseChunker):
             response = loop.run_until_complete(
                 generate_with_messages_async(
                     messages=messages,
-                    max_tokens=8192,
-                    temperature=0.3,
                 )
             )
 
