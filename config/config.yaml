@@ -78,7 +78,7 @@ processing:
   screenshot_processor:
     enabled: true
     dedup_cache_size: 30
-    similarity_hash_threshold: 5
+    similarity_hash_threshold: 7
     batch_size: 20 # Increase batch size to improve throughput
     batch_timeout: 10 # Reduce timeout to improve response speed
     max_image_size: 1920 # Limit image size to reduce memory usage

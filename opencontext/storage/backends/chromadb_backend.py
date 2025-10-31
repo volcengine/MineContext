@@ -458,14 +458,15 @@ class ChromaDBBackend(IVectorStorageBackend):
             return None
         # Search in all collections
         try:
-            result = self._collections[context_type].get(
-                ids=[id],
-                include=(
-                    ["metadatas", "documents", "embeddings"]
-                    if need_vector
-                    else ["metadatas", "documents"]
-                ),
-            )
+            with self._write_lock:
+                result = self._collections[context_type].get(
+                    ids=[id],
+                    include=(
+                        ["metadatas", "documents", "embeddings"]
+                        if need_vector
+                        else ["metadatas", "documents"]
+                    ),
+                )
 
             if result and result["ids"]:
                 doc = {
@@ -505,15 +506,16 @@ class ChromaDBBackend(IVectorStorageBackend):
                 where_clause = self._build_where_clause(filter)
 
                 # ChromaDB's get method does not directly support offset, so pagination needs to be implemented in other ways
-                results = collection.get(
-                    limit=limit + offset,  # Get more data to simulate offset
-                    where=where_clause,
-                    include=(
-                        ["metadatas", "documents", "embeddings"]
-                        if need_vector
-                        else ["metadatas", "documents"]
-                    ),
-                )
+                with self._write_lock:
+                    results = collection.get(
+                        limit=limit + offset,  # Get more data to simulate offset
+                        where=where_clause,
+                        include=(
+                            ["metadatas", "documents", "embeddings"]
+                            if need_vector
+                            else ["metadatas", "documents"]
+                        ),
+                    )
 
                 contexts = []
                 if results and results["ids"]:
@@ -587,7 +589,8 @@ class ChromaDBBackend(IVectorStorageBackend):
             try:
                 # Check if collection is empty
                 try:
-                    count = collection.count()
+                    with self._write_lock:
+                        count = collection.count()
                     if count == 0:
                         continue
                 except Exception as count_error:
@@ -599,16 +602,17 @@ class ChromaDBBackend(IVectorStorageBackend):
 
                 where_clause = self._build_where_clause(filters)
 
-                results = collection.query(
-                    query_embeddings=[query_vector],
-                    n_results=top_k,
-                    where=where_clause,
-                    include=(
-                        ["metadatas", "documents", "distances", "embeddings"]
-                        if need_vector
-                        else ["metadatas", "documents", "distances"]
-                    ),
-                )
+                with self._write_lock:
+                    results = collection.query(
+                        query_embeddings=[query_vector],
+                        n_results=top_k,
+                        where=where_clause,
+                        include=(
+                            ["metadatas", "documents", "distances", "embeddings"]
+                            if need_vector
+                            else ["metadatas", "documents", "distances"]
+                        ),
+                    )
 
                 if results and results["ids"][0]:
                     for i in range(len(results["ids"][0])):
@@ -776,7 +780,8 @@ class ChromaDBBackend(IVectorStorageBackend):
 
         collection = self._collections[context_type]
         try:
-            collection.delete(ids=ids)
+            with self._write_lock:
+                collection.delete(ids=ids)
             return True
         except Exception as e:
             logger.exception(f"Failed to delete ChromaDB contexts: {e}")
@@ -793,7 +798,8 @@ class ChromaDBBackend(IVectorStorageBackend):
         try:
             collection = self._collections[context_type]
             # Use count method to get the number of documents in the collection
-            count = collection.count()
+            with self._write_lock:
+                count = collection.count()
             return count
         except Exception as e:
             logger.warning(f"Failed to get record count for {context_type}: {e}")
@@ -838,11 +844,12 @@ class ChromaDBBackend(IVectorStorageBackend):
                 meta.update(metadata)
 
             # Store to vector database
-            collection.upsert(
-                ids=[f"todo_{todo_id}"],
-                embeddings=[embedding],
-                metadatas=[meta],
-            )
+            with self._write_lock:
+                collection.upsert(
+                    ids=[f"todo_{todo_id}"],
+                    embeddings=[embedding],
+                    metadatas=[meta],
+                )
 
             return True
 
@@ -877,17 +884,19 @@ class ChromaDBBackend(IVectorStorageBackend):
                 return []
 
             # Check if collection is empty
-            count = collection.count()
+            with self._write_lock:
+                count = collection.count()
             if count == 0:
                 logger.debug("Todo collection is empty, no similar todos found")
                 return []
 
             # Query vector database
-            results = collection.query(
-                query_embeddings=[query_embedding],
-                n_results=min(top_k, count),
-                include=["metadatas", "distances"],
-            )
+            with self._write_lock:
+                results = collection.query(
+                    query_embeddings=[query_embedding],
+                    n_results=min(top_k, count),
+                    include=["metadatas", "distances"],
+                )
 
             similar_todos = []
             if results and results["ids"] and results["ids"][0]:
@@ -922,7 +931,8 @@ class ChromaDBBackend(IVectorStorageBackend):
                 logger.error("Todo collection not found")
                 return False
 
-            collection.delete(ids=[f"todo_{todo_id}"])
+            with self._write_lock:
+                collection.delete(ids=[f"todo_{todo_id}"])
             logger.debug(f"Deleted todo embedding: id={todo_id}")
             return True
 

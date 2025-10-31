@@ -81,6 +81,12 @@ class LLMClient:
         else:
             raise ValueError(f"Unsupported LLM type for embedding generation: {self.llm_type}")
 
+    async def generate_embedding_async(self, text: str, **kwargs) -> List[float]:
+        if self.llm_type == LLMType.EMBEDDING:
+            return await self._openai_embedding_async(text, **kwargs)
+        else:
+            raise ValueError(f"Unsupported LLM type for embedding generation: {self.llm_type}")
+
     def _openai_chat_completion(self, messages: List[Dict[str, Any]], **kwargs):
         import time
 
@@ -286,12 +292,54 @@ class LLMClient:
         except APIError as e:
             logger.error(f"OpenAI API error during embedding: {e}")
             raise
+          
+    async def _openai_embedding_async(self, text: str, **kwargs) -> List[float]:
+        try:
+            response = await self.async_client.embeddings.create(model=self.model, input=[text])
+            embedding = response.data[0].embedding
+
+            # Record token usage
+            if hasattr(response, "usage") and response.usage:
+                try:
+                    from opencontext.monitoring import record_token_usage
+
+                    record_token_usage(
+                        model=self.model,
+                        prompt_tokens=response.usage.prompt_tokens,
+                        completion_tokens=0,  # embedding has no completion tokens
+                        total_tokens=response.usage.total_tokens,
+                    )
+                except ImportError:
+                    pass  # Monitoring module not installed or initialized
+
+            output_dim = kwargs.get("output_dim", self.config.get("output_dim", 0))
+            if output_dim and len(embedding) > output_dim:
+                import math
+
+                embedding = embedding[:output_dim]
+                norm = math.sqrt(sum(x**2 for x in embedding))
+                if norm > 0:
+                    embedding = [x / norm for x in embedding]
+
+            return embedding
+        except APIError as e:
+            logger.error(f"OpenAI API error during embedding: {e}")
+            raise
+
+
 
     def vectorize(self, vectorize: Vectorize, **kwargs):
         if vectorize.vector:
             return
         vectorize.vector = self.generate_embedding(vectorize.get_vectorize_content(), **kwargs)
         return
+      
+    async def vectorize_async(self, vectorize: Vectorize, **kwargs):
+        if vectorize.vector:
+            return
+        vectorize.vector = await self.generate_embedding_async(vectorize.get_vectorize_content(), **kwargs)
+        return
+      
 
     def validate(self) -> tuple[bool, str]:
         """

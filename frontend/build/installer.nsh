@@ -4,6 +4,9 @@
 !include "LogicLib.nsh"
 !include "nsDialogs.nsh"
 
+; Only define installer-specific code when building the installer (not uninstaller)
+!ifndef BUILD_UNINSTALLER
+
 ; Define custom variables
 Var DataDir
 
