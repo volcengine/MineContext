@@ -138,9 +138,7 @@ class RealtimeActivityMonitor:
             filters = {"update_time_ts": {"$gte": start_time, "$lte": end_time}}
             context_types = [
                 ContextType.ACTIVITY_CONTEXT.value,
-                ContextType.SEMANTIC_CONTEXT.value,
                 ContextType.INTENT_CONTEXT.value,
-                ContextType.STATE_CONTEXT.value,
             ]
             all_contexts = get_storage().get_all_processed_contexts(
                 context_types=context_types, limit=10000, offset=0, filter=filters
