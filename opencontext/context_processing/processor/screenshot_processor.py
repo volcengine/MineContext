@@ -431,7 +431,7 @@ class ScreenshotProcessor(BaseContextProcessor):
                 if merged_ids[0] in self._processed_cache.get(context_type.value, {}):
                     continue
                 final_context = all_items_map[merged_ids[0]]
-                new_ctxs[final_context.id] = final_context
+            new_ctxs[final_context.id] = final_context
             entity_refresh_items.append(final_context)
 
         # Second pass: parallel refresh entities
