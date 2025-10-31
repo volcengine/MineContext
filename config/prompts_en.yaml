@@ -438,18 +438,6 @@ processing:
                   "context_type": " activity_context | intent_context | semantic_context | procedural_context | state_context",
                   "title": "string",
                   "summary": "string",
-                  "entities": [
-                    {{
-                      "name": "Entity name",
-                      "type": "person | project | meeting | document | organization | product | location",
-                      "description": "Entity profile or impression description (optional)",
-                      "aliases": ["alias1", "alias2"],  # optional
-                      "metadata": {{
-                        "property1": "value1",
-                        "property2": "value2"
-                      }}
-                    }}
-                  ],
                   "keywords": ["string"],
                   "importance": 0-10,
                   "confidence": 0-10,
@@ -637,16 +625,12 @@ processing:
           - **confidence**: Understanding credibility (0-10 integer), based on clarity and completeness of interface information
           - **event_time**: Future event time, must use standard ISO 8601 format (e.g., 2025-09-09T15:30:00+08:00), cannot contain placeholders or invalid characters, single time point or null
           - **screen_ids**: Source screenshot sequence numbers (starting from 1)
-          - **entities**: List of identified key entities. User-related behaviors are uniformly "current_user", other personnel keep specific names.
-            * entities list can only contain objects, each object includes name and type fields
-            * If current_user's specific identity can be identified, also include specific name in aliases list
-            * metadata is entity attribute information, such as position|department|status|age|location|responsibility|contact, etc., stored in key-value pair form, content highly condensed, cannot contain low-quality or meaningless information
 
           ## Subject Identification Rules
           - **current_user Identity Determination**:
             * current_user is the photographer of this screenshot, i.e., the person using/operating this interface
             * Distinguish current_user in various scenarios:
-              Note: "current_user" specifically refers to the person operating the screen, unless there is clear evidence, do not associate other person names appearing in screenshots (such as "Zhang San") as current_user. Should identify "Zhang San" as an independent person entity.
+              Note: "current_user" specifically refers to the person operating the screen, unless there is clear evidence, do not associate other person names appearing in screenshots (such as "Zhang San") as current_user. Should identify "Zhang San" as an independent person.
               Below are specific scenarios for determining current_user identity:
               - Chat scenarios: Determine through interface layout, input box position, message sending status, etc.
               - Document scenarios: current_user is the person viewing/editing the document
@@ -661,9 +645,6 @@ processing:
             * When current_user participates in content: Use format like "current_user (Zhang San) said", "current_user (Li Hua) replied"
             * Other participant content: Keep original identity, like "Li Si replied", "Wang Wu spoke", "author wrote", etc.
             * First-person content: If can be confirmed as current_user's content, convert to current_user (specific name) format
-          - **Entity List Construction**:
-            * Must include "current_user" as interface operator
-            * Include all other relevant personnel's real identities appearing in content
 
           ## Quality Assurance
           - **Understanding Depth**: Not just describing "what is seen", but understanding "what is being done" "why"
@@ -730,7 +711,13 @@ merging:
 
       **Core Principles**:
       1. **Semantic Judgment Based on context_type**: Different types of contexts have different merge criteria
-         - `activity_context` (Activity Context): Determine if they are the same or consecutive activities. For example, "writing code" and "continuing to write the same feature" should be merged
+         - `activity_context` (Activity Context): **Must be explicitly the same task to merge, otherwise keep separate**. Merge conditions are very strict:
+           * ✅ Should merge: "Writing login feature code" and "Continuing to write login feature code" - clearly the same specific task continuation
+           * ✅ Should merge: "Debugging bug in IDE" and "Continuing to debug the same bug in IDE" - clearly continuous handling of the same problem
+           * ❌ Should NOT merge: "Configuring tool credentials" and "Editing configuration file" - related but two independent operations
+           * ❌ Should NOT merge: "Viewing success logs" and "Handling error messages" - activities with different outcome states
+           * ❌ Should NOT merge: "Executing command in terminal" and "Discussing issue in chat" - different activities in different environments
+           * **Criteria**: Must be the same explicit task goal, same file/code block, continuous operations on the same problem, and operation nature is consistent (all successful/all viewing/all fixing)
          - `semantic_context` (Semantic Knowledge): Determine if they are different descriptions or supplementary information on the same topic. For example, "definition of Python list comprehension" and "usage examples of list comprehension" should be merged
          - `entity_context` (Entity Profile): Determine if they are different facets of information about the same entity. For example, "John is an engineer" and "John is good at Python" should be merged
          - `intent_context` (Intent Planning): Determine if they are plans for the same goal or project. For example, "plan to learn React" and "plan to complete React tutorial this week" should be merged
@@ -739,7 +726,9 @@ merging:
 
       2. **Preserve All Descriptions, Do Not Summarize**: When merging, all details from original information must be preserved, cannot be simplified or omitted. The merged summary should be a complete integration of all related information
 
-      3. **Merge Rules**:
+      3. **Entity Extraction Mandatory Requirement**: Regardless of "merged" or "new" type, the entities array in the data field **cannot be empty**. Must identify and extract key entities from the content (people, projects, products, documents, etc.). If there are no explicit entities, at least extract major project names, product names, or tool names as entities
+
+      4. **Merge Rules**:
          - If multiple items need to be merged, merge these items directly into one, set merge_type to "merged", merged_ids is the array of all merged item ids
          - If an item does not need to be merged with any other item, merge_type is "new", merged_ids is an array containing the item's own id, data field contains the item's original data
 
@@ -755,7 +744,18 @@ merging:
               "title": "Merged title or new item title",
               "summary": "Complete merged summary (preserve all details, semantically coherent, do not summarize)",
               "keywords": ["Keyword array"],
-              "entities": ["Entity array"],
+              "entities": [
+                {
+                  "name": "Entity name",
+                  "type": "person | project | meeting | document | organization | product | location",
+                  "description": "Entity description (optional)",
+                  "aliases": ["alias1", "alias2"],
+                  "metadata": {
+                    "property1": "value1",
+                    "property2": "value2"
+                  }
+                }
+              ],
               "importance": 0-10,
               "confidence": 0-10,
               "event_time": "ISO 8601 format time string or null"
@@ -764,6 +764,54 @@ merging:
         ]
       }
       ```
+
+      ## Field Specification
+
+      - **title**: Generate appropriate title based on context_type:
+        * **activity_context**: Action-oriented title with subject and action (e.g., "current_user reviewing memory repository configuration")
+        * **semantic_context**: Concise expression of core concepts or knowledge (e.g., "MineContext Technical Architecture")
+        * **procedural_context**: Task description of operation process (e.g., "Steps for Code Merging Using Git")
+        * **state_context**: State description (e.g., "Project Progress: Frontend Development 80% Complete")
+        * **intent_context**: Plan or goal statement (e.g., "Next Week Product Launch Preparation")
+
+      - **summary**: Generate appropriate content description based on context_type:
+        * **activity_context**: Detailed description of user's specific operations, behavior sequences, and interaction processes
+          - Style: Subject is current_user, use action verbs (viewing, editing, discussing, configuring, starting, etc.)
+          - Focus: What the user did, how they operated, what content they viewed, what goals were achieved
+        * **semantic_context**: Extract core knowledge points, concept definitions, technical principles
+          - Style: Subject is technology/concept/system, use descriptive verbs (adopts, supports, includes, implements, etc.)
+          - Focus: What the knowledge is, how the architecture works, what the principles are, technical characteristics
+        * **procedural_context**: Record operation step sequences
+          - Style: Use step-by-step structure, forming reusable operation processes
+          - Focus: Step 1 → Step 2 → Step 3, how to complete a task
+        * **state_context**: Describe current state, progress indicators, performance data
+          - Style: Subject is project/system/task, use state verbs (shows, reaches, is in, completes, etc.)
+          - Focus: What the state is, how the progress is, indicator values, current situation
+        * **intent_context**: Explain future plans, goal settings, todo items
+          - Style: Use future tense, explain plans and goals
+          - Focus: What to do in the future, what the goals are, how the plan is
+
+      - **keywords**: Core keywords, maximum 5, avoid being too broad
+
+      - **entities**: List of key entities identified from merged content (**Required, cannot be empty array**):
+        * **Entity types that must be extracted**:
+          - Project names (e.g., MineContext, WebKnowledge, React, etc.)
+          - Product/tool names (e.g., Electron, Docker, IDE, Terminal, Xcode, etc.)
+          - People (current_user or specific names)
+          - Organizations/platforms (e.g., Apple, GitHub, Feishu, etc.)
+        * **name**: Entity name, user-related behaviors uniformly as "current_user", other personnel keep specific names
+        * **type**: Entity type (person | project | meeting | document | organization | product | location)
+        * **description**: Entity profile or impression description (optional)
+        * **aliases**: List of entity aliases (optional)
+        * **metadata**: Entity attribute information (optional), such as position, department, status, age, location, responsibility, contact, etc., stored in key-value pair form, content highly condensed
+        * Note: Do not extract action phrases or event descriptions as entities. Entities should be stable objects, not actions or states
+        * **Important**: Each context must extract at least 1-5 entities, prioritize extracting high-frequency noun entities
+
+      - **importance**: Information importance (0-10 integer), considering content value and impact
+
+      - **confidence**: Information confidence (0-10 integer), based on information completeness and reliability
+
+      - **event_time**: Event time, must use standard ISO 8601 format (e.g., 2025-09-09T15:30:00+08:00), cannot contain placeholders or invalid characters, single time point or null
 
     user: |
       Current processing context type: {context_type}
@@ -988,6 +1036,14 @@ generation:
     system: |
       You are a professional real-time activity analysis assistant, responsible for quickly and concisely summarizing user's recent activities. Your goal is to generate a brief and powerful activity overview, helping users quickly understand what they've been doing recently.
 
+      **🚨 MOST IMPORTANT OUTPUT REQUIREMENT (MUST STRICTLY FOLLOW)**:
+      - **MUST output strict JSON format**, do not add any explanations, preambles, postscripts, or extra text
+      - **ONLY return JSON object**, do not wrap with markdown code blocks (no ```json```)
+      - **Output pure JSON directly**, first character must be `{`, last character must be `}`
+      - **FORBIDDEN to output anything outside JSON**, including analysis process, thinking steps, or explanatory text
+      - **Ensure JSON format is complete**, all fields must be output according to the specified structure
+      - **Even if content is extensive**, must maintain JSON format output, do not change output format because of large content
+
       **Core Capabilities**:
       1. **Activity Identification**: Identify user's main activities from various types of contexts
       2. **Activity Extraction**: Provide detailed descriptions when important or multiple contexts involve the same topic, keep other content concise but fully covered
@@ -1000,48 +1056,45 @@ generation:
       - **Goal Behavior**: What goals does the user seem to want to achieve
       - **Activity Pattern**: Whether user's behavior has specific patterns or focuses
 
-      **Output Requirements**:
-      1. **Title Requirements**:
+      **JSON Output Field Specifications**:
+      1. **title field** (required, string type):
          - No more than 30 characters
          - Identify main activity types, core content, and user intent within time range
-         - Summarize most important and specific activity content, reflecting activity goals or results.
+         - Summarize most important and specific activity content, reflecting activity goals or results
          - Use action-oriented words, highlight core behaviors, reflect activity scale and depth
          - Avoid overly technical expressions, use natural language
 
-      2. **Description Requirements**:
+      2. **description field** (required, string type):
          - 150-200 characters detailed description
          - Highlight most meaningful activities and behavior patterns, provide detailed descriptions for important activities or multiple contexts on related topics
          - Keep general activities concise but complete overview, ensure all activities are reflected
          - Explain user's specific operations and goals
          - Use natural friendly tone, avoid excessive emoji use, maximum 1-2
-         - Reflect activity coherence and logic, description in three layers: Main activity � Specific operation � Goal result
+         - Reflect activity coherence and logic, description in three layers: Main activity → Specific operation → Goal result
 
-      3. **Context ID Requirements**:
+      3. **representative_context_ids field** (required, array type):
          - Select at most 5 most valuable context IDs to return
+         - Format: ["context_id_1", "context_id_2", ...]
 
-      4. **Category Distribution Requirements**:
+      4. **category_distribution field** (required, object type):
          - Analyze distribution of activity types, use 0-1 float to represent proportion
-         - Categories include: work, learning, entertainment, life, other
+         - Must include these 5 fields: work, learning, entertainment, life, other
+         - Sum of all values should be close to 1.0
 
-      5. **Insight Extraction Requirements**:
-         - potential_todos: Identified potential todo items, each includes content and description
-           **Important Principles**:
-           Do not extract information current_user only participates in as participants to understand
-           Do not extract tasks discussed in meetings but not clearly assigned to current_user
-           Do not extract work content of other people/other teams/other projects
-           Only extract things current_user is explicitly required to execute or proactively plans to do
-           Must have clear evidence showing this is current_user's responsibility
-         - tip_suggestions: Reminder suggestions that can be given, each includes topic, reason, and suggestion
-         - key_entities: Key entities in activities (names, project names, tech stack, etc.)
-         - focus_areas: Fields or topics users focus on
-         - work_patterns: Work patterns, including continuous_work_time and task_switching_count
+      5. **extracted_insights field** (required, object type):
+         - **potential_todos** (required, array): Identified potential todo items
+           * Each item must include content and description fields
+           * **Important Principles**: Do not extract information current_user only participates in as participants to understand; do not extract tasks discussed in meetings but not clearly assigned to current_user; do not extract work content of other people/other teams/other projects; only extract things current_user is explicitly required to execute or proactively plans to do
+         - **tip_suggestions** (required, array): Reminder suggestions, each includes topic, reason, and suggestion
+         - **key_entities** (required, array): Key entities in activities (names, project names, tech stack, etc.)
+         - **focus_areas** (required, array): Fields or topics users focus on
+         - **work_patterns** (required, object): Work patterns, must include continuous_work_time and task_switching_count fields
 
-      6. **JSON Format**:
-      ```json
+      **Standard JSON Output Format** (strictly follow):
       {
         "title": "Brief activity title",
         "description": "Concise activity description",
-        "representative_context_ids": ["context_id_1", "context_id_2", "context_id_3", "context_id_4", "context_id_5"],
+        "representative_context_ids": ["context_id_1", "context_id_2"],
         "category_distribution": {
           "work": 0.7,
           "learning": 0.2,
@@ -1064,7 +1117,8 @@ generation:
           }
         }
       }
-      ```
+
+      **EMPHASIZE AGAIN**: No matter how much input content there is, your output MUST BE and CAN ONLY BE the above JSON format, do not add any other content!
     user: |
       **Current Time**: {current_time}
       **Analysis Time Range**: {start_time_str} - {end_time_str}

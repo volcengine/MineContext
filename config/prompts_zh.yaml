@@ -431,18 +431,6 @@ processing:
                 "context_type": " activity_context | intent_context | semantic_context | procedural_context | state_context",
                 "title": "string",
                 "summary": "string",
-                "entities": [
-                  {{
-                    "name": "实体名称",
-                    "type": "person | project | meeting | document | organization | product | location",
-                    "description": "实体的画像或印象描述（可选）",
-                    "aliases": ["别名1", "别名2"],  # 可选
-                    "metadata": {{
-                      "property1": "value1",
-                      "property2": "value2"
-                    }}
-                  }}
-                ],
                 "keywords": ["string"],
                 "importance": 0-10,
                 "confidence": 0-10,
@@ -612,17 +600,12 @@ processing:
           - **confidence**: 理解可信度（0-10整数），基于界面信息的清晰度和完整性
           - **event_time**: 未来事件时间，必须使用标准ISO 8601格式（如：2025-09-09T15:30:00+08:00），不能包含占位符或无效字符，单个时间点或null
           - **screen_ids**: 来源截图序号（从1开始）
-          - **entities**: 识别的关键实体列表。用户相关行为统一为"current_user"，其他人员保留具体姓名。
-            * entities列表中只能包含对象，每个对象包含name和type字段
-            * 如果能识别current_user的具体身份，同时包含具体姓名，加入到aliases列表中
-            **不要将动作型短语或事件描述提取为实体**。实体应该是稳定的对象，而不是动作或状态。
-            * metadata 是 实体的属性信息，如 position|department|status|age|location|responsibility|contact等，使用键值对形式存储，内容高度凝练，不能包含低质量或无意义信息
 
           ## 主体识别规则
           - **current_user身份确定**：
             * current_user是这个截图的拍摄者，即正在使用/操作这个界面的人
             * 在各种场景中区分current_user：
-              注意：“current_user”特指操作屏幕的人，除非有明确证据，否则不要将截图中出现的其他人名（如“张三”）关联为 current_user。应将“张三”识别为独立的person实体。
+              注意："current_user"特指操作屏幕的人，除非有明确证据，否则不要将截图中出现的其他人名（如"张三"）关联为 current_user。应将"张三"识别为独立的人物。
               下面是判断current_user身份的具体场景：
               - 聊天场景：通过界面布局、输入框位置、消息发送状态等判断
               - 文档场景：current_user是正在查看/编辑文档的人
@@ -637,9 +620,6 @@ processing:
             * current_user参与内容时：使用"current_user(张三)说"、"current_user(李华)回复"格式
             * 其他参与者内容：保持原始身份，如"李四回复"、"王五发言"、"作者编写"等
             * 第一人称内容：如果能确定是current_user的内容，转换为current_user(具体姓名)格式
-          - **实体列表构建**：
-            * 必须包含"current_user"作为界面操作者
-            * 包含内容中出现的所有其他相关人员的真实标识
 
           ## 质量保障
           - **理解深度**：不只描述"看到什么"，更要理解"在做什么""为什么"
@@ -697,7 +677,13 @@ merging:
 
       **核心原则**:
       1. **基于context_type的语义判断**: 不同类型的上下文有不同的合并标准
-         - `activity_context` (活动上下文): 判断是否为相同或连续的活动。例如"正在编写代码"和"继续编写同一功能"应该合并
+         - `activity_context` (活动上下文): **必须明确是同一件事才能合并，否则保持独立**。合并条件非常严格：
+           * ✅ 应该合并: "正在编写登录功能代码"和"继续编写登录功能代码" - 明确是同一个具体任务的延续
+           * ✅ 应该合并: "在IDE中调试bug"和"继续在IDE中调试同一个bug" - 明确是同一问题的持续处理
+           * ❌ 不应合并: "配置工具凭证"和"编辑配置文件" - 虽然相关但是两个独立操作
+           * ❌ 不应合并: "查看成功日志"和"处理错误信息" - 结果状态不同的活动
+           * ❌ 不应合并: "在终端执行命令"和"在聊天中讨论问题" - 不同环境的不同活动
+           * **判断标准**: 必须是同一个明确的任务目标、同一个文件/代码块、同一个问题的连续操作，且操作性质一致（都是成功/都是查看/都是修复）
          - `semantic_context` (语义知识): 判断是否为同一主题的不同描述或补充信息。例如"Python列表推导式的定义"和"列表推导式的使用示例"应该合并
          - `entity_context` (实体档案): 判断是否为同一实体的不同侧面信息。例如"张三是工程师"和"张三擅长Python"应该合并
          - `intent_context` (意图规划): 判断是否为相同目标或项目的计划。例如"计划学习React"和"计划本周完成React教程"应该合并
@@ -706,7 +692,9 @@ merging:
 
       2. **保留全部描述,不要概括**: 合并时必须保留所有原始信息的细节,不能简化或省略。合并后的summary应该是所有相关信息的完整整合
 
-      3. **合并规则**:
+      3. **实体提取强制要求**: 无论是"merged"还是"new"类型，data字段中的entities数组**不能为空**。必须从内容中识别并提取关键实体（人员、项目、产品、文档等），如果实在没有明确实体，至少要提取主要的项目名称、产品名称或工具名称作为实体
+
+      4. **合并规则**:
          - 如果多个items需要合并,则直接将这些items合并成一个,merge_type设为"merged",merged_ids是所有被合并item的id数组
          - 如果某个item不需要与任何其他item合并,则merge_type为"new",merged_ids为包含该item自身id的数组,data字段包含该item的原始数据
 
@@ -722,7 +710,18 @@ merging:
               "title": "合并后的标题或新item的标题",
               "summary": "合并后的完整摘要(保留所有细节，语义连贯，不要概括)",
               "keywords": ["关键词数组"],
-              "entities": ["实体数组"],
+              "entities": [
+                {
+                  "name": "实体名称",
+                  "type": "person | project | meeting | document | organization | product | location",
+                  "description": "实体描述（可选）",
+                  "aliases": ["别名1", "别名2"],
+                  "metadata": {
+                    "property1": "value1",
+                    "property2": "value2"
+                  }
+                }
+              ],
               "importance": 0-10,
               "confidence": 0-10,
               "event_time": "ISO 8601格式时间字符串或null"
@@ -731,6 +730,54 @@ merging:
         ]
       }
       ```
+
+      ## 字段规范说明
+
+      - **title**: 根据context_type生成合适的标题：
+        * **activity_context**: 行为导向标题，包含主体和动作（如"current_user查看记忆库配置"）
+        * **semantic_context**: 核心概念或知识点的简洁表述（如"MineContext技术架构"）
+        * **procedural_context**: 操作流程的任务描述（如"使用Git进行代码合并的步骤"）
+        * **state_context**: 状态描述（如"项目进度：前端开发完成80%"）
+        * **intent_context**: 计划或目标表述（如"下周产品发布准备事项"）
+
+      - **summary**: 根据context_type生成合适的内容描述：
+        * **activity_context**: 详细描述用户的具体操作、行为序列和交互过程
+          - 描述风格：主语为 current_user，使用动作动词（查看、编辑、讨论、配置、启动等）
+          - 内容重点：用户做了什么、如何操作、查看了哪些内容、达成了什么目标
+        * **semantic_context**: 提取核心知识要点、概念定义、技术原理
+          - 描述风格：主语为技术/概念/系统，使用说明性动词（采用、支持、包含、实现等）
+          - 内容重点：知识是什么、架构如何、原理为何、技术特点
+        * **procedural_context**: 记录操作步骤序列
+          - 描述风格：使用步骤化结构，形成可复用的操作流程
+          - 内容重点：步骤1→步骤2→步骤3，如何完成某个任务
+        * **state_context**: 描述当前状态、进度指标、性能数据
+          - 描述风格：主语为项目/系统/任务，使用状态动词（显示、达到、处于、完成等）
+          - 内容重点：状态是什么、进度如何、指标数值、当前情况
+        * **intent_context**: 说明未来计划、目标设定、待办事项
+          - 描述风格：使用未来时态，说明计划和目标
+          - 内容重点：未来要做什么、目标是什么、计划如何
+
+      - **keywords**: 核心关键词，最多5个，避免过于宽泛
+
+      - **entities**: 从合并内容中识别的关键实体列表（**必填，不能为空数组**）：
+        * **必须提取的实体类型**：
+          - 项目名称（如 MineContext、WebKnowledge、React 等）
+          - 产品/工具名称（如 Electron、Docker、IDE、Terminal、Xcode 等）
+          - 人员（current_user 或其他具体姓名）
+          - 组织/平台（如 Apple、GitHub、飞书 等）
+        * **name**: 实体名称，用户相关行为统一为"current_user"，其他人员保留具体姓名
+        * **type**: 实体类型 (person | project | meeting | document | organization | product | location)
+        * **description**: 实体的画像或印象描述（可选）
+        * **aliases**: 实体的别名列表（可选）
+        * **metadata**: 实体的属性信息（可选），如position、department、status、age、location、responsibility、contact等，使用键值对形式存储，内容高度凝练
+        * 注意：不要将动作型短语或事件描述提取为实体。实体应该是稳定的对象，而不是动作或状态
+        * **重要**：每个上下文必须至少提取1-5个实体，优先提取高频出现的名词实体
+
+      - **importance**: 信息重要性（0-10整数），考虑内容的价值和影响力
+
+      - **confidence**: 信息置信度（0-10整数），基于信息的完整性和可靠性
+
+      - **event_time**: 事件时间，必须使用标准ISO 8601格式（如：2025-09-09T15:30:00+08:00），不能包含占位符或无效字符，单个时间点或null
 
     user: |
       当前处理的context类型: {context_type}
@@ -956,6 +1003,14 @@ generation:
     system: |
       你是一个专业的实时活动分析助手，负责对用户最近的活动进行快速、简洁的总结。你的目标是生成一个简短有力的活动概览，帮助用户快速了解自己最近在做什么。
 
+      **🚨 最重要的输出要求（必须严格遵守）**:
+      - **必须严格输出JSON格式**，不要添加任何解释、前言、后语或额外的文本
+      - **只返回JSON对象**，不要使用markdown代码块包裹（不要用```json```）
+      - **直接输出纯JSON**，第一个字符必须是 `{`，最后一个字符必须是 `}`
+      - **禁止输出任何JSON之外的内容**，包括分析过程、思考步骤或说明文字
+      - **确保JSON格式完整**，所有字段必须按照规定的结构输出
+      - **即使内容很多**，也必须保持JSON格式输出，不要因为内容多就改变输出格式
+
       **核心能力**:
       1. **活动识别**: 从多种类型的上下文中识别用户的主要活动
       2. **活动提取**: 重要或多个上下文涉及同一主题时提供详细描述，其他内容保持简洁但完整覆盖
@@ -968,15 +1023,15 @@ generation:
       - **目标行为**: 用户似乎想要达成什么目标
       - **活动模式**: 用户的行为是否有特定的模式或重点
 
-      **输出要求**:
-      1. **标题要求**:
+      **JSON输出字段说明**:
+      1. **title字段**（必填，string类型）:
          - 不超过30个字符
          - 识别时间范围内主要的活动类型、核心内容和用户意图
-         - 概括最主要和最具体的活动内容，体现活动的目标或结果。
+         - 概括最主要和最具体的活动内容，体现活动的目标或结果
          - 使用动作性的词语，突出核心行为，体现活动规模和深度
          - 避免过于技术化的表达，使用自然语言
 
-      2. **描述要求**:
+      2. **description字段**（必填，string类型）:
          - 150-200个字符的详细描述
          - 重点突出最有意义的活动和行为模式，对重要活动或相关主题的多个上下文提供详细描述
          - 对一般活动保持简洁但完整的概括，确保所有活动都有体现
@@ -984,32 +1039,28 @@ generation:
          - 使用自然友好的语调，避免过多使用emoji，最多使用1-2个
          - 体现活动的连贯性和逻辑性，描述分三层：主要活动→具体操作→目标结果
 
-      3. **上下文ID要求**:
+      3. **representative_context_ids字段**（必填，数组类型）:
          - 精选最多5个最有价值的context ID返回
 
-      4. **分类分布要求**:
+      4. **category_distribution字段**（必填，对象类型）:
          - 分析活动的类型分布，使用0-1的浮点数表示占比
-         - 分类包括：work（工作）、learning（学习）、entertainment（娱乐）、life（生活）、other（其他）
+         - 必须包含以下5个字段：work、learning、entertainment、life、other
+         - 所有数值之和应该接近1.0
 
-      5. **洞察提取要求**:
-         - potential_todos: 识别出的潜在待办事项，每项包含content和description
-           **重要原则**:
-           不要提取current_user仅作为参与者了解的信息
-           不要提取会议中讨论但未明确分配给current_user的任务
-           不要提取其他人/其他团队/其他项目的工作内容
-           只提取current_user被明确要求执行或主动计划要做的事情
-           必须有明确证据表明这是current_user的责任
-         - tip_suggestions: 可以给出的提醒建议，每项包含topic、reason和suggestion
-         - key_entities: 活动中的关键实体（人名、项目名、技术栈等）
-         - focus_areas: 用户关注的领域或主题
-         - work_patterns: 工作模式，包括continuous_work_time和task_switching_count
+      5. **extracted_insights字段**（必填，对象类型）:
+         - **potential_todos**（必填，数组）: 识别出的潜在待办事项
+           * 每项必须包含content和description两个字段
+           * **重要原则**: 不要提取current_user仅作为参与者了解的信息；不要提取会议中讨论但未明确分配给current_user的任务；不要提取其他人/其他团队/其他项目的工作内容；只提取current_user被明确要求执行或主动计划要做的事情
+         - **tip_suggestions**（必填，数组）: 提醒建议，每项包含topic、reason和suggestion
+         - **key_entities**（必填，数组）: 活动中的关键实体（人名、项目名、技术栈等）
+         - **focus_areas**（必填，数组）: 用户关注的领域或主题
+         - **work_patterns**（必填，对象）: 工作模式，必须包含continuous_work_time和task_switching_count两个字段
 
-      6. **JSON格式**:
-      ```json
+      **标准JSON输出格式**:
       {
         "title": "简短的活动标题",
         "description": "简洁的活动描述",
-        "representative_context_ids": ["context_id_1", "context_id_2", "context_id_3", "context_id_4", "context_id_5"],
+        "representative_context_ids": ["context_id_1", "context_id_2"],
         "category_distribution": {
           "work": 0.7,
           "learning": 0.2,
@@ -1032,7 +1083,6 @@ generation:
           }
         }
       }
-      ```
     user: |
       **当前时间**: {current_time}
       **分析时间范围**: {start_time_str} - {end_time_str}

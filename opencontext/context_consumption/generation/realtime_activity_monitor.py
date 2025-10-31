@@ -65,15 +65,13 @@ class RealtimeActivityMonitor:
             # Get context data
             contexts = self._get_recent_contexts(start_time, end_time)
             if not contexts:
-                logger.info(
-                    f"No activity records found in the time range {start_time} to {end_time}."
-                )
                 return None
 
             # Generate an activity summary, including categories, insights, and the most valuable context IDs
             all_context = []
             for context_type, ctx_list in contexts.items():
                 all_context.extend(ctx_list)
+            logger.info(f"{len(all_context)} activity records found in the time range {start_time} to {end_time}.")
             summary_result = self._generate_concise_summary(contexts, start_time, end_time)
 
             if not summary_result:
@@ -190,10 +188,9 @@ class RealtimeActivityMonitor:
             ]
             response = generate_with_messages(
                 messages,
-                max_calls=1,
-                tools=ALL_RETRIEVAL_TOOL_DEFINITIONS + ALL_PROFILE_TOOL_DEFINITIONS,
                 temperature=0.1,
             )
+            print("response:", response)
 
             # Save debug information
             DebugHelper.save_generation_debug(
@@ -292,7 +289,7 @@ class RealtimeActivityMonitor:
         context_dict = {ctx.id: ctx for ctx in contexts}
         for id in recommended_ids:
             if id in context_dict and context_dict[id].properties.raw_properties:
-                for prop in context.properties.raw_properties:
+                for prop in context_dict[id].properties.raw_properties:
                     if prop.object_id in sources:
                         continue
                     if prop.content_format == ContentFormat.IMAGE:
@@ -305,7 +302,7 @@ class RealtimeActivityMonitor:
                         continue
                     sources.add(prop.object_id)
                     if len(sources_data) >= max_count:
-                        return sources_data[:max_count]
+                        return sources_data
         for context in contexts:
             if context.id in recommended_ids:
                 continue
@@ -325,10 +322,7 @@ class RealtimeActivityMonitor:
                     sources.add(prop.object_id)
                     break
             if len(sources_data) >= max_count:
-                return sources_data[:max_count]
-        logger.info(
-            f"Extracted {len(sources_data)} screenshots from {len(contexts)} representative contexts."
-        )
+                return sources_data
         return sources_data
 
     def _is_exist_screenshot(self, screenshot_path: str) -> bool:
