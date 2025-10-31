@@ -412,7 +412,12 @@ async def generate_tips(
 
 
 async def generate_report(
-    processed_contexts: List[ProcessedContext], start_time: int, end_time: int
+    processed_contexts: List[ProcessedContext],
+    start_time: int,
+    end_time: int,
+    tips: Optional[str] = None,
+    todos: List[Dict[str, Any]] = None,
+    activity: Optional[Dict[str, Any]] = None,
 ) -> Optional[str]:
     """
     Generate comprehensive report from contexts (without database writes).
@@ -421,6 +426,9 @@ async def generate_report(
         processed_contexts: List of processed contexts
         start_time: Start timestamp
         end_time: End timestamp
+        tips: Generated tips content
+        todos: Generated todo tasks
+        activity: Generated activity summary
 
     Returns:
         Report content string
@@ -448,6 +456,45 @@ async def generate_report(
         )
         end_time_str = datetime.datetime.fromtimestamp(end_time).strftime("%Y-%m-%d %H:%M:%S")
 
+        # Prepare tips data
+        tips_list = []
+        if tips:
+            tips_list.append({
+                "id": "generated",
+                "content": tips,
+                "created_at": datetime.datetime.now().isoformat(),
+            })
+
+        # Prepare todos data
+        todos_list = []
+        if todos:
+            for todo in todos:
+                todos_list.append({
+                    "id": "generated",
+                    "content": todo.get("description", ""),
+                    "status": 0,
+                    "status_label": "pending",
+                    "urgency": todo.get("priority", "Medium Priority"),
+                    "assignee": todo.get("title", ""),
+                    "reason": todo.get("reason", ""),
+                    "created_at": datetime.datetime.now().isoformat(),
+                })
+
+        # Prepare activities data
+        activities_list = []
+        if activity:
+            activities_list.append({
+                "id": "generated",
+                "title": activity.get("title", ""),
+                "content": activity.get("description", ""),
+                "metadata": {
+                    "category_distribution": activity.get("category_distribution", {}),
+                    "extracted_insights": activity.get("extracted_insights", {}),
+                },
+                "start_time": datetime.datetime.fromtimestamp(start_time).isoformat(),
+                "end_time": datetime.datetime.fromtimestamp(end_time).isoformat(),
+            })
+
         # Build user prompt
         user_prompt = user_prompt_template.format(
             start_time_str=start_time_str,
@@ -455,6 +502,9 @@ async def generate_report(
             start_timestamp=start_time,
             end_timestamp=end_time,
             contexts=json.dumps(contexts, ensure_ascii=False, indent=2),
+            tips=json.dumps(tips_list, ensure_ascii=False, indent=2),
+            todos=json.dumps(todos_list, ensure_ascii=False, indent=2),
+            activities=json.dumps(activities_list, ensure_ascii=False, indent=2),
         )
 
         messages = [
@@ -576,8 +626,8 @@ async def main_pipeline(screenshot_paths: List[str]):
     activity_patterns = activity_insights.get("work_patterns", {}) if activity_insights else {}
     tips = await generate_tips(processed_contexts, activity_patterns, start_time, end_time)
 
-    # Step 5: Generate report
-    report = await generate_report(processed_contexts, start_time, end_time)
+    # Step 5: Generate report (must be last, as it uses all previous results)
+    report = await generate_report(processed_contexts, start_time, end_time, tips, todos, activity)
 
     # Print final summary
     print_final_summary(activity, todos, tips, report)
