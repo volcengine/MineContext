@@ -285,7 +285,7 @@ class SmartTodoManager:
             tasks = self._post_process_tasks(tasks)
 
             # Apply vector-based deduplication
-            tasks = self._deduplicate_with_vector_search(tasks, similarity_threshold=0.85)
+            tasks = self._deduplicate_with_vector_search(tasks, similarity_threshold=0.9)
 
             logger.info(f"Identified {len(tasks)} tasks from the context after deduplication.")
             return tasks
