@@ -304,8 +304,12 @@ class ScreenshotService extends CaptureSourcesTools {
 
         const dateDirName = dateDir.name
 
+        // Normalize directory name to YYYYMMDD format for comparison
+        // Support both YYYY-MM-DD and YYYYMMDD formats
+        const normalizedDirName = dateDirName.replace(/-/g, '')
+
         // Check if date is earlier than cutoff date
-        if (dateDirName < cutoffDateString) {
+        if (normalizedDirName < cutoffDateString) {
           const dateDirPath = path.join(screenshotBasePath, dateDirName)
 
           try {
