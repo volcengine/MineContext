@@ -14,6 +14,7 @@ from openai import APIError, AsyncOpenAI, OpenAI
 
 from opencontext.models.context import Vectorize
 from opencontext.utils.logging_utils import get_logger
+from opencontext.monitoring import record_processing_stage
 
 logger = get_logger(__name__)
 
@@ -86,18 +87,13 @@ class LLMClient:
         request_start = time.time()
         try:
             # Stage: LLM request preparation
-            from opencontext.monitoring import record_processing_stage
 
-            prep_start = time.time()
-
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
             }
             if tools:
                 create_params["tools"] = tools
@@ -106,10 +102,6 @@ class LLMClient:
             if thinking:
                 if self.provider == LLMProvider.DOUBAO.value:
                     create_params["extra_body"] = {"thinking": {"type": thinking}}
-
-            record_processing_stage(
-                "llm_request_prep", int((time.time() - prep_start) * 1000), status="success"
-            )
 
             # Stage: LLM API call
             api_start = time.time()
@@ -136,17 +128,11 @@ class LLMClient:
                 except ImportError:
                     pass  # Monitoring module not installed or initialized
 
-            record_processing_stage(
-                "llm_response_parse", int((time.time() - parse_start) * 1000), status="success"
-            )
-
             return response
         except APIError as e:
             logger.error(f"OpenAI API error: {e}")
             # Record failure
             try:
-                from opencontext.monitoring import record_processing_stage
-
                 record_processing_stage(
                     "chat_cost", int((time.time() - request_start) * 1000), status="failure"
                 )
@@ -160,19 +146,12 @@ class LLMClient:
 
         request_start = time.time()
         try:
-            # Stage: LLM request preparation
-            from opencontext.monitoring import record_processing_stage
-
-            prep_start = time.time()
-
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
             }
             if tools:
                 create_params["tools"] = tools
@@ -181,11 +160,6 @@ class LLMClient:
             if thinking:
                 if self.provider == LLMProvider.DOUBAO.value:
                     create_params["extra_body"] = {"thinking": {"type": thinking}}
-
-            record_processing_stage(
-                "llm_request_prep", int((time.time() - prep_start) * 1000), status="success"
-            )
-
             # Stage: LLM API call
             api_start = time.time()
             response = await self.async_client.chat.completions.create(**create_params)
@@ -193,9 +167,6 @@ class LLMClient:
             record_processing_stage(
                 "chat_cost", int((time.time() - api_start) * 1000), status="success"
             )
-
-            # Stage: Response parsing
-            parse_start = time.time()
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -211,17 +182,11 @@ class LLMClient:
                 except ImportError:
                     pass  # Monitoring module not installed or initialized
 
-            record_processing_stage(
-                "llm_response_parse", int((time.time() - parse_start) * 1000), status="success"
-            )
-
             return response
         except APIError as e:
             logger.exception(f"OpenAI API async error: {e}")
             # Record failure
             try:
-                from opencontext.monitoring import record_processing_stage
-
                 record_processing_stage(
                     "chat_cost", int((time.time() - request_start) * 1000), status="failure"
                 )
@@ -232,14 +197,12 @@ class LLMClient:
     def _openai_chat_completion_stream(self, messages: List[Dict[str, Any]], **kwargs):
         """Sync stream chat completion"""
         try:
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
                 "stream": True,
             }
             if tools:
@@ -259,7 +222,6 @@ class LLMClient:
     async def _openai_chat_completion_stream_async(self, messages: List[Dict[str, Any]], **kwargs):
         """Async stream chat completion - async generator"""
         try:
-            temperature = kwargs.get("temperature", self.config.get("temperature", 0.7))
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
@@ -273,7 +235,6 @@ class LLMClient:
             create_params = {
                 "model": self.model,
                 "messages": messages,
-                "temperature": temperature,
                 "stream": True,
             }
             if tools:

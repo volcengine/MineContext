@@ -64,7 +64,8 @@ class SmartTodoManager:
             # 2. Get regular context data
             contexts = self._get_task_relevant_contexts(start_time, end_time, activity_insights)
             # 3. Get historical todo completion status
-            historical_todos = self._get_historical_todos()
+            # historical_todos = self._get_historical_todos()
+            historical_todos  = []
             # 4. Synthesize all information to generate high-quality todos
             tasks = self._extract_tasks_from_contexts_enhanced(
                 contexts, start_time, end_time, activity_insights, historical_todos
@@ -81,7 +82,6 @@ class SmartTodoManager:
 
                 content = task.get("description", "")
                 reason = task.get("reason", "")
-                logger.info(f"Generated Todo Task: {task}")
                 urgency = self._map_priority_to_urgency(task.get("priority", "normal"))
 
                 deadline = None
@@ -266,7 +266,6 @@ class SmartTodoManager:
             # Call the large model to extract tasks, enabling tools to get relevant background information
             task_response = generate_with_messages(
                 messages,
-                temperature=0.1,
             )
 
             # Save debug information

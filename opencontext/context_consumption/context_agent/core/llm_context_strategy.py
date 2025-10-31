@@ -399,7 +399,6 @@ class LLMContextStrategy:
         try:
             response = await generate_with_messages_async(
                 messages=messages,
-                temperature=0.1,
                 thinking="disabled",
             )
 

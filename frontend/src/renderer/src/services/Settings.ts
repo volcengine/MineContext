@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import axiosInstance from '@renderer/services/axiosConfig'
+import { get } from 'lodash'
 
 // Model configuration interface
-export interface ModelConfig {
+export interface ModelConfigProps {
   modelPlatform: string // Model platform, e.g., doubao, openai, custom
   modelId: string // VLM model ID
   baseUrl: string // API base URL
@@ -17,7 +18,7 @@ export interface ModelConfig {
 
 // API response data structure
 export interface ModelInfoResponseData {
-  config: ModelConfig
+  config: ModelConfigProps
 }
 
 // Complete API response structure
@@ -28,22 +29,10 @@ export interface ApiResponse<T> {
   data: T
 }
 
-// Update request interface
-export interface UpdateRequest {
-  modelPlatform: string
-  modelId: string
-  baseUrl: string
-  embeddingModelId: string
-  apiKey: string
-  embeddingBaseUrl?: string
-  embeddingApiKey?: string
-  embeddingModelPlatform?: string
-}
-
 // Get model settings information
-export const getModelInfo = async (): Promise<ApiResponse<ModelInfoResponseData>> => {
-  const res = await axiosInstance.get<ApiResponse<ModelInfoResponseData>>('/api/model_settings/get')
-  return res.data
+export const getModelInfo = async (): Promise<ModelInfoResponseData | undefined> => {
+  const res = await axiosInstance.get<ModelInfoResponseData>('/api/model_settings/get')
+  return get(res, 'data.data')
 }
 
 // Update model settings information
@@ -53,14 +42,13 @@ export interface UpdateModelSettingsResponseData {
   message: string
 }
 
-export const updateModelSettings = async (
-  params: UpdateRequest
-): Promise<ApiResponse<UpdateModelSettingsResponseData>> => {
-  const res = await axiosInstance.post<ApiResponse<UpdateModelSettingsResponseData>>('/api/model_settings/update', {
+export const updateModelSettingsAPI = async (
+  params: ModelConfigProps
+): Promise<UpdateModelSettingsResponseData | undefined> => {
+  const res = await axiosInstance.post<UpdateModelSettingsResponseData>('/api/model_settings/update', {
     config: {
       ...params
     }
   })
-  console.log('Submit interface response:', res)
-  return res.data
+  return get(res, 'data.data')
 }

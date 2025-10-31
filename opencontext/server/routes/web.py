@@ -51,7 +51,17 @@ async def read_contexts(
     contexts = []
     for backend_contexts in contexts_dict.values():
         contexts.extend(backend_contexts)
-    contexts.sort(key=lambda x: x.properties.create_time, reverse=True)
+
+    # Sort with timezone-aware datetime handling
+    def get_sort_key(context):
+        dt = context.properties.create_time
+        # Convert naive datetime to aware (assume UTC if naive)
+        if dt.tzinfo is None:
+            import datetime as dt_module
+            dt = dt.replace(tzinfo=dt_module.timezone.utc)
+        return dt
+
+    contexts.sort(key=get_sort_key, reverse=True)
     has_next = len(contexts) > limit
     contexts_to_display = contexts[:limit]
 

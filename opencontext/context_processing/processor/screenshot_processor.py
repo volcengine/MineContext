@@ -11,6 +11,7 @@ import asyncio
 import base64
 import datetime
 import heapq
+import json
 import os
 import queue
 import threading
@@ -26,12 +27,19 @@ from opencontext.context_processing.processor.entity_processor import (
 from opencontext.llm.global_embedding_client import do_vectorize
 from opencontext.llm.global_vlm_client import generate_with_messages_async
 from opencontext.models.context import *
+from opencontext.models.enums import get_context_type_descriptions_for_extraction
 from opencontext.monitoring.monitor import record_processing_error
 from opencontext.storage.global_storage import get_storage
 from opencontext.tools.tool_definitions import ALL_TOOL_DEFINITIONS
 from opencontext.utils.image import calculate_phash, resize_image
 from opencontext.utils.json_parser import parse_json_from_response
 from opencontext.utils.logging_utils import get_logger
+from opencontext.config.global_config import get_prompt_group
+from opencontext.monitoring import (
+    increment_data_count,
+    increment_recording_stat,
+    record_processing_metrics,
+)
 
 logger = get_logger(__name__)
 
@@ -53,7 +61,6 @@ class ScreenshotProcessor(BaseContextProcessor):
         config = get_config("processing.screenshot_processor") or {}
         super().__init__(config)
 
-        self.prompt_manager = get_prompt_manager()
 
         self._similarity_hash_threshold = self.config.get("similarity_hash_threshold", 2)
         self._batch_size = self.config.get("batch_size", 10)
@@ -73,13 +80,8 @@ class ScreenshotProcessor(BaseContextProcessor):
         # State cache
         self._processed_cache = (
             {}
-        )  # Store processed contexts for MERGE operations, key: id, value: ProcessedContext
+        )
         self._current_screenshot = deque(maxlen=self._batch_size * 2)
-
-    @property
-    def storage(self):
-        """Get storage from global singleton"""
-        return get_storage()
 
     def shutdown(self, graceful: bool = False):
         """Gracefully shut down background processing tasks."""
@@ -168,6 +170,11 @@ class ScreenshotProcessor(BaseContextProcessor):
         return True
 
     def _run_processing_loop(self):
+        from opencontext.monitoring import (
+            increment_data_count,
+            increment_recording_stat,
+            record_processing_metrics,
+        )
         """Background processing loop for handling screenshots in input queue."""
         unprocessed_contexts = []
         last_process_time = int(time.time())
@@ -191,373 +198,374 @@ class ScreenshotProcessor(BaseContextProcessor):
             except Exception as e:
                 logger.error(f"Unexpected error in processing loop: {e}")
                 time.sleep(1)
-            time1 = int(time.time())
+            start_time = time.time()
+            increment_data_count("screenshot", count=len(unprocessed_contexts))
             try:
-                # Create new event loop to run async methods
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    loop.run_until_complete(self.batch_process(unprocessed_contexts))
-                finally:
-                    loop.close()
+                processed_contexts =  asyncio.run(self.batch_process(unprocessed_contexts))
+                if processed_contexts:
+                    get_storage().batch_upsert_processed_context(processed_contexts)
             except Exception as e:
-                logger.error(f"Unexpected error in batch_process: {e}")
+                error_msg = f"Failed during concurrent VLM processing: {e}"
+                logger.error(error_msg)
+                record_processing_error(
+                    error_msg, processor_name=self.get_name(), context_count=len(unprocessed_contexts)
+                )
+                increment_recording_stat("failed", len(unprocessed_contexts))
                 continue
-            time2 = int(time.time())
-            logger.info(f"processed {len(unprocessed_contexts)} cost: {time2 - time1} seconds")
+            try:
+                duration_ms = int((time.time() - start_time) * 1000)
+                record_processing_metrics(
+                    processor_name=self.get_name(),
+                    operation="screenshot_process",
+                    duration_ms=duration_ms,
+                    context_count=len(processed_contexts),
+                )
+
+                # Record context count by type
+                for context in processed_contexts:
+                    increment_data_count("context", count=1, context_type=context.extracted_data.context_type.value)
+
+                # Increment processed screenshots count
+                increment_recording_stat("processed", len(processed_contexts))
+
+            except ImportError:
+                pass
             unprocessed_contexts.clear()
             last_process_time = int(time.time())
 
-    async def batch_process(self, raw_contexts: List[RawContextProperties]) -> bool:
+    async def _process_vlm_single(self, raw_context: RawContextProperties) -> List[ProcessedContext]:
         """
-        Batch process screenshots using Vision LLM
+        Process a single screenshot with VLM
         """
-        from opencontext.monitoring import (
-            increment_data_count,
-            increment_recording_stat,
-            record_processing_metrics,
-        )
-
-        start_time = time.time()
-
-        prompt_group = self.prompt_manager.get_prompt_group(
-            "processing.extraction.screenshot_contextual_batch"
+        prompt_group = get_prompt_group(
+            "processing.extraction.screenshot_analyze"
         )
         system_prompt = prompt_group.get("system")
         user_prompt_template = prompt_group.get("user")
-
         if not system_prompt or not user_prompt_template:
-            logger.error("Failed to get complete prompt for screenshot_contextual_batch.")
-            increment_recording_stat("failed", len(raw_contexts))
-            increment_recording_stat("processed", len(raw_contexts))
-            return False
+            logger.error("Failed to get complete prompt for screenshot_analyze.")
+            raise ValueError("Missing prompt configuration for screenshot_analyze")
 
         # Prepare image data
-        content = []
-        increment_data_count("screenshot", count=len(raw_contexts))
-        for i in range(len(raw_contexts)):
-            image_path = raw_contexts[i].content_path
-            if not image_path or not os.path.exists(image_path):
-                logger.error(f"Screenshot path is invalid or does not exist: {image_path}")
-                continue
-            base64_image = self._encode_image_to_base64(image_path)
-            if base64_image:
-                content.append(
-                    (
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/png;base64,{base64_image}",
-                            },
-                        }
-                    )
-                )
+        image_path = raw_context.content_path
+        if not image_path or not os.path.exists(image_path):
+            logger.error(f"Screenshot path is invalid or does not exist: {image_path}")
+            raise ValueError(f"Screenshot path is invalid or does not exist: {image_path}")
 
-        if not content:
-            logger.warning("No valid images for processing.")
-            increment_recording_stat("failed", len(raw_contexts))
-            increment_recording_stat("processed", len(raw_contexts))
-            return False
+        base64_image = self._encode_image_to_base64(image_path)
+        if not base64_image:
+            logger.warning(f"Failed to encode image: {image_path}")
+            raise ValueError(f"Failed to encode image: {image_path}")
 
-        # Prepare historical context
-        history_contexts = list(self._processed_cache.values())
-        history_contexts.reverse()
-        history_str = (
-            "\n".join(
-                [
-                    f"- ID: {h.id}\n  analysis: {h.extracted_data.to_dict()}"
-                    for h in history_contexts
-                ]
-            )
-            if history_contexts
-            else ""
-        )
+        content = [
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{base64_image}",
+                },
+            }
+        ]
 
-        time_now = datetime.datetime.now().astimezone()
+        time_now = datetime.datetime.now()
         user_prompt = user_prompt_template.format(
             current_date=time_now.isoformat(),
             current_timestamp=int(time_now.timestamp()),
             current_timezone=time_now.tzname(),
-            history=history_str,
-            total_screenshots=len(raw_contexts),
         )
         content.insert(0, {"type": "text", "text": user_prompt})
         system_prompt = system_prompt.format(
-            context_type_descriptions=self.prompt_manager.get_context_type_descriptions_for_extraction()
+            context_type_descriptions=get_context_type_descriptions_for_extraction()
         )
-        # logger.info(f"system_prompt: {system_prompt}")
+
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": content},
         ]
-        try:
-            raw_llm_response = await generate_with_messages_async(
-                messages, tools=ALL_TOOL_DEFINITIONS
-            )
-        except Exception as e:
-            error_msg = f"Failed to get raw LLM response for batch of screenshots. Error: {e}"
-            logger.error(error_msg)
-            # Record processing error
-            record_processing_error(
-                error_msg, processor_name=self.get_name(), context_count=len(raw_contexts)
-            )
-            increment_recording_stat("failed", len(raw_contexts))
-            increment_recording_stat("processed", len(raw_contexts))
-            return False
 
-        if not raw_llm_response:
-            error_msg = f"Empty LLM response for batch of {len(raw_contexts)} screenshots. Please check LLM configuration and API status."
-            logger.error(error_msg)
-            # Record processing error
-            record_processing_error(
-                error_msg, processor_name=self.get_name(), context_count=len(raw_contexts)
-            )
-            increment_recording_stat("failed", len(raw_contexts))
-            increment_recording_stat("processed", len(raw_contexts))
-            return False
+        raw_llm_response = ''
+        try:
+            raw_llm_response = await generate_with_messages_async(messages)
+        except Exception as e:
+            logger.error(f"Failed to get VLM response. Error: {e}")
+            raise ValueError(f"Failed to get VLM response. Error: {e}")
 
         raw_resp = parse_json_from_response(raw_llm_response)
-
         if not raw_resp:
-            error_msg = (
-                f"Failed to parse JSON from Vision LLM response. Raw response: {raw_llm_response}"
-            )
-            logger.error(error_msg)
-            # Record processing error
-            record_processing_error(
-                error_msg, processor_name=self.get_name(), context_count=len(raw_contexts)
-            )
-            increment_recording_stat("failed", len(raw_contexts))
-            increment_recording_stat("processed", len(raw_contexts))
-            return False
+            logger.error(f"Empty VLM response.")
+            raise ValueError(f"Empty VLM response.")
+        
+        items = raw_resp.get("items", [])
+        processed_items = []
+        for item in items:
+            processed_items.append(self._create_processed_context(item, raw_context))
+        return processed_items
 
-        newly_processed_contexts, removed_context_ids = await self._create_processed_contexts(
-            raw_resp, raw_contexts
-        )
-
-        self._processed_cache.clear()
-        for context in newly_processed_contexts:
-            self._processed_cache[context.id] = context
-        logger.debug(
-            f"Written {len(newly_processed_contexts)} contexts, removed {len(removed_context_ids)} contexts"
-        )
-        self.storage.batch_upsert_processed_context(newly_processed_contexts)
-        # self.storage.delete(removed_context_ids)
-
-        # Record successful processing metrics
-        try:
-
-            duration_ms = int((time.time() - start_time) * 1000)
-            record_processing_metrics(
-                processor_name=self.get_name(),
-                operation="batch_process",
-                duration_ms=duration_ms,
-                context_count=len(newly_processed_contexts),
-            )
-
-            # Record context count by type
-            for context in newly_processed_contexts:
-                if context.extracted_data.context_type:
-                    increment_data_count(
-                        "context", count=1, context_type=context.extracted_data.context_type.value
-                    )
-
-            # Increment processed screenshots count
-            increment_recording_stat("processed", len(raw_contexts))
-
-        except ImportError:
-            pass
-        return True
-
-    async def _create_processed_contexts(
-        self, raw_resp: Any, raw_contexts: List[RawContextProperties]
-    ) -> Tuple[List[ProcessedContext], List[str]]:
+    async def _merge_contexts(self, processed_items: List[ProcessedContext]) -> List[ProcessedContext]:
         """
-        Create or merge processed context objects based on LLM extracted data.
-        This method follows rules defined in `screenshot_contextual_batch` prompt.
+        Merge newly processed items with cached items based on context_type semantics.
         """
-        # Handle when LLM returns a list instead of dict
-        if isinstance(raw_resp, list) and raw_resp:
-            raw_resp = raw_resp[0]
+        if not processed_items:
+            return []
 
-        if (
-            not isinstance(raw_resp, dict)
-            or "items" not in raw_resp
-            or not isinstance(raw_resp.get("items"), list)
-        ):
-            logger.warning(f"LLM returned unprocessable data format: {raw_resp}")
-            return [], []
-        # logger.info(f"Data format returned from LLM: {raw_resp}")
-        newly_processed_contexts = []
-        removed_context_ids = set()
-        items_to_process = raw_resp.get("items", [])
-        now = datetime.datetime.now().astimezone()
+        # Group by context_type
+        items_by_type = {}
+        for item in processed_items:
+            context_type = item.extracted_data.context_type
+            items_by_type.setdefault(context_type, []).append(item)
 
-        context_hash_map = {}
-        for item in self._current_screenshot:
-            context_hash_map[item["id"]] = item["phash"]
-        for item in items_to_process:
-            decision = item.get("decision")
-            analysis = item.get("analysis")
-            history_id = item.get("history_id")
-            screen_ids = item.get("screen_ids", [])
-            if not decision or not analysis:
-                logger.warning(f"Skipping incomplete item: {item}")
+        tasks = []
+        for context_type, new_items in items_by_type.items():
+            cached_items = list(self._processed_cache.get(context_type.value, {}).values())
+            tasks.append(self._merge_items_with_llm(context_type, new_items, cached_items))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        all_newly_created = []
+        for idx, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Merge task {idx} failed with error: {result}")
                 continue
-            context_type = None
-            try:
-                context_type_str = analysis.get("context_type", "semantic_context")
-                # Use the robust context type helper
-                from opencontext.models.enums import get_context_type_for_analysis
+            if result:
+                all_newly_created.extend(result.get("processed_contexts", []))
+                self._processed_cache[context_type.value] = result.get("new_ctxs", {})
+                for item_id in result.get("need_to_del_ids", []):
+                    get_storage().delete_processed_context(item_id, context_type.value)
 
-                context_type = get_context_type_for_analysis(context_type_str)
-            except Exception as e:
-                logger.warning(
-                    f"Error processing context_type: {e}, using default semantic_context."
-                )
-                from opencontext.models.enums import ContextType
+        return all_newly_created
 
-                context_type = ContextType.SEMANTIC_CONTEXT
+    async def _merge_items_with_llm(self, context_type: ContextType, new_items: List[ProcessedContext], cached_items: List[ProcessedContext]) -> Dict[str, Any]:
+        """
+        Call LLM to merge items and directly return ProcessedContext objects.
+        Handles both merged (multiple items -> one) and new (independent) items.
+        """
+        prompt_group = get_prompt_group("merging.screenshot_batch_merging")
+        all_items_map = {item.id: item for item in new_items + cached_items}
+        items_json = json.dumps([self._item_to_dict(item) for item in new_items + cached_items], ensure_ascii=False, indent=2)
 
-            # Safe integer conversion helper
-            def safe_int(value, default=0):
-                if value is None or value == "" or value == "null":
-                    return default
-                try:
-                    return int(value)
-                except (ValueError, TypeError):
-                    return default
+        messages = [
+            {"role": "system", "content": prompt_group["system"]},
+            {"role": "user", "content": prompt_group["user"].format(
+                context_type=context_type.value,
+                items_json=items_json
+            )},
+        ]
 
-            event_time = None
-            if (
-                analysis.get("event_time", "null") != "null"
-                and analysis.get("event_time") is not None
-            ):
-                event_time_str = analysis.get("event_time")
+        response = await generate_with_messages_async(messages)
 
-                if any(
-                    invalid_char in event_time_str
-                    for invalid_char in ["xxxx", "XXXX", "TZ:TZ", "TZ", "????"]
-                ):
-                    event_time = now
-                else:
-                    if event_time_str.endswith("Z"):
-                        event_time_str = event_time_str[:-1] + "+00:00"
+        if not response:
+            raise ValueError(f"Empty LLM response when merge items for context type: {context_type.value}")
 
-                    try:
-                        event_time = datetime.datetime.fromisoformat(event_time_str)
-                        if event_time.tzinfo is None:
-                            event_time = event_time.astimezone()
-                    except ValueError as e:
-                        logger.warning(
-                            f"Cannot parse event time '{event_time_str}': {e}, using current time"
-                        )
-                        event_time = now
-            else:
-                event_time = now
+        response_data = parse_json_from_response(response)
+        if not isinstance(response_data, dict) or "items" not in response_data:
+            logger.error(f"merge_items_with_llm, Invalid response format: {response_data}")
+            raise ValueError(f"Invalid response format when merge items for context type: {context_type.value}")
 
-            raw_entities = analysis.get("entities", [])
-            entities_info = validate_and_clean_entities(raw_entities)
-            context_text = f"{analysis.get('title', '')} {analysis.get('summary', '')}"
-            entities = refresh_entities(entities_info, context_text)
-            raw_keywords = analysis.get("keywords", [])
-            extracted_data = ExtractedData(
-                title=analysis.get("title", ""),
-                summary=analysis.get("summary", ""),
-                keywords=sorted(list(set(raw_keywords))),
-                entities=entities,
-                context_type=context_type,
-                importance=safe_int(analysis.get("importance"), 0),
-                confidence=safe_int(analysis.get("confidence"), 0),
-            )
+        # Process results and build ProcessedContext objects
+        result_contexts = []
+        now = datetime.datetime.now()
+        if context_type.value not in self._processed_cache:
+            self._processed_cache[context_type.value] = {}
+        need_to_del_ids = []
+        final_context = None
+        new_ctxs = {}
+        for result in response_data.get("items", []):
+            merge_type = result.get("merge_type")
+            data = result.get("data", {})
 
-            raw_context_properties = []
-            valid_screen_ids = []
-            for index in screen_ids:
-                idx = int(index) - 1
-                if not isinstance(idx, int) or idx < 0 or idx >= len(raw_contexts):
-                    logger.warning(
-                        f"Invalid screenshot index: {index}, valid range is 1-{len(raw_contexts)}"
-                    )
+            if merge_type == "merged":
+                merged_ids = result.get("merged_ids", [])
+                if not merged_ids:
+                    logger.error(f"merged type but no merged_ids, skipping")
                     continue
-                raw_context_properties.append(raw_contexts[idx])
-                valid_screen_ids.append(index)
+                items_to_merge = [all_items_map[id] for id in merged_ids if id in all_items_map]
+                if not items_to_merge:
+                    logger.error(f"No valid items for merged_ids: {merged_ids}")
+                    continue
 
-            if not raw_context_properties:
-                logger.error(f"All screenshot indices invalid, skipping item: {screen_ids}")
-                continue
-            new_context = ProcessedContext(
-                properties=ContextProperties(
-                    raw_properties=raw_context_properties,
-                    source=ContextSource.SCREENSHOT,
-                    create_time=now,
-                    update_time=now,
-                    event_time=event_time,
-                    enable_merge=True,
-                    is_happend=event_time <= now,
-                ),
-                extracted_data=extracted_data,
-                vectorize=Vectorize(
-                    content_format=ContentFormat.TEXT,
-                    text=f"{extracted_data.title} {extracted_data.summary}",
-                ),
-            )
-            all_raw_properties = {}
-            all_raw_properties.update(
-                {
-                    raw_property.object_id: raw_property
-                    for raw_property in new_context.properties.raw_properties
-                }
-            )
-            if decision == "MERGE" and history_id and history_id in self._processed_cache:
-                history_context = self._processed_cache.pop(history_id)
-                all_raw_properties.update(
-                    {
-                        raw_property.object_id: raw_property
-                        for raw_property in history_context.properties.raw_properties
-                    }
+                min_create_time = min((i.properties.create_time for i in items_to_merge if i.properties.create_time), default=now)
+                event_time = self._parse_event_time_str(
+                    data.get("event_time"),
+                    max((i.properties.event_time for i in items_to_merge if i.properties.event_time), default=now)
                 )
-                new_context.properties.duration_count += history_context.properties.duration_count
-                new_context.properties.create_time = (
-                    history_context.properties.create_time
-                )  # Inherit creation time
-                removed_context_ids.add(history_id)
-            # elif decision == 'MERGE' and history_id not in self._processed_cache:
-            #     logger.info(f"上下文 {history_id} 不存在，无法合并到新上下文 {new_context.id}。")
-            for raw_property in all_raw_properties.values():
-                if raw_property.object_id not in context_hash_map:
-                    temp_hash = calculate_phash(raw_property.content_path)
-                    if temp_hash is not None:
-                        context_hash_map[raw_property.object_id] = temp_hash
-            # Distribute images
-            priority_queue = []
-            object_ids = list(all_raw_properties.keys())
-            for i in range(len(object_ids)):
-                min_dist = float("inf")
-                for j in range(len(object_ids)):
-                    if i == j:
-                        continue
-                    if (
-                        object_ids[i] not in context_hash_map
-                        or object_ids[j] not in context_hash_map
-                    ):
-                        continue
-                    hash1 = context_hash_map[object_ids[i]]
-                    hash2 = context_hash_map[object_ids[j]]
-                    dist = bin(int(str(hash1), 16) ^ int(str(hash2), 16)).count("1")
-                    if dist < min_dist:
-                        min_dist = dist
-                heapq.heappush(priority_queue, (-min_dist, object_ids[i]))
-            new_raw_properties = []
-            while len(priority_queue) > 0 and len(new_raw_properties) < self._max_raw_properties:
-                _, object_id = heapq.heappop(priority_queue)
-                if object_id in all_raw_properties:
-                    new_raw_properties.append(all_raw_properties[object_id])
 
-            new_context.properties.raw_properties = new_raw_properties
-            do_vectorize(new_context.vectorize)
-            newly_processed_contexts.append(new_context)
-        return newly_processed_contexts, list(removed_context_ids)
+                all_raw_props = []
+                for item in items_to_merge:
+                    all_raw_props.extend(item.properties.raw_properties)
+
+                merged_ctx = ProcessedContext(
+                    properties=ContextProperties(
+                        raw_properties=all_raw_props,
+                        create_time=min_create_time,
+                        update_time=now,
+                        event_time=event_time,
+                        enable_merge=True,
+                        is_happend=event_time <= now if event_time else False,
+                        duration_count=sum(i.properties.duration_count for i in items_to_merge),
+                        merge_count=sum(i.properties.merge_count for i in items_to_merge) + 1,
+                    ),
+                    extracted_data=ExtractedData(
+                        title=data.get("title", ""),
+                        summary=data.get("summary", ""),
+                        keywords=sorted(set(data.get("keywords", []))),
+                        entities=[],  # Will be populated below
+                        context_type=context_type,
+                        importance=self._safe_int(data.get("importance")),
+                        confidence=self._safe_int(data.get("confidence")),
+                    ),
+                    vectorize=Vectorize(
+                        content_format=ContentFormat.TEXT,
+                        text=f"{data.get('title', '')} {data.get('summary', '')}",
+                    ),
+                )
+
+                # # Process entities for merged context
+                # raw_entities = data.get("entities", [])
+                # entities_info = validate_and_clean_entities(raw_entities)
+                # context_text = f"{data.get('title', '')} {data.get('summary', '')}"
+                # entities = refresh_entities(entities_info, context_text)
+                # merged_ctx.extracted_data.entities = entities
+
+                final_context = merged_ctx
+                need_to_del_ids.extend([item.id for item in items_to_merge if item.id in self._processed_cache.get(context_type.value, {})])
+                logger.debug(f"Merged {len(merged_ids)} items")
+
+            elif merge_type == "new":
+                # Independent new item
+                merged_ids = result.get("merged_ids", [])
+                if not merged_ids or merged_ids[0] not in all_items_map:
+                    logger.error(f"new type but no merged_ids or merged_ids[0] not in all_items_map, skipping")
+                    continue
+                if merged_ids[0] in self._processed_cache.get(context_type.value, {}):
+                    continue
+                final_context = all_items_map[merged_ids[0]]
+                new_ctxs[final_context.id] = final_context
+
+            entities_info = validate_and_clean_entities(data.get("entities", []))
+            entities = refresh_entities(entities_info, final_context.vectorize.text)
+            final_context.extracted_data.entities = entities
+            result_contexts.append(final_context)
+            
+        return {"processed_contexts": result_contexts, "need_to_del_ids": need_to_del_ids, "new_ctxs": new_ctxs}
+
+    def _parse_event_time_str(self, time_str: Optional[str], default: datetime.datetime) -> datetime.datetime:
+        """Parse ISO time string, return default if invalid."""
+        if not time_str or time_str == "null":
+            return default
+        try:
+            if any(
+                invalid_char in time_str
+                for invalid_char in ["xxxx", "XXXX", "TZ:TZ", "TZ", "????"]
+            ):
+                event_time = default
+            elif time_str.endswith("Z"):
+                time_str = time_str[:-1] + "+00:00"
+                event_time = datetime.datetime.fromisoformat(time_str)
+                return event_time
+            return default
+        except (ValueError, TypeError):
+            return default
+
+    def _safe_int(self, value, default=0) -> int:
+        """Safely convert to int."""
+        if value is None or value == "" or value == "null":
+            return default
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return default
+
+    def _item_to_dict(self, item: ProcessedContext) -> Dict[str, Any]:
+        """Convert a ProcessedContext item to a dictionary for LLM."""
+        return {
+            **item.extracted_data.to_dict(),
+            "id": item.id,
+            "event_time": item.properties.event_time.isoformat()
+            if item.properties.event_time
+            else None,
+        }
+
+    async def batch_process(self, raw_contexts: List[RawContextProperties]) -> List[ProcessedContext]:
+        """
+        Batch process screenshots using Vision LLM with concurrent batch processing
+        """
+
+        logger.info(f"Processing {len(raw_contexts)} screenshots concurrently")
+
+        # Step 1: Process all VLM tasks concurrently
+        vlm_results = await asyncio.gather(
+            *[self._process_vlm_single(raw_context) for raw_context in raw_contexts],
+            return_exceptions=True
+        )
+
+        all_vlm_items = []
+        for idx, result in enumerate(vlm_results):
+            if isinstance(result, Exception):
+                logger.error(f"Screenshot {idx} failed with error: {result}")
+                increment_recording_stat("failed", 1)
+                continue
+            if result:
+                # for item in result:
+                #     print(f"result.extracted_data.context_type: {item.extracted_data.context_type} result: {item.vectorize.text}")
+                #     print("-"*80)
+                all_vlm_items.extend(result)
+
+        if not all_vlm_items:
+            return []
+
+        logger.info(f"VLM parsing completed, got {len(all_vlm_items)} items")
+
+        # Step 2: Merge contexts concurrently
+        newly_processed_contexts = await self._merge_contexts(all_vlm_items)
+        return newly_processed_contexts
+
+    def _create_processed_context(self, analysis: Dict[str, Any], raw_context: RawContextProperties = None) -> ProcessedContext:
+        now = datetime.datetime.now()
+        if not analysis:
+            logger.warning(f"Skipping incomplete item: {analysis}")
+            return None
+        context_type = None
+        try:
+            context_type_str = analysis.get("context_type", "semantic_context")
+            # Use the robust context type helper
+            from opencontext.models.enums import get_context_type_for_analysis
+            context_type = get_context_type_for_analysis(context_type_str)
+        except Exception as e:
+            logger.warning(f"Error processing context_type: {e}, using default activity_context.")
+            from opencontext.models.enums import ContextType
+            context_type = ContextType.ACTIVITY_CONTEXT
+
+        event_time = self._parse_event_time_str(analysis.get("event_time"), now)
+
+        # Entity extraction moved to merge phase
+        entities = []
+        raw_keywords = analysis.get("keywords", [])
+        extracted_data = ExtractedData(
+            title=analysis.get("title", ""),
+            summary=analysis.get("summary", ""),
+            keywords=sorted(list(set(raw_keywords))),
+            entities=entities,
+            context_type=context_type,
+            importance=self._safe_int(analysis.get("importance"), 0),
+            confidence=self._safe_int(analysis.get("confidence"), 0),
+        )
+
+        new_context = ProcessedContext(
+            properties=ContextProperties(
+                raw_properties=[raw_context] if raw_context else [],
+                source=ContextSource.SCREENSHOT,
+                create_time=raw_context.create_time if raw_context else now,
+                update_time=now,
+                event_time=event_time,
+                enable_merge=True,
+                is_happend=event_time <= now,
+            ),
+            extracted_data=extracted_data,
+            vectorize=Vectorize(
+                content_format=ContentFormat.TEXT,
+                text=f"{extracted_data.title} {extracted_data.summary}",
+            ),
+        )
+        return new_context
 
     def _encode_image_to_base64(self, image_path: str) -> Optional[str]:
         """Encode image file to base64 string."""

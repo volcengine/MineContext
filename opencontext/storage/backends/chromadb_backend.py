@@ -844,7 +844,6 @@ class ChromaDBBackend(IVectorStorageBackend):
                 metadatas=[meta],
             )
 
-            logger.debug(f"Stored todo embedding: id={todo_id}, content='{content[:50]}...'")
             return True
 
         except Exception as e:

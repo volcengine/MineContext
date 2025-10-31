@@ -218,7 +218,6 @@ class SmartTipGenerator:
             # Sort by time, with the newest first
             contexts.sort(key=lambda x: x.properties.create_time, reverse=True)
 
-            logger.info(f"Retrieved {len(contexts)} context records for reminder analysis.")
             return contexts
 
         except Exception as e:
@@ -285,7 +284,6 @@ class SmartTipGenerator:
             messages,
             max_calls=2,
             tools=ALL_TOOL_DEFINITIONS,
-            temperature=0.1,
         )
 
         # Save debug information

@@ -122,7 +122,6 @@ class ExecutorNode(BaseNode):
         prompt_group = get_prompt_group("chat_workflow.executor.generate")
 
         system_prompt = prompt_group["system"]
-        temperature = 0.7
 
         context = state.contexts.prepare_context()
         user_prompt = prompt_group["user"]
@@ -142,7 +141,7 @@ class ExecutorNode(BaseNode):
         # Use streaming generation
         full_content = ""
         chunk_index = 0
-        async for chunk in generate_stream_for_agent(messages, temperature=temperature):
+        async for chunk in generate_stream_for_agent(messages):
             if chunk.choices and len(chunk.choices) > 0:
                 delta = chunk.choices[0].delta
                 if hasattr(delta, "content") and delta.content:
@@ -184,7 +183,7 @@ class ExecutorNode(BaseNode):
         # Use streaming generation
         full_content = ""
         chunk_index = 0
-        async for chunk in generate_stream_for_agent(messages, temperature=0.3):
+        async for chunk in generate_stream_for_agent(messages):
             if chunk.choices and len(chunk.choices) > 0:
                 delta = chunk.choices[0].delta
                 if hasattr(delta, "content") and delta.content:
@@ -256,7 +255,7 @@ class ExecutorNode(BaseNode):
         # Use streaming generation
         full_content = ""
         chunk_index = 0
-        async for chunk in generate_stream_for_agent(messages, temperature=0.5):
+        async for chunk in generate_stream_for_agent(messages):
             if chunk.choices and len(chunk.choices) > 0:
                 delta = chunk.choices[0].delta
                 if hasattr(delta, "content") and delta.content:

@@ -272,9 +272,6 @@ def get_context_type_for_analysis(context_type_str: str) -> "ContextType":
     """
     Get the context type for analysis, with fault tolerance
     """
-    if not context_type_str:
-        return ContextType.SEMANTIC_CONTEXT
-
     # Normalize input
     context_type_str = context_type_str.lower().strip()
 
@@ -282,8 +279,7 @@ def get_context_type_for_analysis(context_type_str: str) -> "ContextType":
     if validate_context_type(context_type_str):
         return ContextType(context_type_str)
 
-    # Default to semantic context
-    return ContextType.SEMANTIC_CONTEXT
+    raise ValueError(f"Invalid context type: {context_type_str}")
 
 
 def get_context_type_choices_for_tools():
