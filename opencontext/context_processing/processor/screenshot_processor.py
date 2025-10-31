@@ -418,13 +418,6 @@ class ScreenshotProcessor(BaseContextProcessor):
                     ),
                 )
 
-                # # Process entities for merged context
-                # raw_entities = data.get("entities", [])
-                # entities_info = validate_and_clean_entities(raw_entities)
-                # context_text = f"{data.get('title', '')} {data.get('summary', '')}"
-                # entities = refresh_entities(entities_info, context_text)
-                # merged_ctx.extracted_data.entities = entities
-
                 final_context = merged_ctx
                 need_to_del_ids.extend([item.id for item in items_to_merge if item.id in self._processed_cache.get(context_type.value, {})])
                 logger.debug(f"Merged {len(merged_ids)} items")
@@ -441,7 +434,7 @@ class ScreenshotProcessor(BaseContextProcessor):
                 new_ctxs[final_context.id] = final_context
 
             entities_info = validate_and_clean_entities(data.get("entities", []))
-            entities = refresh_entities(entities_info, final_context.vectorize.text)
+            entities =  await refresh_entities(entities_info, final_context.vectorize.text)
             final_context.extracted_data.entities = entities
             result_contexts.append(final_context)
             

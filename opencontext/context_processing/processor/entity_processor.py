@@ -7,7 +7,6 @@
 """
 Entity processing module
 """
-import asyncio
 import datetime
 from copy import deepcopy
 from typing import Dict, List
@@ -43,23 +42,13 @@ def validate_and_clean_entities(raw_entities) -> Dict[str, ProfileContextMetadat
     return entities_info
 
 
-def refresh_entities(
-    entities_info: Dict[str, ProfileContextMetadata], context_text: str
-) -> List[str]:
+async def refresh_entities(entities_info: Dict[str, ProfileContextMetadata], context_text: str) -> List[str]:
     """
     Entity processing main workflow - Three-step strategy
     1. Exact match -> Find then asynchronously update information
     2. Similar match -> LLM judgment -> If yes, update aliases and information
     3. No match -> Extract information -> Create new entity
     """
-
-    # Get or create event loop
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
     entity_tool = ProfileEntityTool()
     processed_entities = {}
 
