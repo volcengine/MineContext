@@ -112,6 +112,15 @@ class GlobalEmbeddingClient:
             return
         self._embedding_client.vectorize(vectorize, **kwargs)
         return
+    
+    async def do_vectorize_async(self, vectorize: Vectorize, **kwargs):
+        """
+        Vectorize a Vectorize object asynchronously
+        """
+        if vectorize.vector:
+            return
+        await self._embedding_client.vectorize_async(vectorize, **kwargs)
+        return
 
 
 def is_initialized() -> bool:
@@ -124,3 +133,6 @@ def do_embedding(text: str, **kwargs) -> List[float]:
 
 def do_vectorize(vectorize_obj: Vectorize, **kwargs):
     return GlobalEmbeddingClient.get_instance().do_vectorize(vectorize_obj, **kwargs)
+  
+async def do_vectorize_async(vectorize_obj: Vectorize, **kwargs):
+    return await GlobalEmbeddingClient.get_instance().do_vectorize_async(vectorize_obj, **kwargs)

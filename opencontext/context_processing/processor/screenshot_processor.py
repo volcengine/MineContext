@@ -24,7 +24,7 @@ from opencontext.context_processing.processor.entity_processor import (
     refresh_entities,
     validate_and_clean_entities,
 )
-from opencontext.llm.global_embedding_client import do_vectorize
+from opencontext.llm.global_embedding_client import do_vectorize_async
 from opencontext.llm.global_vlm_client import generate_with_messages_async
 from opencontext.models.context import *
 from opencontext.models.enums import get_context_type_descriptions_for_extraction
@@ -73,7 +73,7 @@ class ScreenshotProcessor(BaseContextProcessor):
         self._stop_event = threading.Event()
 
         # Pipeline related
-        self._input_queue = queue.Queue(maxsize=self._batch_size * 2)
+        self._input_queue = queue.Queue(maxsize=self._batch_size * 3)
         self._processing_task = threading.Thread(target=self._run_processing_loop, daemon=True)
         self._processing_task.start()
 
@@ -158,7 +158,7 @@ class ScreenshotProcessor(BaseContextProcessor):
             if self._max_image_size > 0:
                 resize_image(context.content_path, self._max_image_size, self._resize_quality)
             if not self._is_duplicate(context):
-                self._input_queue.put(context)
+                self._input_queue.put(context, timeout=2)
                 # Record screenshot path for UI display
                 from opencontext.monitoring import record_screenshot_path
 
@@ -349,8 +349,8 @@ class ScreenshotProcessor(BaseContextProcessor):
                 items_json=items_json
             )},
         ]
-
         response = await generate_with_messages_async(messages)
+
 
         if not response:
             raise ValueError(f"Empty LLM response when merge items for context type: {context_type.value}")
@@ -368,6 +368,7 @@ class ScreenshotProcessor(BaseContextProcessor):
         need_to_del_ids = []
         final_context = None
         new_ctxs = {}
+        entity_refresh_items = []
         for result in response_data.get("items", []):
             merge_type = result.get("merge_type")
             data = result.get("data", {})
@@ -421,7 +422,6 @@ class ScreenshotProcessor(BaseContextProcessor):
                 final_context = merged_ctx
                 need_to_del_ids.extend([item.id for item in items_to_merge if item.id in self._processed_cache.get(context_type.value, {})])
                 logger.debug(f"Merged {len(merged_ids)} items")
-
             elif merge_type == "new":
                 # Independent new item
                 merged_ids = result.get("merged_ids", [])
@@ -432,13 +432,31 @@ class ScreenshotProcessor(BaseContextProcessor):
                     continue
                 final_context = all_items_map[merged_ids[0]]
                 new_ctxs[final_context.id] = final_context
+            entity_refresh_items.append(final_context)
 
-            entities_info = validate_and_clean_entities(data.get("entities", []))
-            entities =  await refresh_entities(entities_info, final_context.vectorize.text)
-            final_context.extracted_data.entities = entities
-            result_contexts.append(final_context)
-            
+        # Second pass: parallel refresh entities
+        entity_tasks = [
+            self._parse_single_context(item, data.get("entities", []))
+            for item in entity_refresh_items
+        ]
+        # Execute all entity refresh tasks in parallel
+        entities_results = await asyncio.gather(*entity_tasks, return_exceptions=True)
+        for entities_result in entities_results:
+            if isinstance(entities_result, Exception):
+                logger.error(f"Entity refresh failed for context {item.id}: {entities_result}")
+            else:
+                result_contexts.append(entities_result)
+
         return {"processed_contexts": result_contexts, "need_to_del_ids": need_to_del_ids, "new_ctxs": new_ctxs}
+
+    async def _parse_single_context(self, item: ProcessedContext, entities: List[Dict[str, Any]]) -> ProcessedContext:
+        """Parse a single context item."""
+        entities_info = validate_and_clean_entities(entities)
+        vectorize_task = do_vectorize_async(item.vectorize)
+        entities_task = refresh_entities(entities_info, item.vectorize.text)
+        _, entities_results = await asyncio.gather(vectorize_task, entities_task)
+        item.extracted_data.entities = entities_results
+        return item
 
     def _parse_event_time_str(self, time_str: Optional[str], default: datetime.datetime) -> datetime.datetime:
         """Parse ISO time string, return default if invalid."""
