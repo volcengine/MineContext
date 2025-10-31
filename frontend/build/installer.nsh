@@ -6,13 +6,15 @@
 
 ; Define custom variables
 Var DataDir
-Var DataDirPage
-Var DataDirLabel
-Var DataDirText
-Var DataDirBrowseButton
 
-; Initialize data directory variable when installer starts
+; Initialize variables when installer starts
 !macro customInit
+  ; Try to read existing installation directory from registry
+  ReadRegStr $0 HKCU "Software\MineContext" "InstallDirectory"
+  ${If} $0 != ""
+    StrCpy $INSTDIR $0
+  ${EndIf}
+
   ; Try to read existing data directory from registry
   ReadRegStr $DataDir HKCU "Software\MineContext" "DataDirectory"
   ${If} $DataDir == ""
@@ -20,6 +22,15 @@ Var DataDirBrowseButton
     StrCpy $DataDir "$LOCALAPPDATA\MineContext"
   ${EndIf}
 !macroend
+
+; Only define installer functions when building the installer (not uninstaller)
+!ifndef BUILD_UNINSTALLER
+
+; Define variables for data directory page
+Var DataDirPage
+Var DataDirLabel
+Var DataDirText
+Var DataDirBrowseButton
 
 ; Function to create the custom data directory selection page
 Function DataDirectoryPage
@@ -68,6 +79,12 @@ Function DataDirectoryLeave
     Abort
   ${EndIf}
 
+  ; Validate that data directory is not the same as installation directory
+  ${If} $DataDir == $INSTDIR
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Data directory cannot be the same as the installation directory.$\n$\nInstallation Directory: $INSTDIR$\nData Directory: $DataDir$\n$\nPlease choose a different location for application data."
+    Abort
+  ${EndIf}
+
   ; Create the directory if it doesn't exist
   CreateDirectory "$DataDir"
 
@@ -85,28 +102,10 @@ Function DataDirectoryLeave
   WriteRegStr HKCU "Software\MineContext" "DataDirectory" "$DataDir"
 FunctionEnd
 
-; Add custom installation page
-!macro customInstallMode
-  ; Add the data directory selection page after directory selection
-  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE DataDirectoryLeave
-  !insertmacro MUI_PAGE_DIRECTORY_CUSTOM DataDirectoryPage
-!macroend
+!endif ; BUILD_UNINSTALLER
 
-; Clean up on uninstall
-!macro customUnInstall
-  ; Read the data directory from registry
-  ReadRegStr $DataDir HKCU "Software\MineContext" "DataDirectory"
-
-  ; Ask user if they want to delete the data directory
-  ${If} $DataDir != ""
-    MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to delete the application data directory?$\n$\nDirectory: $DataDir$\n$\nThis will permanently delete all your data, including databases and files." IDYES deleteData IDNO skipDelete
-
-    deleteData:
-      RMDir /r "$DataDir"
-
-    skipDelete:
-  ${EndIf}
-
-  ; Remove registry entry
-  DeleteRegKey HKCU "Software\MineContext"
+; Add custom page after installation directory selection
+!macro customPageAfterChangeDir
+  ; Insert the data directory selection page
+  Page custom DataDirectoryPage DataDirectoryLeave
 !macroend
