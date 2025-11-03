@@ -145,7 +145,7 @@ storage:
       backend: "chromadb"
       config:
         mode: "local" # Options: "local", "server"
-        path: "${CONTEXT_PATH:.}/persist/chromadb"
+        path: "/Users/bytedance/Library/Application Support/MineContext/persist/chromadb"
         collection_prefix: "opencontext"
 
     - name: "document_store"
