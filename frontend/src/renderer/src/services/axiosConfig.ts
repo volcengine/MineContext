@@ -7,7 +7,7 @@ import axios from 'axios'
 // Create an axios instance, initially using the default port
 const axiosInstance = axios.create({
   baseURL: 'http://127.0.0.1:1733', // Default port, will be updated at runtime
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json'
   },

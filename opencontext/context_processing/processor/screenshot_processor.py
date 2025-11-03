@@ -323,14 +323,14 @@ class ScreenshotProcessor(BaseContextProcessor):
         all_newly_created = []
         for idx, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(f"Merge task {idx} failed with error: {result}")
+                logger.error(f"Merge task {idx} failed with error: {result} for context type: {context_type.value}")
                 continue
             if result:
+                context_type = result.get("context_type")
                 all_newly_created.extend(result.get("processed_contexts", []))
-                self._processed_cache[context_type.value] = result.get("new_ctxs", {})
+                self._processed_cache[context_type] = result.get("new_ctxs", {})
                 for item_id in result.get("need_to_del_ids", []):
-                    get_storage().delete_processed_context(item_id, context_type.value)
-
+                    get_storage().delete_processed_context(item_id, context_type)
         return all_newly_created
 
     async def _merge_items_with_llm(self, context_type: ContextType, new_items: List[ProcessedContext], cached_items: List[ProcessedContext]) -> Dict[str, Any]:
@@ -421,7 +421,7 @@ class ScreenshotProcessor(BaseContextProcessor):
 
                 final_context = merged_ctx
                 need_to_del_ids.extend([item.id for item in items_to_merge if item.id in self._processed_cache.get(context_type.value, {})])
-                logger.debug(f"Merged {len(merged_ids)} items")
+                logger.debug(f"Merged {len(merged_ids)} items for context type: {context_type.value}")
             elif merge_type == "new":
                 # Independent new item
                 merged_ids = result.get("merged_ids", [])
@@ -447,7 +447,7 @@ class ScreenshotProcessor(BaseContextProcessor):
             else:
                 result_contexts.append(entities_result)
 
-        return {"processed_contexts": result_contexts, "need_to_del_ids": need_to_del_ids, "new_ctxs": new_ctxs}
+        return {"processed_contexts": result_contexts, "need_to_del_ids": need_to_del_ids, "new_ctxs": new_ctxs, "context_type": context_type.value}
 
     async def _parse_single_context(self, item: ProcessedContext, entities: List[Dict[str, Any]]) -> ProcessedContext:
         """Parse a single context item."""
@@ -513,6 +513,7 @@ class ScreenshotProcessor(BaseContextProcessor):
             if isinstance(result, Exception):
                 logger.error(f"Screenshot {idx} failed with error: {result}")
                 increment_recording_stat("failed", 1)
+                record_processing_error(error_msg=str(result), processor_name=self.get_name(), context_count=1)
                 continue
             if result:
                 # for item in result:
