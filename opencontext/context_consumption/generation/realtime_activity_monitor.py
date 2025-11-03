@@ -185,7 +185,7 @@ class RealtimeActivityMonitor:
                 {"role": "user", "content": user_prompt},
             ]
             response = generate_with_messages(messages)
-            # print("response:", response)
+            # print(f"user len prompt: {len(user_prompt)} response: {response}")
 
             # Save debug information
             DebugHelper.save_generation_debug(
@@ -235,7 +235,7 @@ class RealtimeActivityMonitor:
                     ),
                 }
             except Exception as e:
-                logger.debug(f"Failed to parse JSON response: {e}")
+                logger.error(f"Failed to parse JSON response: {e}")
                 # Fallback: generate a basic summary
                 return None
 
