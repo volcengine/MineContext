@@ -20,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
       fail-fast: false
 
     steps:
@@ -71,7 +71,7 @@ jobs:
           uv venv
           uv pip install --upgrade pip setuptools wheel build
           uv sync
-      
+
       # Windows: install uv
       - name: Install uv and sync Python dependencies (Windows)
         if: matrix.os == 'windows-latest'
@@ -79,6 +79,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install uv
+          uv sync
+
+      # Linux: install uv
+      - name: Install uv and sync Python dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-venv python3-pip
+          pip install uv
+          uv venv
+          uv pip install --upgrade pip setuptools wheel build
           uv sync
 
       # 获取 pnpm 缓存目录
@@ -106,15 +117,20 @@ jobs:
         run: |
           source .venv/bin/activate
           chmod +x ./build.sh
-
           ./build.sh
 
       - name: Build Windows Backend
         if: matrix.os == 'windows-latest'
         run: |
           .venv\Scripts\activate
-
           ./build.bat
+
+      - name: Build Linux Backend
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          source .venv/bin/activate
+          chmod +x ./build.sh
+          ./build.sh
 
       - name: Build Mac
         if: matrix.os == 'macos-latest'
@@ -135,6 +151,15 @@ jobs:
         working-directory: frontend
         run: |
           pnpm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: frontend
+        run: |
+          pnpm run build:linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=8192
