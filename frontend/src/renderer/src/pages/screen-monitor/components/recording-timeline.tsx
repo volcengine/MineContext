@@ -46,8 +46,7 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
                       Recording screen...
                     </Text>
                     <div className="text-[#C9C9D4]">
-                      Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen
-                      analysis.
+                      Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen analysis.
                     </div>
                   </div>
                   {console.log('[RecordingTimeline] About to render RecordingStatsCard')}

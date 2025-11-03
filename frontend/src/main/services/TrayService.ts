@@ -206,7 +206,6 @@ export class TrayService {
     return Menu.buildFromTemplate(menuTemplate)
   }
 
-
   /**
    * Toggle recording state
    */
