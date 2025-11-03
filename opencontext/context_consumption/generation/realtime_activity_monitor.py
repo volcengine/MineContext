@@ -235,7 +235,7 @@ class RealtimeActivityMonitor:
                     ),
                 }
             except Exception as e:
-                # logger.error(f"Failed to parse JSON response: {e}")
+                logger.error(f"Failed to parse JSON response: {e}")
                 # Fallback: generate a basic summary
                 return None
 
