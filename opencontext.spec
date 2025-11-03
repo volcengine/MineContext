@@ -13,7 +13,7 @@ a = Analysis(
         ('opencontext/web/templates', 'opencontext/web/templates')
     ],
     hiddenimports=[
-        'uvicorn.protocols.http.auto', 
+        'uvicorn.protocols.http.auto',
         'uvicorn.protocols.websockets.auto',
         'chromadb.telemetry.product.posthog',
         'chromadb.api.rust',
@@ -23,6 +23,8 @@ a = Analysis(
         'chromadb.segment.impl.metadata.sqlite',
         'hnswlib',
         'sqlite3',
+        '_ssl',
+        '_hashlib',
     ],
     hookspath=['.'],
     hooksconfig={},

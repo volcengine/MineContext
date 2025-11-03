@@ -9,11 +9,18 @@ echo.
 
 REM 1. Dependency Check
 echo --^> Checking for python...
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo Error: python is not found. Please install Python 3.
-    exit /b 1
+where py >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON_CMD=py
+) else (
+    where python >nul 2>&1
+    if errorlevel 1 (
+        echo Error: python is not found. Please install Python 3.
+        exit /b 1
+    )
+    set PYTHON_CMD=python
 )
+%PYTHON_CMD% --version
 
 set USE_UV=false
 
@@ -29,7 +36,7 @@ if %errorlevel% equ 0 (
     set USE_UV=true
 ) else (
     echo --^> uv not found, using pip to install from pyproject.toml...
-    python -m pip install -e .
+    %PYTHON_CMD% -m pip install -e .
     if errorlevel 1 (
         echo Error: pip install failed.
         exit /b 1
@@ -49,10 +56,10 @@ if "!USE_UV!"=="true" (
         )
     )
 ) else (
-    python -c "import PyInstaller" >nul 2>&1
+    %PYTHON_CMD% -c "import PyInstaller" >nul 2>&1
     if errorlevel 1 (
         echo --^> PyInstaller not found. Installing...
-        python -m pip install pyinstaller
+        %PYTHON_CMD% -m pip install pyinstaller
         if errorlevel 1 (
             echo Error: Failed to install PyInstaller with pip.
             exit /b 1
