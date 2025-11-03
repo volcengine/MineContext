@@ -65,6 +65,7 @@ class RealtimeActivityMonitor:
             # Get context data
             contexts = self._get_recent_contexts(start_time, end_time)
             if not contexts:
+                logger.info("No activity records found in the time range %s to %s.", start_time, end_time)
                 return None
 
             # Generate an activity summary, including categories, insights, and the most valuable context IDs
