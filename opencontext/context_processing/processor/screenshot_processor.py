@@ -513,7 +513,7 @@ class ScreenshotProcessor(BaseContextProcessor):
             if isinstance(result, Exception):
                 logger.error(f"Screenshot {idx} failed with error: {result}")
                 increment_recording_stat("failed", 1)
-                record_processing_error(error_msg=str(result), processor_name=self.get_name(), context_count=1)
+                record_processing_error(str(result), processor_name=self.get_name(), context_count=1)
                 continue
             if result:
                 # for item in result:
