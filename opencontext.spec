@@ -8,12 +8,12 @@ import random
 import string
 from pathlib import Path
 
-
 def get_codesign_identity():
     csc_link_data = os.environ.get("CSC_LINK")
     csc_password = os.environ.get("CSC_KEY_PASSWORD")
 
     if not csc_link_data or not csc_password:
+        print("⚠️ No CSC_LINK or CSC_KEY_PASSWORD found, skipping codesign setup.")
         return None
 
     if csc_link_data.startswith("data:application/x-pkcs12;base64,"):
@@ -23,18 +23,15 @@ def get_codesign_identity():
         p12_path = f.name
         f.write(base64.b64decode(csc_link_data))
 
-    # ✅ 使用固定安全路径 + 后缀 .keychain-db
     keychain_dir = Path("/tmp")
     keychain_name = f"temp-sign-{os.getpid()}.keychain-db"
     keychain_path = str(keychain_dir / keychain_name)
     keychain_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
 
     try:
-        # 创建并解锁 keychain
         subprocess.run(["security", "create-keychain", "-p", keychain_password, keychain_path], check=True)
         subprocess.run(["security", "unlock-keychain", "-p", keychain_password, keychain_path], check=True)
 
-        # 导入证书
         subprocess.run([
             "security", "import", p12_path,
             "-k", keychain_path,
@@ -42,18 +39,26 @@ def get_codesign_identity():
             "-T", "/usr/bin/codesign"
         ], check=True)
 
-        # 查找 identity
+        # ✅ 确保 PyInstaller 子进程可见
+        subprocess.run(["security", "list-keychains", "-d", "user", "-s", keychain_path], check=True)
+        subprocess.run(["security", "default-keychain", "-d", "user", "-s", keychain_path], check=True)
+        subprocess.run(["security", "set-keychain-settings", keychain_path], check=True)
+
+        os.environ["KEYCHAIN_PATH"] = keychain_path
+        print(f"✅ Keychain created: {keychain_path}")
+        print(f"::set-env name=KEYCHAIN_PATH::{keychain_path}")
+
         result = subprocess.run(
             ["security", "find-identity", "-v", "-p", "codesigning", keychain_path],
             capture_output=True, text=True, check=True
         )
         for line in result.stdout.splitlines():
             if "Developer ID Application:" in line:
-                return line.split('"')[1]
+                identity = line.split('"')[1]
+                print(f"✅ Found identity: {identity}")
+                return identity
 
     finally:
-        # ✅ 删除临时文件与 keychain
-        subprocess.run(["security", "delete-keychain", keychain_path], check=False)
         os.unlink(p12_path)
 
     return None

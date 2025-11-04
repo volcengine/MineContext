@@ -135,6 +135,14 @@ jobs:
           chmod +x ./build.sh
           ./build.sh
 
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            echo "🧹 Deleting temporary keychain: $KEYCHAIN_PATH"
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+
       - name: Build Mac
         if: matrix.os == 'macos-latest'
         working-directory: frontend
