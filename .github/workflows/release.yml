@@ -118,6 +118,9 @@ jobs:
           source .venv/bin/activate
           chmod +x ./build.sh
           ./build.sh
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
 
       - name: Build Windows Backend
         if: matrix.os == 'windows-latest'
