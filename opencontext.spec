@@ -45,8 +45,13 @@ def get_codesign_identity():
         subprocess.run(["security", "set-keychain-settings", keychain_path], check=True)
 
         os.environ["KEYCHAIN_PATH"] = keychain_path
+        # ✅ 正确导出到 GitHub Actions 环境
+        github_env = os.environ.get("GITHUB_ENV")
+        if github_env and os.path.exists(github_env):
+            with open(github_env, "a") as f:
+                f.write(f"KEYCHAIN_PATH={keychain_path}\n")
+
         print(f"✅ Keychain created: {keychain_path}")
-        print(f"::set-env name=KEYCHAIN_PATH::{keychain_path}")
 
         result = subprocess.run(
             ["security", "find-identity", "-v", "-p", "codesigning", keychain_path],
