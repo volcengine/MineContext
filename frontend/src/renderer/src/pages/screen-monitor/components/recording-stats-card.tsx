@@ -72,8 +72,7 @@ const RecordingStatsCard: React.FC<RecordingStatsCardProps> = ({ stats }) => {
                     <span className="text-xs">No detailed error information available</span>
                   )}
                 </div>
-              }
-            >
+              }>
               <span className="text-[#FF4D4F] font-medium cursor-help underline decoration-dashed">
                 {stats.failed_screenshots} screenshot{stats.failed_screenshots > 1 ? 's' : ''} failed
               </span>

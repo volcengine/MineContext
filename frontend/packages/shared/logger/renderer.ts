@@ -10,7 +10,7 @@ export type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'silly'
  * @param scope - The scope name, usually the component name.
  */
 export const getLogger = (scope?: string) => {
-  return Logger.scope(scope || 'renderer')
+  return Logger.scope(scope ? `renderer - ${scope}` : '[renderer]')
 }
 
 /**

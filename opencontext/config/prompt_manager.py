@@ -210,14 +210,6 @@ class PromptManager:
                 result[key] = value
         return result
 
-    def get_context_type_descriptions_for_extraction(self) -> str:
-        """
-        Get context type descriptions for content extraction scenarios
-        """
-        from opencontext.models.enums import get_context_type_descriptions_for_extraction
-
-        return get_context_type_descriptions_for_extraction()
-
     def get_context_type_descriptions_for_retrieval(self) -> str:
         """
         Get context type descriptions for retrieval scenarios

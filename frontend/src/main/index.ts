@@ -24,6 +24,7 @@ import { powerWatcher } from './background/os/Power'
 import { initLog } from '@shared/logger/init'
 import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
+import { TrayService } from './services/TrayService'
 import { ScreenMonitorTask } from './background/task/screen-monitor-task'
 import { autoUpdater } from "electron-updater"
 import { IpcChannel } from '@shared/IpcChannel'
@@ -41,6 +42,16 @@ const originalConsoleLog = console.log
 
 // Screenshot cleanup timer
 let cleanupIntervalId: NodeJS.Timeout | null = null
+
+// Tray service instance
+let trayService: TrayService | null = null
+
+/**
+ * Get tray service instance
+ */
+export function getTrayService(): TrayService | null {
+  return trayService
+}
 
 /**
  * Start screenshot cleanup scheduled task
@@ -142,6 +153,15 @@ function createWindow() {
     }
   })
 
+  // Intercept window close event to hide instead of closing
+  mainWindow.on('close', (event) => {
+    if (!(app as any).isQuitting) {
+      event.preventDefault()
+      mainWindow.hide()
+      logger.info('Window hidden instead of closed')
+    }
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -221,6 +241,11 @@ app.whenReady().then(() => {
   powerWatcher.run()
   startBackendInBackground(mainWindow)
 
+  // Initialize tray service
+  trayService = new TrayService(mainWindow)
+  trayService.create()
+  logger.info('Tray service initialized')
+
   // Start screenshot cleanup scheduled task
   startScreenshotCleanup()
   task.init()
@@ -229,9 +254,14 @@ app.whenReady().then(() => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-      const win = createWindow()
-      win.webContents.send(IpcChannel.Notification_Send, { id: '123', type: 'info', message: "hello",
-  timestamp: new Date().getTime(), source: 'update' })
+      createWindow()
+    } else {
+      // If window exists but is hidden, show it
+      const existingWindow = BrowserWindow.getAllWindows()[0]
+      if (existingWindow) {
+        existingWindow.show()
+        existingWindow.focus()
+      }
     }
   })
 
@@ -246,13 +276,10 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   monitor.stop()
+  // Don't quit the app when windows are closed - keep running in tray
+  // App will only quit when user clicks "Quit" from tray menu
   task.unregister()
-  if (process.platform !== 'darwin') {
-    // Restore the original console.log to avoid "Object has been destroyed" errors during exit
-    console.log = originalConsoleLog
-    stopBackendServerSync()
-    app.quit()
-  }
+  logger.info('All windows closed, app continues running in tray')
 })
 
 // In this file you can include the rest of your app's specific main process
@@ -272,15 +299,26 @@ if (!isDev) {
 }
 
 app.on('before-quit', () => {
+  // Set flag to allow windows to actually close
+  ;(app as any).isQuitting = true
+
   // Restore the original console.log to avoid "Object has been destroyed" errors during exit
   console.log = originalConsoleLog
 
   // Stop screenshot cleanup scheduled task
   stopScreenshotCleanup()
 
+  // Destroy tray
+  if (trayService) {
+    trayService.destroy()
+    trayService = null
+  }
+
   if (server) {
     server.close()
   }
   stopBackendServerSync()
   db.close()
+
+  logger.info('App is quitting, all resources cleaned up')
 })

@@ -26,7 +26,7 @@ An open-source, proactive context-aware AI partner, dedicated to bringing clarit
 
 🌍 Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
 
-<a href="https://github.com/volcengine/MineContext/releases/download/0.1.3/MacOS.arm.MineContext-0.1.3.dmg">🖥️ Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.3/Windows.MineContext-0.1.3-setup.exe">💻 Download for Windows</a>
+<a href="https://github.com/volcengine/MineContext/releases/download/0.1.4/MineContext-0.1.4.dmg">🖥️ Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.4/MineContext-0.1.4-setup.exe">💻 Download for Windows</a>
 
 </div>
 
@@ -157,7 +157,6 @@ After restarting the application, please first set your screen sharing area in [
 ## 5. Forget it
 
 After starting the recording, your context will gradually be collected. It will take some time to generate value. So, forget about it and focus on other tasks with peace of mind. MineContext will generate to-dos, prompts, summaries, and activities for you in the background. Of course, you can also engage in proactive Q&A through [Chat with AI].
-Of course, here is the English translation of the provided text:
 
 ## 6. Backend Debugging
 

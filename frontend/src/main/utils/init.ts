@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import { isLinux, isPortable, isWin } from '@main/constant'
 import { app } from 'electron'
+import { execSync } from 'node:child_process'
 
 // Please don't import any other modules which is not node/electron built-in modules
 
@@ -23,6 +24,34 @@ function getConfigDir() {
   return path.join(os.homedir(), '.vikingdb', 'config')
 }
 
+function getDataDirFromRegistry() {
+  if (!isWin) return null
+
+  try {
+    // Read data directory from Windows Registry with timeout protection
+    const result = execSync('reg query "HKCU\\Software\\MineContext" /v DataDirectory', {
+      encoding: 'utf8',
+      timeout: 3000, // 3 second timeout to prevent hanging
+      windowsHide: true
+    })
+
+    // Parse the registry output
+    // Format: "DataDirectory    REG_SZ    C:\Users\...\AppData\Local\MineContext"
+    const match = result.match(/DataDirectory\s+REG_SZ\s+(.+)/)
+    if (match && match[1]) {
+      const dataDir = match[1].trim()
+      if (fs.existsSync(dataDir) && hasWritePermission(dataDir)) {
+        return dataDir
+      }
+    }
+  } catch (error) {
+    // Registry key doesn't exist, timeout, or other error - ignore and use default
+    console.warn('Failed to read data directory from registry:', error)
+  }
+
+  return null
+}
+
 export function initAppDataDir() {
   const appDataPath = getAppDataPathFromConfig()
   if (appDataPath) {
@@ -36,19 +65,18 @@ export function initAppDataDir() {
     return
   }
 
-  // For Windows installer version, set userData to installation directory
+  // For Windows installer version, check registry for custom data directory
   if (isWin && !isPortable) {
-    const executablePath = app.getPath('exe')
-    const installDir = path.dirname(executablePath)
-    // Use 'data' subdirectory in installation directory
-    const dataDir = path.join(installDir, 'data')
-
-    // Check if we have write permission to the installation directory
-    if (hasWritePermission(installDir)) {
-      app.setPath('userData', dataDir)
+    // Try to get data directory from registry (set by installer)
+    const registryDataDir = getDataDirFromRegistry()
+    if (registryDataDir) {
+      app.setPath('userData', registryDataDir)
       return
     }
-    // If no write permission, fall back to default AppData location
+
+    // If no registry setting, use the default AppData location
+    // (e.g., %LOCALAPPDATA%\MineContext)
+    // This is the correct fallback behavior
   }
 }
 

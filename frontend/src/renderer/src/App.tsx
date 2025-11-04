@@ -96,27 +96,21 @@ function AppContent(): React.ReactElement {
   useEffect(() => {
     window.serverPushAPI.getInitCheckData((data) => {
       const temp = JSON.parse(data)
-
+      logger.info('Init settings data:', temp)
       setShowSettings(!temp.data.components.llm)
     })
   }, [])
 
   // Decide whether to display the application based on the status
   const pythonServerStarted = backendStatus === 'running'
-
+  const closeSetting = useMemoizedFn(() => {
+    setShowSettings(false)
+  })
   return (
     <>
       {pythonServerStarted ? (
         <CaptureSourcesProvider>
-          {showSetting ? (
-            <Settings
-              onOk={() => {
-                setShowSettings(false)
-              }}
-            />
-          ) : (
-            <Router />
-          )}
+          {showSetting ? <Settings closeSetting={closeSetting} init /> : <Router />}
         </CaptureSourcesProvider>
       ) : (
         <LoadingComponent backendStatus={backendStatus} />
@@ -126,8 +120,6 @@ function AppContent(): React.ReactElement {
 }
 
 function App(): React.ReactElement {
-  logger.info('App initialized')
-
   return (
     <Provider store={store}>
       <ConfigProvider locale={isEnglish ? enUS : zhCN}>

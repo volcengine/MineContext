@@ -119,41 +119,31 @@ async def process_screenshots_example(screenshot_paths: list[str]):
 
     # Process screenshots in batch (this will call the Vision LLM)
     try:
-        success = await processor.batch_process(raw_contexts)
+        processed_contexts = await processor.batch_process(raw_contexts)
 
-        if success:
-            print("=" * 80)
-            print("Extraction Results")
-            print("=" * 80)
+        print("=" * 80)
+        print("Extraction Results")
+        print("=" * 80)
 
-            # The processor stores results in _processed_cache
-            for i, (context_id, processed_context) in enumerate(
-                processor._processed_cache.items(), 1
-            ):
-                print(f"\n[Context {i}]")
-                print(f"Title: {processed_context.extracted_data.title}")
-                print(f"Summary: {processed_context.extracted_data.summary}")
-                print(f"Keywords: {', '.join(processed_context.extracted_data.keywords)}")
-                print(f"Type: {processed_context.extracted_data.context_type}")
-                print(f"Importance: {processed_context.extracted_data.importance}/10")
-                print(f"Confidence: {processed_context.extracted_data.confidence}/10")
+        # The processor stores results in _processed_cache
+        for processed_context in processed_contexts:
+            print(f"Title: {processed_context.extracted_data.title}")
+            print(f"Summary: {processed_context.extracted_data.summary}")
+            print(f"Keywords: {', '.join(processed_context.extracted_data.keywords)}")
+            print(f"Type: {processed_context.extracted_data.context_type}")
+            print(f"Importance: {processed_context.extracted_data.importance}/10")
+            print(f"Confidence: {processed_context.extracted_data.confidence}/10")
 
-                if processed_context.extracted_data.entities:
-                    print(f"Entities: {processed_context.extracted_data.entities}")
+            if processed_context.extracted_data.entities:
+                print(f"Entities: {processed_context.extracted_data.entities}")
 
-                print(f"Event Time: {processed_context.properties.event_time}")
-                print("-" * 80)
-        else:
-            print("\nProcessing failed. Check the logs for details.")
+            print(f"Event Time: {processed_context.properties.event_time}")
+            print("-" * 80)
 
     except Exception as e:
         print(f"\nError: {e}")
         import traceback
-
         traceback.print_exc()
-
-    finally:
-        processor.shutdown(_graceful=True)
 
 
 def main():

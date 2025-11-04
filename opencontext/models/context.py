@@ -154,7 +154,7 @@ class ProcessedContext(BaseModel):
         """Get context information string for LLM input"""
         parts = []
         ed = self.extracted_data
-
+        parts.append(f"id: {self.id}")
         if ed.title:
             parts.append(f"title: {ed.title}")
         if ed.summary:

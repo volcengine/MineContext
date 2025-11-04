@@ -26,7 +26,7 @@ const ProactiveFeedModal: FC<ProactiveFeedModalProps> = (props) => {
   bg-clip-text text-transparent font-bold">
           Proactive Feed
         </div>
-        <div className="text-[12px] leading-[20px] text-[#6e718c]">Here’s some insights you should konw</div>
+        <div className="text-[12px] leading-[20px] text-[#6e718c]">Here are some insights you should know</div>
       </div>
     </div>
   )

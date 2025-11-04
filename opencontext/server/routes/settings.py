@@ -90,9 +90,7 @@ def _build_llm_config(
 ) -> dict:
     """Build LLM config dict"""
     config = {"base_url": base_url, "api_key": api_key, "model": model, "provider": provider}
-    if llm_type == LLMType.CHAT:
-        config["temperature"] = kwargs.get("temperature", 0.7)
-    elif llm_type == LLMType.EMBEDDING:
+    if llm_type == LLMType.EMBEDDING:
         config["output_dim"] = kwargs.get("output_dim", 2048)
     return config
 

@@ -77,7 +77,7 @@ async def regenerate_content(messages: List[Dict[str, Any]]) -> str:
 
         # Use the same parameters as in the original generation
         response = await generate_with_messages_async(
-            messages=messages, enable_executor=False, temperature=0.2
+            messages=messages, enable_executor=False
         )
 
         logger.info("Content regeneration completed")

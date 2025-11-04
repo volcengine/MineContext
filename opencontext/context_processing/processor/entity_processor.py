@@ -9,12 +9,15 @@ Entity processing module
 """
 import asyncio
 import datetime
+import json
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 from opencontext.models.context import *
 from opencontext.tools.profile_tools.profile_entity_tool import ProfileEntityTool
 from opencontext.utils.logging_utils import get_logger
+from opencontext.utils.json_parser import parse_json_from_response
+from opencontext.llm.global_embedding_client import do_vectorize_async
 
 logger = get_logger(__name__)
 
@@ -43,67 +46,98 @@ def validate_and_clean_entities(raw_entities) -> Dict[str, ProfileContextMetadat
     return entities_info
 
 
-def refresh_entities(
-    entities_info: Dict[str, ProfileContextMetadata], context_text: str
-) -> List[str]:
-    """
-    Entity processing main workflow - Three-step strategy
-    1. Exact match -> Find then asynchronously update information
-    2. Similar match -> LLM judgment -> If yes, update aliases and information
-    3. No match -> Extract information -> Create new entity
-    """
+async def _process_single_entity(entity_name: str, entity_info: ProfileContextMetadata, context_text: str, entity_tool: ProfileEntityTool, all_entities: List[str]) -> tuple:
+    """Process a single entity (async wrapper for concurrent execution)"""
+    entity_name = str(entity_name).strip()
+    if not entity_name:
+        return None, None
 
-    # Get or create event loop
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    entity_type = entity_info.entity_type
+    matched_name, matched_context = entity_tool.match_entity(entity_name, entity_type, judge=False)
 
-    entity_tool = ProfileEntityTool()
-    processed_entities = {}
-
-    for entity_name, entity_info in entities_info.items():
-        entity_name = str(entity_name).strip()
-        if not entity_name:
-            continue
-
-        entity_type = entity_info.entity_type
-        matched_name, matched_context = entity_tool.match_entity(entity_name, entity_type)
-
-        if matched_context:
-            entity_data = matched_context.metadata
-            entity_canonical_name = entity_data.get(
-                "entity_canonical_name", matched_name or entity_name
-            )
-            entity_aliases = entity_data.get("entity_aliases", [])
-            if entity_name not in entity_aliases:
-                entity_aliases.append(entity_name)
-            matched_context.metadata["entity_aliases"] = entity_aliases
-            update_info = entity_tool.update_entity_meta(
-                entity_canonical_name,
-                context_text,
-                ProfileContextMetadata.from_dict(entity_data),
-                entity_info,
-            )
-            matched_context.metadata = update_info.to_dict()
-            processed_entities[entity_canonical_name] = {
-                "entity_name": entity_canonical_name,
-                "entity_type": entity_type,
-                "context": matched_context,
-                "entity_info": update_info,
-            }
-            continue
-
-        processed_entities[entity_name] = {
-            "entity_name": entity_name,
+    if matched_context:
+        # logger.info(f"Matched entity: {entity_name} -> {matched_name}")
+        entity_data = matched_context.metadata
+        entity_canonical_name = entity_data.get(
+            "entity_canonical_name", matched_name or entity_name
+        )
+        entity_aliases = entity_data.get("entity_aliases", [])
+        if entity_name not in entity_aliases:
+            entity_aliases.append(entity_name)
+        matched_context.metadata["entity_aliases"] = list(set(entity_aliases))
+        # update_info = entity_tool.update_entity_meta(
+        #     entity_canonical_name,
+        #     context_text,
+        #     ProfileContextMetadata.from_dict(entity_data),
+        #     entity_info,
+        # )
+        # matched_context.metadata = update_info.to_dict()
+        return entity_canonical_name, {
+            "entity_name": entity_canonical_name,
             "entity_type": entity_type,
-            "context": None,
-            "entity_info": entity_info,
+            "context": matched_context,
+            # "entity_info": update_info,
+            "entity_info": ProfileContextMetadata.from_dict(matched_context.metadata),
         }
 
-    now = datetime.datetime.now().astimezone()
-    all_entities = list(processed_entities.keys())
+    # Create new entity context
+    now = datetime.datetime.now()
+    entity_info.entity_aliases.append(entity_name)
+    entity_context = ProcessedContext(
+        properties=ContextProperties(
+            create_time=now,
+            event_time=now,
+            update_time=now,
+            # enable_merge=True,
+        ),
+        extracted_data=ExtractedData(
+            title=entity_name,
+            summary=entity_info.entity_description,
+            entities=all_entities,
+            context_type=ContextType.ENTITY_CONTEXT,
+        ),
+        metadata=entity_info.to_dict(),
+        vectorize=Vectorize(
+            text=entity_name+" "+entity_info.entity_description,
+        ),
+    )
+
+    await do_vectorize_async(entity_context.vectorize)
+
+    return entity_name, {
+        "entity_name": entity_name,
+        "entity_type": entity_type,
+        "context": entity_context,
+        "entity_info": entity_info,
+    }
+
+
+async def refresh_entities(entities_info: Dict[str, ProfileContextMetadata], context_text: str) -> List[str]:
+    """
+    Entity processing main workflow - Three-step strategy (optimized with concurrent processing)
+    """
+    entity_tool = ProfileEntityTool()
+    all_entities = list(entities_info.keys())
+
+    # Process all entities concurrently (including match, update, create context, and vectorize)
+    tasks = [
+        _process_single_entity(entity_name, entity_info, context_text, entity_tool, all_entities)
+        for entity_name, entity_info in entities_info.items()
+    ]
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Collect results
+    processed_entities = {}
+    for result in results:
+        if isinstance(result, Exception):
+            logger.error(f"Entity processing failed: {result}")
+            continue
+        if result and result[0]:
+            key, value = result
+            processed_entities[key] = value
+
+    # Build entities_link for relationship tracking
     entities_link = {}
     for entity_name, value in processed_entities.items():
         entity_info = value["entity_info"]
@@ -112,31 +146,12 @@ def refresh_entities(
             entities_link[entity_type] = dict()
         if value["context"]:
             entities_link[entity_type][value["context"].id] = entity_info.entity_canonical_name
-            continue
-        entity_info.entity_aliases.append(entity_name)
-        entity_context = ProcessedContext(
-            properties=ContextProperties(
-                create_time=now,
-                event_time=now,
-                update_time=now,
-                # enable_merge=True,
-            ),
-            extracted_data=ExtractedData(
-                title=entity_name,
-                summary=entity_info.entity_description,
-                entities=all_entities,
-                context_type=ContextType.ENTITY_CONTEXT,
-            ),
-            metadata=entity_info.to_dict(),
-            vectorize=Vectorize(
-                text=entity_name,
-            ),
-        )
-        value["context"] = entity_context
-        entities_link[entity_type][entity_context.id] = entity_name
+    
+    # Build relationships and prepare contexts for batch upsert
     from opencontext.storage.global_storage import get_global_storage
+    contexts_to_upsert = []
 
-    for entity_name, value in processed_entities.items():
+    for value in processed_entities.values():
         context = value["context"]
         entity_info = value["entity_info"]
         entity_type = entity_info.entity_type
@@ -154,5 +169,10 @@ def refresh_entities(
         entity_info.entity_relationships = entity_relationships
         entity_info.entity_aliases = list(set(entity_info.entity_aliases))
         context.metadata = entity_info.to_dict()
-        get_global_storage().upsert_processed_context(context)
+        contexts_to_upsert.append(context)
+
+    # Batch upsert all contexts at once
+    if contexts_to_upsert:
+        get_global_storage().batch_upsert_processed_context(contexts_to_upsert)
+
     return list(processed_entities.keys())

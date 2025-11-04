@@ -65,25 +65,21 @@ class RealtimeActivityMonitor:
             # Get context data
             contexts = self._get_recent_contexts(start_time, end_time)
             if not contexts:
-                logger.info(
-                    f"No activity records found in the time range {start_time} to {end_time}."
-                )
+                logger.info("No activity records found in the time range %s to %s.", start_time, end_time)
                 return None
 
             # Generate an activity summary, including categories, insights, and the most valuable context IDs
             all_context = []
             for context_type, ctx_list in contexts.items():
                 all_context.extend(ctx_list)
+            logger.info(f"{len(all_context)} activity records found in the time range {start_time} to {end_time}.")
             summary_result = self._generate_concise_summary(contexts, start_time, end_time)
 
             if not summary_result:
                 return None
 
-            representative_contexts = self._find_contexts_by_ids(
-                all_context, summary_result.get("representative_context_ids", [])
-            )
             resource_data = self._extract_resource_data_from_contexts(
-                representative_contexts, max_count=5
+                all_context, summary_result.get("representative_context_ids", []), max_count=20
             )
 
             # Prepare metadata
@@ -143,9 +139,7 @@ class RealtimeActivityMonitor:
             filters = {"update_time_ts": {"$gte": start_time, "$lte": end_time}}
             context_types = [
                 ContextType.ACTIVITY_CONTEXT.value,
-                ContextType.SEMANTIC_CONTEXT.value,
                 ContextType.INTENT_CONTEXT.value,
-                ContextType.STATE_CONTEXT.value,
             ]
             all_contexts = get_storage().get_all_processed_contexts(
                 context_types=context_types, limit=10000, offset=0, filter=filters
@@ -191,12 +185,8 @@ class RealtimeActivityMonitor:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
-            response = generate_with_messages(
-                messages,
-                max_calls=1,
-                tools=ALL_RETRIEVAL_TOOL_DEFINITIONS + ALL_PROFILE_TOOL_DEFINITIONS,
-                temperature=0.1,
-            )
+            response = generate_with_messages(messages)
+            # print(f"user len prompt: {len(user_prompt)} response: {response}")
 
             # Save debug information
             DebugHelper.save_generation_debug(
@@ -246,7 +236,7 @@ class RealtimeActivityMonitor:
                     ),
                 }
             except Exception as e:
-                logger.debug(f"Failed to parse JSON response: {e}")
+                logger.error(f"Failed to parse JSON response: {e}")
                 # Fallback: generate a basic summary
                 return None
 
@@ -287,15 +277,15 @@ class RealtimeActivityMonitor:
             return contexts[:5]
 
     def _extract_resource_data_from_contexts(
-        self, contexts: List[ProcessedContext], max_count: int = 5
+        self, contexts: List[ProcessedContext], recommended_ids: List[str], max_count: int = 20
     ) -> List[Dict[str, Any]]:
         """Extract screenshots from contexts, prioritizing the most relevant ones."""
         sources_data: List[Dict[str, Any]] = []
         sources: Set[str] = set()
-
-        for context in contexts:
-            try:
-                for prop in context.properties.raw_properties:
+        context_dict = {ctx.id: ctx for ctx in contexts}
+        for id in recommended_ids:
+            if id in context_dict and context_dict[id].properties.raw_properties:
+                for prop in context_dict[id].properties.raw_properties:
                     if prop.object_id in sources:
                         continue
                     if prop.content_format == ContentFormat.IMAGE:
@@ -307,15 +297,28 @@ class RealtimeActivityMonitor:
                     else:
                         continue
                     sources.add(prop.object_id)
-            except Exception as e:
-                logger.debug(
-                    f"Failed to extract screenshot from context {getattr(context, 'id', 'unknown')}: {e}"
-                )
+                    if len(sources_data) >= max_count:
+                        return sources_data
+        for context in contexts:
+            if context.id in recommended_ids:
                 continue
-
-        logger.info(
-            f"Extracted {len(sources_data)} screenshots from {len(contexts)} representative contexts."
-        )
+            if context.extracted_data.context_type != ContextType.ACTIVITY_CONTEXT:
+                continue
+            if context.properties.raw_properties:
+                for prop in context.properties.raw_properties:
+                    if prop.content_format != ContentFormat.IMAGE:
+                        continue
+                    if prop.object_id in sources:
+                        continue
+                    if not self._is_exist_screenshot(prop.content_path):
+                        continue
+                    sources_data.append(
+                        {"type": "image", "id": prop.object_id, "path": prop.content_path}
+                    )
+                    sources.add(prop.object_id)
+                    break
+            if len(sources_data) >= max_count:
+                return sources_data
         return sources_data
 
     def _is_exist_screenshot(self, screenshot_path: str) -> bool:

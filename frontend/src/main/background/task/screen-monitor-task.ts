@@ -1,7 +1,7 @@
 import { CaptureSource } from '@interface/common/source'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { BrowserWindow, ipcMain } from 'electron'
-import { get, uniqBy } from 'lodash'
+import { get, pick, uniqBy } from 'lodash'
 import screenshotService from '../../services/ScreenshotService'
 import { AutoRefreshCache } from './cache-value'
 import { getLogger } from '@shared/logger/main'
@@ -76,7 +76,10 @@ class ScreenMonitorTask extends ScheduleNextTask {
   }
   private listenToScreenMonitorEvents() {
     ipcMain.handle(IpcChannel.Task_Update_Current_Record_App, (_, appInfo: CaptureSource[]) => {
-      logger.info('ScreenMonitorTask updateCurrentRecordApp', appInfo)
+      logger.info(
+        'ScreenMonitorTask updateCurrentRecordApp -->',
+        appInfo.map((v) => pick(v, ['name', 'type']))
+      )
       this.appInfo = uniqBy([...this.appInfo, ...appInfo], 'id')
       this.configCache?.triggerUpdate(true)
     })
@@ -148,6 +151,7 @@ class ScreenMonitorTask extends ScheduleNextTask {
   private async getVisibleSourcesUseCache() {
     try {
       const res = await screenshotService.getVisibleSources()
+      logger.info('getVisibleSourcesUseCache', res)
       if (res.sources) {
         return res.sources
       } else {
@@ -174,7 +178,10 @@ class ScreenMonitorTask extends ScheduleNextTask {
   private async startScreenMonitor() {
     try {
       const visibleSources = this.configCache?.get()
-      // logger.info('visibleSources', visibleSources)
+      logger.info(
+        'visibleSources',
+        visibleSources?.map((item) => pick(item, ['name', 'type', 'isVisible']))
+      )
       const ids = visibleSources?.map((item) => (item.isVisible ? item.id : '')).filter(Boolean) || []
       if (!visibleSources || ids.length === 0) {
         logger.warn('screen monitor visibleSources is empty')
@@ -186,7 +193,10 @@ class ScreenMonitorTask extends ScheduleNextTask {
       }
 
       const sources = this.appInfo.filter((source) => ids.includes(source.id))
-      // logger.info('sources', sources, this.appInfo)
+      logger.info(
+        'sources',
+        sources.map((v) => pick(v, ['name', 'type']))
+      )
       const createTime = dayjs()
       sources.forEach((source) => {
         queue.add(() => this.handleScreenshotTask(source, createTime))

@@ -268,7 +268,7 @@ class ProfileEntityTool(BaseTool):
             return {"success": False, "error": str(e), "entity_name": entity_name}
 
     def match_entity(
-        self, entity_name: str, entity_type: str = None, top_k: int = 3
+        self, entity_name: str, entity_type: str = None, top_k: int = 3, judge: bool = True
     ) -> Tuple[Optional[str], Optional[ProcessedContext]]:
         """Intelligent entity matching - exact match first, then similar search + LLM judgment if not found
 
@@ -295,8 +295,11 @@ class ProfileEntityTool(BaseTool):
             return None, None
 
         # 3. Use LLM to judge if similar entities really match
-        matched_name, matched_context = self.judge_entity_match([entity_name], similar_contexts)
-        return matched_name, matched_context
+        if judge:
+            matched_name, matched_context = self.judge_entity_match([entity_name], similar_contexts)
+            return matched_name, matched_context
+        else:
+            return similar_contexts[0].metadata.get("entity_canonical_name", entity_name), similar_contexts[0]
 
     def find_exact_entity(
         self, entity_names: List[str], entity_type: str = None
@@ -335,7 +338,8 @@ class ProfileEntityTool(BaseTool):
             return []
         contexts = []
         for context, score in results:
-            contexts.append(context)
+            if score >= 0.90:
+                contexts.append(context)
         return contexts
 
     def check_entity_relationships(self, entity1: str, entity2: str) -> Dict[str, Any]:
@@ -547,7 +551,7 @@ class ProfileEntityTool(BaseTool):
             ]
             from opencontext.llm.global_vlm_client import generate_with_messages
 
-            response = generate_with_messages(messages, temperature=0.1, thinking="disabled")
+            response = generate_with_messages(messages, thinking="disabled")
             result = parse_json_from_response(response)
             if "entity_canonical_name" in result and result["entity_canonical_name"]:
                 old_entity_data.entity_canonical_name = result["entity_canonical_name"]
@@ -603,8 +607,6 @@ class ProfileEntityTool(BaseTool):
 
             response = generate_with_messages(
                 messages,
-                temperature=0.1,
-                max_tokens=200,
                 thinking="disabled",
             )
             result = parse_json_from_response(response)

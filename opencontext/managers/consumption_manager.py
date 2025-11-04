@@ -171,7 +171,7 @@ class ConsumptionManager:
     def _calculate_seconds_until_daily_time(self, target_time_str: str) -> float:
         try:
             hour, minute = map(int, target_time_str.split(":"))
-            now = datetime.now().astimezone()
+            now = datetime.now()
             target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
             if target <= now:
@@ -522,29 +522,3 @@ class ConsumptionManager:
         self._statistics["total_queries"] = 0
         self._statistics["total_contexts_consumed"] = 0
         self._statistics["errors"] = 0
-
-    def generate_report(self, start_time: int, end_time: int) -> str:
-        """Generate activity report
-
-        Args:
-            start_time: Start timestamp
-            end_time: End timestamp
-
-        Returns:
-            str: Generated report content
-        """
-        if self._activity_generator is None:
-            logger.error("ActivityGenerator not initialized, unable to generate activity report")
-            return ""
-
-        try:
-            report = self._activity_generator.generate_report(start_time, end_time)
-
-            # Update statistics
-            self._statistics["total_queries"] += 1
-            return report
-
-        except Exception as e:
-            self._statistics["errors"] += 1
-            logger.exception(f"Error occurred while generating activity report: {e}")
-            return ""

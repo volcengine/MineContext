@@ -188,7 +188,7 @@ class ReflectionNode(BaseNode):
                 {"role": "user", "content": prompt},
             ]
 
-            response = await generate_with_messages_async(messages, temperature=0.3)
+            response = await generate_with_messages_async(messages)
 
             if response and response.strip() != "None":
                 # Parse issues
@@ -240,7 +240,7 @@ class ReflectionNode(BaseNode):
                     {"role": "user", "content": prompt},
                 ]
 
-                response = await generate_with_messages_async(messages, temperature=0.5)
+                response = await generate_with_messages_async(messages)
 
                 # Parse suggestions
                 for line in response.split("\n"):
