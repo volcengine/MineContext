@@ -111,7 +111,7 @@ const components = ['window_inspector', 'window_capture'];
 let allSuccess = true;
 
 // Skip macOS-specific tools on Windows
-if (process.platform === 'win32') {
+if (process.platform !== 'darwin') {
   console.log('⚠️  Skipping macOS-specific Python tools on Windows platform');
   console.log('   These tools (window_inspector, window_capture) are designed for macOS only');
   console.log('   and use the Quartz framework which is not available on Windows.');
