@@ -9,11 +9,15 @@ import string
 from pathlib import Path
 
 def get_codesign_identity():
+    if not sys.platform.startswith("darwin"):
+        print("Skipping codesign setup: not macOS.")
+        return None
+        
     csc_link_data = os.environ.get("CSC_LINK")
     csc_password = os.environ.get("CSC_KEY_PASSWORD")
 
     if not csc_link_data or not csc_password:
-        print("⚠️ No CSC_LINK or CSC_KEY_PASSWORD found, skipping codesign setup.")
+        print("No CSC_LINK or CSC_KEY_PASSWORD found, skipping codesign setup.")
         return None
 
     if csc_link_data.startswith("data:application/x-pkcs12;base64,"):
