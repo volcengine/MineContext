@@ -62,8 +62,10 @@ appImage:
 npmRebuild: false
 nodeGypRebuild: false
 buildDependenciesFromSource: false
+# afterSign: build/notarize.js
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: volcengine
+  repo: MineContext
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

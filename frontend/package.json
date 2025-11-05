@@ -31,6 +31,7 @@
     "build:win": "npm run copy-backend && npm run build && electron-builder --win",
     "build:mac": "npm run copy-backend && npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
+    "publish": "npm run copy-backend && npm run build && electron-builder --mac --win -p always",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "copy-backend": "node scripts/copy-prebuilt-backend.js",
     "electron-pack": "npm run build && electron-builder --mac"
@@ -38,6 +39,7 @@
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.14",
     "@ai-sdk/react": "^2.0.30",
+    "@arco-design/color": "0.4.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -105,6 +107,7 @@
     "dexie-react-hooks": "^1.1.7",
     "electron": "^37.2.3",
     "electron-builder": "^25.1.8",
+    "@electron/notarize": "^2.5.0",
     "electron-rebuild": "^3.2.9",
     "electron-vite": "^4.0.0",
     "eslint": "^9.31.0",
