@@ -65,7 +65,7 @@ export default function UpdateAvailableButton() {
 
       {/* 版本号 */}
       {
-        !isHovered ? <span className="pl-2 font-bytesans text-[10px] text-[#AEAFC2]">
+        !isHovered ? <span className="pl-2 font-['Roboto'] text-[10px] text-[#AEAFC2]">
         {updateInfo.version}
       </span> : null
       }
