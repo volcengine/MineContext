@@ -1,4 +1,4 @@
 provider: github
-owner: keshidong
+owner: volcengine
 repo: MineContext
 updaterCacheDirName: minecontext-updater

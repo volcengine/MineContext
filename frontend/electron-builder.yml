@@ -65,7 +65,7 @@ buildDependenciesFromSource: false
 # afterSign: build/notarize.js
 publish:
   provider: github
-  owner: keshidong
+  owner: volcengine
   repo: MineContext
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
