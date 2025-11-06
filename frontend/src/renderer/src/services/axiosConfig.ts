@@ -19,7 +19,6 @@ const axiosInstance = axios.create({
 export const updateBaseURL = (port: number) => {
   const newBaseURL = `http://127.0.0.1:${port}`
   axiosInstance.defaults.baseURL = newBaseURL
-  console.log(`Updated axios baseURL to: ${newBaseURL}`)
 }
 
 // Get the backend port and update the baseURL when the application starts
