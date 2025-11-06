@@ -26,9 +26,6 @@ Var DataDir
   ${EndIf}
 !macroend
 
-; Only define installer functions when building the installer (not uninstaller)
-!ifndef BUILD_UNINSTALLER
-
 ; Define variables for data directory page
 Var DataDirPage
 Var DataDirLabel
