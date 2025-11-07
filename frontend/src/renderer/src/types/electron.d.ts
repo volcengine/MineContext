@@ -63,6 +63,10 @@ interface dbAPI {
   getAllVaults: () => Promise<Vault[]>
   [propName: string]: (...args: any[]) => any
 }
+interface AppAPIType {
+  setTray: (isRecording: boolean) => Promise<void>
+  setTrayOnClose: (enabled: boolean) => Promise<void>
+}
 
 declare global {
   interface Window {
@@ -72,5 +76,6 @@ declare global {
     screenMonitorAPI: ScreenMonitorAPI
     fileService: any
     serverPushAPI: any
+    appAPI: AppAPI
   }
 }

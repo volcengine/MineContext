@@ -42,5 +42,9 @@ declare global {
       copyFile: (srcPath: string) => Promise<any>
       getFiles: () => Promise<any>
     }
+    appAPI: {
+      setTray: (isRecording: boolean) => Promise<void>
+      setTrayOnClose: (enabled: boolean) => Promise<void>
+    }
   }
 }

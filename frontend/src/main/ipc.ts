@@ -35,6 +35,7 @@ import { localStoreService } from './services/LocalStoreService'
 import { activityService } from './services/ActivityService'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { VaultDocumentType } from '@shared/enums/global-enum'
+import trayService from './services/TrayService'
 
 const logger = getLogger('IPC')
 
@@ -538,4 +539,14 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
     return localStoreService.setSetting(key, value)
   })
   ipcMain.handle(IpcChannel.Screen_Monitor_Clear_Settings, (_, key: string) => localStoreService.clearSetting(key))
+
+  // Tray service
+  ipcMain.handle(IpcChannel.App_SetTray, (_, isRecording: boolean = false) => {
+    trayService.setRecording(isRecording)
+  })
+
+  ipcMain.handle(IpcChannel.App_SetTrayOnClose, () => {
+    // The tray is already initialized in index.ts.
+    // Extend here later for custom close-to-tray behavior if needed.
+  })
 }

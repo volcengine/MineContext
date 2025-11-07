@@ -159,6 +159,8 @@ const ScreenMonitor: React.FC = () => {
     startCapture()
     // Start polling for new activities
     startActivityPolling()
+    // Update tray icon
+    window.appAPI?.setTray(true)
   }
 
   // Stop monitoring
@@ -172,6 +174,8 @@ const ScreenMonitor: React.FC = () => {
       // Stop polling for new activities
       stopActivityPolling()
       clearCache()
+      // Update tray icon
+      window.appAPI?.setTray(false)
     }
   }
 

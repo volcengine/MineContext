@@ -98,6 +98,11 @@ const fileService = {
   getFiles: () => ipcRenderer.invoke(IpcChannel.File_Get_All)
 }
 
+const appAPI = {
+  setTray: (isRecording: boolean) => ipcRenderer.invoke(IpcChannel.App_SetTray, isRecording),
+  setTrayOnClose: (enabled: boolean) => ipcRenderer.invoke(IpcChannel.App_SetTrayOnClose, enabled)
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
@@ -109,6 +114,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('screenMonitorAPI', screenMonitorAPI)
     contextBridge.exposeInMainWorld('fileService', fileService)
     contextBridge.exposeInMainWorld('serverPushAPI', serverPushAPI)
+    contextBridge.exposeInMainWorld('appAPI', appAPI)
   } catch (error) {
     console.error(error)
   }
@@ -125,6 +131,8 @@ if (process.contextIsolated) {
   window.fileService = fileService
   // @ts-ignore (define in dts)
   window.serverPushAPI = serverPushAPI
+  // @ts-ignore (define in dts)
+  window.appAPI = appAPI
 }
 
 ipcRenderer.on('main-log', (_, ...args) => {

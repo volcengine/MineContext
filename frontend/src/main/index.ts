@@ -17,6 +17,7 @@ import { registerIpc } from './ipc'
 import openInspector from './utils/inspector'
 import db from './services/DatabaseService'
 import screenshotService from './services/ScreenshotService'
+import trayService from './services/TrayService'
 import { isDev, isMac } from './constant'
 import icon from '../../resources/icon.png?asset'
 import { ensureBackendRunning, startBackendInBackground, stopBackendServerSync } from './backend'
@@ -212,6 +213,9 @@ app.whenReady().then(() => {
   openInspector(mainWindow)
   powerWatcher.run(mainWindow)
   startBackendInBackground(mainWindow)
+
+  // Initialize tray service
+  trayService.initialize(mainWindow)
 
   // Start screenshot cleanup scheduled task
   startScreenshotCleanup()
