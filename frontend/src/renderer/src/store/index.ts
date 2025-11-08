@@ -12,6 +12,7 @@ import screen from './screen'
 import setting from './setting'
 import vault from './vault'
 import events from './events'
+import chatHistory from './chat-history'
 
 import { getLogger } from '@shared/logger/renderer'
 
@@ -22,7 +23,8 @@ const rootReducer = combineReducers({
   setting,
   screen,
   vault,
-  events
+  events,
+  chatHistory
 })
 
 // Desktop application persistence configuration, mainly for data recovery on next launch
