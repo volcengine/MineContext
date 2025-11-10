@@ -501,6 +501,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-success" id="exportBtn" onclick="exportHistoryRecord()" disabled>
+                    <i class="bi bi-download"></i> 导出记录
+                </button>
                 <button type="button" class="btn btn-primary" id="regenerateBtn" onclick="regenerateWithCurrent()" disabled>
                     <i class="bi bi-arrow-clockwise"></i> 使用当前Prompt重新生成
                 </button>
@@ -561,4 +564,55 @@
 
 {% block scripts %}
 <script src="/static/js/settings.js"></script>
+<script>
+// 导出历史记录
+window.exportHistoryRecord = async function() {
+    if (!selectedHistoryFile || !currentCategory) {
+        showToast('请先选择一条历史记录', true);
+        return;
+    }
+
+    const exportBtn = document.getElementById('exportBtn');
+    const originalBtnText = exportBtn.innerHTML;
+
+    try {
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>导出中...';
+
+        const response = await fetch(`/api/settings/prompts/history/${currentCategory}/${selectedHistoryFile}`);
+        const data = await response.json();
+
+        if (data.code === 0 && data.data) {
+            const exportData = {
+                category: currentCategory,
+                filename: selectedHistoryFile,
+                timestamp: data.data.timestamp,
+                messages: data.data.messages,
+                response: data.data.response
+            };
+
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = selectedHistoryFile || 'export.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+            }, 100);
+        } else {
+            showToast('导出失败: ' + (data.message || '未知错误'), true);
+        }
+    } catch (error) {
+        console.error('导出错误:', error);
+        showToast('导出失败: ' + error.message, true);
+    } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = originalBtnText;
+    }
+};
+</script>
 {% endblock %}
