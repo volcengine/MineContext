@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useState, useCallback, useMemo, FC } from 'react'
-import { Button, Input, Typography, Tag, Space } from '@arco-design/web-react'
-import { IconClose, IconStop, IconPlus } from '@arco-design/web-react/icon'
+import { Button, Input, Typography, Tag } from '@arco-design/web-react'
+import { IconStop } from '@arco-design/web-react/icon'
 import { useChatStream } from '@renderer/hooks/use-chat-stream'
 import { ChatContext } from '@renderer/services/ChatStreamService'
 import MarkdownIt from 'markdown-it'
