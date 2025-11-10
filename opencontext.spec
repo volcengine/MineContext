@@ -96,12 +96,18 @@ a = Analysis(
         'sqlite3',
         '_ssl',
         '_hashlib',
+        'numpy',
+        'numpy.core',
+        'numpy.core._multiarray_umath',
+        'pandas',
+        'pandas._libs',
+        'pandas._libs.tslibs',
     ],
     hookspath=['.'],
     hooksconfig={},
     runtime_hooks=['hook-opencontext.py'],
     excludes=[],
-    noarchive=True,
+    noarchive=False,  # Changed to False to fix numpy 2.x import issues
     optimize=1,
 )
 pyz = PYZ(a.pure)
