@@ -688,4 +688,4 @@ async def generate_with_custom_prompts(
         logger.exception(f"Error generating with custom prompts: {e}")
         return convert_resp(
             code=500, status=500, message=f"Failed to generate with custom prompts: {str(e)}"
-        ) 
+        )
