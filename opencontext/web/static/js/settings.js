@@ -775,6 +775,7 @@ async function viewHistory(category) {
     document.getElementById('historyCategory').textContent = category;
     document.getElementById('historyDetail').innerHTML = '<p class="text-muted">加载中...</p>';
     document.getElementById('regenerateBtn').disabled = true;
+    document.getElementById('exportBtn').disabled = true;
     document.getElementById('compareBtn').disabled = true;
 
     try {
@@ -861,7 +862,8 @@ async function loadHistoryDetail(category, filename) {
             `;
 
             document.getElementById('regenerateBtn').disabled = false;
-            document.getElementById('compareBtn').disabled = true; // 默认禁用，重新生成后启用
+            document.getElementById('exportBtn').disabled = false;
+            document.getElementById('compareBtn').disabled = true;
         }
     } catch (error) {
         console.error('加载历史记录详情失败:', error);
@@ -968,6 +970,7 @@ function compareResults() {
     const modal = new bootstrap.Modal(document.getElementById('compareModal'));
     modal.show();
 }
+
 
 // 覆盖原有的loadPrompts函数
 const originalLoadPrompts = loadPrompts;

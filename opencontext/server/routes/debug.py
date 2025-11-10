@@ -7,12 +7,14 @@
 Debug and development routes
 """
 
+import io
 import json
 import time
 from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, Query
+from fastapi.responses import StreamingResponse
 
 from opencontext.models.enums import VaultType
 from opencontext.server.middleware.auth import auth_dependency
@@ -688,4 +690,89 @@ async def generate_with_custom_prompts(
         logger.exception(f"Error generating with custom prompts: {e}")
         return convert_resp(
             code=500, status=500, message=f"Failed to generate with custom prompts: {str(e)}"
+        )
+
+
+@router.get("/api/debug/export/{item_type}/{item_id}")
+async def export_debug_item(
+    item_type: str,
+    item_id: int,
+    opencontext: OpenContext = Depends(get_context_lab),
+    _auth: str = auth_dependency,
+):
+    """
+    Export a single debug item as JSON file
+
+    Args:
+        item_type: Type of item (reports/todos/activities/tips)
+        item_id: ID of the item to export
+    """
+    try:
+        # Validate item type
+        valid_types = ["reports", "todos", "activities", "tips"]
+        if item_type not in valid_types:
+            return convert_resp(
+                code=400,
+                status=400,
+                message=f"Invalid item type. Must be one of: {', '.join(valid_types)}"
+            )
+
+        # Get item based on type
+        item = None
+        item_name = item_type.rstrip('s')  # Remove 's' for filename
+
+        if item_type == "reports":
+            reports = get_storage().get_reports(limit=1000, offset=0, is_deleted=False)
+            item = next((r for r in reports if r.get("id") == item_id), None)
+
+        elif item_type == "todos":
+            todos = get_storage().get_todos(status=None, limit=1000, offset=0)
+            item = next((t for t in todos if t.get("id") == item_id), None)
+
+        elif item_type == "activities":
+            activities = get_storage().get_activities(
+                start_time=None, end_time=None, limit=1000, offset=0
+            )
+            # Parse resources field for activities
+            for activity in activities:
+                if activity.get("resources"):
+                    try:
+                        activity["resources"] = json.loads(activity["resources"])
+                    except (json.JSONDecodeError, TypeError) as e:
+                        logger.warning(f"Failed to parse resources for activity {activity.get('id')}: {e}")
+                        activity["resources"] = None
+            item = next((a for a in activities if a.get("id") == item_id), None)
+
+        elif item_type == "tips":
+            tips = get_storage().get_tips(limit=1000, offset=0)
+            item = next((t for t in tips if t.get("id") == item_id), None)
+
+        # Check if item was found
+        if not item:
+            return convert_resp(
+                code=404,
+                status=404,
+                message=f"{item_name.capitalize()} with ID {item_id} not found"
+            )
+
+        # Convert item to JSON
+        json_content = json.dumps(item, indent=2, ensure_ascii=False, default=str)
+
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{item_name}_{item_id}_{timestamp}.json"
+
+        # Return as downloadable file
+        return StreamingResponse(
+            io.BytesIO(json_content.encode("utf-8")),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    except Exception as e:
+        logger.exception(f"Error exporting {item_type} item: {e}")
+        return convert_resp(
+            code=500,
+            status=500,
+            message=f"Failed to export {item_type} item: {str(e)}"
         )
