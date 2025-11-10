@@ -2,14 +2,12 @@ import { useState, useEffect } from 'react'
 import rocketSvg from '@renderer/assets/icons/rocket.svg'
 import { UpdateInfo } from 'electron-updater'
 import { IpcChannel } from '@shared/IpcChannel'
-import { useNotification } from '@renderer/context/NotificationProvider'
 import { debounce } from 'lodash'
 
 export default function UpdateAvailableButton() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
   const [isDownloaded, setIsDownloaded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const { open } = useNotification()
   useEffect(() => {
     ;(async () => {
       const { updateInfo: _updateInfo } = await window.api.checkForUpdate()
@@ -30,10 +28,6 @@ export default function UpdateAvailableButton() {
 
     const f2 = ipcRenderer.on(IpcChannel.UpdateError, (_, err) => {
       console.error("UpdateError", err)
-      open.error?.({
-        title: 'update error',
-        content: err.message
-      })
     })
     return () => {
       f1()
@@ -65,7 +59,7 @@ export default function UpdateAvailableButton() {
 
       {/* 版本号 */}
       {
-        !isHovered ? <span className="pl-2 font-bytesans text-[10px] text-[#AEAFC2]">
+        !isHovered ? <span className="pl-2 font-['Roboto'] text-[10px] text-[#AEAFC2]">
         {updateInfo.version}
       </span> : null
       }

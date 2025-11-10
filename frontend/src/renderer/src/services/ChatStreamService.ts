@@ -48,6 +48,7 @@ export interface ChatStreamRequest {
   context?: ChatContext
   session_id?: string
   user_id?: string
+  conversation_id: number
 }
 
 export type EventType =
@@ -83,6 +84,7 @@ export interface StreamEvent {
   metadata?: {
     [key: string]: any
   }
+  assistant_message_id?: number
 }
 
 // Streaming chat service class

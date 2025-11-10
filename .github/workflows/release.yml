@@ -136,7 +136,8 @@ jobs:
           ./build.sh
 
       - name: Cleanup keychain
-        if: always()
+        if: always() && runner.os == 'macOS'
+        shell: bash
         run: |
           if [ -n "${KEYCHAIN_PATH:-}" ]; then
             echo "🧹 Deleting temporary keychain: $KEYCHAIN_PATH"

@@ -19,7 +19,9 @@ from pydantic import BaseModel, Field
 
 from opencontext.context_consumption.context_agent import ContextAgent
 from opencontext.context_consumption.context_agent.models import WorkflowStage
+from opencontext.context_consumption.context_agent.models.enums import EventType
 from opencontext.server.middleware.auth import auth_dependency
+from opencontext.storage.global_storage import get_storage
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -28,6 +30,10 @@ router = APIRouter(prefix="/api/agent", tags=["agent_chat"])
 
 # Global Context Agent instance
 agent_instance = None
+
+# Interrupt flags for active streaming messages
+# Key: message_id, Value: True if interrupted
+active_streams = {}
 
 
 def get_agent():
@@ -47,6 +53,7 @@ class ChatRequest(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict, description="Context information")
     session_id: Optional[str] = Field(None, description="Session ID")
     user_id: Optional[str] = Field(None, description="User ID")
+    conversation_id: Optional[int] = Field(None, description="Conversation ID for message storage")
 
 
 class ResumeRequest(BaseModel):
@@ -113,11 +120,40 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
     """Intelligent chat interface (streaming)"""
 
     async def generate():
+        user_message_id = None
+        assistant_message_id = None
+        storage = None
+
         try:
             agent = get_agent()
+            storage = get_storage()
+
             if not request.session_id:
                 request.session_id = str(uuid.uuid4())
-            yield f"data: {json.dumps({'type': 'session_start', 'session_id': request.session_id}, ensure_ascii=False)}\n\n"
+
+            # Save user message if conversation_id is provided
+            if request.conversation_id:
+                user_message_id = storage.create_message(
+                    conversation_id=request.conversation_id,
+                    role="user",
+                    content=request.query,
+                    is_complete=True
+                )
+                logger.info(f"Created user message {user_message_id} in conversation {request.conversation_id}")
+
+            # Create streaming assistant message if conversation_id is provided
+            if request.conversation_id:
+                assistant_message_id = storage.create_streaming_message(
+                    conversation_id=request.conversation_id,
+                    role="assistant"
+                )
+                logger.info(f"Created assistant streaming message {assistant_message_id}")
+                # Register this message as an active stream
+                active_streams[assistant_message_id] = False
+
+            # Send session start event with assistant_message_id
+            yield f"data: {json.dumps({'type': 'session_start', 'session_id': request.session_id, 'assistant_message_id': assistant_message_id}, ensure_ascii=False)}\n\n"
+
             args = {
                 "query": request.query,
                 "session_id": request.session_id,
@@ -125,14 +161,124 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
             }
             if request.context:
                 args.update(request.context)
+
+            accumulated_content = ""
+            event_metadata = {}  # Store events by type
+            interrupted = False  # Track if stream was interrupted
+            title_updated = False  # Track if conversation title has been updated
+
             async for event in agent.process_stream(**args):
-                converted_event = event.to_dict()
-                yield f"data: {json.dumps(converted_event, ensure_ascii=False)}\n\n"
-                if event.stage in [WorkflowStage.COMPLETED, WorkflowStage.FAILED]:
+                # Check interrupt flag (in-memory, no database query)
+                if assistant_message_id and active_streams.get(assistant_message_id):
+                    logger.info(f"Message {assistant_message_id} was interrupted, stopping stream")
+                    interrupted = True
+                    yield f"data: {json.dumps({'type': 'interrupted', 'content': 'Message generation was interrupted'}, ensure_ascii=False)}\n\n"
                     break
+
+                converted_event = event.to_dict()
+
+                # Save event content based on type
+                if assistant_message_id and event.content:
+                    # Check if this is a thinking event
+                    if event.type == EventType.THINKING:
+                        # Save thinking messages separately to message_thinking table
+                        storage.add_message_thinking(
+                            message_id=assistant_message_id,
+                            content=event.content,
+                            stage=event.stage.value if event.stage else None,
+                            progress=event.progress if hasattr(event, 'progress') else 0.0,
+                            metadata=event.metadata if hasattr(event, 'metadata') else None
+                        )
+                        logger.debug(f"Saved thinking to message {assistant_message_id}: stage={event.stage.value if event.stage else 'unknown'}, content_len={len(event.content)}")
+                    elif event.type == EventType.STREAM_CHUNK:
+                        # Only stream_chunk content goes to message.content
+                        accumulated_content += event.content
+                        storage.append_message_content(
+                            message_id=assistant_message_id,
+                            content_chunk=event.content,
+                            token_count=1  # Approximate token count
+                        )
+                        logger.debug(f"Appended stream_chunk to message {assistant_message_id}: content_len={len(event.content)}")
+
+                        # Auto-update conversation title with first 30 characters
+                        if not title_updated and len(accumulated_content) >= 30 and request.conversation_id:
+                            title = accumulated_content[:30].strip()
+                            if title:
+                                storage.update_conversation(
+                                    conversation_id=request.conversation_id,
+                                    title=title
+                                )
+                                title_updated = True
+                                logger.info(f"Auto-updated conversation {request.conversation_id} title: {title}")
+                    else:
+                        # Other event types (running, done, etc.) go to metadata as lists
+                        event_type_key = event.type.value
+                        if event_type_key not in event_metadata:
+                            event_metadata[event_type_key] = []
+                        event_metadata[event_type_key].append({
+                            "content": event.content,
+                            "timestamp": event.timestamp.isoformat() if hasattr(event, 'timestamp') else None,
+                            "stage": event.stage.value if event.stage else None,
+                            "progress": event.progress if hasattr(event, 'progress') else None,
+                        })
+                        logger.debug(f"Added {event_type_key} event to metadata for message {assistant_message_id}")
+
+                yield f"data: {json.dumps(converted_event, ensure_ascii=False)}\n\n"
+
+                if event.stage in [WorkflowStage.COMPLETED, WorkflowStage.FAILED]:
+                    # Update metadata with collected events before finishing
+                    if assistant_message_id and event_metadata:
+                        storage.update_message_metadata(
+                            message_id=assistant_message_id,
+                            metadata=event_metadata
+                        )
+                        logger.info(f"Updated message {assistant_message_id} metadata with {len(event_metadata)} event types")
+
+                    # Mark assistant message as finished
+                    if assistant_message_id:
+                        status = "completed" if event.stage == WorkflowStage.COMPLETED else "failed"
+                        storage.mark_message_finished(
+                            message_id=assistant_message_id,
+                            status=status,
+                            error_message=event.metadata.get("error") if status == "failed" else None
+                        )
+                        logger.info(f"Marked assistant message {assistant_message_id} as {status}")
+                    break
+
+            # Handle interrupted stream - save accumulated data and mark as cancelled
+            if interrupted and assistant_message_id:
+                # Update metadata with collected events
+                if event_metadata:
+                    storage.update_message_metadata(
+                        message_id=assistant_message_id,
+                        metadata=event_metadata
+                    )
+                    logger.info(f"Updated interrupted message {assistant_message_id} metadata with {len(event_metadata)} event types")
+
+                # Mark message as cancelled (status already set by interrupt endpoint)
+                logger.info(f"Message {assistant_message_id} interrupted with {len(accumulated_content)} characters saved")
+
         except Exception as e:
             logger.exception(f"Stream chat failed: {e}")
+
+            # Mark assistant message as failed if it exists
+            if assistant_message_id and storage:
+                try:
+                    storage.mark_message_finished(
+                        message_id=assistant_message_id,
+                        status="failed",
+                        error_message=str(e)
+                    )
+                except Exception as mark_error:
+                    logger.exception(f"Failed to mark message as failed: {mark_error}")
+
             yield f"data: {json.dumps({'type': 'error', 'content': str(e)}, ensure_ascii=False)}\n\n"
+
+        finally:
+            # Clean up the interrupt flag when stream ends
+            if assistant_message_id and assistant_message_id in active_streams:
+                del active_streams[assistant_message_id]
+                logger.debug(f"Cleaned up interrupt flag for message {assistant_message_id}")
 
     return StreamingResponse(
         generate(),

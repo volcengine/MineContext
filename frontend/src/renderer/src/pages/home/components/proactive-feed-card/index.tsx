@@ -139,7 +139,7 @@ const ProactiveFeedCard: React.FC = ({}) => {
       <div className="flex items-center gap-2 w-full">
         <div className="flex px-[2px] justify-center items-center gap-[4px] rounded-[2px] bg-gradient-to-l from-[rgba(239,251,248,0.5)] to-[#F5FBEF]">
           💡
-          <div className="font-['Byte Sans'] text-[15px] font-extralight leading-[22px] tracking-[0.045px] bg-gradient-to-l from-[#00C469] to-[#0026B1] bg-clip-text text-transparent">
+          <div className="font-['Roboto'] text-[15px] font-extralight leading-[22px] tracking-[0.045px] bg-gradient-to-l from-[#00C469] to-[#0026B1] bg-clip-text text-transparent">
             Proactive
           </div>
         </div>

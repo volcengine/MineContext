@@ -9,6 +9,7 @@ import {
   WorkflowStage,
   chatStreamService
 } from '@renderer/services/ChatStreamService'
+import { get } from 'lodash'
 
 export interface ChatState {
   messages: ChatMessage[]
@@ -16,6 +17,7 @@ export interface ChatState {
   currentStage?: WorkflowStage
   progress: number
   sessionId: string
+  messageId: number
   error?: string
 }
 
@@ -34,7 +36,8 @@ export const useChatStream = () => {
     messages: [],
     isLoading: false,
     progress: 0,
-    sessionId: chatStreamService.generateSessionId()
+    sessionId: chatStreamService.generateSessionId(),
+    messageId: -1
   })
 
   const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null)
@@ -49,7 +52,7 @@ export const useChatStream = () => {
 
   // Send message
   const sendMessage = useCallback(
-    async (query: string, context?: ChatStreamRequest['context']) => {
+    async (query: string, conversation_id: number, context?: ChatStreamRequest['context']) => {
       if (!query.trim() || chatState.isLoading) return
 
       // Add user message
@@ -71,6 +74,7 @@ export const useChatStream = () => {
 
       const request: ChatStreamRequest = {
         query: query.trim(),
+        conversation_id,
         context: {
           ...context,
           chat_history: [...chatState.messages, userMessage]
@@ -96,7 +100,8 @@ export const useChatStream = () => {
         if (event.session_id) {
           setChatState((prev) => ({
             ...prev,
-            sessionId: event.session_id!
+            sessionId: event.session_id!,
+            messageId: get(event, 'assistant_message_id', prev.messageId)
           }))
         }
         break
@@ -137,11 +142,8 @@ export const useChatStream = () => {
         break
 
       case 'stream_chunk':
-        console.log('📝 Handling stream_chunk:', event.content)
-        // Handle streaming content chunk
         if (!currentStreamingId.current) {
           currentStreamingId.current = 'stream_' + Date.now()
-          console.log('🆕 Creating new streaming message:', currentStreamingId.current)
           setStreamingMessage({
             id: currentStreamingId.current,
             role: 'assistant',
@@ -152,10 +154,8 @@ export const useChatStream = () => {
             timestamp: event.timestamp
           })
         } else {
-          console.log('📝 Appending to existing streaming message')
           setStreamingMessage((prev) => {
             if (prev) {
-              console.log('📝 Current content length:', prev.content.length, 'New content:', event.content)
               return {
                 ...prev,
                 content: prev.content + event.content,
@@ -169,7 +169,6 @@ export const useChatStream = () => {
         break
 
       case 'stream_complete':
-        // Stream complete (streaming mode) - save accumulated streamingMessage
         setStreamingMessage((prev) => {
           if (prev && prev.content.trim()) {
             const finalMessage: ChatMessage = {
@@ -283,7 +282,8 @@ export const useChatStream = () => {
       messages: [],
       isLoading: false,
       progress: 0,
-      sessionId: chatStreamService.generateSessionId()
+      sessionId: chatStreamService.generateSessionId(),
+      messageId: -1
     })
     setStreamingMessage(null)
     currentStreamingId.current = null
@@ -304,6 +304,7 @@ export const useChatStream = () => {
     streamingMessage,
     sendMessage,
     clearChat,
-    stopStreaming
+    stopStreaming,
+    setChatState
   }
 }

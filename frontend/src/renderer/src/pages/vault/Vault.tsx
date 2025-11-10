@@ -100,7 +100,7 @@ const VaultPage = () => {
           </div>
         </Allotment.Pane>
         <Allotment.Pane minSize={rightMinSize}>
-          <AIAssistant visible={isVisible} onClose={hideAIAssistant} />
+          <AIAssistant visible={isVisible} onClose={hideAIAssistant} pageName="creation" />
         </Allotment.Pane>
       </Allotment>
     </div>
