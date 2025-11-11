@@ -141,14 +141,16 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
                 )
                 logger.info(f"Created user message {user_message_id} in conversation {request.conversation_id}")
 
-                # Update conversation title with user's question (max 50 characters)
+                # Update conversation title with user's question only if not already set
                 if request.query and request.query.strip():
-                    title = request.query[:50].strip()
-                    storage.update_conversation(
-                        conversation_id=request.conversation_id,
-                        title=title
-                    )
-                    logger.info(f"Updated conversation {request.conversation_id} title from user query: {title}")
+                    conversation = storage.get_conversation(request.conversation_id)
+                    if conversation and not conversation.get("title"):
+                        title = request.query[:50].strip()
+                        storage.update_conversation(
+                            conversation_id=request.conversation_id,
+                            title=title
+                        )
+                        logger.info(f"Set conversation {request.conversation_id} title from user query: {title}")
 
             # Create streaming assistant message if conversation_id is provided
             if request.conversation_id:

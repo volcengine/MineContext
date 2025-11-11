@@ -25,7 +25,7 @@ const ChatHistoryList: FC<ChatHistoryListProps> = (props) => {
       <div className="text-[14px] leading-[22px] text-[#0c0d0e] font-medium mb-[8px] px-[12px] py-[2px]">
         Recent chats
       </div>
-      <div className="overflow-x-hidden overflow-y-auto min-h-[calc(100vh_-_400px)]">
+      <div className="overflow-x-hidden overflow-y-auto max-h-[calc(100vh_-_400px)]">
         {conversationList.map((conversation) => (
           <ChatHistoryListItem
             conversation={conversation}

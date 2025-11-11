@@ -39,8 +39,8 @@ const AIAssistantHeader: FC<AIAssistantHeaderProps> = (props) => {
   })
   const [popupVisible, setPopupVisible] = useState(false)
   const showChatHistoryPopup = useMemoizedFn((e: MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
+    e?.stopPropagation()
+    e?.preventDefault()
     setPopupVisible(true)
   })
   const hideChatHistoryPopup = useMemoizedFn((e?: MouseEvent) => {
@@ -87,7 +87,8 @@ const AIAssistantHeader: FC<AIAssistantHeaderProps> = (props) => {
               'flex items-center justify-center w-[32px] h-[32px] hover:bg-[#F6F7FA] rounded-[6px] cursor-pointer',
               { 'bg-[#F6F7FA]': popupVisible }
             )}
-            onClick={showChatHistoryPopup}>
+            onClick={showChatHistoryPopup}
+            onMouseEnter={showChatHistoryPopup}>
             <img src={chatHistoryIcon} className="w-[14px] h-[14px]" />
           </div>
         </Popover>
