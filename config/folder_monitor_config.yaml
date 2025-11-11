@@ -1,0 +1,79 @@
+# 文件夹文档监控器配置文件
+# 用于配置 FolderDocumentMonitor 组件的参数
+
+folder_document_monitor:
+  # 监控的文件夹路径列表
+  # 支持绝对路径和相对路径
+  watch_folders:
+    - "/Users/username/Documents"
+    - "/Users/username/Downloads"
+    - "./data/documents"
+  
+  # 扫描间隔（秒）
+  # 监控器每隔多少秒扫描一次文件夹变化
+  # 最小值: 5 秒
+  scan_interval: 30
+  
+  # 是否递归扫描子文件夹
+  # true: 扫描所有子文件夹
+  # false: 只扫描指定文件夹的直接文件
+  recursive: true
+  
+  # 最大文件大小（字节）
+  # 超过此大小的文件将被跳过
+  # 默认: 100MB (104857600 字节)
+  max_file_size: 104857600
+  
+  # 是否执行初始扫描
+  # true: 启动时扫描现有文件
+  # false: 只监控新的变化
+  initial_scan: true
+  
+  # 是否保存处理结果到 JSON 文件
+  # true: 将分块结果保存为 *_chunks.json 文件
+  # false: 不保存结果文件
+  save_results: false
+
+# 支持的文件扩展名（只读，不可修改）
+# 视觉文档: .pdf, .png, .jpg, .jpeg, .gif, .bmp, .webp, .docx, .doc, .pptx, .ppt
+# 结构化文档: .xlsx, .xls, .csv, .jsonl
+# 文本文件: .md, .txt
+
+# 使用示例配置
+examples:
+  # 基本配置 - 监控单个文件夹
+  basic:
+    watch_folders:
+      - "/path/to/documents"
+    scan_interval: 60
+    recursive: true
+    initial_scan: true
+  
+  # 高频监控配置 - 适用于频繁变化的文件夹
+  high_frequency:
+    watch_folders:
+      - "/path/to/active/folder"
+    scan_interval: 10
+    recursive: false
+    max_file_size: 52428800  # 50MB
+    save_results: true
+  
+  # 多文件夹配置 - 监控多个不同的文件夹
+  multi_folder:
+    watch_folders:
+      - "/Users/username/Documents"
+      - "/Users/username/Downloads"
+      - "/Users/username/Desktop"
+    scan_interval: 120
+    recursive: true
+    initial_scan: false
+  
+  # 开发测试配置 - 用于开发和测试
+  development:
+    watch_folders:
+      - "./test_documents"
+    scan_interval: 5
+    recursive: true
+    max_file_size: 10485760  # 10MB
+    save_results: true
+    initial_scan: true
