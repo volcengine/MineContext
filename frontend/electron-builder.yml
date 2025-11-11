@@ -62,7 +62,7 @@ appImage:
 npmRebuild: false
 nodeGypRebuild: false
 buildDependenciesFromSource: false
-# afterSign: build/notarize.js
+afterSign: build/notarize.js
 publish:
   provider: github
   owner: volcengine
