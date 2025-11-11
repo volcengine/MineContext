@@ -4,6 +4,7 @@ import axiosInstance from './axiosConfig'
 // 类型定义
 export interface CreateConversationRequest {
   page_name: string
+  document_id?: string
 }
 
 export interface ConversationResponse {

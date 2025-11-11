@@ -15,6 +15,10 @@ import AIToggleButton from '@renderer/components/ai-toggle-button'
 import AIAssistant from '@renderer/components/ai-assistant'
 import { removeMarkdownSymbols } from '@renderer/utils/vault'
 import './vault.css'
+import { useSelector } from 'react-redux'
+import { RootState, useAppDispatch } from '@renderer/store'
+import { setActiveConversationId, toggleCreationAiAssistant } from '@renderer/store/chat-history'
+import { useUnmount } from 'ahooks'
 
 const VaultPage = () => {
   const [searchParams] = useSearchParams()
@@ -26,9 +30,9 @@ const VaultPage = () => {
   const vault = findVaultById(Number(id))
   const content = vault?.content
   const title = vault?.title ? '## ' + vault.title : ''
-  const { isVisible, toggleAIAssistant, hideAIAssistant } = useAIAssistant()
+  const isVisible = useSelector((state: RootState) => state.chatHistory.creation.aiAssistantVisible)
   const { controller, defaultSizes, leftMinSize, rightMinSize } = useAllotment(isVisible)
-
+  const dispatch = useAppDispatch()
   const debouncedSave = useMemo(
     () =>
       debounce((value: string, type: 'content' | 'title' | 'summary' | 'tags') => {
@@ -63,7 +67,10 @@ const VaultPage = () => {
     },
     [debouncedSave]
   )
-
+  const activeConversationId = useSelector((state: RootState) => state.chatHistory.activeConversationId)
+  useUnmount(() => {
+    dispatch(setActiveConversationId(null))
+  })
   // Status bar component
   return (
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>
@@ -96,11 +103,16 @@ const VaultPage = () => {
                 </>
               )}
             </Card>
-            <AIToggleButton onClick={toggleAIAssistant} isActive={isVisible} />
+            <AIToggleButton onClick={() => dispatch(toggleCreationAiAssistant(true))} isActive={isVisible} />
           </div>
         </Allotment.Pane>
         <Allotment.Pane minSize={rightMinSize}>
-          <AIAssistant visible={isVisible} onClose={hideAIAssistant} pageName="creation" />
+          <AIAssistant
+            visible={isVisible}
+            onClose={() => dispatch(toggleCreationAiAssistant(false))}
+            pageName="creation"
+            initConversationId={activeConversationId}
+          />
         </Allotment.Pane>
       </Allotment>
     </div>

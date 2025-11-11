@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useState, MouseEvent } from 'react'
 import addChatIcon from '@renderer/assets/icons/ai-assistant/add-chat.svg'
 import chatHistoryIcon from '@renderer/assets/icons/ai-assistant/chat-history.svg'
 import { Button, Space, Divider, Popover } from '@arco-design/web-react'
@@ -6,6 +6,7 @@ import { IconClose } from '@arco-design/web-react/icon'
 import { useMemoizedFn, useRequest } from 'ahooks'
 import { conversationService } from '@renderer/services/conversation-service'
 import { ChatHistoryList } from './chat-history-list'
+import clsx from 'clsx'
 export interface AIAssistantHeaderProps {
   onClose: () => void
   startNewConversation: () => void
@@ -36,6 +37,21 @@ const AIAssistantHeader: FC<AIAssistantHeaderProps> = (props) => {
       getConversationList()
     }
   })
+  const [popupVisible, setPopupVisible] = useState(false)
+  const showChatHistoryPopup = useMemoizedFn((e: MouseEvent) => {
+    e?.stopPropagation()
+    e?.preventDefault()
+    setPopupVisible(true)
+  })
+  const hideChatHistoryPopup = useMemoizedFn((e?: MouseEvent) => {
+    e?.stopPropagation()
+    e?.preventDefault()
+    setPopupVisible(false)
+  })
+  const selectConversation = useMemoizedFn((e: MouseEvent, conversationId: number) => {
+    hideChatHistoryPopup(e)
+    handleGetMessages?.(conversationId)
+  })
   return (
     <div className="flex items-center justify-between px-[16px] border-b border-[#F0F2FA]">
       <div
@@ -51,14 +67,28 @@ const AIAssistantHeader: FC<AIAssistantHeaderProps> = (props) => {
           content={
             <ChatHistoryList
               conversationList={conversationList || []}
-              handleGetMessages={handleGetMessages}
+              handleGetMessages={selectConversation}
               onConversationUpdate={getConversationList}
               refreshConversationList={refreshConversationList}
             />
           }
           trigger={['click', 'hover']}
-          onVisibleChange={handleVisibleChange}>
-          <div className="flex items-center justify-center w-[32px] h-[32px] hover:bg-[#F6F7FA] rounded-[6px] cursor-pointer">
+          onVisibleChange={handleVisibleChange}
+          popupVisible={popupVisible}
+          className="[&_.arco-popover-content]:!p-0"
+          triggerProps={{
+            popupAlign: {
+              top: 8
+            },
+            onClickOutside: hideChatHistoryPopup
+          }}>
+          <div
+            className={clsx(
+              'flex items-center justify-center w-[32px] h-[32px] hover:bg-[#F6F7FA] rounded-[6px] cursor-pointer',
+              { 'bg-[#F6F7FA]': popupVisible }
+            )}
+            onClick={showChatHistoryPopup}
+            onMouseEnter={showChatHistoryPopup}>
             <img src={chatHistoryIcon} className="w-[14px] h-[14px]" />
           </div>
         </Popover>
