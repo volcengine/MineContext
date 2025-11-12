@@ -84,7 +84,7 @@ const AppContent: FC = () => {
         background:
           'linear-gradient(165.9deg, #CEC1D2 -3.95%, #D9DAE8 3.32%, #F2F2F2 23.35%, #F2F0E6 71.67%, #F9FAED 76.64%, #FFEDDF 83.97%)'
       }}>
-      <div style={{ appRegion: 'drag', width: '12px', height: '100%' } as React.CSSProperties} />
+      {/* <div style={{ appRegion: 'drag', width: '12px', height: '100%' } as React.CSSProperties} /> */}
       <Sidebar />
       <div className="flex-1 flex flex-col pr-2">{routes}</div>
     </div>

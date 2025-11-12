@@ -21,7 +21,7 @@ const ChatHistoryList: FC<ChatHistoryListProps> = (props) => {
     )
   }
   return (
-    <div className="w-[270px] h-[70%] px-[8px] py-[16px]">
+    <div className="w-[270px] h-[70%] p-[8px]">
       <div className="text-[14px] leading-[22px] text-[#0c0d0e] font-medium mb-[8px] px-[12px] py-[2px]">
         Recent chats
       </div>

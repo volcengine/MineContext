@@ -274,7 +274,7 @@ const Settings: FC<SettingsProps> = (props) => {
 
   return (
     <Spin loading={getInfoLoading} block className="[&_.arco-spin-children]:!h-full !h-full">
-      <div className="top-0 left-0 flex flex-col h-full overflow-y-hidden p-2 relative">
+      <div className="top-0 left-0 flex flex-col h-full overflow-y-hidden py-2 pr-2 relative">
         <div className="bg-white rounded-[16px] pl-6 flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
           <div className="mb-[12px]">
             <div className="mt-[26px] mb-[10px] text-[24px] font-bold text-[#000]">Select a AI model to start</div>
