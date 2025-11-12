@@ -36,6 +36,7 @@ const HomePage: React.FC = () => {
   const dispatch = useAppDispatch()
   useUnmount(() => {
     dispatch(setActiveConversationId(null))
+    dispatch(toggleHomeAiAssistant(false))
   })
   return (
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>

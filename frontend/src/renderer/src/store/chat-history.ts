@@ -257,22 +257,4 @@ export const {
   resetChatHistory
 } = chatHistorySlice.actions
 
-// ========== Selectors ==========
-
-export const selectConversations = (state: { chatHistory: ChatHistoryState }) => state.chatHistory.conversations
-export const selectActiveConversationId = (state: { chatHistory: ChatHistoryState }) =>
-  state.chatHistory.activeConversationId
-export const selectChatHistoryMessages = (state: { chatHistory: ChatHistoryState }) =>
-  state.chatHistory.chatHistoryMessages
-export const selectActiveConversation = (state: { chatHistory: ChatHistoryState }) => {
-  const { conversations, activeConversationId } = state.chatHistory
-  return conversations.find((conv) => conv.id === activeConversationId) || null
-}
-export const selectLoading = (state: { chatHistory: ChatHistoryState }) => state.chatHistory.loading
-export const selectError = (state: { chatHistory: ChatHistoryState }) => state.chatHistory.error
-export const selectHomeAiAssistantVisible = (state: { chatHistory: ChatHistoryState }) =>
-  state.chatHistory.home.aiAssistantVisible
-export const selectCreationAiAssistantVisible = (state: { chatHistory: ChatHistoryState }) =>
-  state.chatHistory.creation.aiAssistantVisible
-
 export default chatHistorySlice.reducer
