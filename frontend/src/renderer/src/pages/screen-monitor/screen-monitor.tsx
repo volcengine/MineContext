@@ -57,7 +57,7 @@ const ScreenMonitor: React.FC = () => {
   } = useSetting()
   const {
     currentSession,
-    hasPermission,
+    hasPermission = false,
     grantPermission,
     selectedImage,
     setSelectedImage,

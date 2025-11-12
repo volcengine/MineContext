@@ -44,7 +44,7 @@ const ChatHistoryListItem: FC<ChatHistoryListItemProps> = (props) => {
     <>
       <Trigger
         popup={() => (
-          <div className="text-black border border-[#EAEDF1] rounded-[4px] p-[6px] shadow-[0_5px_15px_rgba(0,0,0,0.052)] bg-white w-[158px] p-[6px]">
+          <div className="text-black border border-[#EAEDF1] p-[6px] shadow-[0_5px_15px_rgba(0,0,0,0.052)] bg-white w-[158px] p-[6px] rounded-[8px]">
             <div
               className="flex items-center mb-[4px] px-[12px] py-[6px] gap-[4px] hover:bg-[#f6f7fa] cursor-pointer"
               onClick={(e) => {
@@ -88,7 +88,7 @@ const ChatHistoryListItem: FC<ChatHistoryListItemProps> = (props) => {
           <Trigger
             updateOnScroll
             popup={() => (
-              <div className="text-black border border-[#EAEDF1] rounded-[4px] p-[6px] shadow-[0_5px_15px_rgba(0,0,0,0.052)] bg-white w-[158px] p-[6px]">
+              <div className="text-black border border-[#EAEDF1] rounded-[8px] p-[6px] shadow-[0_5px_15px_rgba(0,0,0,0.052)] bg-white w-[158px] p-[6px]">
                 <div
                   className="flex items-center mb-[4px] px-[12px] py-[6px] gap-[4px] hover:bg-[#f6f7fa] cursor-pointer"
                   onClick={(e) => {
