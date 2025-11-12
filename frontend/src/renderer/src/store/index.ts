@@ -33,7 +33,7 @@ const persistedReducer = persistReducer(
     key: 'vikingdb',
     storage,
     version: 1,
-    blacklist: ['vault', 'screen'] // Do not persist vault, vault data is stored in the sqlite data table
+    blacklist: ['vault', 'screen', 'chatHistory'] // Do not persist vault, vault data is stored in the sqlite data table
   },
   rootReducer
 )

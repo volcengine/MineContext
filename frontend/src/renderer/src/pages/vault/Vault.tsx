@@ -69,6 +69,7 @@ const VaultPage = () => {
   const activeConversationId = useSelector((state: RootState) => state.chatHistory.activeConversationId)
   useUnmount(() => {
     dispatch(setActiveConversationId(null))
+    dispatch(toggleCreationAiAssistant(false))
   })
   // Status bar component
   return (
