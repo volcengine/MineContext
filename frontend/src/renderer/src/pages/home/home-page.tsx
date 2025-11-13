@@ -18,6 +18,7 @@ import { setActiveConversationId, toggleHomeAiAssistant } from '@renderer/store/
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
 import { useUnmount } from 'ahooks'
+import { HeatmapEntry } from './components/heatmap/heatmap'
 
 const { Title, Text } = Typography
 
@@ -63,6 +64,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex items-start gap-3 flex-1 self-stretch">
                   <div className="flex flex-col items-start gap-3 flex-1 self-stretch">
+                    <HeatmapEntry />
                     <ToDoCard />
                     <LatestActivityCard
                       title="Latest activity"
