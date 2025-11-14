@@ -28,6 +28,8 @@ from .routes import (
     settings,
     vaults,
     web,
+    conversation,
+    messages
 )
 
 logger = get_logger(__name__)
@@ -50,4 +52,6 @@ router.include_router(agent_chat.router)
 router.include_router(completions.router)
 router.include_router(events.router)
 router.include_router(settings.router)
+router.include_router(conversation.router)  # 新增：会话路由
+router.include_router(messages.router)  # 新增：消息路由
 router.include_router(documents.router)  # 新增：文档上传路由

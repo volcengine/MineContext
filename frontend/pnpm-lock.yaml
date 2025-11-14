@@ -14,6 +14,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.30
         version: 2.0.30(react@19.1.1)(zod@3.25.76)
+      '@arco-design/color':
+        specifier: 0.4.0
+        version: 0.4.0
       '@electron-toolkit/preload':
         specifier: ^3.0.2
         version: 3.0.2(electron@37.3.0)
@@ -144,6 +147,9 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@24.7.2)
+      '@electron/notarize':
+        specifier: ^2.5.0
+        version: 2.5.0
       '@milkdown/crepe':
         specifier: ^7.15.5
         version: 7.15.5(prosemirror-model@1.25.3)(prosemirror-state@1.4.3)(prosemirror-view@1.40.1)(typescript@5.9.2)
@@ -361,10 +367,10 @@ packages:
     resolution: {integrity: sha512-Mex9nXf9vR6AhcXmMrlz/HVgYYZpVGJ6YlPgwl7UnaFpnshXs6EK/oa5Gpf3CzENMjkvEx2tQtntGnb7UtSTOQ==}
 
   '@arco-design/color@0.4.0':
-    resolution: {integrity: sha1-b7RqMzpqHF5MVjL3WPGAeZAYKAw=}
+    resolution: {integrity: sha512-s7p9MSwJgHeL8DwcATaXvWT3m2SigKpxx4JA1BGPHL4gfvaQsmQfrLBDpjOJFJuJ2jG2dMt3R3P8Pm9E65q18g==}
 
   '@arco-design/web-react@2.66.4':
-    resolution: {integrity: sha512-U1mE6FPfvxW7Ji9FsHRg4i8aDScsU1bGQx6BGF7l7rlcy0hYg+UoSArrJ95dv5y9pUjNgSzXtr7DxgXcE6XMmA==}
+    resolution: {integrity: sha512-vl7sJBLvbVyJhYRPoQ8kHc8BuXNkJIXca5h9ync2J1TuKglFMLNbQwjIvJLW3ciabqTZ5g1O7H1GQ+lLIEMsWA==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'

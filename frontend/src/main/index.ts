@@ -26,8 +26,13 @@ import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
 import { TrayService } from './services/TrayService'
 import { ScreenMonitorTask } from './background/task/screen-monitor-task'
+import { autoUpdater } from "electron-updater"
+import { IpcChannel } from '@shared/IpcChannel'
+
 initLog()
 const logger = getLogger('MainEntry')
+
+autoUpdater.logger = logger
 
 const isPackaged = app.isPackaged
 const actuallyDev = isDev && !isPackaged // true
@@ -261,6 +266,9 @@ app.whenReady().then(() => {
   })
 
   registerIpc(mainWindow, app)
+
+  mainWindow.webContents.send(IpcChannel.Notification_Send, { id: '123', type: 'info', message: "hello",
+  timestamp: new Date().getTime(), source: 'update' })
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

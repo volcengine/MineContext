@@ -37,7 +37,7 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
     <div className="mt-5">
       <Timeline labelPosition="relative">
         {isToday && (
-          <TimelineItem label="Now">
+          <TimelineItem label="Now" className="!pb-[24px]">
             {isMonitoring ? (
               canRecord ? (
                 <>
@@ -49,7 +49,6 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
                       Every {SCREEN_INTERVAL_TIME} minutes, MineContext generates an Activity based on screen analysis.
                     </div>
                   </div>
-                  {console.log('[RecordingTimeline] About to render RecordingStatsCard')}
                   <RecordingStatsCard stats={recordingStats} />
                 </>
               ) : (
