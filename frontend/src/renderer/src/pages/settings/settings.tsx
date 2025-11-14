@@ -291,7 +291,7 @@ const Settings: FC<SettingsProps> = (props) => {
               initialValues={{
                 modelPlatform: ModelTypeList.Doubao,
                 [`${ModelTypeList.Doubao}-modelId`]: 'doubao-seed-1-6-flash-250828',
-                [`${ModelTypeList.OpenAI}-modelId`]: 'gpt-4.1-nano'
+                [`${ModelTypeList.OpenAI}-modelId`]: 'gpt-5-nano'
               }}>
               <FormItem label="Model platform" field={'modelPlatform'} requiredSymbol={false}>
                 <ModelRadio />
