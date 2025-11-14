@@ -18,3 +18,4 @@ __pycache__
 uv.lock
 uv.toml
 .idea
+.claude/
