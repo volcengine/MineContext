@@ -37,11 +37,13 @@ import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { VaultDocumentType } from '@shared/enums/global-enum'
 import { getTrayService } from './index'
 import { type Dayjs } from 'dayjs'
+import AppUpdater from './services/AppUpdater'
 
 const logger = getLogger('IPC')
 
 export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   const notificationService = new NotificationService(mainWindow)
+  const appUpdater = new AppUpdater(mainWindow)
 
   // Backend 服务相关
   // ipcMain.handle(IpcChannel.Backend_GetPort, () => {
@@ -87,6 +89,14 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
 
   ipcMain.handle(IpcChannel.App_Reload, () => mainWindow.reload())
   ipcMain.handle(IpcChannel.Open_Website, (_, url: string) => shell.openExternal(url))
+  // check for update
+  ipcMain.handle(IpcChannel.App_CheckForUpdate, async () => {
+    return await appUpdater.checkForUpdates()
+  })
+  ipcMain.handle(IpcChannel.App_DownloadUpdate, () => appUpdater.downloadUpdate())
+  // Update
+  ipcMain.handle(IpcChannel.App_QuitAndInstall, () => appUpdater.quitAndInstall())
+  ipcMain.handle(IpcChannel.App_CancelDownload, () => appUpdater.cancelDownload())
 
   // launch on boot
   ipcMain.handle(IpcChannel.App_SetLaunchOnBoot, (_, isLaunchOnBoot: boolean) => {

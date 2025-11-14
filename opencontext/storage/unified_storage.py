@@ -373,6 +373,99 @@ class UnifiedStorage:
             return True
         return False
 
+    def create_conversation(
+        self,
+        page_name: str,
+        user_id: Optional[str] = None,
+        title: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Create a new conversation record."""
+        if not self._initialized:
+            logger.error("Unified storage system not initialized")
+            return None
+
+        if not self._document_backend:
+            logger.error("Document database backend not initialized")
+            return None
+
+        return self._document_backend.create_conversation(
+            page_name=page_name,
+            user_id=user_id,
+            title=title,
+            metadata=metadata,
+        )
+
+    def get_conversation(self, conversation_id: int) -> Optional[Dict[str, Any]]:
+        """Query single conversation details."""
+        if not self._initialized:
+            logger.error("Unified storage system not initialized")
+            return None
+
+        if not self._document_backend:
+            logger.error("Document database backend not initialized")
+            return None
+
+        return self._document_backend.get_conversation(conversation_id)
+
+    def get_conversation_list(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        page_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        status: str = "active",
+    ) -> Dict[str, Any]:
+        """List conversations with pagination/filtering."""
+        if not self._initialized:
+            logger.error("Unified storage system not initialized")
+            return {"items": [], "total": 0}
+
+        if not self._document_backend:
+            logger.error("Document database backend not initialized")
+            return {"items": [], "total": 0}
+
+        return self._document_backend.get_conversation_list(
+            limit=limit,
+            offset=offset,
+            page_name=page_name,
+            user_id=user_id,
+            status=status,
+        )
+
+    def update_conversation(
+        self,
+        conversation_id: int,
+        title: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Update conversation metadata (title/status)."""
+        if not self._initialized:
+            logger.error("Unified storage system not initialized")
+            return None
+
+        if not self._document_backend:
+            logger.error("Document database backend not initialized")
+            return None
+
+        return self._document_backend.update_conversation(
+            conversation_id=conversation_id,
+            title=title,
+            status=status,
+        )
+
+    def delete_conversation(self, conversation_id: int) -> Dict[str, Any]:
+        """Soft delete conversation."""
+        if not self._initialized:
+            logger.error("Unified storage system not initialized")
+            return {"success": False, "id": conversation_id}
+
+        if not self._document_backend:
+            logger.error("Document database backend not initialized")
+            return {"success": False, "id": conversation_id}
+
+        return self._document_backend.delete_conversation(conversation_id)
+
     def insert_vaults(
         self,
         title: str,
@@ -654,3 +747,166 @@ class UnifiedStorage:
     def cleanup_old_monitoring_data(self, days: int = 7) -> bool:
         """Clean up monitoring data older than specified days"""
         return self._document_backend.cleanup_old_monitoring_data(days)
+
+    # Message management operations - delegated to document backend
+    def create_message(
+        self,
+        conversation_id: int,
+        role: str,
+        content: str,
+        is_complete: bool = True,
+        token_count: int = 0,
+        parent_message_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Optional[int]:
+        """Create a new message, returns message ID"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return None
+        result = self._document_backend.create_message(
+            conversation_id=conversation_id,
+            role=role,
+            content=content,
+            is_complete=is_complete,
+            token_count=token_count,
+            parent_message_id=parent_message_id,
+            metadata=metadata,
+        )
+        # create_message returns a dict, extract the ID
+        return result.get("id") if result else None
+
+    def create_streaming_message(
+        self,
+        conversation_id: int,
+        role: str,
+        parent_message_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Optional[int]:
+        """Create a streaming message (initial content is empty), returns message ID"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return None
+        result = self._document_backend.create_streaming_message(
+            conversation_id=conversation_id,
+            role=role,
+            parent_message_id=parent_message_id,
+            metadata=metadata,
+        )
+        # create_streaming_message returns a dict, extract the ID
+        return result.get("id") if result else None
+
+    def update_message(
+        self,
+        message_id: int,
+        new_content: str,
+        is_complete: Optional[bool] = None,
+        token_count: Optional[int] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Update message content"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return None
+        return self._document_backend.update_message(
+            message_id=message_id,
+            new_content=new_content,
+            is_complete=is_complete,
+            token_count=token_count,
+        )
+
+    def append_message_content(
+        self, message_id: int, content_chunk: str, token_count: int = 0
+    ) -> bool:
+        """Append content to a streaming message"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return False
+        return self._document_backend.append_message_content(
+            message_id=message_id, content_chunk=content_chunk, token_count=token_count
+        )
+
+    def update_message_metadata(
+        self, message_id: int, metadata: Dict[str, Any]
+    ) -> bool:
+        """Update message metadata"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return False
+        return self._document_backend.update_message_metadata(
+            message_id=message_id, metadata=metadata
+        )
+
+    def mark_message_finished(
+        self, message_id: int, status: str = "completed", error_message: Optional[str] = None
+    ) -> bool:
+        """Mark a message as finished (completed, failed, or cancelled)"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return False
+        return self._document_backend.mark_message_finished(
+            message_id=message_id, status=status, error_message=error_message
+        )
+
+    def get_message(self, message_id: int) -> Optional[Dict[str, Any]]:
+        """Get a single message"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return None
+        return self._document_backend.get_message(message_id)
+
+    def get_conversation_messages(self, conversation_id: int) -> List[Dict[str, Any]]:
+        """Get all messages for a conversation"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return []
+        return self._document_backend.get_conversation_messages(conversation_id)
+
+    def delete_message(self, message_id: int) -> bool:
+        """Delete a message"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return False
+        return self._document_backend.delete_message(message_id)
+
+    def interrupt_message(self, message_id: int) -> bool:
+        """Interrupt message generation (mark as cancelled)"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return False
+        return self._document_backend.interrupt_message(message_id)
+
+    # Message Thinking operations - delegated to document backend
+    def add_message_thinking(
+        self,
+        message_id: int,
+        content: str,
+        stage: Optional[str] = None,
+        progress: float = 0.0,
+        sequence: Optional[int] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Optional[int]:
+        """Add a thinking record to a message"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return None
+        return self._document_backend.add_message_thinking(
+            message_id=message_id,
+            content=content,
+            stage=stage,
+            progress=progress,
+            sequence=sequence,
+            metadata=metadata,
+        )
+
+    def get_message_thinking(self, message_id: int) -> List[Dict[str, Any]]:
+        """Get all thinking records for a message"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return []
+        return self._document_backend.get_message_thinking(message_id)
+
+    def clear_message_thinking(self, message_id: int) -> bool:
+        """Clear all thinking records for a message"""
+        if not self._initialized or not self._document_backend:
+            logger.error("Storage not initialized")
+            return False
+        return self._document_backend.clear_message_thinking(message_id)

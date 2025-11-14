@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+  push:
+    tags:
+      - v*.*.*
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+      fail-fast: false
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get release tag
+        id: get-tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set package.json version
+        working-directory: frontend
+        shell: bash
+        run: |
+          TAG="${{ steps.get-tag.outputs.tag }}"
+          VERSION="${TAG#v}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Install Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Prepare pnpm 9.12.0
+        run: corepack prepare pnpm@9.12.0 --activate
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # macOS: install uv
+      - name: Install uv and sync Python dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install uv
+          uv venv
+          uv pip install --upgrade pip setuptools wheel build
+          uv sync
+
+      # Windows: install uv
+      - name: Install uv and sync Python dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          uv sync
+
+      # Linux: install uv
+      - name: Install uv and sync Python dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-venv python3-pip
+          pip install uv
+          uv venv
+          uv pip install --upgrade pip setuptools wheel build
+          uv sync
+
+      # 获取 pnpm 缓存目录
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: |
+          echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # 缓存 pnpm 依赖
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Mac Backend
+        if: matrix.os == 'macos-latest'
+        run: |
+          source .venv/bin/activate
+          chmod +x ./build.sh
+          ./build.sh
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Build Windows Backend
+        if: matrix.os == 'windows-latest'
+        run: |
+          .venv\Scripts\activate
+          ./build.bat
+
+      - name: Build Linux Backend
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          source .venv/bin/activate
+          chmod +x ./build.sh
+          ./build.sh
+
+      - name: Cleanup keychain
+        if: always() && runner.os == 'macOS'
+        shell: bash
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            echo "🧹 Deleting temporary keychain: $KEYCHAIN_PATH"
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+
+      - name: Build Mac
+        if: matrix.os == 'macos-latest'
+        working-directory: frontend
+        run: |
+          pnpm run build:mac
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Build Windows
+        if: matrix.os == 'windows-latest'
+        working-directory: frontend
+        run: |
+          pnpm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: frontend
+        run: |
+          pnpm run build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          workingDirectory: frontend
+          draft: true
+          allowUpdates: true
+          makeLatest: false
+          tag: ${{ steps.get-tag.outputs.tag }}
+          artifacts: 'dist/*.exe,dist/*.zip,dist/*.dmg,dist/*.AppImage,dist/*.snap,dist/*.deb,dist/*.rpm,dist/*.tar.gz,dist/latest*.yml,dist/rc*.yml,dist/beta*.yml,dist/*.blockmap'
+          token: ${{ secrets.GITHUB_TOKEN }}

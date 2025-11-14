@@ -3,6 +3,7 @@
 
 import { Layout } from '@arco-design/web-react'
 import VaultTree from '@renderer/components/vault-tree'
+import UpdateAvailableButton from '@renderer/components/UpdateAvailableButton'
 import { useNavigation } from '@renderer/hooks/use-navigation'
 import logo from '/src/assets/icons/logo.svg'
 import homeIcon from '/src/assets/icons/home.svg'
@@ -12,6 +13,7 @@ import settings from '/src/assets/icons/settings.svg'
 // import resourcesIcon from '/src/assets/icons/resources.svg'
 // import { IconRobot } from '@arco-design/web-react/icon'
 import './index.css'
+import { CSSProperties } from 'react'
 const { Sider } = Layout
 
 const tabItems = [
@@ -60,13 +62,11 @@ const Sidebar = () => {
   return (
     <Sider
       width={176}
-      className="sidebar-container [&_.arco-layout-sider]: !flex !flex-col !bg-transparent !height-[100vh]">
+      className="sidebar-container [&_.arco-layout-sider]: !flex !flex-col !bg-transparent !height-[100vh] !px-[12px]"
+      style={{ appRegion: 'drag' } as CSSProperties}>
       {/* Top logo and title */}
       <div style={{ height: '16px', appRegion: 'drag' } as React.CSSProperties} />
-      <div
-        className="flex items-center px-4 py-2 h-[80px] flex-shrink-0"
-        onClick={() => handleTabChange('home')}
-        style={{ appRegion: 'drag' } as React.CSSProperties}>
+      <div className="flex items-center px-4 py-2 h-[80px] flex-shrink-0">
         <div className="flex items-center gap-2 flex-1">
           <img
             src={logo}
@@ -85,7 +85,7 @@ const Sidebar = () => {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0" style={{ appRegion: 'no-drag' } as CSSProperties}>
         {tabItems.map((item) => (
           <div
             key={item.key}
@@ -99,7 +99,10 @@ const Sidebar = () => {
         ))}
       </div>
 
-      <VaultTree />
+      <VaultTree className="flex-1" />
+      <div className="mt-2 mr-3 mb-5" style={{ appRegion: 'no-drag' } as CSSProperties}>
+        <UpdateAvailableButton />
+      </div>
     </Sider>
   )
 }

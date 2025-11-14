@@ -343,7 +343,7 @@ const ToDoCard: React.FC = () => {
           <div className="flex flex-1 justify-between items-center w-full">
             <Space style={{ marginTop: 5 }}>
               <div className="flex px-[2px] justify-center items-center gap-[4px] rounded-[2px] bg-gradient-to-l from-[rgba(239,251,248,0.5)] to-[#F5FBEF]">
-                <div className="mr-[0.3em] font-['Byte Sans'] text-[15px] font-extralight leading-[22px] tracking-[0.045px] bg-gradient-to-l from-[#007740] to-[#D0B400] bg-clip-text text-transparent">
+                <div className="mr-[0.3em] font-['Roboto'] text-[15px] font-extralight leading-[22px] tracking-[0.045px] bg-gradient-to-l from-[#007740] to-[#D0B400] bg-clip-text text-transparent">
                   Todo
                 </div>
               </div>

@@ -13,7 +13,7 @@ import fileIcon from '/src/assets/icons/file.svg'
 import addIcon from '/src/assets/icons/add.svg'
 import deleteIcon from '/src/assets/icons/delete.svg'
 import renameIcon from '/src/assets/icons/rename.svg'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { useEvents } from '@renderer/hooks/use-events'
 import { PushDataTypes } from '@renderer/constant/feed'
 import { get } from 'lodash'
@@ -22,6 +22,8 @@ import PQueue from 'p-queue'
 import { VaultDocumentType, VaultTitle } from '@shared/enums/global-enum'
 import { getLogger } from '@shared/logger/renderer'
 import dayjs from 'dayjs'
+import clsx from 'clsx'
+
 const queue = new PQueue({ concurrency: 2 })
 const { Text, Ellipsis } = Typography
 const logger = getLogger('VaultTree')
@@ -173,7 +175,7 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
   )
 }
 
-const Sidebar = () => {
+const Sidebar = ({ className }: { className?: string }) => {
   const {
     vaults: treeData,
     updateVaultPosition,
@@ -249,13 +251,29 @@ const Sidebar = () => {
   const treeContainerRef = useRef<HTMLDivElement>(null)
   const [treeDimensions, setTreeDimensions] = useState({ width: 200, height: 600 })
   useEffect(() => {
-    if (treeContainerRef.current && treeContainerRef.current.clientWidth > 0) {
+    if (!treeContainerRef.current) return
+
+    const updateSize = () => {
+      const el = treeContainerRef.current
+      if (!el) return
       setTreeDimensions({
-        ...treeDimensions,
-        width: treeContainerRef.current.clientWidth
+        height: el.clientHeight,
+        width: el.clientWidth
       })
     }
-  }, [treeData])
+
+    // 初始化时先更新一次
+    updateSize()
+
+    const observer = new ResizeObserver(() => {
+      updateSize()
+    })
+
+    observer.observe(treeContainerRef.current)
+
+    // 清理 observer
+    return () => observer.disconnect()
+  }, [treeContainerRef])
 
   const onRename = ({ id, name }: { id: string; name: string }) => {
     onRenameVault(Number(id), name)
@@ -297,7 +315,9 @@ const Sidebar = () => {
   )
 
   return (
-    <div className="flex-1 flex flex-col min-h-[0]" style={{ marginTop: 12 }}>
+    <div
+      className={clsx('flex flex-col min-h-[0]', className)}
+      style={{ marginTop: 12, appRegion: 'no-drag' } as CSSProperties}>
       <div className="flex flex-col flex-1 min-h-[0]">
         {/* Vault notes section */}
         <div className="px-[12px] shrink-0">
@@ -316,25 +336,25 @@ const Sidebar = () => {
         </div>
 
         {/* Modern tree structure */}
-        <div className="text-black flex-1 min-h-[0]  [&_.arco-typography]: !font-[13px]" ref={treeContainerRef}>
-          {treeDimensions.height > 0 && (
-            <Tree
-              idAccessor={(data) => data.id.toString()}
-              data={treeData?.children || []}
-              onRename={onRename}
-              onMove={onMove}
-              width={treeDimensions.width}
-              height={treeDimensions.height}
-              rowHeight={32}
-              indent={0}
-              onActivate={(node) => {
-                if (node.data.is_folder !== 1) {
-                  navigateToVault(node.data.id)
-                }
-              }}>
-              {Node}
-            </Tree>
-          )}
+        <div
+          className="text-black flex-1 min-h-[0]  [&_.arco-typography]: !font-[13px] overflow-auto"
+          ref={treeContainerRef}>
+          <Tree
+            idAccessor={(data) => data.id.toString()}
+            data={treeData?.children || []}
+            onRename={onRename}
+            onMove={onMove}
+            width={treeDimensions.width}
+            height={treeDimensions.height}
+            rowHeight={32}
+            indent={0}
+            onActivate={(node) => {
+              if (node.data.is_folder !== 1) {
+                navigateToVault(node.data.id)
+              }
+            }}>
+            {Node}
+          </Tree>
         </div>
       </div>
     </div>

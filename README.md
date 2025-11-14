@@ -491,7 +491,7 @@ We will prioritize the expansion of Context Sources according to the following p
 ## MineContext vs Dayflow
 
 - 💡 Richer, Proactive Insights:
-  ineContext delivers a more diverse range of automated, intelligent content—including concise summaries, actionable todos, and contextual tips—going beyond basic activity tracking. DayFlow primarily focuses on logging user activity.
+  MineContext delivers a more diverse range of automated, intelligent content—including concise summaries, actionable todos, and contextual tips—going beyond basic activity tracking. DayFlow primarily focuses on logging user activity.
 - 🧠 Context-Aware Q&A & Creation:
   MineContext enables you to ask questions and generate new content based on your captured context, unlocking wider application scenarios like content drafting and project planning. DayFlow is limited to passive activity recording and review.
 - ✨ Superior Activity Generation & Experience:
