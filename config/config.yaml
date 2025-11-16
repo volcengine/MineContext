@@ -24,16 +24,16 @@ document_processing:
   text_threshold_per_page: 50 # Scanned document threshold: pages with fewer characters than this value are considered scanned documents (requires VLM)
 
 vlm_model:
-  base_url: "${LLM_BASE_URL}"
+  base_url: "https://open.bigmodel.cn/api/paas/v4"
   api_key: "${LLM_API_KEY}"
-  model: "${LLM_MODEL}"
-  provider: ""
+  model: "glm-4.1v-thinking-flash"
+  provider: "openai"
 
 embedding_model:
-  base_url: "${EMBEDDING_BASE_URL}"
+  base_url: "https://ark.cn-beijing.volces.com/api/v3"
   api_key: "${EMBEDDING_API_KEY}"
-  model: "${EMBEDDING_MODEL}"
-  provider: ""
+  model: "Doubao-embedding-large"
+  provider: "doubao"
   output_dim: 2048
 
 # Context capture module
@@ -198,29 +198,3 @@ content_generation:
   activity:
     enabled: true
     interval: 900 # Seconds, minimum 600 (10 minutes), recommended 900-1800 (15-30 minutes)
-
-  tips:
-    enabled: true
-    interval: 3600 # Seconds, minimum 1800 (30 minutes), recommended 3600-7200 (1-2 hours)
-
-  todos:
-    enabled: true
-    interval: 1800 # Seconds, minimum 1800 (30 minutes), recommended 1800-3600 (30-60 minutes)
-
-  report:
-    enabled: true
-    time: "08:00" # Daily report generation time (HH:MM)
-
-tools:
-  # Operation tools configuration
-  operation_tools:
-    web_search_tool:
-      enabled: true
-      web_search:
-        engine: duckduckgo
-        max_results: 5
-        timeout: 10
-
-# Intelligent completion service configuration
-completion:
-  enabled: true

@@ -9,9 +9,10 @@ import { ActivityTimelineItem } from '@renderer/pages/screen-monitor/components/
 import { isEmpty } from 'lodash'
 import { useServiceHandler } from '@renderer/atom/event-loop.atom'
 import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
+import { useTranslation } from 'react-i18next'
 
 interface LatestActivityCardProps {
-  title: string
+  title?: string
   hasToDocButton?: boolean
   emptyText?: string
   children?: React.ReactNode
@@ -22,6 +23,7 @@ const LOCKED_INTERVAL = 300000 // Locked: 5 minutes
 
 const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   const { navigateToMainTab } = useNavigation()
+  const { t } = useTranslation()
 
   // Store polling timer ID
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -78,8 +80,8 @@ const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   return (
     <CardLayout
       seeAllClick={handleNavigateToScreenMonitor}
-      title="Latest activity"
-      emptyText="No activity in the last 7 days. "
+      title={t('home.latest_activity.title')}
+      emptyText={t('home.latest_activity.empty')}
       isEmpty={isEmpty(data)}>
       {data ? (
         <ActivityTimelineItem activity={{ ...data, resources: JSON.parse(data.resources || '[]') } as any} />
