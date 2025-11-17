@@ -273,6 +273,9 @@ class ScreenshotProcessor(BaseContextProcessor):
             current_timezone=time_now.tzname(),
         )
         content.insert(0, {"type": "text", "text": user_prompt})
+        system_prompt = system_prompt.format(
+            context_type_descriptions=get_context_type_descriptions_for_extraction()
+        )
 
         messages = [
             {"role": "system", "content": system_prompt},

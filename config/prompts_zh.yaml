@@ -422,20 +422,22 @@ processing:
           9. **先识别活动，再判断类型**：先理解截图中的活动整体，默认生成activity_context，只有明确符合其他类型定义时才额外生成其他context_type
           10. **类型与风格匹配**：不同context_type必须使用对应的描述风格，避免用activity风格描述state/procedural/semantic
 
-          ## 标准JSON输出格式:
-          {
+          ## 输出格式
+          严格输出JSON对象，无解释文字：
+          ```json
+          {{
             "items": [
-              {
-                "context_type": "activity_context | intent_context | semantic_context | procedural_context | state_context",
+              {{
+                "context_type": " activity_context | intent_context | semantic_context | procedural_context | state_context",
                 "title": "string",
                 "summary": "string",
                 "keywords": ["string"],
                 "importance": 0-10,
                 "confidence": 0-10,
-              }
+              }}
             ]
-          }
-
+          }}
+          ```
           注意：同一个context_type下的不同主题必须分别生成独立的item，不要混合不相关的内容。
 
           ## context_type 识别关键原则
@@ -634,7 +636,7 @@ processing:
         当前时区: {current_timezone}
         当前时间戳: {current_timestamp}
         ---
-        请严格按照上述规则和格式，分析以下截图。输出请按JSON格式返回。
+        请严格按照上述规则和格式，分析以下截图
 
 merging:
   context_merging_multiple:
