@@ -21,7 +21,7 @@ from opencontext.models.context import ProcessedContext, Vectorize
 class StorageType(Enum):
     """Enumeration of supported storage types."""
 
-    VECTOR_DB = "vector_db"  # Vector databases: ChromaDB
+    VECTOR_DB = "vector_db"  # Vector databases: ChromaDB, Qdrant
     DOCUMENT_DB = "document_db"  # Document databases: SQLite, MongoDB
 
 

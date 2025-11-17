@@ -34,6 +34,7 @@ class StorageBackendFactory:
         self._backends = {
             StorageType.VECTOR_DB: {
                 "chromadb": self._create_chromadb_backend,
+                "qdrant": self._create_qdrant_backend,
             },
             StorageType.DOCUMENT_DB: {
                 "sqlite": self._create_sqlite_backend,
@@ -74,6 +75,11 @@ class StorageBackendFactory:
         from opencontext.storage.backends.chromadb_backend import ChromaDBBackend
 
         return ChromaDBBackend()
+
+    def _create_qdrant_backend(self, config: Dict[str, Any]):
+        from opencontext.storage.backends.qdrant_backend import QdrantBackend
+
+        return QdrantBackend()
 
     def _create_sqlite_backend(self, config: Dict[str, Any]):
         from opencontext.storage.backends.sqlite_backend import SQLiteBackend
