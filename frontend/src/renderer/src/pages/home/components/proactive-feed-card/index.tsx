@@ -120,7 +120,6 @@ const ProactiveFeedCardItem: FC<FeedCardProps> = (props) => {
 
 const ProactiveFeedCard: React.FC = ({}) => {
   const { feedEvents } = useEvents()
-  console.log('feedEvents', feedEvents)
   const transferType = (event: FeedEvent): FeedCardProps => {
     return {
       id: event.id,

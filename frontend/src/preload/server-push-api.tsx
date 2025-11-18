@@ -30,5 +30,17 @@ export const serverPushAPI = {
     } catch (error) {
       logger.error('Error setting up screenMonitorStatus event listener', error)
     }
+  },
+  pushHomeLatestActivity: (callback: (data: any) => void): any => {
+    try {
+      ipcRenderer.on(IpcServerPushChannel.Home_PushLatestActivity, (_, data) => {
+        callback(data)
+      })
+      return () => {
+        ipcRenderer.off(IpcServerPushChannel.Home_PushLatestActivity, callback)
+      }
+    } catch (error) {
+      logger.error('Error setting up homeLatestActivity event listener', error)
+    }
   }
 }

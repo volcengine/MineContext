@@ -6,7 +6,7 @@ import Database from 'better-sqlite3'
 import path from 'node:path'
 import fs from 'fs'
 import { app } from 'electron'
-import { toSqliteDatetime } from '../utils/time'
+import { isValidIsoString, toSqliteDatetime } from '../utils/time'
 import { is } from '@electron-toolkit/utils'
 import { DB } from './Database'
 import { TODOActivity } from '@interface/db/todo'
@@ -220,14 +220,20 @@ class DatabaseManager extends VaultDatabaseService {
     }
   }
 
-  public getTasks(startTime: string, endTime: string = '2099-12-31 00:00:00') {
+  public getTasks(startTime: string, endTime: string) {
     try {
       this.ensureInitialized()
-      const start = toSqliteDatetime(startTime)
-      const end = toSqliteDatetime(endTime)
+      if (!isValidIsoString(startTime)) {
+        logger.error('❌ Invalid startTime format:', startTime)
+        throw new Error('Invalid startTime format. Expected ISO 8601 string.')
+      }
+      if (!isValidIsoString(endTime)) {
+        logger.error('❌ Invalid endTime format:', endTime)
+        throw new Error('Invalid endTime format. Expected ISO 8601 string.')
+      }
       const db = DB.getInstance(DB.dbName)
-      const sql = 'SELECT * FROM todo WHERE start_time > ? AND start_time < ? ORDER BY start_time ASC'
-      const rows = db.query<TODOActivity>(sql, [start, end])
+      const sql = 'SELECT * FROM todo WHERE start_time >= ? AND start_time < ? ORDER BY start_time ASC'
+      const rows = db.query<TODOActivity>(sql, [startTime, endTime])
       return rows
     } catch (error) {
       logger.error('❌ Failed to get tasks:', error)
