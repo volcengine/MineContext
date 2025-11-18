@@ -7,7 +7,7 @@
 Server component: monitoring routes - Monitoring API endpoints
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -137,6 +137,33 @@ async def get_data_stats_trend(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to get data statistics trend: {str(e)}"
+        )
+
+
+@router.get("/data-stats-range")
+async def get_data_stats_by_range(
+    start_time: datetime = Query(..., description="Start time of the query range (ISO format)"),
+    end_time: datetime = Query(..., description="End time of the query range (ISO format)"),
+    _auth: str = auth_dependency,
+):
+    """
+    Get data statistics by custom time range (screenshots, documents, contexts)
+    """
+    try:
+        # Validate time range
+        if start_time >= end_time:
+            raise HTTPException(
+                status_code=400, detail="start_time must be earlier than end_time"
+            )
+
+        monitor = get_monitor()
+        stats = monitor.get_data_stats_by_range(start_time=start_time, end_time=end_time)
+        return {"success": True, "data": stats}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get data statistics by range: {str(e)}"
         )
 
 

@@ -7,5 +7,6 @@ export enum IpcServerPushChannel {
   PushScreenMonitorStatus = 'push:screen-monitor-status',
   NotificationClick = 'push:IpcServerPushChannel.NotificationClick',
   Tray_ToggleRecording = 'push:tray-toggle-recording',
-  Tray_NavigateToScreenMonitor = 'push:tray-navigate-to-screen-monitor'
+  Tray_NavigateToScreenMonitor = 'push:tray-navigate-to-screen-monitor',
+  Home_PushLatestActivity = 'push:latest-activity'
 }

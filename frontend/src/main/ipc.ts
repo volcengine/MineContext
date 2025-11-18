@@ -38,6 +38,7 @@ import { VaultDocumentType } from '@shared/enums/global-enum'
 import { getTrayService } from './index'
 import { type Dayjs } from 'dayjs'
 import AppUpdater from './services/AppUpdater'
+import { HeatmapService } from './services/HeatmapService'
 
 const logger = getLogger('IPC')
 
@@ -601,5 +602,8 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
       logger.error('Failed to get recording stats:', error)
       return null
     }
+  })
+  ipcMain.handle(IpcChannel.Get_Heatmap_Data, async (_, startTime: number, endTime: number) => {
+    return HeatmapService.getHeatmapData(startTime, endTime)
   })
 }

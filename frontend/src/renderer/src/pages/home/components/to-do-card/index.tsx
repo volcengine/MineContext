@@ -18,7 +18,7 @@ import {
 } from '@arco-design/web-react'
 import { IconDelete } from '@arco-design/web-react/icon'
 import { Task, useHomeInfo } from '@renderer/hooks/use-home-info'
-import { useRef, useState } from 'react'
+import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import taskEmpty from '@renderer/assets/images/task-empty.svg'
 import addIcon from '@renderer/assets/icons/add.svg'
 import copyIcon from '@renderer/assets/images/copy.svg'
@@ -29,6 +29,7 @@ import highPriorityIcon from '@renderer/assets/icons/high-priority.svg'
 import mediumPriorityIcon from '@renderer/assets/icons/medium-priority.svg'
 import lowPriorityIcon from '@renderer/assets/icons/low-priority.svg'
 import doneIcon from '@renderer/assets/icons/done.svg'
+import dayjs from 'dayjs'
 
 const { Text } = Typography
 const TextArea = Input.TextArea
@@ -63,25 +64,32 @@ function genTodoTitle(urgency: TaskUrgency) {
       return 'Unknown Priority'
   }
 }
-
-const ToDoCard: React.FC = () => {
-  const { tasks, toggleTaskStatus, updateTask, deleteTask, addTask } = useHomeInfo()
-  const hasTasks = tasks.length > 0
+export interface ToDoCardProps {
+  selectedDays: string | null
+}
+const ToDoCard: FC<ToDoCardProps> = (props) => {
+  const { selectedDays } = props
+  const { tasks, toggleTaskStatus, updateTask, deleteTask, addTask, fetchTasks } = useHomeInfo()
+  const hasTasks = useMemo(() => tasks.length > 0, [tasks])
   const [isTaskHover, setIsTaskHover] = useState<number | null>(null) // Edit task status
   const [isDeleting, setIsDeleting] = useState(false)
   const [copiedTaskId, setCopiedTaskId] = useState<number | null>(null) // Copied tooltip state
   const { deleteTodoList, data: todoListInitData } = useInitPrepareData()
   const [form] = Form.useForm()
-  const filterDoneTasks = tasks.map((task) => {
-    // After a task is done, its urgency becomes -1
-    if (task.status === 1) {
-      return {
-        ...task,
-        urgency: TaskUrgency.Done
-      }
-    }
-    return task
-  })
+  const filterDoneTasks = useMemo(
+    () =>
+      tasks.map((task) => {
+        // Set urgency to done when task is done
+        if (task.status === 1) {
+          return {
+            ...task,
+            urgency: TaskUrgency.Done
+          }
+        }
+        return task
+      }),
+    [tasks]
+  )
 
   // Handle deleting a task
   const handleDeleteTask = useMemoizedFn(async (taskId: number) => {
@@ -260,7 +268,7 @@ const ToDoCard: React.FC = () => {
   const timer = useRef<NodeJS.Timeout>(null)
   const handleToggleTaskStatus = useMemoizedFn(async (task) => {
     let id = task.id
-    console.log('id --->', id)
+
     if (todoListInitData.some((v) => v.id === task.id)) {
       deleteTodoList(task.id)
       id = await addTask({
@@ -268,7 +276,6 @@ const ToDoCard: React.FC = () => {
         urgency: task.urgency,
         status: 0
       })
-      console.log('id --->', id)
     }
     timer.current = setTimeout(() => {
       toggleTaskStatus(id)
@@ -331,6 +338,13 @@ const ToDoCard: React.FC = () => {
       clearTimeout(timer.current!)
     }
   })
+
+  useEffect(() => {
+    // Need to refresh the task list after clicking a date on the heatmap
+    if (selectedDays) {
+      fetchTasks(dayjs(selectedDays))
+    }
+  }, [selectedDays])
 
   return (
     <>

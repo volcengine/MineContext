@@ -12,7 +12,10 @@ dayjs.extend(timezone)
 export const toSqliteDatetime = (date: Date | string | number): string => {
   return dayjs(date).utc().format('YYYY-MM-DD HH:mm:ss')
 }
-
+export const isValidIsoString = (isoString: string): boolean => {
+  // 第二个参数 true 表示启用严格模式，要求格式和 ISO 8601 完全匹配
+  return dayjs(isoString).isValid()
+}
 // Read from SQLite (convert to local time zone)
 export const fromSqliteDatetime = (sqliteDate: string, tz: string = dayjs.tz.guess()): string => {
   return dayjs.utc(sqliteDate).tz(tz).format('YYYY-MM-DD HH:mm:ss')
