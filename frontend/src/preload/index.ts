@@ -65,7 +65,7 @@ const dbAPI = {
   getLatestActivity: () => ipcRenderer.invoke(IpcChannel.Database_GetLatestActivity),
 
   // tasks
-  getTasks: (startTime: string, endTime?: string) =>
+  getTasks: (startTime: string, endTime: string) =>
     ipcRenderer.invoke(IpcChannel.Database_GetAllTasks, startTime, endTime),
   updateTask: (id: number, task: Partial<{ content: string; urgency: number; start_time: string; end_time: string }>) =>
     ipcRenderer.invoke(IpcChannel.Database_UpdateTask, id, task),
@@ -76,7 +76,9 @@ const dbAPI = {
   ) => ipcRenderer.invoke(IpcChannel.Database_AddTask, taskData), // 新增
 
   // tips
-  getAllTips: () => ipcRenderer.invoke(IpcChannel.Database_GetAllTips)
+  getAllTips: () => ipcRenderer.invoke(IpcChannel.Database_GetAllTips),
+  getHeatmapData: (startTime: number, endTime: number) =>
+    ipcRenderer.invoke(IpcChannel.Get_Heatmap_Data, startTime, endTime)
 }
 
 const screenMonitorAPI = {
@@ -110,6 +112,10 @@ const fileService = {
   getFiles: () => ipcRenderer.invoke(IpcChannel.File_Get_All)
 }
 
+const eventLoop = {
+  getHomeLatestActivity: (status: string) => ipcRenderer.invoke(IpcChannel.Get_Home_LatestActivity, status)
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
@@ -121,6 +127,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('screenMonitorAPI', screenMonitorAPI)
     contextBridge.exposeInMainWorld('fileService', fileService)
     contextBridge.exposeInMainWorld('serverPushAPI', serverPushAPI)
+    contextBridge.exposeInMainWorld('eventLoop', eventLoop)
   } catch (error) {
     console.error(error)
   }
@@ -137,6 +144,8 @@ if (process.contextIsolated) {
   window.fileService = fileService
   // @ts-ignore (define in dts)
   window.serverPushAPI = serverPushAPI
+  // @ts-ignore (define in dts)
+  window.eventLoop = eventLoop
 }
 
 ipcRenderer.on('main-log', (_, ...args) => {

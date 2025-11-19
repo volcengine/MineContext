@@ -744,6 +744,12 @@ class UnifiedStorage:
         """Query data statistics monitoring data"""
         return self._document_backend.query_monitoring_data_stats(hours)
 
+    def query_monitoring_data_stats_by_range(
+        self, start_time: Any, end_time: Any
+    ) -> List[Dict[str, Any]]:
+        """Query data statistics monitoring data by custom time range"""
+        return self._document_backend.query_monitoring_data_stats_by_range(start_time, end_time)
+
     def query_monitoring_data_stats_trend(
         self, hours: int = 24, interval_hours: int = 1
     ) -> List[Dict[str, Any]]:

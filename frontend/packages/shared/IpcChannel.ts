@@ -338,5 +338,11 @@ export enum IpcChannel {
   Task_Start = 'task:start',
   Task_Stop = 'task:stop',
   Task_Update_Current_Record_App = 'task:update-current-record-app',
-  Task_Check_Can_Record = 'task:check-can-record'
+  Task_Check_Can_Record = 'task:check-can-record',
+
+  // Heatmap
+  Get_Heatmap_Data = 'heatmap:get-data',
+
+  // Home
+  Get_Home_LatestActivity = 'home:get-latest-activity'
 }
