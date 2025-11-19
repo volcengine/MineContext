@@ -40,7 +40,8 @@ dependencies = [
     "imagehash",
     "pypdfium2>=4.30.0",
     "python-docx>=1.0.0",
-    "python-multipart"
+    "python-multipart",
+    "playwright",
 ]
 
 [project.optional-dependencies]

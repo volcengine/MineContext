@@ -14,7 +14,7 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from opencontext.context_capture.base import BaseCaptureComponent
 from opencontext.context_processing.processor.document_processor import DocumentProcessor
@@ -185,7 +185,7 @@ class FolderMonitor(BaseCaptureComponent):
         except Exception as e:
             logger.exception(f"Folder scan failed: {e}")
 
-    def _detect_new_and_updated_files(self, current_files: set) -> (List[str], List[str]):
+    def _detect_new_and_updated_files(self, current_files: set) -> Tuple[List[str], List[str]]:
         new_files, updated_files = [], []
         for file_path in current_files:
             try:
