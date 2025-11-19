@@ -250,3 +250,4 @@ pyrightconfig.json
 
 # ide config file
 .trae
+.claude/

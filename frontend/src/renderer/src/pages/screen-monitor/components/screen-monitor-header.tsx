@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Space, Typography, Popover } from '@arco-design/web-react'
-import { IconPlayArrow, IconSettings, IconRecordStop, IconVideoCamera } from '@arco-design/web-react/icon'
+import { IconPlayArrow, IconSettings, IconRecordStop } from '@arco-design/web-react/icon'
 
 const { Title, Text } = Typography
 
@@ -24,8 +24,7 @@ const ScreenMonitorHeader: React.FC<ScreenMonitorHeaderProps> = ({
   appAllSources,
   onOpenSettings,
   onStartMonitoring,
-  onStopMonitoring,
-  onRequestPermission
+  onStopMonitoring
 }) => {
   return (
     <div className="flex justify-between items-start mb-3 flex-col md:flex-row">
@@ -82,17 +81,7 @@ const ScreenMonitorHeader: React.FC<ScreenMonitorHeaderProps> = ({
               </Button>
             )}
           </Space>
-        ) : (
-          <Button
-            type="primary"
-            status="danger"
-            icon={<IconVideoCamera />}
-            size="large"
-            onClick={onRequestPermission}
-            className="[&_.arco-btn-primary]:!bg-red-500 [&_.arco-btn-primary:hover]:!bg-red-600">
-            Request permission
-          </Button>
-        )}
+        ) : null}
       </div>
     </div>
   )

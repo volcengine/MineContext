@@ -12,6 +12,8 @@ exports.default = async function notarizing(context) {
   const appName = context.packager.appInfo.productFilename
   const appPath = `${context.appOutDir}/${appName}.app`
 
+  console.log('Notarizing app:', appPath)
+
   await notarize({
     appPath,
     appBundleId: 'com.vikingdb.desktop',

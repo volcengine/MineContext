@@ -26,7 +26,7 @@ An open-source, proactive context-aware AI partner, dedicated to bringing clarit
 
 🌍 Join our [Discord Group](https://discord.gg/tGj7RQ3nUR)
 
-<a href="https://github.com/volcengine/MineContext/releases/download/0.1.4/MineContext-0.1.4.dmg">🖥️ Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.4/MineContext-0.1.4-setup.exe">💻 Download for Windows</a>
+<a href="https://github.com/volcengine/MineContext/releases/download/0.1.5/MineContext-0.1.5.dmg">🖥️ Download for Mac</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.5/MineContext-0.1.5-setup.exe">💻 Download for Windows</a>
 
 </div>
 
@@ -39,11 +39,10 @@ Table of Contents
   - [Local AI model](#local-ai-model)
 - [🏁 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
-  - [2. Disable the quarantine attribute](#2-disable-the-quarantine-attribute)
-  - [3. Enter Your API Key](#3-enter-your-api-key)
-  - [4. Start Recording](#4-start-recording)
-  - [5. Forget it](#5-forget-it)
-  - [6. Backend Debugging](#6-backend-debugging)
+  - [2. Enter Your API Key](#2-enter-your-api-key)
+  - [3. Start Recording](#3-start-recording)
+  - [4. Forget it](#4-forget-it)
+  - [5. Backend Debugging](#5-backend-debugging)
 - [🎃 Contribution Guide](#-contribution-guide)
   - [🎨 Frontend Architecture](#-frontend-architecture)
     - [Core Tech Stack](#core-tech-stack)
@@ -114,17 +113,9 @@ Click [Github Latest Release](https://github.com/volcengine/MineContext/releases
 
 ![Download APP](src/Download-App.gif)
 
-## 2. Disable the quarantine attribute
+> **Note**: Starting from v0.1.5, MineContext supports Apple notarization, so you no longer need to disable the quarantine attribute. If you're using an older version, please refer to the [previous documentation](https://github.com/volcengine/MineContext/blob/0.1.4/README.md) for instructions.
 
-Enter the following command in the terminal to disable the quarantine attribute before running the application.
-
-```
-sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
-```
-
-![Quarantine](src/Quarantine.gif)
-
-## 3. Enter Your API Key
+## 2. Enter Your API Key
 
 After the application launches, please follow the prompts to enter your API key. (Note: On the first run, the application needs to install the backend environment, which may take about two minutes).
 
@@ -146,7 +137,7 @@ The following is the filling process after obtaining the API Key:
 
 ![Enter API Key](src/Enter-API-Key.gif)
 
-## 4. Start Recording
+## 3. Start Recording
 
 Enter [Screen Monitor] to enable the system permissions for screen sharing. After completing the setup, you need to restart the application for the changes to take effect.
 ![Enable-Permissions](src/Enable-Permissions.gif)
@@ -154,11 +145,11 @@ Enter [Screen Monitor] to enable the system permissions for screen sharing. Afte
 After restarting the application, please first set your screen sharing area in [Settings], then click [Start Recording] to begin taking screenshots.
 ![Screen-Settings](src/Screen-Settings.gif)
 
-## 5. Forget it
+## 4. Forget it
 
 After starting the recording, your context will gradually be collected. It will take some time to generate value. So, forget about it and focus on other tasks with peace of mind. MineContext will generate to-dos, prompts, summaries, and activities for you in the background. Of course, you can also engage in proactive Q&A through [Chat with AI].
 
-## 6. Backend Debugging
+## 5. Backend Debugging
 
 MineContext supports backend debugging, which can be accessed at `http://localhost:1733`.
 
@@ -491,7 +482,7 @@ We will prioritize the expansion of Context Sources according to the following p
 ## MineContext vs Dayflow
 
 - 💡 Richer, Proactive Insights:
-  ineContext delivers a more diverse range of automated, intelligent content—including concise summaries, actionable todos, and contextual tips—going beyond basic activity tracking. DayFlow primarily focuses on logging user activity.
+  MineContext delivers a more diverse range of automated, intelligent content—including concise summaries, actionable todos, and contextual tips—going beyond basic activity tracking. DayFlow primarily focuses on logging user activity.
 - 🧠 Context-Aware Q&A & Creation:
   MineContext enables you to ask questions and generate new content based on your captured context, unlocking wider application scenarios like content drafting and project planning. DayFlow is limited to passive activity recording and review.
 - ✨ Superior Activity Generation & Experience:

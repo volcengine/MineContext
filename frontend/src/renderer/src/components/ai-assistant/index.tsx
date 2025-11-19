@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useCallback, useMemo, FC } from 'react'
+import React, { useState, useCallback, useMemo, FC, useEffect } from 'react'
 import { Button, Input, Typography, Tag } from '@arco-design/web-react'
 import { IconStop } from '@arco-design/web-react/icon'
 import { useChatStream } from '@renderer/hooks/use-chat-stream'
@@ -31,6 +31,7 @@ interface AIAssistantProps {
   visible: boolean
   onClose: () => void
   pageName: string
+  initConversationId: number | null
 }
 
 // Markdown rendering component
@@ -53,7 +54,7 @@ export const MarkdownContent: React.FC<{ content: string }> = ({ content }) => {
 }
 
 const AIAssistant: FC<AIAssistantProps> = (props) => {
-  const { visible, onClose, pageName } = props
+  const { visible, onClose, pageName, initConversationId } = props
   const [message, setMessage] = useState('')
   const {
     messages,
@@ -80,6 +81,11 @@ const AIAssistant: FC<AIAssistantProps> = (props) => {
       }))
     }
   })
+  useEffect(() => {
+    if (initConversationId) {
+      getConversationMessages(initConversationId)
+    }
+  }, [initConversationId])
 
   // Get current page context information
   const getCurrentContext = useMemoizedFn((): ChatContext => {
@@ -113,9 +119,9 @@ const AIAssistant: FC<AIAssistantProps> = (props) => {
     if (!conversationId) {
       // Create a new conversation if none exists
       try {
-        const response = await createConversation({ page_name: pageName })
-        setConversationId(response.id)
         const context = getCurrentContext()
+        const response = await createConversation({ page_name: pageName, document_id: context.document_id })
+        setConversationId(response.id)
         if (response.id) {
           await sendMessage(message, response.id, context)
         }

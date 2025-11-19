@@ -31,6 +31,8 @@ class CreateConversationRequest(BaseModel):
     """Request model for 4.1.1 Create Conversation"""
     page_name: str = Field(...,
                            description="Page name, e.g., 'home' or 'creation'")
+    document_id: Optional[str] = Field(None,
+                                       description="Optional document ID to store in metadata")
 
 
 class ConversationResponse(BaseModel):
@@ -83,9 +85,15 @@ async def create_conversation(
     try:
         storage = get_storage()
 
+        # Prepare metadata if document_id is provided
+        metadata = None
+        if request.document_id:
+            metadata = {"document_id": request.document_id}
+
         # user_id is optional in the backend and can be added later
         conversation = storage.create_conversation(
-            page_name=request.page_name
+            page_name=request.page_name,
+            metadata=metadata
         )
 
         if not conversation:

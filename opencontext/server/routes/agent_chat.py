@@ -141,6 +141,17 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
                 )
                 logger.info(f"Created user message {user_message_id} in conversation {request.conversation_id}")
 
+                # Update conversation title with user's question only if not already set
+                if request.query and request.query.strip():
+                    conversation = storage.get_conversation(request.conversation_id)
+                    if conversation and not conversation.get("title"):
+                        title = request.query[:50].strip()
+                        storage.update_conversation(
+                            conversation_id=request.conversation_id,
+                            title=title
+                        )
+                        logger.info(f"Set conversation {request.conversation_id} title from user query: {title}")
+
             # Create streaming assistant message if conversation_id is provided
             if request.conversation_id:
                 assistant_message_id = storage.create_streaming_message(
@@ -165,7 +176,6 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
             accumulated_content = ""
             event_metadata = {}  # Store events by type
             interrupted = False  # Track if stream was interrupted
-            title_updated = False  # Track if conversation title has been updated
 
             async for event in agent.process_stream(**args):
                 # Check interrupt flag (in-memory, no database query)
@@ -199,17 +209,6 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
                             token_count=1  # Approximate token count
                         )
                         logger.debug(f"Appended stream_chunk to message {assistant_message_id}: content_len={len(event.content)}")
-
-                        # Auto-update conversation title with first 30 characters
-                        if not title_updated and len(accumulated_content) >= 30 and request.conversation_id:
-                            title = accumulated_content[:30].strip()
-                            if title:
-                                storage.update_conversation(
-                                    conversation_id=request.conversation_id,
-                                    title=title
-                                )
-                                title_updated = True
-                                logger.info(f"Auto-updated conversation {request.conversation_id} title: {title}")
                     else:
                         # Other event types (running, done, etc.) go to metadata as lists
                         event_type_key = event.type.value

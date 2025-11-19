@@ -26,7 +26,7 @@
 
 🌍 加入我们的 [Discord 社区](https://discord.gg/tGj7RQ3nUR)
 
-<a href="https://github.com/volcengine/MineContext/releases/download/0.1.4/MineContext-0.1.4.dmg">🖥️ Mac 版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.4/MineContext-0.1.4-setup.exe">💻 Windows 版下载</a>
+<a href="https://github.com/volcengine/MineContext/releases/download/0.1.5/MineContext-0.1.5.dmg">🖥️ Mac 版下载</a> · <a href="https://github.com/volcengine/MineContext/releases/download/0.1.5/MineContext-0.1.5-setup.exe">💻 Windows 版下载</a>
 
 </div>
   
@@ -39,11 +39,10 @@
   - [本地模型](#本地模型)
 - [🏁 快速开始](#-快速开始)
   - [1. 安装](#1-安装)
-  - [2. 禁用隔离属性](#2-禁用隔离属性)
-  - [3. 输入您的 API 密钥](#3-输入您的-api-密钥)
-  - [4. 开始记录](#4-开始记录)
-  - [5. 忘掉它](#5-忘掉它)
-  - [6. 后台调试](#6-后台调试)
+  - [2. 输入您的 API 密钥](#2-输入您的-api-密钥)
+  - [3. 开始记录](#3-开始记录)
+  - [4. 忘掉它](#4-忘掉它)
+  - [5. 后台调试](#5-后台调试)
 - [🎃 贡献指南](#-贡献指南)
   - [🎨 前端架构](#-前端架构)
     - [核心技术栈](#核心技术栈)
@@ -112,17 +111,9 @@ MineContext 非常注重用户隐私，所有数据都默认保存在本地如�
 
 ![Download APP](src/Download-App.gif)
 
-## 2. 禁用隔离属性
+> **注意**：从 v0.1.5 版本开始，MineContext 已支持 Apple 公证，因此不再需要禁用隔离属性。如果您使用的是旧版本，请参考[之前的文档](https://github.com/volcengine/MineContext/blob/0.1.4/README_zh.md)获取相关说明。
 
-在运行应用程序之前，在终端中输入以下命令以禁用隔离属性。
-
-```
-sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
-```
-
-![Quarantine](src/Quarantine.gif)
-
-## 3. 输入您的 API 密钥
+## 2. 输入您的 API 密钥
 
 应用程序启动后（首次运行时需要安装后端环境，约需等待两分钟），请根据引导输入您的 API 密钥。目前我们支持豆包、OpenAI 以及自定义模型服务，包括任何兼容 OpenAI API 格式的**本地模型**或**第三方模型**服务。
 我们推荐使用 [LMStudio](https://lmstudio.ai/) 来运行本地模型，它提供了简单的界面和强大的功能，能够帮助您快速部署和管理本地模型。
@@ -140,7 +131,7 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 以下是获取了 API Key 后的填写流程：
 ![Enter API-Key](src/Enter-API-Key.gif)
 
-## 4. 开始记录
+## 3. 开始记录
 
 进入【Screen Monitor】启用屏幕分享的系统权限，设置完之后需要重新启动应用使其生效。
 
@@ -150,11 +141,11 @@ sudo xattr -d com.apple.quarantine "/Applications/MineContext.app"
 
 ![Screen-Settings](src/Screen-Settings.gif)
 
-## 5. 忘掉它
+## 4. 忘掉它
 
 启动记录后，您的上下文将逐渐被收集。这会需要一些时间才能产生价值。所以说，忘记它，安心专注于其他任务吧。MineContext 将会在后台为您生成待办事项、提示、摘要和活动。当然，您也可以通过【Chat with AI】进行主动问答。
 
-## 6. 后台调试
+## 5. 后台调试
 
 MineContext 支持在`http://localhost:1733` 进行后台调试。
 

@@ -1,10 +1,10 @@
-import { FC } from 'react'
+import { FC, MouseEvent } from 'react'
 import logoImage from '@renderer/assets/icons/ai-assistant/logo.png'
 
 import { ChatHistoryListItem } from './chat-history-list-item'
 export interface ChatHistoryListProps {
   conversationList: any[]
-  handleGetMessages?: (conversationId: number) => void
+  handleGetMessages?: (e: MouseEvent, conversationId: number) => void
   onConversationUpdate?: () => void
   refreshConversationList?: () => void
 }
@@ -21,9 +21,11 @@ const ChatHistoryList: FC<ChatHistoryListProps> = (props) => {
     )
   }
   return (
-    <div className="w-[270px] h-[70%] px-[16px] py-[20px]">
-      <div className="text-[14px] leading-[22px] text-[#0c0d0e] font-medium mb-[12px]">Recent chats</div>
-      <div className="overflow-x-hidden overflow-y-auto min-h-[400px] ">
+    <div className="w-[270px] h-[70%] p-[8px]">
+      <div className="text-[14px] leading-[22px] text-[#0c0d0e] font-medium mb-[8px] px-[12px] py-[2px]">
+        Recent chats
+      </div>
+      <div className="overflow-x-hidden overflow-y-auto max-h-[calc(100vh_-_400px)]">
         {conversationList.map((conversation) => (
           <ChatHistoryListItem
             conversation={conversation}

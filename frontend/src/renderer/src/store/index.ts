@@ -3,7 +3,17 @@
 
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
+import {
+  createMigrate,
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE
+} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
 import storeSyncService from '../services/StoreSyncService'
@@ -15,6 +25,7 @@ import events from './events'
 import chatHistory from './chat-history'
 
 import { getLogger } from '@shared/logger/renderer'
+import { migrations } from './migrations'
 
 const logger = getLogger('Store')
 
@@ -32,8 +43,9 @@ const persistedReducer = persistReducer(
   {
     key: 'vikingdb',
     storage,
-    version: 1,
-    blacklist: ['vault', 'screen'] // Do not persist vault, vault data is stored in the sqlite data table
+    version: 2,
+    migrate: createMigrate(migrations, { debug: false }),
+    blacklist: ['vault', 'screen', 'chatHistory'] // Do not persist vault, vault data is stored in the sqlite data table
   },
   rootReducer
 )
