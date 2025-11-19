@@ -7,10 +7,12 @@
 OpenContext module: llm_client
 """
 
+import re
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse, parse_qs
 
-from openai import APIError, AsyncOpenAI, OpenAI
+from openai import APIError, AsyncOpenAI, OpenAI, AzureOpenAI, AsyncAzureOpenAI
 
 from opencontext.models.context import Vectorize
 from opencontext.utils.logging_utils import get_logger
@@ -21,6 +23,7 @@ logger = get_logger(__name__)
 class LLMProvider(Enum):
     OPENAI = "openai"
     DOUBAO = "doubao"
+    AZURE = "azure"
 
 
 class LLMType(Enum):
@@ -34,15 +37,141 @@ class LLMClient:
         self.config = config
         self.model = config.get("model")
         self.api_key = config.get("api_key")
-        self.base_url = config.get("base_url")
         self.timeout = config.get("timeout", 300)
         self.provider = config.get("provider", LLMProvider.OPENAI.value)
-        if not self.api_key or not self.base_url or not self.model:
-            raise ValueError("API key, base URL, and model must be provided")
-        self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
-        self.async_client = AsyncOpenAI(
-            api_key=self.api_key, base_url=self.base_url, timeout=self.timeout
-        )
+        
+        # Azure OpenAI specific initialization
+        if self.provider == LLMProvider.AZURE.value:
+            # Check if user provided base_url (which might be a complete Azure URL)
+            base_url = config.get("base_url")
+            azure_endpoint = config.get("azure_endpoint")
+            
+            # If no azure_endpoint but has base_url, try to parse it
+            if not azure_endpoint and base_url:
+                parsed_azure = self._parse_azure_url(base_url)
+                azure_endpoint = parsed_azure['azure_endpoint']
+                
+                # If URL contains model and user didn't provide one, use parsed model
+                if parsed_azure['model'] and not self.model:
+                    self.model = parsed_azure['model']
+                    logger.info(f"Extracted model from Azure URL: {self.model}")
+                
+                # If URL contains api_version, use it
+                if parsed_azure['api_version']:
+                    self.api_version = parsed_azure['api_version']
+                    logger.info(f"Extracted api_version from Azure URL: {self.api_version}")
+                else:
+                    # No api_version in URL, check config
+                    self.api_version = config.get("api_version")
+            else:
+                # User provided azure_endpoint (standard way)
+                self.api_version = config.get("api_version")
+            
+            self.azure_endpoint = azure_endpoint
+            
+            # Validate required parameters
+            if not self.api_key:
+                raise ValueError(
+                    "Azure OpenAI requires api_key. "
+                    "Please provide your Azure OpenAI API key."
+                )
+            
+            if not self.azure_endpoint:
+                raise ValueError(
+                    "Azure OpenAI requires azure_endpoint or a full URL in base_url. "
+                    "Example: https://your-resource.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-01"
+                )
+            
+            if not self.model:
+                raise ValueError(
+                    "Azure OpenAI requires model (deployment name). "
+                    "Please provide it explicitly or include it in the URL."
+                )
+            
+            # Validate api_version must exist
+            if not self.api_version:
+                raise ValueError(
+                    "Azure OpenAI requires api_version. "
+                    "Please provide a full Azure API URL with api-version parameter. "
+                    "Example: https://your-resource.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-01"
+                )
+            
+            self.client = AzureOpenAI(
+                api_key=self.api_key,
+                azure_endpoint=self.azure_endpoint,
+                api_version=self.api_version,
+                timeout=self.timeout
+            )
+            self.async_client = AsyncAzureOpenAI(
+                api_key=self.api_key,
+                azure_endpoint=self.azure_endpoint,
+                api_version=self.api_version,
+                timeout=self.timeout
+            )
+        else:
+            # Standard OpenAI or compatible APIs (Doubao, custom, etc.)
+            self.base_url = config.get("base_url")
+            if not self.api_key or not self.base_url or not self.model:
+                raise ValueError("API key, base URL, and model must be provided")
+            
+            self.client = OpenAI(
+                api_key=self.api_key, 
+                base_url=self.base_url, 
+                timeout=self.timeout
+            )
+            self.async_client = AsyncOpenAI(
+                api_key=self.api_key, 
+                base_url=self.base_url, 
+                timeout=self.timeout
+            )
+
+    @staticmethod
+    def _parse_azure_url(url: str) -> Dict[str, Optional[str]]:
+        """
+        Parse Azure OpenAI URL and extract configuration parameters
+        
+        Args:
+            url: Azure OpenAI URL (full URL or just endpoint)
+        
+        Returns:
+            Dict with keys: azure_endpoint, model, api_version
+        
+        Examples:
+            >>> _parse_azure_url("https://xxx.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-01")
+            {
+                'azure_endpoint': 'https://xxx.openai.azure.com/',
+                'model': 'gpt-4',
+                'api_version': '2024-02-01'
+            }
+        """
+        if not url or not url.strip():
+            return {'azure_endpoint': None, 'model': None, 'api_version': None}
+        
+        url = url.strip()
+        parsed = urlparse(url)
+        
+        # Extract azure_endpoint (base domain)
+        azure_endpoint = f"{parsed.scheme}://{parsed.netloc}/"
+        
+        # Extract deployment name (model) from path
+        # Path format: /openai/deployments/{deployment-name}/...
+        model = None
+        if parsed.path:
+            match = re.search(r'/openai/deployments/([^/]+)', parsed.path)
+            if match:
+                model = match.group(1)
+        
+        # Extract api_version from query params
+        api_version = None
+        if parsed.query:
+            query_params = parse_qs(parsed.query)
+            api_version = query_params.get('api-version', [None])[0]
+        
+        return {
+            'azure_endpoint': azure_endpoint,
+            'model': model,
+            'api_version': api_version
+        }
 
     def generate(self, prompt: str, **kwargs) -> str:
         messages = [{"role": "user", "content": prompt}]
@@ -263,12 +392,9 @@ class LLMClient:
             tools = kwargs.get("tools", None)
             thinking = kwargs.get("thinking", None)
 
-            # Create async client
-            from openai import AsyncOpenAI
-
-            async_client = AsyncOpenAI(
-                api_key=self.api_key, base_url=self.base_url, timeout=self.timeout
-            )
+            # Use the existing async_client that was initialized in __init__
+            # This ensures proper Azure vs OpenAI client is used
+            async_client = self.async_client
 
             create_params = {
                 "model": self.model,

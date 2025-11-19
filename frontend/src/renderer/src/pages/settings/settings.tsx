@@ -116,6 +116,110 @@ const CustomFormItems: FC<CustomFormItemsProps> = (props) => {
     </>
   )
 }
+
+export interface AzureFormItemsProps {
+  prefix: string
+}
+const AzureFormItems: FC<AzureFormItemsProps> = (props) => {
+  const { prefix } = props
+  return (
+    <>
+
+
+      <div className="flex flex-col gap-6 mb-6">
+        {/* VLM Configuration */}
+        <div className="flex flex-col gap-[8px]">
+          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px]">
+            Vision language model
+          </span>
+          <FormItem
+            field={`${prefix}-modelId`}
+            className="!mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputPrefix label="Model name" />}
+              placeholder="Deployment name"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+          <FormItem
+            field={`${prefix}-baseUrl`}
+            className="!mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputPrefix label="Base URL" />}
+              placeholder="Paste complete Azure URL here"
+              allowClear
+              className="[&_.arco-input-inner-wrapper]: !w-[574px]"
+            />
+          </FormItem>
+          <Text type="warning" style={{ fontSize: 12 }}>
+            Complete URL like: https://your-resource.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-01
+          </Text>
+          <FormItem
+            field={`${prefix}-apiKey`}
+            className="!mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputPrefix label="API Key" />}
+              placeholder="Enter your Azure OpenAI API Key"
+              allowClear
+              className="!w-[574px]"
+            />
+          </FormItem>
+        </div>
+
+        {/* Embedding Configuration */}
+        <div className="flex flex-col gap-[8px]">
+          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px]">
+            Embedding model
+          </span>
+          <FormItem
+            field={`${prefix}-embeddingModelId`}
+            className="!mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputPrefix label="Model name" />}
+              placeholder="Embedding deployment name"
+              allowClear
+              className="!w-[574px]"
+            />
+          </FormItem>
+          <FormItem
+            field={`${prefix}-embeddingBaseUrl`}
+            className="!mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputPrefix label="Base URL" />}
+              placeholder="Complete Azure embedding URL or other base URL"
+              allowClear
+              className="!w-[574px]"
+            />
+          </FormItem>
+          <FormItem
+            field={`${prefix}-embeddingApiKey`}
+            className="!mb-0"
+            rules={[{ required: true, message: 'Cannot be empty' }]}
+            requiredSymbol={false}>
+            <Input
+              addBefore={<InputPrefix label="API Key" />}
+              placeholder="Enter Azure API Key"
+              allowClear
+              className="!w-[574px]"
+            />
+          </FormItem>
+        </div>
+      </div>
+    </>
+  )
+}
+
 export interface StandardFormItemsProps {
   modelPlatform: ModelTypeList
   prefix: string
@@ -194,7 +298,12 @@ export type SettingsFormProps = SettingsFormBase & {
   [K in
     | `${ModelTypeList.Custom}-embeddingModelId`
     | `${ModelTypeList.Custom}-embeddingBaseUrl`
-    | `${ModelTypeList.Custom}-embeddingApiKey`]?: string
+    | `${ModelTypeList.Custom}-embeddingApiKey`
+    | `${ModelTypeList.Custom}-baseUrl`
+    | `${ModelTypeList.Azure}-embeddingModelId`
+    | `${ModelTypeList.Azure}-embeddingBaseUrl`
+    | `${ModelTypeList.Azure}-embeddingApiKey`
+    | `${ModelTypeList.Azure}-baseUrl`]?: string
 }
 const Settings: FC<SettingsProps> = (props) => {
   const { closeSetting, init } = props
@@ -221,6 +330,7 @@ const Settings: FC<SettingsProps> = (props) => {
       await form.validate()
       const values = form.getFieldsValue()
       const isCustom = values.modelPlatform === ModelTypeList.Custom
+      const isAzure = values.modelPlatform === ModelTypeList.Azure
       if (!values.modelPlatform) {
         Message.error('Please select Model Platform')
         return
@@ -238,7 +348,7 @@ const Settings: FC<SettingsProps> = (props) => {
       const formatData = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [key.replace(`${values.modelPlatform}-`, ''), value])
       )
-      const params = isCustom
+      const params = (isCustom || isAzure)
         ? formatData
         : {
             ...formatData,
@@ -303,6 +413,8 @@ const Settings: FC<SettingsProps> = (props) => {
                   const modelPlatform = values.modelPlatform
                   if (modelPlatform === ModelTypeList.Custom) {
                     return <CustomFormItems prefix={ModelTypeList.Custom} />
+                  } else if (modelPlatform === ModelTypeList.Azure) {
+                    return <AzureFormItems prefix={ModelTypeList.Azure} />
                   } else if (modelPlatform === ModelTypeList.Doubao) {
                     return <StandardFormItems modelPlatform={modelPlatform} prefix={ModelTypeList.Doubao} />
                   } else if (modelPlatform === ModelTypeList.OpenAI) {
