@@ -105,6 +105,7 @@ interface EventLoopAPI {
 }
 interface serverPushAPI {
   pushHomeLatestActivity: (callback: (data: Activity) => void) => any
+  [propName: string]: (...args: any[]) => any
 }
 
 declare global {

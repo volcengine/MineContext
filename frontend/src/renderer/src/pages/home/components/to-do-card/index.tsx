@@ -29,6 +29,7 @@ import highPriorityIcon from '@renderer/assets/icons/high-priority.svg'
 import mediumPriorityIcon from '@renderer/assets/icons/medium-priority.svg'
 import lowPriorityIcon from '@renderer/assets/icons/low-priority.svg'
 import doneIcon from '@renderer/assets/icons/done.svg'
+import dayjs from 'dayjs'
 
 const { Text } = Typography
 const TextArea = Input.TextArea
@@ -341,7 +342,7 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
   useEffect(() => {
     // Need to refresh the task list after clicking a date on the heatmap
     if (selectedDays) {
-      fetchTasks()
+      fetchTasks(dayjs(selectedDays))
     }
   }, [selectedDays])
 

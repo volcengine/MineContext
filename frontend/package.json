@@ -50,7 +50,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
-    "@zhongyao/heatmap": "^0.0.4",
+    "@zhongyao/heatmap": "^0.0.6",
     "ahooks": "^3.9.5",
     "ai": "^5.0.30",
     "allotment": "^1.20.4",
@@ -82,7 +82,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@arco-design/web-react": "^2.66.4",
+    "@arco-design/web-react": "latest",
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",

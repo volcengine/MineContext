@@ -241,6 +241,19 @@ const HeatmapEntry: FC<HeatmapEntryProps> = (props) => {
               selectedDate={selectedDays}
             />
           )}
+          renderWeekday={(props) => {
+            const { label, cellSize, index } = props
+            return (
+              <div
+                style={{
+                  height: cellSize,
+                  justifyContent: 'space-around'
+                }} // 使用 cellSize
+                className="flex items-center text-xs text-gray-500">
+                {index % 2 === 0 ? '' : label}
+              </div>
+            )
+          }}
         />
         <div className="grid grid-cols-4 gap-[8px] mt-[10px]">
           {currentDetailData.map((item) => {
