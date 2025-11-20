@@ -82,7 +82,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@arco-design/web-react": "^2.66.4",
+    "@arco-design/web-react": "latest",
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",

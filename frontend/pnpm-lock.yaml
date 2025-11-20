@@ -139,8 +139,8 @@ importers:
         version: 3.25.76
     devDependencies:
       '@arco-design/web-react':
-        specifier: ^2.66.4
-        version: 2.66.4(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: latest
+        version: 2.66.8(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@electron-toolkit/eslint-config-prettier':
         specifier: ^3.0.0
         version: 3.0.0(eslint@9.33.0(jiti@2.5.1))(prettier@3.6.2)
@@ -372,8 +372,8 @@ packages:
   '@arco-design/color@0.4.0':
     resolution: {integrity: sha512-s7p9MSwJgHeL8DwcATaXvWT3m2SigKpxx4JA1BGPHL4gfvaQsmQfrLBDpjOJFJuJ2jG2dMt3R3P8Pm9E65q18g==}
 
-  '@arco-design/web-react@2.66.4':
-    resolution: {integrity: sha512-vl7sJBLvbVyJhYRPoQ8kHc8BuXNkJIXca5h9ync2J1TuKglFMLNbQwjIvJLW3ciabqTZ5g1O7H1GQ+lLIEMsWA==}
+  '@arco-design/web-react@2.66.8':
+    resolution: {integrity: sha512-V2XDTqeSFq4g6Yk0tSEFO4SMPZ04cGNF6dKfFBM9drEpmj91cU1n9+rd3gmmtcJ2f3SOqbr0itnUsqBWGQ4PvQ==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
@@ -6326,7 +6326,7 @@ snapshots:
     dependencies:
       color: 3.2.1
 
-  '@arco-design/web-react@2.66.4(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@arco-design/web-react@2.66.8(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@arco-design/color': 0.4.0
       '@babel/runtime': 7.28.3
