@@ -50,7 +50,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
-    "@zhongyao/heatmap": "^0.0.4",
+    "@zhongyao/heatmap": "^0.0.6",
     "ahooks": "^3.9.5",
     "ai": "^5.0.30",
     "allotment": "^1.20.4",

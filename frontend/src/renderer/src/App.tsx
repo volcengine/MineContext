@@ -52,7 +52,6 @@ function AppContent(): React.ReactElement {
   })
   const scheduleNextCheck = useMemoizedFn(() => {
     statusCheckIntervalRef.current = setTimeout(() => {
-      console.log('scheduleNextCheck', backendStatus)
       if (backendStatus !== 'running') {
         checkInitialStatus()
       } else {
