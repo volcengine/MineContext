@@ -43,6 +43,8 @@ class WebLinkCapture(BaseCaptureComponent):
         self._stats_lock = threading.Lock()
         # Max workers for PDF conversion
         self._max_workers = 4
+        # Temporary storage for URLs passed to the overridden capture method
+        self._urls_to_process: List[str] = []
 
     def submit_url(self, url: str) -> List[RawContextProperties]:
         """
@@ -125,16 +127,22 @@ class WebLinkCapture(BaseCaptureComponent):
         # Nothing to stop, no background threads are managed by this component.
         return True
 
-    def _capture_impl(self, urls: List[str]) -> List[RawContextProperties]:
+    def capture(self, urls: Optional[List[str]] = None) -> List[RawContextProperties]:
         """
-        Accepts a list of URLs and processes them in parallel to generate PDFs and RawContextProperties.
-        This is the main entry point for batch processing.
+        Overrides the base capture method to accept a list of URLs.
+        It stores the URLs and then calls the base class's capture method.
+        """
+        if urls:
+            self._urls_to_process = urls
+        # Call the base implementation which will, in turn, call _capture_impl
+        return super().capture()
 
-        Args:
-            urls: A list of URL strings to process.
+    def _capture_impl(self) -> List[RawContextProperties]:
         """
-        urls_to_process = urls
-        if not urls_to_process or not isinstance(urls_to_process, list):
+        Processes the list of URLs stored in self._urls_to_process.
+        """
+        urls_to_process = self._urls_to_process
+        if not urls_to_process:
             return []
 
         logger.info(f"Starting capture for {len(urls_to_process)} URLs.")
@@ -168,6 +176,9 @@ class WebLinkCapture(BaseCaptureComponent):
                 except Exception as exc:
                     url = future_to_url[future]
                     logger.error(f"URL '{url}' generated an exception during conversion: {exc}")
+
+        # Clear the list for the next capture call
+        self._urls_to_process = []
 
         logger.info(
             f"Finished capture. Successfully converted {len(results)} out of {len(urls_to_process)} URLs."
