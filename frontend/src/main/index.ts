@@ -38,6 +38,21 @@ autoUpdater.logger = logger
 const isPackaged = app.isPackaged
 const actuallyDev = isDev && !isPackaged // true
 
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) {
+  app.quit()
+  process.exit(0)
+} else {
+  app.on('second-instance', () => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.show()
+      win.focus()
+    }
+  })
+}
+
 // Save the original console.log
 const originalConsoleLog = console.log
 
