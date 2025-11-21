@@ -34,7 +34,7 @@ try:
                       'Safari', 'Firefox', 'WeChat', 'Obsidian', 'Chrome']
 
     system_apps_to_skip = ['SystemUIServer', 'Dock', 'ControlCenter',
-                           'WindowManager', 'MIRIX', 'Electron', 'Finder']
+                           'WindowManager', 'MineContext', 'Electron', 'Finder']
 
     app_windows = {}
 
