@@ -43,6 +43,7 @@ class FolderMonitor(BaseCaptureComponent):
         self._watch_folder_paths: List[str] = []
         self._recursive = True
         self._max_file_size = 104857600  # 100MB
+        self._initial_scan = True  # Initialize initial_scan
         self._file_info_cache: Dict[str, Dict[str, Any]] = {}
         self._supported_formats: Set[str] = set()
 
@@ -65,6 +66,7 @@ class FolderMonitor(BaseCaptureComponent):
             self._watch_folder_paths = config.get("watch_folder_paths", ["./watch_folder"])
             self._recursive = config.get("recursive", True)
             self._max_file_size = config.get("max_file_size", 104857600)
+            self._initial_scan = config.get("initial_scan", True)  # Get initial_scan from config
             self._supported_formats = set(DocumentProcessor.get_supported_formats())
 
             self._file_info_cache.clear()
@@ -83,7 +85,7 @@ class FolderMonitor(BaseCaptureComponent):
         Start folder monitoring.
         """
         try:
-            if self._config.get("initial_scan", True):
+            if self._initial_scan:  # Use self._initial_scan
                 self._scan_existing_folders()
 
             self._monitor_thread = threading.Thread(

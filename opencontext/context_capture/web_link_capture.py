@@ -4,6 +4,7 @@
 # Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 # SPDX-License-Identifier: Apache-2.0
 
+import asyncio
 import hashlib
 import re
 import threading
@@ -26,10 +27,11 @@ class WebLinkCapture(BaseCaptureComponent):
     def __init__(self):
         super().__init__(
             name="WebLinkCapture",
-            description="Capture web links, render to PDF, and enqueue for processing",
+            description="Capture web links, render to MarkDown or PDF, and enqueue for processing",
             source_type=ContextSource.WEB_LINK,
         )
         self._output_dir: Path = Path("uploads/weblinks").resolve()
+        self._mode: str = "markdown"  # 'pdf' or 'markdown'
         self._timeout: int = 30000
         self._wait_until: str = "networkidle"
         self._pdf_options: Dict[str, Any] = {
@@ -56,6 +58,61 @@ class WebLinkCapture(BaseCaptureComponent):
             return []
         # Directly invoke the capture mechanism for a single URL
         return self.capture(urls=[url])
+
+    def convert_url_to_markdown(
+        self, url: str, filename_hint: Optional[str] = None
+    ) -> Optional[Dict[str, str]]:
+        """
+        Converts a single URL to a Markdown file.
+
+        Returns:
+            A dictionary containing the original URL and the path to the generated MD file, or None on failure.
+        """
+        try:
+            from crawl4ai import AsyncWebCrawler
+        except ImportError:
+            logger.error(
+                "crawl4ai is not installed. Please install it with 'pip install crawl4ai'."
+            )
+            return None
+
+        safe_name = self._make_safe_filename(url, filename_hint)
+        output_path = self._output_dir / f"{safe_name}.md"
+
+        try:
+            self._output_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.exception(f"Failed to create output dir {self._output_dir}: {e}")
+            return None
+
+        async def _crawl():
+            try:
+                async with AsyncWebCrawler() as crawler:
+                    result = await crawler.arun(url=url)
+                    if result and result.markdown:
+                        with open(output_path, "w", encoding="utf-8") as f:
+                            f.write(result.markdown)
+                        logger.info(
+                            f"Successfully converted URL '{url}' to Markdown '{output_path}'"
+                        )
+                        return {"url": url, "md_path": str(output_path)}
+                    else:
+                        logger.error(f"Failed to get markdown for URL: {url}")
+                        return None
+            except Exception as e:
+                logger.exception(f"Exception during markdown conversion for URL '{url}': {e}")
+                return None
+
+        try:
+            # asyncio.run() can be used here as each thread in ThreadPoolExecutor
+            # does not have a running event loop.
+            result = asyncio.run(_crawl())
+            return result
+        except Exception as e:
+            # This can catch issues with asyncio.run() if it's called in a thread
+            # that already has a loop, though it's not expected with ThreadPoolExecutor.
+            logger.exception(f"Failed to render URL to Markdown: {url}, error: {e}")
+            return None
 
     def convert_url_to_pdf(
         self, url: str, filename_hint: Optional[str] = None
@@ -105,6 +162,10 @@ class WebLinkCapture(BaseCaptureComponent):
             output_dir = config.get("output_dir")
             if output_dir:
                 self._output_dir = Path(output_dir).expanduser().resolve()
+            self._mode = str(config.get("mode", "markdown"))
+            if self._mode not in ["pdf", "markdown"]:
+                logger.error(f"Invalid mode specified: {self._mode}. Must be 'pdf' or 'markdown'.")
+                return False
             self._timeout = int(config.get("timeout", 30000))
             self._wait_until = str(config.get("wait_until", "networkidle"))
             self._pdf_options = {
@@ -145,28 +206,34 @@ class WebLinkCapture(BaseCaptureComponent):
         if not urls_to_process:
             return []
 
-        logger.info(f"Starting capture for {len(urls_to_process)} URLs.")
+        logger.info(f"Starting capture for {len(urls_to_process)} URLs in '{self._mode}' mode.")
         results: List[RawContextProperties] = []
+
+        if self._mode == "markdown":
+            convert_function = self.convert_url_to_markdown
+            path_key = "md_path"
+        else:  # Default to 'pdf'
+            convert_function = self.convert_url_to_pdf
+            path_key = "pdf_path"
+
         with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
             # Submit all URL conversion tasks to the thread pool
-            future_to_url = {
-                executor.submit(self.convert_url_to_pdf, url): url for url in urls_to_process
-            }
+            future_to_url = {executor.submit(convert_function, url): url for url in urls_to_process}
 
             for future in as_completed(future_to_url):
+                url = future_to_url[future]
                 try:
                     conversion_result = future.result()
                     if conversion_result:
-                        pdf_path = conversion_result["pdf_path"]
-                        url = conversion_result["url"]
+                        file_path = conversion_result[path_key]
                         raw_context = RawContextProperties(
                             source=ContextSource.WEB_LINK,
                             content_format=ContentFormat.FILE,
-                            content_path=pdf_path,
+                            content_path=file_path,
                             content_text="",
                             create_time=datetime.now(),
                             filter_path=url,  # Use URL for deduplication
-                            additional_info={"url": url, "pdf_path": pdf_path},
+                            additional_info={"url": url, f"{self._mode}_path": file_path},
                             enable_merge=False,
                         )
                         results.append(raw_context)
@@ -174,7 +241,6 @@ class WebLinkCapture(BaseCaptureComponent):
                             self._total_converted += 1
                             self._last_activity_time = datetime.now()
                 except Exception as exc:
-                    url = future_to_url[future]
                     logger.error(f"URL '{url}' generated an exception during conversion: {exc}")
 
         # Clear the list for the next capture call
@@ -190,34 +256,40 @@ class WebLinkCapture(BaseCaptureComponent):
             "properties": {
                 "output_dir": {
                     "type": "string",
-                    "description": "Directory to store generated PDFs",
+                    "description": "Directory to store generated files (PDFs or Markdown)",
                     "default": "uploads/weblinks",
+                },
+                "mode": {
+                    "type": "string",
+                    "enum": ["pdf", "markdown"],
+                    "description": "Conversion mode: 'pdf' or 'markdown'",
+                    "default": "pdf",
                 },
                 "max_workers": {
                     "type": "integer",
-                    "description": "Max number of parallel threads for PDF conversion.",
+                    "description": "Max number of parallel threads for conversion.",
                     "default": 4,
                 },
                 "timeout": {
                     "type": "integer",
-                    "description": "Page load timeout (ms)",
+                    "description": "Page load timeout (ms) for PDF conversion",
                     "minimum": 1000,
                     "default": 30000,
                 },
                 "wait_until": {
                     "type": "string",
-                    "description": "Wait condition for page.goto",
+                    "description": "Wait condition for page.goto in PDF conversion",
                     "default": "networkidle",
                 },
                 "pdf_format": {"type": "string", "description": "PDF page format", "default": "A4"},
                 "print_background": {
                     "type": "boolean",
-                    "description": "Print CSS backgrounds",
+                    "description": "Print CSS backgrounds for PDF",
                     "default": True,
                 },
                 "landscape": {
                     "type": "boolean",
-                    "description": "Landscape orientation",
+                    "description": "Landscape orientation for PDF",
                     "default": False,
                 },
             }
@@ -227,6 +299,9 @@ class WebLinkCapture(BaseCaptureComponent):
         try:
             if "output_dir" in config and not isinstance(config["output_dir"], str):
                 logger.error("output_dir must be a string")
+                return False
+            if "mode" in config and config["mode"] not in ["pdf", "markdown"]:
+                logger.error("mode must be either 'pdf' or 'markdown'")
                 return False
             for k in ["max_workers", "timeout"]:
                 if k in config:
@@ -241,6 +316,7 @@ class WebLinkCapture(BaseCaptureComponent):
 
     def _get_status_impl(self) -> Dict[str, Any]:
         return {
+            "mode": self._mode,
             "output_dir": str(self._output_dir),
             "max_workers": self._max_workers,
             "last_activity_time": (
