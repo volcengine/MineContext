@@ -142,7 +142,7 @@ class DocumentProcessor(BaseContextProcessor):
         return context.source == ContextSource.INPUT
 
     def _is_visual_document(self, context: RawContextProperties) -> bool:
-        if context.source != ContextSource.LOCAL_FILE:
+        if context.source not in [ContextSource.LOCAL_FILE, ContextSource.WEB_LINK]:
             return False
         file_ext = Path(context.content_path).suffix.lower()
         visual_formats = {
@@ -397,7 +397,7 @@ class DocumentProcessor(BaseContextProcessor):
         """Extract text from visual pages using VLM, returns extracted text list (in page order)"""
         file_ext = Path(file_path).suffix.lower()
 
-        if file_ext in [".docx", ".doc"]:
+        if file_ext in [".docx", ".doc", ".md"]:
             return self._process_vlm_pages_with_doc_images(page_infos)
 
         # For PDF and other formats, convert pages to images
