@@ -3,6 +3,7 @@
 
 import React from 'react'
 import { Button, Tooltip } from '@arco-design/web-react'
+import { useTranslation } from 'react-i18next'
 
 interface AIToggleButtonProps {
   onClick: () => void
@@ -10,6 +11,7 @@ interface AIToggleButtonProps {
 }
 
 const AIToggleButton: React.FC<AIToggleButtonProps> = ({ onClick, isActive = false }) => {
+  const { t } = useTranslation()
   return (
     <Tooltip position="left">
       <Button
@@ -60,7 +62,7 @@ const AIToggleButton: React.FC<AIToggleButtonProps> = ({ onClick, isActive = fal
           background: isActive ? '#000' : '#F6F8FA',
           color: isActive ? '#fff' : '#000'
         }}>
-        <span style={{ fontWeight: 500 }}>Chat with AI</span>
+        <span style={{ fontWeight: 500 }}>{t('ai_assistant.chat_with_ai', 'Chat with AI')}</span>
       </Button>
     </Tooltip>
   )

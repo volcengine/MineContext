@@ -34,7 +34,9 @@
     "publish": "npm run copy-backend && npm run build && electron-builder --mac --win -p always",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "copy-backend": "node scripts/copy-prebuilt-backend.js",
-    "electron-pack": "npm run build && electron-builder --mac"
+    "electron-pack": "npm run build && electron-builder --mac",
+    "i18n:extract": "pnpm dlx i18next-parser --config i18next-parser.config.js",
+    "i18n:validate": "i18next-parser --validate --config i18next-parser.config.js"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.14",
@@ -64,6 +66,8 @@
     "electron-updater": "^6.3.9",
     "embla-carousel-react": "^8.6.0",
     "express": "^5.1.0",
+    "i18next": "^25.6.3",
+    "i18next-fs-backend": "^2.6.1",
     "jotai": "^2.14.0",
     "lucide-react": "^0.542.0",
     "mitt": "^3.0.1",
@@ -117,6 +121,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "fetch-socks": "1.3.2",
     "highlight.js": "^11.11.1",
+    "i18next-parser": "^9.3.0",
     "iconv-lite": "^0.6.3",
     "less": "^4.4.0",
     "lodash": "^4.17.21",

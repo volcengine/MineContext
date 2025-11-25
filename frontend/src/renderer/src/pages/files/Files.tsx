@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, Typography, Modal, Upload, Grid, Tag, Input } from '@arco-design/web-react'
 import { IconClose, IconLoading, IconCheckCircleFill } from '@arco-design/web-react/icon'
 import uploadIcon from '@renderer/assets/images/files/upload.png'
@@ -13,6 +14,7 @@ const { Title, Text } = Typography
 const { Row, Col } = Grid
 
 const Files: React.FC = () => {
+  const { t } = useTranslation()
   const [analyzeVisible, setAnalyzeVisible] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState<any>(null)
   const [prompt, setPrompt] = useState('')
@@ -77,11 +79,13 @@ const Files: React.FC = () => {
         <div className="flex justify-between items-start mb-3 px-2 max-md:flex-col max-md:items-stretch">
           <div className="w-3/5 max-md:w-full">
             <Title heading={3} style={{ marginTop: 5, fontWeight: 700, fontSize: 24 }}>
-              Upload Your Files
+              {t('files.upload_title', 'Upload Your Files')}
             </Title>
             <Text type="secondary" style={{ width: 519, fontSize: 12 }}>
-              Upload screenshots and docs—MineContext auto-organizes tasks and generates summaries. Simplify work
-              reviews and planning, and save your energy for what truly matters ✨
+              {t(
+                'files.upload_description',
+                'Upload screenshots and docs—MineContext auto-organizes tasks and generates summaries. Simplify work reviews and planning, and save your energy for what truly matters ✨'
+              )}
             </Text>
           </div>
           <div className="flex items-center ml-6 max-md:ml-0 max-md:mt-4 max-md:justify-end"></div>
@@ -106,9 +110,11 @@ const Files: React.FC = () => {
                 <div className="text-center flex flex-col items-center justify-center">
                   <img src={uploadIcon} alt="Screen recording" style={{ width: 214 }} />
                   <Text style={{ color: '#0C0D0E', fontSize: 14, fontWeight: 700, marginTop: 10 }}>
-                    Drop or select your files here
+                    {t('files.drop_or_select', 'Drop or select your files here')}
                   </Text>
-                  <Text style={{ color: '#6C7191', fontSize: 13, marginTop: 6 }}>ppt, pdf, pptx, word</Text>
+                  <Text style={{ color: '#6C7191', fontSize: 13, marginTop: 6 }}>
+                    {t('files.supported_formats', 'ppt, pdf, pptx, word')}
+                  </Text>
                 </div>
               </div>
             </div>
@@ -117,7 +123,7 @@ const Files: React.FC = () => {
 
         <div className="mt-[50px]">
           <Title heading={5} style={{ marginTop: 5, fontWeight: 700, fontSize: 24 }}>
-            Analyzed Documents
+            {t('files.analyzed_documents', 'Analyzed Documents')}
           </Title>
           <Row gutter={[24, 24]} style={{ marginTop: 20 }}>
             {analyzedDocs.map((doc, index) => (
@@ -162,12 +168,12 @@ const Files: React.FC = () => {
                     {doc.status === 'Analyzing' ? (
                       <>
                         <IconLoading style={{ marginRight: 6 }} />
-                        <span>Analyzing</span>
+                        <span>{t('files.status.analyzing', 'Analyzing')}</span>
                       </>
                     ) : (
                       <>
                         <IconCheckCircleFill style={{ marginRight: 6, color: '#00B42A' }} />
-                        <span>Analysis successful</span>
+                        <span>{t('files.status.success', 'Analysis successful')}</span>
                       </>
                     )}
                   </div>
@@ -180,7 +186,7 @@ const Files: React.FC = () => {
 
       {/* Analyze document modal */}
       <Modal
-        title="Analyze ducument"
+        title={t('files.analyze_modal.title', 'Analyze ducument')}
         visible={analyzeVisible}
         autoFocus={false}
         focusLock={true}
@@ -188,11 +194,11 @@ const Files: React.FC = () => {
         footer={
           <>
             <Button onClick={() => setAnalyzeVisible(false)} style={{ fontSize: 12 }}>
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button type="primary" onClick={() => analyzeDocument()}>
               <img src={aiIcon} alt="AI icon" style={{ marginRight: 5 }} />
-              Smart analyze
+              {t('files.analyze_modal.smart_analyze', 'Smart analyze')}
             </Button>
           </>
         }
@@ -215,18 +221,25 @@ const Files: React.FC = () => {
             </div>
             <div className="mt-4 relative">
               <Input.TextArea
-                placeholder="Input your desired analyze prompt (Quickly select from below)"
+                placeholder={t(
+                  'files.analyze_modal.prompt_placeholder',
+                  'Input your desired analyze prompt (Quickly select from below)'
+                )}
                 value={prompt}
                 onChange={setPrompt}
                 autoSize={{ minRows: 3, maxRows: 5 }}
                 style={{ fontSize: 12 }}
               />
               <div className="absolute bottom-3 left-3 flex gap-2">
-                <Tag onClick={() => setPrompt('Summary')} style={{ cursor: 'pointer', fontSize: 12 }}>
-                  Summary
+                <Tag
+                  onClick={() => setPrompt('Summary')}
+                  style={{ cursor: 'pointer', fontSize: 12 }}>
+                  {t('files.analyze_modal.tag_summary', 'Summary')}
                 </Tag>
-                <Tag onClick={() => setPrompt('Work Output')} style={{ cursor: 'pointer', fontSize: 12 }}>
-                  Work Output
+                <Tag
+                  onClick={() => setPrompt('Work Output')}
+                  style={{ cursor: 'pointer', fontSize: 12 }}>
+                  {t('files.analyze_modal.tag_work_output', 'Work Output')}
                 </Tag>
               </div>
             </div>

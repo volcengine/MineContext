@@ -34,6 +34,7 @@ import { Reasoning, ReasoningContent, ReasoningTrigger } from '@renderer/compone
 import { Loader } from '@renderer/components/ai-elements/loader'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import { useTranslation } from 'react-i18next'
 
 const models = [
   {
@@ -104,6 +105,7 @@ const models = [
 
 const ChatBotDemo = () => {
   const [input, setInput] = useState('')
+  const { t } = useTranslation()
   const [model, setModel] = useState<string>(models[0].value)
   const [webSearch, setWebSearch] = useState(false)
   const { messages, sendMessage, status } = useChat({
@@ -142,8 +144,10 @@ const ChatBotDemo = () => {
                   <div className="bg-black rounded-full p-4 w-fit mx-auto mb-6">
                     <img src={ChatBubbleIcon} alt="Chat" className="size-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3 text-black">AI Chat Assistant</h3>
-                  <p className="text-gray-600 leading-relaxed">Start a conversation with our intelligent AI</p>
+                  <h3 className="text-2xl font-bold mb-3 text-black">{t('ai_assistant.title', 'AI Chat Assistant')}</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {t('ai_assistant.description', 'Start a conversation with our intelligent AI')}
+                  </p>
                 </div>
               </div>
             )}
@@ -190,13 +194,13 @@ const ChatBotDemo = () => {
                             <Actions className="mt-3">
                               <Action
                                 onClick={() => {}}
-                                label="Retry"
+                                label={t('common.retry', 'Retry')}
                                 className="[&_.arco-btn]: !bg-white [&_.arco-btn:hover]: !bg-gray-100 [&_.arco-btn]: !text-gray-600 [&_.arco-btn:hover]: !text-black [&_.arco-btn]: !border [&_.arco-btn]: !border-gray-300 [&_.arco-btn:hover]: !border-gray-400 transition-all duration-200">
                                 <RefreshCcwIcon className="size-3" />
                               </Action>
                               <Action
                                 onClick={() => navigator.clipboard.writeText(part.text || '')}
-                                label="Copy"
+                                label={t('common.copy', 'Copy')}
                                 className="[&_.arco-btn]: !bg-white [&_.arco-btn:hover]: !bg-gray-100 [&_.arco-btn]: !text-gray-600 [&_.arco-btn:hover]: !text-black [&_.arco-btn]: !border [&_.arco-btn]: !border-gray-300 [&_.arco-btn:hover]: !border-gray-400 transition-all duration-200">
                                 <CopyIcon className="size-3" />
                               </Action>
@@ -227,7 +231,7 @@ const ChatBotDemo = () => {
             {status === 'submitted' && (
               <div className="flex items-center justify-center py-6 bg-gray-50 rounded-2xl mx-4 shadow-lg border border-gray-200">
                 <Loader className="mr-3 text-black" size={20} />
-                <span className="text-gray-700 font-medium">AI is thinking...</span>
+                <span className="text-gray-700 font-medium">{t('ai_assistant.ai_thinking', 'AI is thinking...')}</span>
               </div>
             )}
           </ConversationContent>
@@ -241,7 +245,7 @@ const ChatBotDemo = () => {
             <PromptInputTextarea
               onChange={(e) => setInput(e.target.value)}
               value={input}
-              placeholder="Type your message..."
+              placeholder={t('ai_assistant.type_message', 'Type your message...')}
               className="text-black placeholder-gray-500 bg-white border-0 focus:ring-0"
             />
             <PromptInputToolbar className="bg-gray-50 border-t border-gray-200">
@@ -255,7 +259,7 @@ const ChatBotDemo = () => {
                       : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-black'
                   } border border-gray-300 hover:border-gray-400 transition-all duration-200`}>
                   <GlobeIcon size={16} />
-                  <span>Search</span>
+                  <span>{t('common.search', 'Search')}</span>
                 </PromptInputButton>
                 <PromptInputModelSelect
                   onValueChange={(value) => {

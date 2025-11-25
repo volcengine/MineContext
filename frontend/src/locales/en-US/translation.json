@@ -1,0 +1,238 @@
+{
+  "ai_assistant": {
+    "ai_thinking": "AI is thinking...",
+    "chat_with_ai": "Chat with AI",
+    "description": "Start a conversation with our intelligent AI",
+    "history": {
+      "delete_confirm": "Do you want to delete this chat? It cannot be restored after deletion",
+      "delete_title": "Delete chat?",
+      "no_chats": "Ops...No chats yet",
+      "recent_chats": "Recent chats",
+      "rename_title": "Rename chat",
+      "untitled": "Untitled Conversation"
+    },
+    "new_chat": "New chat",
+    "prompt_placeholder": "What would you like to know?",
+    "thinking": "Thinking...",
+    "thought_for": "Thought for {{duration}} {{unit}}",
+    "title": "AI Chat Assistant",
+    "type_message": "Type your message...",
+    "used_sources_one": "Used {{count}} sources",
+    "used_sources_other": "Used {{count}} sources"
+  },
+  "capture": {
+    "display_name": "Display {{index}}",
+    "error": {
+      "permission_denied": "Screen recording permission not granted. Please grant screen recording permissions in System Preferences > Security & Privacy > Screen Recording and restart the application."
+    },
+    "hidden": "Hidden",
+    "virtual_window": "Virtual Window",
+    "window_not_accessible": "Window not accessible - may be minimized or on another desktop"
+  },
+  "common": {
+    "add": "Add",
+    "back": "Back",
+    "cancel": "Cancel",
+    "carousel": {
+      "next": "Next slide",
+      "previous": "Previous slide"
+    },
+    "check": "Check",
+    "confirm": "Confirm",
+    "copied": "Copied!",
+    "copy": "Copy",
+    "delete": "Delete",
+    "got_it": "I got it",
+    "loading": "Loading...",
+    "no_data": "No data available",
+    "please_select": "please select",
+    "rename": "Rename",
+    "required": "Cannot be empty",
+    "retry": "Retry",
+    "save": "Save",
+    "search": "Search",
+    "unknown": "Unknown",
+    "update": "Update",
+    "view": "View"
+  },
+  "feed": {
+    "daily_summary": "Daily Summary",
+    "empty_hint": "Proactive insights will appear here to help you",
+    "feed": "Feed",
+    "insight_deleted": "insight deleted",
+    "modal_subtitle": "Here are some insights you should know",
+    "modal_title": "Proactive Feed",
+    "new_notification": "New Notification",
+    "proactive": "Proactive",
+    "tip": "Tip",
+    "weekly_summary": "Weekly Summary"
+  },
+  "files": {
+    "analyze_modal": {
+      "prompt_placeholder": "Input your desired analyze prompt (Quickly select from below)",
+      "smart_analyze": "Smart analyze",
+      "tag_summary": "Summary",
+      "tag_work_output": "Work Output",
+      "title": "Analyze ducument"
+    },
+    "analyzed_documents": "Analyzed Documents",
+    "drop_or_select": "Drop or select your files here",
+    "status": {
+      "analyzing": "Analyzing",
+      "success": "Analysis successful"
+    },
+    "supported_formats": "ppt, pdf, pptx, word",
+    "upload_description": "Upload screenshots and docs—MineContext auto-organizes tasks and generates summaries. Simplify work reviews and planning, and save your energy for what truly matters ✨",
+    "upload_title": "Upload Your Files"
+  },
+  "heatmap": {
+    "cannot_select_future": "Cannot select future date",
+    "cannot_select_past": "Cannot select past date",
+    "less": "Less",
+    "more": "More"
+  },
+  "screen_monitor": {
+    "empty": {
+      "enable_permission_btn": "Enable Permission",
+      "enable_permission_hint": "Enable screen recording permission, summary with AI every {{interval}} minutes",
+      "start_recording_hint": "Start screen recording, and then it will take screenshots and summarize your work records every {{interval}} minutes"
+    },
+    "stats": {
+      "no_error_info": "No detailed error information available",
+      "recent_errors": "Recent Errors:",
+      "screenshots_failed": "screenshot{{s}} failed",
+      "screenshots_processed": "screenshot{{s}} processed"
+    },
+    "status": {
+      "can_start_again": "You can start recording again",
+      "not_in_hours": "It's not in recording hours now. Recording will automatically start at the next allowed time.",
+      "recording_description": "Every {{interval}} minutes, MineContext generates an Activity based on screen analysis.",
+      "recording_screen": "Recording screen...",
+      "recording_stopped": "Recording stopped"
+    },
+    "timeline": {
+      "can_start_again": "You can start recording again",
+      "not_in_hours": "It's not in recording hours now. Recording will automatically start at the next allowed time.",
+      "now": "Now",
+      "recording_description": "Every {{interval}} minutes, MineContext generates an Activity based on screen analysis.",
+      "recording_screen": "Recording screen...",
+      "recording_stopped": "Recording stopped"
+    }
+  },
+  "settings": {
+    "api_key": "API Key",
+    "apply_to_days": "Apply to days",
+    "base_url": "Base URL",
+    "choose_what_to_record": "Choose what to record",
+    "embedding_model": "Embedding model",
+    "enable_recording_hours": "Enable recording hours",
+    "enter_api_key": "Enter your API key",
+    "enter_base_url": "Enter your base URL",
+    "enter_embedding_model": "Enter your embedding model name",
+    "everyday": "Everyday",
+    "get_api_key_here": "You can get the API Key Here:",
+    "get_doubao_key": "Get Doubao API Key",
+    "get_openai_key": "Get OpenAI API Key",
+    "get_started": "Get started",
+    "model_name": "Model name",
+    "model_platform": "Model platform",
+    "only_opened_apps": "Only opened applications can be selected",
+    "only_weekday": "Only weekday",
+    "please_enter_api_key": "Please enter your API key",
+    "please_select_ai_model": "Please select AI model",
+    "record_interval": "Record Interval",
+    "save_failed": "Failed to save settings",
+    "save_success": "Your API key saved successfully",
+    "screen": "Screen",
+    "select_ai_model": "Select AI model",
+    "select_model_desc": "Configure AI model and API Key, then you can start MineContext’s intelligent context capability",
+    "select_model_title": "Select a AI model to start",
+    "select_platform_error": "Please select Model Platform",
+    "set_recording_hours": "Set recording hours",
+    "title": "Settings",
+    "vlm_model": "Vision language model",
+    "vlm_placeholder": "A VLM model with visual understanding capabilities is required.",
+    "window": "Window"
+  },
+  "status_bar": {
+    "capture_method": "Capture method",
+    "context_type": "Context type",
+    "created_at": "Created at",
+    "creation": "Creation",
+    "enter_new_tag": "Enter new tag",
+    "enter_summary": "Enter summary",
+    "knowledge_context": "Knowledge Context",
+    "new_tag": "+ New tag",
+    "no_summary": "No summary",
+    "no_tags": "No tags",
+    "process_method": "Process method",
+    "smart_summary": "Smart Summary",
+    "summary": "Summary",
+    "tags": "Tags"
+  },
+  "todo": {
+    "add_success": "Task add success",
+    "add_todo": "Add todo",
+    "confirm_delete_content": "Confirm to delete this todo?",
+    "confirm_delete_title": "Confirm delete",
+    "content_label": "Todo content",
+    "content_placeholder": "Input todo content",
+    "content_required": "Please input task content",
+    "copy_failed": "Failed to copy content",
+    "delete_failed": "task delete failed",
+    "delete_success": "task delete success",
+    "edit_todo": "Edit todo",
+    "priority": {
+      "low": "Low Priority",
+      "medium": "Medium Priority",
+      "urgent": "Urgent"
+    },
+    "priority_label": "Priority",
+    "title": "Todo",
+    "today": "today",
+    "update_daily": "Update at 8 am everyday",
+    "update_success": "task update success"
+  },
+  "tool": {
+    "error": "Error",
+    "parameters": "Parameters",
+    "result": "Result",
+    "status": {
+      "completed": "Completed",
+      "error": "Error",
+      "pending": "Pending",
+      "running": "Running"
+    }
+  },
+  "tray": {
+    "pause_recording": "Pause Recording",
+    "paused": "Paused",
+    "quit": "Quit MineContext",
+    "recording": "Recording",
+    "resume_recording": "Resume Recording",
+    "show_main_window": "Show Main Window",
+    "tooltip_paused": "MineContext - Paused",
+    "tooltip_recording": "MineContext - Recording"
+  },
+  "update": {
+    "available": "Update available",
+    "restart_to_update": "Restart to update"
+  },
+  "vault": {
+    "creation": "Creation",
+    "max_depth_warning": "Maximum folder depth of 5 levels reached.",
+    "menu": {
+      "delete": "Delete",
+      "new_document": "New Document",
+      "new_folder": "New Folder",
+      "rename": "Rename"
+    },
+    "untitled": "Untitled"
+  },
+  "web_preview": {
+    "console": "Console",
+    "enter_url": "Enter URL...",
+    "no_console_output": "No console output",
+    "preview": "Preview"
+  }
+}

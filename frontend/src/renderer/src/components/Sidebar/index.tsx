@@ -14,6 +14,7 @@ import settings from '/src/assets/icons/settings.svg'
 // import { IconRobot } from '@arco-design/web-react/icon'
 import './index.css'
 import { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 const { Sider } = Layout
 
 const tabItems = [
@@ -50,6 +51,7 @@ const tabItems = [
 ]
 
 const Sidebar = () => {
+  const { t } = useTranslation()
   const { navigateToMainTab, isMainTabActive } = useNavigation()
 
   const handleTabChange = (key: string) => {
@@ -94,7 +96,7 @@ const Sidebar = () => {
               ${isMainTabActive(item.key) ? 'bg-[#FFFFFF66] font-medium' : 'bg-transparent font-normal hover:bg-[#FFFFFF66]'}
               text-[#3F3F54] transition-all duration-200 ease-in-out rounded-lg flex items-center gap-2 mt-[5px]`}>
             <span className="flex">{item.icon}</span>
-            {item.label}
+            {t(`sidebar.${item.key}`, item.label)}
           </div>
         ))}
       </div>

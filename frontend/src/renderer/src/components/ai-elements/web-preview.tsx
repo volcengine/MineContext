@@ -11,6 +11,7 @@ import { cn } from '@renderer/lib/utils'
 import { ChevronDownIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type WebPreviewContextValue = {
   url: string
@@ -102,6 +103,7 @@ export type WebPreviewUrlProps = ComponentProps<typeof Input>
 
 export const WebPreviewUrl = ({ value, onChange, onKeyDown, ...props }: WebPreviewUrlProps) => {
   const { url, setUrl } = useWebPreview()
+  const { t } = useTranslation()
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -116,7 +118,7 @@ export const WebPreviewUrl = ({ value, onChange, onKeyDown, ...props }: WebPrevi
       className="h-8 flex-1 text-sm"
       onChange={onChange}
       onKeyDown={handleKeyDown}
-      placeholder="Enter URL..."
+      placeholder={t('web_preview.enter_url', 'Enter URL...')}
       value={value ?? url}
       {...props}
     />
@@ -129,6 +131,7 @@ export type WebPreviewBodyProps = ComponentProps<'iframe'> & {
 
 export const WebPreviewBody = ({ className, loading, src, ...props }: WebPreviewBodyProps) => {
   const { url } = useWebPreview()
+  const { t } = useTranslation()
 
   return (
     <div className="flex-1">
@@ -136,7 +139,7 @@ export const WebPreviewBody = ({ className, loading, src, ...props }: WebPreview
         className={cn('size-full', className)}
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
         src={(src ?? url) || undefined}
-        title="Preview"
+        title={t('web_preview.preview', 'Preview')}
         {...props}
       />
       {loading}
@@ -154,6 +157,7 @@ export type WebPreviewConsoleProps = ComponentProps<'div'> & {
 
 export const WebPreviewConsole = ({ className, logs = [], children, ...props }: WebPreviewConsoleProps) => {
   const { consoleOpen, setConsoleOpen } = useWebPreview()
+  const { t } = useTranslation()
 
   return (
     <Collapsible
@@ -165,7 +169,7 @@ export const WebPreviewConsole = ({ className, logs = [], children, ...props }: 
         <Button
           className="flex w-full items-center justify-between p-4 text-left font-medium hover:bg-muted/50"
           variant="ghost">
-          Console
+          {t('web_preview.console', 'Console')}
           <ChevronDownIcon className={cn('h-4 w-4 transition-transform duration-200', consoleOpen && 'rotate-180')} />
         </Button>
       </CollapsibleTrigger>
@@ -176,7 +180,7 @@ export const WebPreviewConsole = ({ className, logs = [], children, ...props }: 
         )}>
         <div className="max-h-48 space-y-1 overflow-y-auto">
           {logs.length === 0 ? (
-            <p className="text-muted-foreground">No console output</p>
+            <p className="text-muted-foreground">{t('web_preview.no_console_output', 'No console output')}</p>
           ) : (
             logs.map((log, index) => (
               <div

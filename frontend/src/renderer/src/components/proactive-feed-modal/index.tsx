@@ -3,6 +3,7 @@
 
 import { Modal, Button } from '@arco-design/web-react'
 import { FC, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MarkdownContent } from '../ai-assistant'
 import titleBg from './assets/bg.png'
 interface ProactiveFeedModalProps {
@@ -14,6 +15,7 @@ interface ProactiveFeedModalProps {
 
 const ProactiveFeedModal: FC<ProactiveFeedModalProps> = (props) => {
   const { visible, onCancel, content } = props
+  const { t } = useTranslation()
 
   // Modal header (including icon, title, subtitle)
   const modalHeader = (
@@ -21,12 +23,12 @@ const ProactiveFeedModal: FC<ProactiveFeedModalProps> = (props) => {
       className={`bg-[url('${titleBg}')] !bg-no-repeat w-full h-[76px] !bg-cover !bg-center rounded-[8px] overflow-hidden flex items-center`}
       style={{ background: `url(${titleBg})` }}>
       <div className="ml-[118px]">
-        <div
-          className="text-[20px] leading-[22px] bg-[linear-gradient(271.9deg,_#C296FF_-23.68%,_#FF875F_100.99%)]
-  bg-clip-text text-transparent font-bold">
-          Proactive Feed
+        <div className="text-[20px] leading-[22px] bg-[linear-gradient(271.9deg,_#C296FF_-23.68%,_#FF875F_100.99%)] bg-clip-text text-transparent font-bold">
+          {t('feed.modal_title', 'Proactive Feed')}
         </div>
-        <div className="text-[12px] leading-[20px] text-[#6e718c]">Here are some insights you should know</div>
+        <div className="text-[12px] leading-[20px] text-[#6e718c]">
+          {t('feed.modal_subtitle', 'Here are some insights you should know')}
+        </div>
       </div>
     </div>
   )
@@ -48,7 +50,7 @@ const ProactiveFeedModal: FC<ProactiveFeedModalProps> = (props) => {
         style={{
           backgroundColor: '#0B0B0F'
         }}>
-        I got it
+        {t('common.got_it', 'I got it')}
       </Button>
     </div>
   )

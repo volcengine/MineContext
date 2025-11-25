@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import rocketSvg from '@renderer/assets/icons/rocket.svg'
 import { UpdateInfo } from 'electron-updater'
 import { IpcChannel } from '@shared/IpcChannel'
 import { debounce } from 'lodash'
 
 export default function UpdateAvailableButton() {
+  const { t } = useTranslation()
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
   const [isDownloaded, setIsDownloaded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -54,7 +56,7 @@ export default function UpdateAvailableButton() {
       <img src={rocketSvg} className="w-3 h-3" />
       {/* 文本内容 */}
       <span className="text-[#3F3F51] text-[12px] ml-1">
-        {!isHovered ? 'Update available' : 'Restart to update'}
+        {!isHovered ? t('update.available', 'Update available') : t('update.restart_to_update', 'Restart to update')}
       </span>
 
       {/* 版本号 */}

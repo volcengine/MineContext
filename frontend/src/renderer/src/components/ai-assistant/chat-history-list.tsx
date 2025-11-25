@@ -9,21 +9,24 @@ export interface ChatHistoryListProps {
   refreshConversationList?: () => void
 }
 
+import { useTranslation } from 'react-i18next'
+
 const ChatHistoryList: FC<ChatHistoryListProps> = (props) => {
+  const { t } = useTranslation()
   const { conversationList, refreshConversationList, handleGetMessages } = props
 
   if (conversationList.length === 0) {
     return (
       <div className="w-[270px] p-4 text-center text-gray-500 flex items-center justify-center flex-col">
         <img src={logoImage} alt="No chat history" className="w-[62px] h-[46px]" />
-        <div className="text-[12px] leading-[22px]">Ops...No chats yet</div>
+        <div className="text-[12px] leading-[22px]">{t('ai_assistant.history.no_chats', 'Ops...No chats yet')}</div>
       </div>
     )
   }
   return (
     <div className="w-[270px] h-[70%] p-[8px]">
       <div className="text-[14px] leading-[22px] text-[#0c0d0e] font-medium mb-[8px] px-[12px] py-[2px]">
-        Recent chats
+        {t('ai_assistant.history.recent_chats', 'Recent chats')}
       </div>
       <div className="overflow-x-hidden overflow-y-auto max-h-[calc(100vh_-_400px)]">
         {conversationList.map((conversation) => (

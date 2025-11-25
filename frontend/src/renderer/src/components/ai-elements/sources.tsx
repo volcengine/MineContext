@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@renderer/c
 import { cn } from '@renderer/lib/utils'
 import { BookIcon, ChevronDownIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type SourcesProps = ComponentProps<'div'>
 
@@ -18,16 +19,19 @@ export type SourcesTriggerProps = ComponentProps<typeof CollapsibleTrigger> & {
   count: number
 }
 
-export const SourcesTrigger = ({ className, count, children, ...props }: SourcesTriggerProps) => (
+export const SourcesTrigger = ({ className, count, children, ...props }: SourcesTriggerProps) => {
+  const { t } = useTranslation()
+  return (
   <CollapsibleTrigger className={cn('flex items-center gap-2', className)} {...props}>
     {children ?? (
       <>
-        <p className="font-medium">Used {count} sources</p>
+        <p className="font-medium">{t('ai_assistant.used_sources', 'Used {{count}} sources', { count })}</p>
         <ChevronDownIcon className="h-4 w-4" />
       </>
     )}
   </CollapsibleTrigger>
 )
+}
 
 export type SourcesContentProps = ComponentProps<typeof CollapsibleContent>
 

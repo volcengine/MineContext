@@ -10,6 +10,7 @@ import type { ToolUIPart } from 'ai'
 import { CheckCircleIcon, ChevronDownIcon, CircleIcon, ClockIcon, WrenchIcon, XCircleIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { CodeBlock } from './code-block'
+import { useTranslation } from 'react-i18next'
 
 export type ToolProps = ComponentProps<typeof Collapsible>
 
@@ -24,11 +25,12 @@ export type ToolHeaderProps = {
 }
 
 const getStatusBadge = (status: ToolUIPart['state']) => {
+  const { t } = useTranslation()
   const labels = {
-    'input-streaming': 'Pending',
-    'input-available': 'Running',
-    'output-available': 'Completed',
-    'output-error': 'Error'
+    'input-streaming': t('tool.status.pending', 'Pending'),
+    'input-available': t('tool.status.running', 'Running'),
+    'output-available': t('tool.status.completed', 'Completed'),
+    'output-error': t('tool.status.error', 'Error')
   } as const
 
   const icons = {
@@ -73,14 +75,17 @@ export type ToolInputProps = ComponentProps<'div'> & {
   input: ToolUIPart['input']
 }
 
-export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
+export const ToolInput = ({ className, input, ...props }: ToolInputProps) => {
+  const { t } = useTranslation()
+  return (
   <div className={cn('space-y-2 overflow-hidden p-4', className)} {...props}>
-    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">Parameters</h4>
+    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{t('tool.parameters', 'Parameters')}</h4>
     <div className="rounded-md bg-muted/50">
       <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
     </div>
   </div>
 )
+}
 
 export type ToolOutputProps = ComponentProps<'div'> & {
   output: ReactNode
@@ -88,6 +93,7 @@ export type ToolOutputProps = ComponentProps<'div'> & {
 }
 
 export const ToolOutput = ({ className, output, errorText, ...props }: ToolOutputProps) => {
+  const { t } = useTranslation()
   if (!(output || errorText)) {
     return null
   }
@@ -95,7 +101,7 @@ export const ToolOutput = ({ className, output, errorText, ...props }: ToolOutpu
   return (
     <div className={cn('space-y-2 p-4', className)} {...props}>
       <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {errorText ? 'Error' : 'Result'}
+        {errorText ? t('tool.error', 'Error') : t('tool.result', 'Result')}
       </h4>
       <div
         className={cn(

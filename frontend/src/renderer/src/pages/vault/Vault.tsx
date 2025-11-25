@@ -17,9 +17,11 @@ import './vault.css'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
 import { setActiveConversationId, toggleCreationAiAssistant } from '@renderer/store/chat-history'
+import { useTranslation } from 'react-i18next'
 import { useUnmount } from 'ahooks'
 
 const VaultPage = () => {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const id = searchParams.get('id')
   const loading = false
@@ -81,7 +83,7 @@ const VaultPage = () => {
             <Card className="vault-card">
               {loading || !vault ? (
                 <div className="flex justify-center items-center h-full text-[#333]">
-                  <Spin tip="Loading..." />
+                  <Spin tip={t('common.loading', 'Loading...')} />
                 </div>
               ) : error ? (
                 <div className="text-red-500">{error}</div>

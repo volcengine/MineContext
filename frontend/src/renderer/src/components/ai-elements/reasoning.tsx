@@ -10,6 +10,7 @@ import { BrainIcon, ChevronDownIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import { createContext, memo, useContext, useEffect, useState } from 'react'
 import { Response } from './response'
+import { useTranslation } from 'react-i18next'
 
 type ReasoningContextValue = {
   isStreaming: boolean
@@ -111,6 +112,7 @@ export type ReasoningTriggerProps = ComponentProps<typeof CollapsibleTrigger>
 
 export const ReasoningTrigger = memo(({ className, children, ...props }: ReasoningTriggerProps) => {
   const { isStreaming, isOpen, duration } = useReasoning()
+  const { t } = useTranslation()
 
   return (
     <CollapsibleTrigger className={cn('flex items-center gap-2 text-muted-foreground text-sm', className)} {...props}>
@@ -118,10 +120,10 @@ export const ReasoningTrigger = memo(({ className, children, ...props }: Reasoni
         <>
           <BrainIcon className="size-4" />
           {isStreaming || duration === 0 ? (
-            <p>Thinking...</p>
+            <p>{t('ai_assistant.thinking', 'Thinking...')}</p>
           ) : (
             <p>
-              Thought for {duration} {duration === 1 ? 'second' : 'seconds'}
+              {t('ai_assistant.thought_for', 'Thought for {{duration}} {{unit}}', { duration, unit: duration === 1 ? 'second' : 'seconds' })}
             </p>
           )}
           <ChevronDownIcon

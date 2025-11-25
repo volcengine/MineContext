@@ -5,6 +5,7 @@ import { useMemoizedFn, useRequest } from 'ahooks'
 import dayjs from 'dayjs'
 import { capitalize, get, set } from 'lodash'
 import { FC, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import clsx from 'clsx'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
@@ -74,6 +75,7 @@ export interface HeatmapEntryProps {
   onChange: (date: string | null, monthType: MonthType) => void
 }
 const HeatmapEntry: FC<HeatmapEntryProps> = (props) => {
+  const { t } = useTranslation()
   const { onChange } = props
   const { data, loading } = useRequest(async () => {
     const res = await window.dbAPI.getHeatmapData(dayjs('2025-01-01').valueOf(), dayjs('2025-12-31').valueOf())
@@ -139,7 +141,7 @@ const HeatmapEntry: FC<HeatmapEntryProps> = (props) => {
     if (dayjs(days).isSameOrAfter(dayjs('2025-01-01'))) {
       setSelectedDays(days)
     } else {
-      Message.info('Cannot select past date')
+      Message.info(t('heatmap.cannot_select_past', 'Cannot select past date'))
     }
   })
 
@@ -148,7 +150,7 @@ const HeatmapEntry: FC<HeatmapEntryProps> = (props) => {
     if (dayjs(days).isSameOrBefore(dayjs())) {
       setSelectedDays(days)
     } else {
-      Message.info('Cannot select future date')
+      Message.info(t('heatmap.cannot_select_future', 'Cannot select future date'))
     }
   })
   const [visible, setVisible] = useState(false)
@@ -194,7 +196,7 @@ const HeatmapEntry: FC<HeatmapEntryProps> = (props) => {
             <div
               onClick={handleChangeYear}
               className="rounded-[4px] flex items-center justify-center text-[12px] leading-[20px] font-medium text-[#3F3F51] bg-[#FFFFFF] border border-[#E1E3EF] px-[12px] py-[2px]">
-              Back
+              {t('common.back', 'Back')}
             </div>
             <div className="flex items-center gap-[6px]">
               <div
@@ -214,13 +216,13 @@ const HeatmapEntry: FC<HeatmapEntryProps> = (props) => {
           </div>
         )}
         <div className="flex items-center gap-[6px]">
-          <span className="text-[10px] leading-[24px] text-[#6E718C]">Less</span>
+          <span className="text-[10px] leading-[24px] text-[#6E718C]">{t('heatmap.less', 'Less')}</span>
           <div className="flex items-center gap-[2px]">
             {[0, 5, 10, 15, 20].map((count) => (
               <div key={count} className={`w-[6px] h-[6px] rounded-[1px] ${getColor(count)}`} />
             ))}
           </div>
-          <span className="text-[10px] leading-[24px] text-[#6E718C]">More</span>
+          <span className="text-[10px] leading-[24px] text-[#6E718C]">{t('heatmap.more', 'More')}</span>
         </div>
       </div>
       <Divider className="!my-[10px]" />

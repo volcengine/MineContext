@@ -23,6 +23,7 @@ import { VaultDocumentType, VaultTitle } from '@shared/enums/global-enum'
 import { getLogger } from '@shared/logger/renderer'
 import dayjs from 'dayjs'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 
 const queue = new PQueue({ concurrency: 2 })
 const { Text, Ellipsis } = Typography
@@ -34,6 +35,7 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
   const { navigateToVault, isVaultActive } = useNavigation()
   const [visible, setVisible] = useState(false)
   const [isFolderHover, setIsFolderHover] = useState(false)
+  const { t } = useTranslation()
 
   const dropList = (
     <Menu
@@ -46,16 +48,16 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
         } else if (key === 'new-folder') {
           const path = getVaultPath(node.data.id)
           if (path && path.length >= 6) {
-            Message.warning('Maximum folder depth of 5 levels reached.')
+            Message.warning(t('vault.max_depth_warning', 'Maximum folder depth of 5 levels reached.'))
             return
           }
-          await createFolder('Untitled', node.data.id)
+          await createFolder(t('vault.untitled', 'Untitled'), node.data.id)
           if (!node.isOpen) {
             node.toggle()
           }
         } else if (key === 'new-document') {
           await addVault({
-            title: 'Untitled',
+            title: t('vault.untitled', 'Untitled'),
             content: '',
             parent_id: node.data.id
           })
@@ -66,21 +68,21 @@ const Node = ({ node, dragHandle }: NodeRendererProps<VaultTreeNode>) => {
       }}>
       <Menu.Item key="rename" className="flex items-center">
         <img src={renameIcon} className="w-[16px]" style={{ marginRight: '6px' }} />
-        Rename
+        {t('vault.menu.rename', 'Rename')}
       </Menu.Item>
       <Menu.Item key="delete" className="flex items-center">
         <img src={deleteIcon} className="w-[16px]" style={{ marginRight: '6px' }} />
-        Delete
+        {t('vault.menu.delete', 'Delete')}
       </Menu.Item>
       {isFolder && (
         <>
           <Menu.Item key="new-folder" className="flex items-center">
             <img src={folderStrokedIcon} className="w-[16px]" style={{ marginRight: '6px' }} />
-            New Folder
+            {t('vault.menu.new_folder', 'New Folder')}
           </Menu.Item>
           <Menu.Item key="new-document" className="flex items-center">
             <img src={fileIcon} className="w-[16px]" style={{ marginRight: '6px' }} />
-            New Document
+            {t('vault.menu.new_document', 'New Document')}
           </Menu.Item>
         </>
       )}
@@ -185,6 +187,7 @@ const Sidebar = ({ className }: { className?: string }) => {
     updateVault,
     initVaults
   } = useVaults()
+  const { t } = useTranslation()
 
   const { feedEvents } = useEvents()
   // eventLoop every 10s
@@ -295,9 +298,9 @@ const Sidebar = ({ className }: { className?: string }) => {
 
   const handleMenuClick = async (key: string) => {
     if (key === 'new-folder') {
-      await createFolder('Untitled')
+      await createFolder(t('vault.untitled', 'Untitled'))
     } else if (key === 'new-document') {
-      await addVault({ title: 'Untitled', content: '' })
+      await addVault({ title: t('vault.untitled', 'Untitled'), content: '' })
     }
   }
 
@@ -305,11 +308,11 @@ const Sidebar = ({ className }: { className?: string }) => {
     <Menu onClickMenuItem={handleMenuClick} className="w-[180px] text-[12px]">
       <Menu.Item key="new-folder" className="flex">
         <img src={folderStrokedIcon} style={{ width: '16px', marginRight: '6px' }} />
-        New Folder
+        {t('vault.menu.new_folder', 'New Folder')}
       </Menu.Item>
       <Menu.Item key="new-document" className="flex">
         <img src={fileIcon} style={{ width: '16px', marginRight: '6px' }} />
-        New Document
+        {t('vault.menu.new_document', 'New Document')}
       </Menu.Item>
     </Menu>
   )
@@ -324,7 +327,7 @@ const Sidebar = ({ className }: { className?: string }) => {
           <Space direction="vertical" size={8} className="w-full">
             <div className="flex items-center justify-between">
               <Text className="text-[12px]" style={{ color: '#6E718C' }}>
-                Creation
+                {t('vault.creation', 'Creation')}
               </Text>
               <div className="flex justify-end gap-[8px] flex-1 items-center">
                 <Dropdown droplist={menu} trigger="click">

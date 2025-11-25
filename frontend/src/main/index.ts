@@ -7,6 +7,7 @@
 import './bootstrap'
 
 import '@main/config'
+import './i18n'
 
 import { app, shell, BrowserWindow, protocol } from 'electron'
 import path, { join } from 'path'

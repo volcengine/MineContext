@@ -11,6 +11,7 @@ import type { ChatStatus } from 'ai'
 import { Loader2Icon, SendIcon, SquareIcon, XIcon } from 'lucide-react'
 import type { ComponentProps, HTMLAttributes, KeyboardEventHandler } from 'react'
 import { Children } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>
 
@@ -29,11 +30,13 @@ export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
 export const PromptInputTextarea = ({
   onChange,
   className,
-  placeholder = 'What would you like to know?',
+  placeholder,
   minHeight = 48,
   maxHeight = 164,
   ...props
 }: PromptInputTextareaProps) => {
+  const { t } = useTranslation()
+  const resolvedPlaceholder = placeholder || t('ai_assistant.prompt_placeholder', 'What would you like to know?')
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
     if (e.key === 'Enter') {
       // Don't submit if IME composition is in progress
@@ -68,7 +71,9 @@ export const PromptInputTextarea = ({
         onChange?.(e)
       }}
       onKeyDown={handleKeyDown}
-      placeholder={placeholder}
+      onKeyDown={handleKeyDown}
+      placeholder={resolvedPlaceholder}
+      {...props}
       {...props}
     />
   )

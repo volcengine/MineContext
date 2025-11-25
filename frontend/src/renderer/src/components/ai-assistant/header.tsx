@@ -1,4 +1,5 @@
 import { FC, useState, MouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import addChatIcon from '@renderer/assets/icons/ai-assistant/add-chat.svg'
 import chatHistoryIcon from '@renderer/assets/icons/ai-assistant/chat-history.svg'
 import { Button, Space, Divider, Popover } from '@arco-design/web-react'
@@ -16,6 +17,7 @@ export interface AIAssistantHeaderProps {
 }
 const AIAssistantHeader: FC<AIAssistantHeaderProps> = (props) => {
   const { onClose, startNewConversation, handleGetMessages, pageName } = props
+  const { t } = useTranslation()
   const {
     runAsync: getConversationList,
     data: conversationList,
@@ -59,7 +61,7 @@ const AIAssistantHeader: FC<AIAssistantHeaderProps> = (props) => {
         onClick={startNewConversation}
         style={{ padding: '12px 16px 12px 0' }}>
         <img src={addChatIcon} alt="add-chat" className="w-[16px] h-[16px] mr-[6px]" />
-        New chat
+        {t('ai_assistant.new_chat', 'New chat')}
       </div>
       <Space>
         <Popover

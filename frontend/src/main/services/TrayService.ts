@@ -6,6 +6,7 @@ import path from 'path'
 import { getLogger } from '@shared/logger/main'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import screenshotService from './ScreenshotService'
+import i18n from '../i18n'
 
 const logger = getLogger('TrayService')
 
@@ -169,7 +170,7 @@ export class TrayService {
    * Build the context menu based on current state
    */
   private buildContextMenu(): Menu {
-    const recordingStatusLabel = this.isRecording ? '录制中' : '已暂停'
+    const recordingStatusLabel = this.isRecording ? i18n.t('tray.recording', 'Recording') : i18n.t('tray.paused', 'Paused')
 
     const menuTemplate: Electron.MenuItemConstructorOptions[] = [
       {
@@ -180,14 +181,14 @@ export class TrayService {
         type: 'separator'
       },
       {
-        label: '显示主窗口',
+        label: i18n.t('tray.show_main_window', 'Show Main Window'),
         click: () => {
           this.mainWindow.show()
           this.mainWindow.focus()
         }
       },
       {
-        label: this.isRecording ? '暂停录制' : '继续录制',
+        label: this.isRecording ? i18n.t('tray.pause_recording', 'Pause Recording') : i18n.t('tray.resume_recording', 'Resume Recording'),
         click: () => {
           this.toggleRecording()
         }
@@ -196,7 +197,7 @@ export class TrayService {
         type: 'separator'
       },
       {
-        label: '退出 MineContext',
+        label: i18n.t('tray.quit', 'Quit MineContext'),
         click: () => {
           this.quitApp()
         }
@@ -263,7 +264,7 @@ export class TrayService {
       }
 
       // Update tooltip
-      const tooltip = isRecording ? 'MineContext - 录制中' : 'MineContext - 已暂停'
+      const tooltip = isRecording ? i18n.t('tray.tooltip_recording', 'MineContext - Recording') : i18n.t('tray.tooltip_paused', 'MineContext - Paused')
       this.tray.setToolTip(tooltip)
 
       // Update context menu

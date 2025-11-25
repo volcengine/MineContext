@@ -17,6 +17,10 @@ extraResources:
     filter:
       - 'main*'
       - 'config/**/*'
+  - from: src/locales
+    to: locales
+    filter:
+      - '**/*'
 asarUnpack:
   - resources/**
 win:

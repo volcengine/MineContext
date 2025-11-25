@@ -1,0 +1,238 @@
+{
+  "ai_assistant": {
+    "ai_thinking": "AI 正在思考...",
+    "chat_with_ai": "与 AI 聊天",
+    "description": "开始与我们的智能 AI 对话",
+    "history": {
+      "delete_confirm": "您确定要删除此聊天吗？删除后无法恢复",
+      "delete_title": "删除聊天？",
+      "no_chats": "哎呀...还没有聊天记录",
+      "recent_chats": "最近的聊天",
+      "rename_title": "重命名聊天",
+      "untitled": "未命名对话"
+    },
+    "new_chat": "新聊天",
+    "prompt_placeholder": "您想了解什么？",
+    "thinking": "思考中...",
+    "thought_for": "思考了 {{duration}} {{unit}}",
+    "title": "AI 聊天助手",
+    "type_message": "输入您的消息...",
+    "used_sources_one": "使用了 {{count}} 个来源",
+    "used_sources_other": "使用了 {{count}} 个来源"
+  },
+  "capture": {
+    "display_name": "显示器 {{index}}",
+    "error": {
+      "permission_denied": "未授予屏幕录制权限。请在系统偏好设置 > 安全性与隐私 > 屏幕录制中授予权限并重启应用。"
+    },
+    "hidden": "隐藏",
+    "virtual_window": "虚拟窗口",
+    "window_not_accessible": "窗口无法访问 - 可能已最小化或在其他桌面上"
+  },
+  "common": {
+    "add": "添加",
+    "back": "返回",
+    "cancel": "取消",
+    "carousel": {
+      "next": "下一张",
+      "previous": "上一张"
+    },
+    "check": "检查",
+    "confirm": "确认",
+    "copied": "已复制！",
+    "copy": "复制",
+    "delete": "删除",
+    "got_it": "知道了",
+    "loading": "加载中...",
+    "no_data": "暂无数据",
+    "please_select": "请选择",
+    "rename": "重命名",
+    "required": "不能为空",
+    "retry": "重试",
+    "save": "保存",
+    "search": "搜索",
+    "unknown": "未知",
+    "update": "更新",
+    "view": "查看"
+  },
+  "feed": {
+    "daily_summary": "每日摘要",
+    "empty_hint": "主动洞察将出现在这里为您提供帮助",
+    "feed": "动态",
+    "insight_deleted": "洞察已删除",
+    "modal_subtitle": "这里有一些您应该知道的洞察",
+    "modal_title": "主动动态",
+    "new_notification": "新通知",
+    "proactive": "主动",
+    "tip": "提示",
+    "weekly_summary": "每周摘要"
+  },
+  "files": {
+    "analyze_modal": {
+      "prompt_placeholder": "输入您想要的分析提示（从下方快速选择）",
+      "smart_analyze": "智能分析",
+      "tag_summary": "摘要",
+      "tag_work_output": "工作产出",
+      "title": "分析文档"
+    },
+    "analyzed_documents": "已分析文档",
+    "drop_or_select": "拖放或选择您的文件",
+    "status": {
+      "analyzing": "分析中",
+      "success": "分析成功"
+    },
+    "supported_formats": "ppt, pdf, pptx, word",
+    "upload_description": "上传截图和文档——MineContext 自动整理任务并生成摘要。简化工作回顾和计划，把精力留给真正重要的事情 ✨",
+    "upload_title": "上传您的文件"
+  },
+  "heatmap": {
+    "cannot_select_future": "无法选择未来日期",
+    "cannot_select_past": "无法选择过去日期",
+    "less": "少",
+    "more": "多"
+  },
+  "screen_monitor": {
+    "empty": {
+      "enable_permission_btn": "启用权限",
+      "enable_permission_hint": "启用屏幕录制权限，每 {{interval}} 分钟使用 AI 进行总结",
+      "start_recording_hint": "开始屏幕录制，然后每 {{interval}} 分钟将截取屏幕截图并总结您的工作记录"
+    },
+    "stats": {
+      "no_error_info": "暂无详细错误信息",
+      "recent_errors": "最近错误：",
+      "screenshots_failed": "{{s}} 张截图失败",
+      "screenshots_processed": "已处理 {{s}} 张截图"
+    },
+    "status": {
+      "can_start_again": "您可以再次开始录制",
+      "not_in_hours": "当前不在录制时间内。录制将在下一个允许的时间自动开始。",
+      "recording_description": "每 {{interval}} 分钟，MineContext 根据屏幕分析生成一个活动。",
+      "recording_screen": "正在录制屏幕...",
+      "recording_stopped": "录制已停止"
+    },
+    "timeline": {
+      "can_start_again": "您可以再次开始录制",
+      "not_in_hours": "当前不在录制时间内。录制将在下一个允许的时间自动开始。",
+      "now": "现在",
+      "recording_description": "每 {{interval}} 分钟，MineContext 根据屏幕分析生成一个活动。",
+      "recording_screen": "正在录制屏幕...",
+      "recording_stopped": "录制已停止"
+    }
+  },
+  "settings": {
+    "api_key": "API Key",
+    "apply_to_days": "应用到天数",
+    "base_url": "Base URL",
+    "choose_what_to_record": "选择录制内容",
+    "embedding_model": "Embedding 模型",
+    "enable_recording_hours": "启用录制时间段",
+    "enter_api_key": "输入您的 API Key",
+    "enter_base_url": "输入您的 Base URL",
+    "enter_embedding_model": "输入您的 Embedding 模型名称",
+    "everyday": "每天",
+    "get_api_key_here": "您可以在此获取 API Key：",
+    "get_doubao_key": "获取豆包 API Key",
+    "get_openai_key": "获取 OpenAI API Key",
+    "get_started": "开始使用",
+    "model_name": "模型名称",
+    "model_platform": "模型平台",
+    "only_opened_apps": "只能选择已打开的应用程序",
+    "only_weekday": "仅工作日",
+    "please_enter_api_key": "请输入您的 API Key",
+    "please_select_ai_model": "请选择 AI 模型",
+    "record_interval": "录制间隔",
+    "save_failed": "保存设置失败",
+    "save_success": "您的 API Key 保存成功",
+    "screen": "屏幕",
+    "select_ai_model": "选择 AI 模型",
+    "select_model_desc": "配置 AI 模型和 API Key，即可开始使用 MineContext 的智能上下文能力",
+    "select_model_title": "选择一个 AI 模型开始",
+    "select_platform_error": "请选择模型平台",
+    "set_recording_hours": "设置录制时间段",
+    "title": "设置",
+    "vlm_model": "视觉语言模型",
+    "vlm_placeholder": "需要一个具有视觉理解能力的 VLM 模型。",
+    "window": "窗口"
+  },
+  "status_bar": {
+    "capture_method": "捕获方式",
+    "context_type": "上下文类型",
+    "created_at": "创建于",
+    "creation": "创建",
+    "enter_new_tag": "输入新标签",
+    "enter_summary": "输入摘要",
+    "knowledge_context": "知识上下文",
+    "new_tag": "+ 新标签",
+    "no_summary": "无摘要",
+    "no_tags": "无标签",
+    "process_method": "处理方式",
+    "smart_summary": "智能摘要",
+    "summary": "摘要",
+    "tags": "标签"
+  },
+  "todo": {
+    "add_success": "任务添加成功",
+    "add_todo": "添加待办",
+    "confirm_delete_content": "确认删除此待办事项？",
+    "confirm_delete_title": "确认删除",
+    "content_label": "待办内容",
+    "content_placeholder": "输入待办内容",
+    "content_required": "请输入任务内容",
+    "copy_failed": "复制内容失败",
+    "delete_failed": "任务删除失败",
+    "delete_success": "任务删除成功",
+    "edit_todo": "编辑待办",
+    "priority": {
+      "low": "低优先级",
+      "medium": "中优先级",
+      "urgent": "紧急"
+    },
+    "priority_label": "优先级",
+    "title": "待办事项",
+    "today": "今天",
+    "update_daily": "每天上午 8 点更新",
+    "update_success": "任务更新成功"
+  },
+  "tool": {
+    "error": "错误",
+    "parameters": "参数",
+    "result": "结果",
+    "status": {
+      "completed": "已完成",
+      "error": "错误",
+      "pending": "等待中",
+      "running": "运行中"
+    }
+  },
+  "tray": {
+    "pause_recording": "暂停录制",
+    "paused": "已暂停",
+    "quit": "退出 MineContext",
+    "recording": "录制中",
+    "resume_recording": "继续录制",
+    "show_main_window": "显示主窗口",
+    "tooltip_paused": "MineContext - 已暂停",
+    "tooltip_recording": "MineContext - 录制中"
+  },
+  "update": {
+    "available": "有可用更新",
+    "restart_to_update": "重启以更新"
+  },
+  "vault": {
+    "creation": "创建",
+    "max_depth_warning": "已达到最大文件夹深度 5 层。",
+    "menu": {
+      "delete": "删除",
+      "new_document": "新建文档",
+      "new_folder": "新建文件夹",
+      "rename": "重命名"
+    },
+    "untitled": "未命名"
+  },
+  "web_preview": {
+    "console": "控制台",
+    "enter_url": "输入 URL...",
+    "no_console_output": "无控制台输出",
+    "preview": "预览"
+  }
+}

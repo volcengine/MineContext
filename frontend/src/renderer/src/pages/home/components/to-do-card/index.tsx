@@ -19,6 +19,7 @@ import {
 import { IconDelete } from '@arco-design/web-react/icon'
 import { Task, useHomeInfo } from '@renderer/hooks/use-home-info'
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import taskEmpty from '@renderer/assets/images/task-empty.svg'
 import addIcon from '@renderer/assets/icons/add.svg'
 import copyIcon from '@renderer/assets/images/copy.svg'
@@ -68,6 +69,7 @@ export interface ToDoCardProps {
   selectedDays: string | null
 }
 const ToDoCard: FC<ToDoCardProps> = (props) => {
+  const { t } = useTranslation()
   const { selectedDays } = props
   const { tasks, toggleTaskStatus, updateTask, deleteTask, addTask, fetchTasks } = useHomeInfo()
   const hasTasks = useMemo(() => tasks.length > 0, [tasks])
@@ -97,9 +99,9 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
       await deleteTask(taskId)
       // TODO: Separate deletion from initial data
       deleteTodoList(taskId)
-      Message.success('task delete success')
+      Message.success(t('todo.delete_success', 'task delete success'))
     } catch (error) {
-      Message.error('task delete failed')
+      Message.error(t('todo.delete_failed', 'task delete failed'))
     } finally {
       setIsDeleting(false)
       setIsTaskHover(null)
@@ -118,7 +120,7 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
         setCopiedTaskId(null)
       }, 2000)
     } catch (error) {
-      Message.error('Failed to copy content')
+      Message.error(t('todo.copy_failed', 'Failed to copy content'))
     }
   })
 
@@ -143,7 +145,7 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
         </div>
       </div>
       <div className={`flex items-center ml-2 gap-3 ${isTaskHover === task.id ? 'opacity-100' : 'opacity-0'}`}>
-        <Tooltip content="Copied!" position="top" popupVisible={copiedTaskId === task.id}>
+        <Tooltip content={t('common.copied', 'Copied!')} position="top" popupVisible={copiedTaskId === task.id}>
           <Button
             type="text"
             size="small"
@@ -154,8 +156,8 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
           />
         </Tooltip>
         <Popconfirm
-          title="Confirm delete"
-          content="Confirm to delete this todo?"
+          title={t('todo.confirm_delete_title', 'Confirm delete')}
+          content={t('todo.confirm_delete_content', 'Confirm to delete this todo?')}
           onOk={() => handleDeleteTask(task.id)}
           onCancel={() => {
             setIsDeleting(false)
@@ -167,8 +169,8 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
               setIsTaskHover(null)
             }
           }}
-          okText="Confirm"
-          cancelText="Cancel">
+          okText={t('common.confirm', 'Confirm')}
+          cancelText={t('common.cancel', 'Cancel')}>
           <Button
             type="text"
             size="small"
@@ -296,7 +298,7 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
         content: values.content,
         urgency: values.urgency
       })
-      Message.success('Task add success')
+      Message.success(t('todo.add_success', 'Task add success'))
     } catch (error: any) {
       Message.error(error.message || '')
     }
@@ -318,7 +320,7 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
           urgency: values.urgency
         })
       }
-      Message.success('task update success')
+      Message.success(t('todo.update_success', 'task update success'))
     } catch (error: any) {
       Message.error(error.message || '')
     }
@@ -358,11 +360,11 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
             <Space style={{ marginTop: 5 }}>
               <div className="flex px-[2px] justify-center items-center gap-[4px] rounded-[2px] bg-gradient-to-l from-[rgba(239,251,248,0.5)] to-[#F5FBEF]">
                 <div className="mr-[0.3em] font-['Roboto'] text-[15px] font-extralight leading-[22px] tracking-[0.045px] bg-gradient-to-l from-[#007740] to-[#D0B400] bg-clip-text text-transparent">
-                  Todo
+                  {t('todo.title', 'Todo')}
                 </div>
               </div>
               <div className="text-black font-['Roboto'] text-sm font-medium leading-[22px] tracking-[0.042px]">
-                today
+                {t('todo.today', 'today')}
               </div>
             </Space>
             <img src={addIcon} alt="" onClick={handleCreateToDoList} className="cursor-pointer" />
@@ -382,19 +384,19 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
           ) : (
             <div className="flex flex-col items-center justify-center pt-[60px] pb-[60px] text-center">
               <img src={taskEmpty} alt="empty" className="w-20 h-20 mb-4" />
-              <Text type="secondary">Update at 8 am everyday</Text>
+              <Text type="secondary">{t('todo.update_daily', 'Update at 8 am everyday')}</Text>
             </div>
           )}
         </div>
       </Card>
       {/* Edit task modal */}
       <Modal
-        title={status === TODO_LIST_STATUS.Create ? 'Add todo' : 'Edit todo'}
+        title={status === TODO_LIST_STATUS.Create ? t('todo.add_todo', 'Add todo') : t('todo.edit_todo', 'Edit todo')}
         visible={visible}
         onOk={handleSave}
         onCancel={() => setVisible(false)}
-        okText={status === TODO_LIST_STATUS.Create ? 'Add' : 'Update'}
-        cancelText="Cancel"
+        okText={status === TODO_LIST_STATUS.Create ? t('common.add', 'Add') : t('common.update', 'Update')}
+        cancelText={t('common.cancel', 'Cancel')}
         unmountOnExit>
         <Form
           layout="vertical"
@@ -405,16 +407,16 @@ const ToDoCard: FC<ToDoCardProps> = (props) => {
             <Input className="hidden" />
           </Form.Item>
           <Form.Item
-            label="Todo content"
+            label={t('todo.content_label', 'Todo content')}
             field="content"
-            rules={[{ required: true, message: 'Please input task content' }]}>
-            <TextArea autoSize placeholder="Input todo content" />
+            rules={[{ required: true, message: t('todo.content_required', 'Please input task content') }]}>
+            <TextArea autoSize placeholder={t('todo.content_placeholder', 'Input todo content')} />
           </Form.Item>
-          <Form.Item label="Priority" field="urgency">
+          <Form.Item label={t('todo.priority_label', 'Priority')} field="urgency">
             <Select>
-              <Select.Option value={TaskUrgency.High}>Urgent</Select.Option>
-              <Select.Option value={TaskUrgency.Medium}>Medium Priority</Select.Option>
-              <Select.Option value={TaskUrgency.Low}>Low Priority</Select.Option>
+              <Select.Option value={TaskUrgency.High}>{t('todo.priority.urgent', 'Urgent')}</Select.Option>
+              <Select.Option value={TaskUrgency.Medium}>{t('todo.priority.medium', 'Medium Priority')}</Select.Option>
+              <Select.Option value={TaskUrgency.Low}>{t('todo.priority.low', 'Low Priority')}</Select.Option>
             </Select>
           </Form.Item>
         </Form>

@@ -9,6 +9,7 @@ import { getLogger } from '@shared/logger/main'
 import { FinalWindowInfo, getAllWindows } from './mac-window-manager'
 import { NativeCaptureHelper } from './native-capture-helper'
 import path from 'node:path'
+import i18n from '../i18n'
 const logger = getLogger('ScreenshotService')
 
 /**
@@ -301,7 +302,7 @@ class CaptureSourcesTools {
                   <rect width="256" height="144" fill="${bgColor}"/>
                   <text x="128" y="60" font-family="Arial, sans-serif" font-size="32" text-anchor="middle" fill="white">${appIcon}</text>
                   <text x="128" y="85" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="white">${window.appName}</text>
-                  <text x="128" y="100" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#cccccc">Hidden</text>
+                  <text x="128" y="100" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#cccccc">${i18n.t('capture.hidden', 'Hidden')}</text>
                 </svg>
               `
 
@@ -339,7 +340,7 @@ class CaptureSourcesTools {
           const permissionGranted = await systemPreferences.askForMediaAccess('camera')
           if (!permissionGranted) {
             throw new Error(
-              'Screen recording permission not granted. Please grant screen recording permissions in System Preferences > Security & Privacy > Screen Recording and restart the application.'
+              i18n.t('capture.error.permission_denied', 'Screen recording permission not granted. Please grant screen recording permissions in System Preferences > Security & Privacy > Screen Recording and restart the application.')
             )
           }
         }
@@ -512,9 +513,9 @@ class CaptureSourcesTools {
         return {
           success: true,
           source: { thumbnail: { minimalPng, toPNG: () => minimalPng, isEmpty: () => false } },
-          sourceName: appName || 'Virtual Window',
+          sourceName: appName || i18n.t('capture.virtual_window', 'Virtual Window'),
           isPlaceholder: true,
-          placeholderReason: 'Window not accessible - may be minimized or on another desktop'
+          placeholderReason: i18n.t('capture.window_not_accessible', 'Window not accessible - may be minimized or on another desktop')
         }
       } else if (sourceId.startsWith('window:')) {
         const sources = await desktopCapturer.getSources({
@@ -566,7 +567,7 @@ class CaptureSourcesTools {
         displays: displays.map((display, index) => ({
           id: display.id,
           index: index,
-          name: display.name || `Display ${index + 1}`,
+          name: display.name || i18n.t('capture.display_name', 'Display {{index}}', { index: index + 1 }),
           bounds: display.bounds
         }))
       }
@@ -692,7 +693,7 @@ class CaptureSourcesTools {
 
         const results = sourceIds.map((id) => {
           let isVisible = false
-          let name = 'Unknown'
+          let name = i18n.t('common.unknown', 'Unknown')
 
           if (id.startsWith('virtual-window:')) {
             const appNameMatch = id.match(/virtual-window:\d+-(.+)$/)
