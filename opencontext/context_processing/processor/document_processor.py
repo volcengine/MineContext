@@ -15,7 +15,7 @@ import queue
 import threading
 import time
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from PIL import Image
 
@@ -57,7 +57,9 @@ class DocumentProcessor(BaseContextProcessor):
         doc_processing_config = get_config("document_processing") or {}
         self._enabled = doc_processing_config.get("enabled", True)
         self._dpi = doc_processing_config.get("dpi", 200)
-        self._vlm_batch_size = doc_processing_config.get("batch_size", 3)
+        self._vlm_batch_size = doc_processing_config.get(
+            "vlm_batch_size", doc_processing_config.get("batch_size", 6)
+        )
         self._text_threshold = doc_processing_config.get("text_threshold_per_page", 50)
 
         # Thread control
@@ -99,6 +101,12 @@ class DocumentProcessor(BaseContextProcessor):
         return (
             "Unified document processor: structured (CSV/XLSX), text, and visual (PDF/DOCX/images)"
         )
+
+    def set_vlm_batch_size(self, vlm_batch_size: int) -> bool:
+        if not isinstance(vlm_batch_size, int) or vlm_batch_size < 1:
+            return False
+        self._vlm_batch_size = vlm_batch_size
+        return True
 
     @staticmethod
     def get_supported_formats() -> List[str]:
@@ -393,6 +401,21 @@ class DocumentProcessor(BaseContextProcessor):
         all_contexts = self._create_contexts_from_chunks(raw_context, chunks)
         return all_contexts
 
+    async def _run_tasks_with_progress(
+        self, tasks: List[Any], start_index: int, total_count: int
+    ) -> List[Any]:
+        results: List[Any] = []
+        completed = 0
+        for coro in asyncio.as_completed(tasks):
+            try:
+                r = await coro
+                results.append(r)
+            except Exception as e:
+                results.append(e)
+            completed += 1
+            logger.info(f"images {start_index + completed}/{total_count} processed")
+        return results
+
     def _extract_vlm_pages(self, file_path: str, page_infos: List[PageInfo]) -> List[str]:
         """Extract text from visual pages using VLM, returns extracted text list (in page order)"""
         file_ext = Path(file_path).suffix.lower()
@@ -466,6 +489,13 @@ class DocumentProcessor(BaseContextProcessor):
                 batch_images = all_doc_images[i : i + self._vlm_batch_size]
                 batch_page_nums = image_page_mapping[i : i + self._vlm_batch_size]
 
+                total = len(all_doc_images)
+                total_batches = (total + self._vlm_batch_size - 1) // self._vlm_batch_size
+                batch_index = i // self._vlm_batch_size + 1
+                logger.info(
+                    f"batch {batch_index}/{total_batches}, images {i+1}-{i+len(batch_images)} of {total}"
+                )
+
                 tasks = [
                     self._analyze_image_with_vlm(img, page_num)
                     for img, page_num in zip(batch_images, batch_page_nums)
@@ -478,7 +508,7 @@ class DocumentProcessor(BaseContextProcessor):
                     asyncio.set_event_loop(loop)
 
                 batch_results = loop.run_until_complete(
-                    asyncio.gather(*tasks, return_exceptions=True)
+                    self._run_tasks_with_progress(tasks, i, total)
                 )
 
                 for idx, result in enumerate(batch_results):
