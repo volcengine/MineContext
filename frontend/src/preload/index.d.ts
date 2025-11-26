@@ -26,7 +26,7 @@ declare global {
       getNewActivities: (startTime: string, endTime?: string) => Promise<any[]>
 
       // tasks
-      getTasks: (startTime: string, endTime?: string) => Promise<any>
+      getTasks: (startTime: string, endTime: string) => Promise<any>
       toggleTaskStatus: (id: number) => Promise<any>
       // tips
       getAllTips: () => Promise<any>

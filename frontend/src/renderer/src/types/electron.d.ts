@@ -95,6 +95,16 @@ interface dbAPI {
   getVaultsByDocumentType: (documentType: VaultDocumentType | VaultDocumentType[]) => Promise<Vault[]>
   getVaultByTitle: (title: string) => Promise<Vault[]>
   getAllVaults: () => Promise<Vault[]>
+  getHeatmapData: (startTime: number, endTime: number) => Promise<HeatmapData[]>
+  getTasks: (startTime: string, endTime: string) => Promise<TODOActivity[]>
+  [propName: string]: (...args: any[]) => any
+}
+interface EventLoopAPI {
+  getHomeLatestActivity: (status: string) => Promise<LatestActivity[]>
+  [propName: string]: (...args: any[]) => any
+}
+interface serverPushAPI {
+  pushHomeLatestActivity: (callback: (data: Activity) => void) => any
   [propName: string]: (...args: any[]) => any
 }
 
@@ -105,6 +115,7 @@ declare global {
     dbAPI: dbAPI
     screenMonitorAPI: ScreenMonitorAPI
     fileService: any
-    serverPushAPI: any
+    serverPushAPI: serverPushAPI
+    eventLoop: EventLoopAPI
   }
 }

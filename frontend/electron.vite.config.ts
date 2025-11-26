@@ -62,32 +62,22 @@ export default defineConfig({
     },
     plugins: [
       tailwindcss(),
-      react({
-        // tsDecorators: true,
-        // plugins: [
-        //   [
-        //     '@swc/plugin-styled-components',
-        //     {
-        //       displayName: true, // 开发环境下启用组件名称
-        //       fileName: false, // 不在类名中包含文件名
-        //       pure: true, // 优化性能
-        //       ssr: false // 不需要服务端渲染
-        //     }
-        //   ]
-        // ]
-      }),
+      react({}),
       ...(isDev ? [CodeInspectorPlugin({ bundler: 'vite' })] : []), // 只在开发环境下启用 CodeInspectorPlugin
-      ...visualizerPlugin('renderer')
+      ...visualizerPlugin('renderer'),
+      {
+        name: 'force-arco-adapter-side-effect',
+        transform(code, id) {
+          if (id.includes('react-19-adapter')) {
+            return {
+              code,
+              map: null,
+              moduleSideEffects: true
+            }
+          }
+          return null
+        }
+      }
     ]
-    // server: {
-    //   proxy: {
-    //     // 代理Express服务 (AI Chat)
-    //     '/api/chat': {
-    //       target: 'http://127.0.0.1:3001',
-    //       changeOrigin: true,
-    //       secure: false,
-    //     },
-    //   }
-    // }
   }
 })

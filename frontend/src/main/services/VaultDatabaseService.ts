@@ -4,9 +4,115 @@ import { getLogger } from '@shared/logger/main'
 import type { Vault } from '@types'
 import { DB } from './Database'
 import { VaultDocumentType } from '@shared/enums/global-enum'
+import dayjs from 'dayjs'
 // SPDX-License-Identifier: Apache-2.0
 const logger = getLogger('VaultDatabaseService')
+
+export interface VaultQueryOptions {
+  documentTypes?: VaultDocumentType | VaultDocumentType[] // Document types filter
+  isFolder?: number // 0: files only, 1: folders only, undefined: all
+  isDeleted?: number // 0: not deleted, 1: deleted, undefined: all
+  parentId?: number | null // Filter by parent folder
+  createdFrom?: number // Created time lower bound (Unix timestamp in milliseconds)
+  createdTo?: number // Created time upper bound (Unix timestamp in milliseconds)
+  updatedFrom?: number // Updated time lower bound (Unix timestamp in milliseconds)
+  updatedTo?: number // Updated time upper bound (Unix timestamp in milliseconds)
+  limit?: number // Max number of results
+  offset?: number // Offset for pagination
+}
 class VaultDatabaseService {
+  /**
+   * Query Vaults with flexible filters including time range and document types
+   * @param options Query options with multiple filters
+   * @returns Array of Vault items
+   */
+  public queryVaults(options: VaultQueryOptions = {}): Vault[] {
+    try {
+      const db = DB.getInstance()
+
+      // Build WHERE conditions
+      const conditions: string[] = []
+      const params: Record<string, any> = {}
+
+      // Document types filter
+      if (options.documentTypes !== undefined) {
+        const types = Array.isArray(options.documentTypes)
+          ? options.documentTypes
+          : [options.documentTypes]
+        const placeholders = types.map((_, index) => `@docType${index}`).join(', ')
+        conditions.push(`document_type IN (${placeholders})`)
+        types.forEach((type, index) => {
+          params[`docType${index}`] = type
+        })
+      }
+
+      // Folder filter
+      if (options.isFolder !== undefined) {
+        conditions.push('is_folder = @isFolder')
+        params.isFolder = options.isFolder
+      }
+
+      // Deleted filter
+      if (options.isDeleted !== undefined) {
+        conditions.push('is_deleted = @isDeleted')
+        params.isDeleted = options.isDeleted
+      } else {
+        // Default: exclude deleted items
+        conditions.push('is_deleted = 0')
+      }
+
+      // Parent ID filter
+      if (options.parentId !== undefined) {
+        if (options.parentId === null) {
+          conditions.push('parent_id IS NULL')
+        } else {
+          conditions.push('parent_id = @parentId')
+          params.parentId = options.parentId
+        }
+      }
+
+      // Created time range
+      if (options.createdFrom !== undefined) {
+        conditions.push('created_at >= @createdFrom')
+        params.createdFrom = dayjs(options.createdFrom).toISOString()
+      }
+
+      if (options.createdTo !== undefined) {
+        conditions.push('created_at <= @createdTo')
+        params.createdTo = dayjs(options.createdTo).toISOString()
+      }
+
+      // Updated time range
+      if (options.updatedFrom !== undefined) {
+        conditions.push('updated_at >= @updatedFrom')
+        params.updatedFrom = dayjs(options.updatedFrom).toISOString()
+      }
+
+      if (options.updatedTo !== undefined) {
+        conditions.push('updated_at <= @updatedTo')
+        params.updatedTo = dayjs(options.updatedTo).toISOString()
+      }
+
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+      const limit = options.limit ?? 100
+      const offset = options.offset ?? 0
+
+      const sql = `
+        SELECT * FROM vaults
+        ${whereClause}
+        ORDER BY updated_at DESC, id DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+
+      const result = db.query<Vault>(sql, conditions.length > 0 ? params : undefined)
+      logger.debug(`📊 Queried ${result.length} vaults with options:`, options)
+      return result
+    } catch (error) {
+      logger.error('❌ Failed to query Vaults with options:', error)
+      throw error
+    }
+  }
+
   public getVaults(): Vault[] {
     try {
       const db = DB.getInstance()
@@ -214,6 +320,92 @@ class VaultDatabaseService {
     // This method is identical to hardDelete, so we can just call it.
     logger.info(`🗑️ Calling hard delete for Vault ID: ${id}`)
     return this.hardDeleteVaultById(id)
+  }
+
+  /**
+   * Get Vaults within a time range (created_at)
+   * @param createdFrom Created time lower bound (Unix timestamp)
+   * @param createdTo Created time upper bound (Unix timestamp)
+   * @param limit Max number of results
+   * @param offset Offset for pagination
+   * @returns Array of Vault items
+   */
+  public getVaultsInTimeRange(
+    createdFrom: number,
+    createdTo: number,
+    limit = 100,
+    offset = 0
+  ): Vault[] {
+    return this.queryVaults({
+      createdFrom,
+      createdTo,
+      limit,
+      offset
+    })
+  }
+
+  /**
+   * Get Vaults by multiple document types with time range
+   * @param documentTypes Document types to filter
+   * @param createdFrom Optional created time lower bound
+   * @param createdTo Optional created time upper bound
+   * @param limit Max number of results
+   * @param offset Offset for pagination
+   * @returns Array of Vault items
+   */
+  public getVaultsByTypesAndTimeRange(
+    documentTypes: VaultDocumentType | VaultDocumentType[],
+    createdFrom?: number,
+    createdTo?: number,
+    limit = 100,
+    offset = 0
+  ): Vault[] {
+    return this.queryVaults({
+      documentTypes,
+      createdFrom,
+      createdTo,
+      limit,
+      offset
+    })
+  }
+
+  /**
+   * Get recently updated Vaults
+   * @param days Number of days to look back (default: 7)
+   * @param limit Max number of results
+   * @returns Array of Vault items
+   */
+  public getRecentlyUpdatedVaults(days = 7, limit = 100): Vault[] {
+    const updatedFrom = dayjs().subtract(days, 'day').valueOf()
+    const updatedTo = dayjs().valueOf()
+
+    return this.queryVaults({
+      updatedFrom,
+      updatedTo,
+      limit
+    })
+  }
+
+  /**
+   * Get Vaults by folder with time range
+   * @param parentId Parent folder ID (null for root level)
+   * @param createdFrom Optional created time lower bound
+   * @param createdTo Optional created time upper bound
+   * @param limit Max number of results
+   * @returns Array of Vault items
+   */
+  public getVaultsByFolderAndTimeRange(
+    parentId: number | null,
+    createdFrom?: number,
+    createdTo?: number,
+    limit = 100
+  ): Vault[] {
+    return this.queryVaults({
+      parentId,
+      createdFrom,
+      createdTo,
+      limit
+    })
   }
 }
 export { VaultDatabaseService }
