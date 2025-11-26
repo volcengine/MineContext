@@ -153,8 +153,15 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
                     code=400, status=400, message=f"Embedding validation failed: {emb_msg}"
                 )
 
-            # Save configuration
-            new_settings = {"vlm_model": vlm_config, "embedding_model": emb_config}
+            # Save configuration (without timeout limit)
+            vlm_config_save = _build_llm_config(
+                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT
+            )
+            emb_config_save = _build_llm_config(
+                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
+            )
+            
+            new_settings = {"vlm_model": vlm_config_save, "embedding_model": emb_config_save}
 
             config_mgr = GlobalConfig.get_instance().get_config_manager()
             if not config_mgr:
