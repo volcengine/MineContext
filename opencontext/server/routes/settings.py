@@ -62,6 +62,11 @@ def _build_llm_config(
 ) -> dict:
     """Build LLM config dict"""
     config = {"base_url": base_url, "api_key": api_key, "model": model, "provider": provider}
+    
+    # Add optional parameters
+    if "timeout" in kwargs:
+        config["timeout"] = kwargs["timeout"]
+
     if llm_type == LLMType.EMBEDDING:
         config["output_dim"] = kwargs.get("output_dim", 2048)
     return config
@@ -130,7 +135,7 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
 
             # Validate VLM
             vlm_config = _build_llm_config(
-                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT
+                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT, timeout=15
             )
             vlm_valid, vlm_msg = LLMClient(llm_type=LLMType.CHAT, config=vlm_config).validate()
             if not vlm_valid:
@@ -140,7 +145,7 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
 
             # Validate Embedding
             emb_config = _build_llm_config(
-                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
+                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING, timeout=15
             )
             emb_valid, emb_msg = LLMClient(llm_type=LLMType.EMBEDDING, config=emb_config).validate()
             if not emb_valid:
@@ -210,10 +215,10 @@ async def validate_llm_config(request: UpdateModelSettingsRequest, _auth: str = 
 
         # Build configs for validation (without saving)
         vlm_config = _build_llm_config(
-            cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT
+            cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT, timeout=15
         )
         emb_config = _build_llm_config(
-            emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
+            emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING, timeout=15
         )
 
         # Validate VLM
