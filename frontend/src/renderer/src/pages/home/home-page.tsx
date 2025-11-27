@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Beijing Volcano Engine Technology Co., Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Typography } from '@arco-design/web-react'
 import './home-page.css'
 import { Allotment } from 'allotment'
@@ -17,7 +17,8 @@ import { ChatCard } from './components/chat-card/chat-card'
 import { setActiveConversationId, toggleHomeAiAssistant } from '@renderer/store/chat-history'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
-import { useUnmount } from 'ahooks'
+import { useMemoizedFn, useUnmount } from 'ahooks'
+import { HeatmapEntry, MonthType } from './components/heatmap/heatmap'
 
 const { Title, Text } = Typography
 
@@ -37,6 +38,13 @@ const HomePage: React.FC = () => {
   useUnmount(() => {
     dispatch(setActiveConversationId(null))
     dispatch(toggleHomeAiAssistant(false))
+  })
+  const [selectedDays, setSelectedDays] = useState<string | null>(null)
+
+  const onChange = useMemoizedFn((date: string | null, monthType: MonthType) => {
+    if (monthType === MonthType.MONTH && date) {
+      setSelectedDays(date)
+    }
   })
   return (
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>
@@ -63,7 +71,8 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex items-start gap-3 flex-1 self-stretch">
                   <div className="flex flex-col items-start gap-3 flex-1 self-stretch">
-                    <ToDoCard />
+                    <HeatmapEntry onChange={onChange} />
+                    <ToDoCard selectedDays={selectedDays} />
                     <LatestActivityCard
                       title="Latest activity"
                       emptyText="No activity in the last 7 days. "

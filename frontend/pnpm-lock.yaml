@@ -47,6 +47,9 @@ importers:
       '@radix-ui/react-use-controllable-state':
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.1.10)(react@19.1.1)
+      '@zhongyao/heatmap':
+        specifier: ^0.0.6
+        version: 0.0.6(dayjs@1.11.18)(react@19.1.1)
       ahooks:
         specifier: ^3.9.5
         version: 3.9.5(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -136,8 +139,8 @@ importers:
         version: 3.25.76
     devDependencies:
       '@arco-design/web-react':
-        specifier: ^2.66.4
-        version: 2.66.4(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: latest
+        version: 2.66.8(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@electron-toolkit/eslint-config-prettier':
         specifier: ^3.0.0
         version: 3.0.0(eslint@9.33.0(jiti@2.5.1))(prettier@3.6.2)
@@ -369,8 +372,8 @@ packages:
   '@arco-design/color@0.4.0':
     resolution: {integrity: sha512-s7p9MSwJgHeL8DwcATaXvWT3m2SigKpxx4JA1BGPHL4gfvaQsmQfrLBDpjOJFJuJ2jG2dMt3R3P8Pm9E65q18g==}
 
-  '@arco-design/web-react@2.66.4':
-    resolution: {integrity: sha512-vl7sJBLvbVyJhYRPoQ8kHc8BuXNkJIXca5h9ync2J1TuKglFMLNbQwjIvJLW3ciabqTZ5g1O7H1GQ+lLIEMsWA==}
+  '@arco-design/web-react@2.66.8':
+    resolution: {integrity: sha512-V2XDTqeSFq4g6Yk0tSEFO4SMPZ04cGNF6dKfFBM9drEpmj91cU1n9+rd3gmmtcJ2f3SOqbr0itnUsqBWGQ4PvQ==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
@@ -1971,6 +1974,9 @@ packages:
   '@types/react@19.1.10':
     resolution: {integrity: sha512-EhBeSYX0Y6ye8pNebpKrwFJq7BoQ8J5SO6NlvNwwHjSj6adXJViPQrKlsyPw7hLBLvckEMO1yxeGdR82YBBlDg==}
 
+  '@types/react@19.2.3':
+    resolution: {integrity: sha512-k5dJVszUiNr1DSe8Cs+knKR6IrqhqdhpUwzqhkS8ecQTSf3THNtbfIp/umqHMpX2bv+9dkx3fwDv/86LcSfvSg==}
+
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
 
@@ -2100,6 +2106,12 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+
+  '@zhongyao/heatmap@0.0.6':
+    resolution: {integrity: sha512-AXQFk4f8CkPSUSi4qasTZtwWPABkSVv6zSMlmlFXtCqYug0tie/pHc81DYkx51lvluQycaX4l40z7m1EHrtSCQ==}
+    peerDependencies:
+      dayjs: ^1.11.19
+      react: ^16.18.0
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -5915,6 +5927,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
@@ -6309,7 +6326,7 @@ snapshots:
     dependencies:
       color: 3.2.1
 
-  '@arco-design/web-react@2.66.4(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@arco-design/web-react@2.66.8(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@arco-design/color': 0.4.0
       '@babel/runtime': 7.28.3
@@ -8293,6 +8310,10 @@ snapshots:
     dependencies:
       csstype: 3.1.3
 
+  '@types/react@19.2.3':
+    dependencies:
+      csstype: 3.1.3
+
   '@types/responselike@1.0.3':
     dependencies:
       '@types/node': 24.7.2
@@ -8486,6 +8507,13 @@ snapshots:
   '@vue/shared@3.5.18': {}
 
   '@xmldom/xmldom@0.8.11': {}
+
+  '@zhongyao/heatmap@0.0.6(dayjs@1.11.18)(react@19.1.1)':
+    dependencies:
+      '@types/react': 19.2.3
+      dayjs: 1.11.18
+      react: 19.1.1
+      typescript: 5.9.3
 
   abbrev@1.1.1: {}
 
@@ -13220,6 +13248,8 @@ snapshots:
       - supports-color
 
   typescript@5.9.2: {}
+
+  typescript@5.9.3: {}
 
   uc.micro@2.1.0: {}
 
