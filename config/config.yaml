@@ -51,8 +51,7 @@ capture:
     monitor_interval: 30 # Monitor interval (seconds)
     watch_folder_paths:
       - "/Users/${USERNAME}/Documents"
-      - "/Users/${USERNAME}/Downloads"
-      - "./data/documents"
+
     recursive: true
     max_file_size: 104857600 # Maximum file size to process (bytes), default: 100MB
     initial_scan: true
