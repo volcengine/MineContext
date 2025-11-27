@@ -55,41 +55,18 @@ class UpdateModelSettingsResponse(BaseModel):
     message: str
 
 
-class ValidateLLMRequest(BaseModel):
-    baseUrl: str
-    apiKey: str
-    modelId: str
-    provider: str
-    embeddingModelId: str
-    embeddingBaseUrl: str | None = None
-    embeddingApiKey: str | None = None
-    embeddingProvider: str | None = None
-
-
 # ==================== Helper Functions ====================
-
-
-def _mask_api_key(raw: str) -> str:
-    """Mask API key: keep first 4 and last 2 chars"""
-    if not raw:
-        return ""
-    if len(raw) <= 6:
-        return raw[0] + "***" if len(raw) > 1 else "***"
-    return f"{raw[:4]}***{raw[-2:]}"
-
-
-def _is_masked_api_key(val: str) -> bool:
-    """Check if API key is already masked"""
-    if not val:
-        return False
-    return ("***" in val) and not val.endswith("***") and len(val) >= 6
-
 
 def _build_llm_config(
     base_url: str, api_key: str, model: str, provider: str, llm_type: LLMType, **kwargs
 ) -> dict:
     """Build LLM config dict"""
     config = {"base_url": base_url, "api_key": api_key, "model": model, "provider": provider}
+    
+    # Add optional parameters
+    if "timeout" in kwargs:
+        config["timeout"] = kwargs["timeout"]
+
     if llm_type == LLMType.EMBEDDING:
         config["output_dim"] = kwargs.get("output_dim", 2048)
     return config
@@ -113,10 +90,10 @@ async def get_model_settings(_auth: str = auth_dependency):
             modelPlatform=vlm_cfg.get("provider", ""),
             modelId=vlm_cfg.get("model", ""),
             baseUrl=vlm_cfg.get("base_url", ""),
-            apiKey=_mask_api_key(vlm_cfg.get("api_key", "")),
+            apiKey=vlm_cfg.get("api_key", ""),
             embeddingModelId=emb_cfg.get("model", ""),
             embeddingBaseUrl=emb_cfg.get("base_url", ""),
-            embeddingApiKey=_mask_api_key(emb_cfg.get("api_key", "")),
+            embeddingApiKey=emb_cfg.get("api_key", ""),
             embeddingModelPlatform=emb_cfg.get("provider", ""),
         )
 
@@ -133,22 +110,10 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
     with _config_lock:
         try:
             cfg = request.config
-            current_cfg = GlobalConfig.get_instance().get_config() or {}
-            current_vlm_key = (current_cfg.get("vlm_model") or {}).get("api_key", "")
-            current_emb_key = (current_cfg.get("embedding_model") or {}).get("api_key", "")
 
-            # Resolve VLM API key
-            vlm_key = current_vlm_key if _is_masked_api_key(cfg.apiKey) else cfg.apiKey
-
-            # Resolve Embedding API key
-            if cfg.embeddingApiKey:
-                emb_key = (
-                    current_emb_key
-                    if _is_masked_api_key(cfg.embeddingApiKey)
-                    else cfg.embeddingApiKey
-                )
-            else:
-                emb_key = vlm_key
+            # Use API keys directly from frontend
+            vlm_key = cfg.apiKey
+            emb_key = cfg.embeddingApiKey or vlm_key
 
             # Resolve embedding URL and provider
             emb_url = cfg.embeddingBaseUrl or cfg.baseUrl
@@ -170,7 +135,7 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
 
             # Validate VLM
             vlm_config = _build_llm_config(
-                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT
+                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT, timeout=15
             )
             vlm_valid, vlm_msg = LLMClient(llm_type=LLMType.CHAT, config=vlm_config).validate()
             if not vlm_valid:
@@ -180,7 +145,7 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
 
             # Validate Embedding
             emb_config = _build_llm_config(
-                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
+                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING, timeout=15
             )
             emb_valid, emb_msg = LLMClient(llm_type=LLMType.EMBEDDING, config=emb_config).validate()
             if not emb_valid:
@@ -188,8 +153,15 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
                     code=400, status=400, message=f"Embedding validation failed: {emb_msg}"
                 )
 
-            # Save configuration
-            new_settings = {"vlm_model": vlm_config, "embedding_model": emb_config}
+            # Save configuration (without timeout limit)
+            vlm_config_save = _build_llm_config(
+                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT
+            )
+            emb_config_save = _build_llm_config(
+                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
+            )
+            
+            new_settings = {"vlm_model": vlm_config_save, "embedding_model": emb_config_save}
 
             config_mgr = GlobalConfig.get_instance().get_config_manager()
             if not config_mgr:
@@ -222,23 +194,45 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
             return convert_resp(code=500, status=500, message="Failed to update model settings")
 
 
-@router.get("/api/model_settings/validate")
-async def validate_llm_config(_auth: str = auth_dependency):
-    """Validate current LLM configuration from backend"""
+@router.post("/api/model_settings/validate")
+async def validate_llm_config(request: UpdateModelSettingsRequest, _auth: str = auth_dependency):
+    """Validate LLM configuration from frontend (without saving)"""
     try:
-        # Get current configuration from backend
-        config = GlobalConfig.get_instance().get_config()
-        if not config:
-            return convert_resp(code=500, status=500, message="配置未初始化")
+        cfg = request.config
 
-        vlm_cfg = config.get("vlm_model", {})
-        emb_cfg = config.get("embedding_model", {})
+        # Use API keys directly from frontend
+        vlm_key = cfg.apiKey
+        emb_key = cfg.embeddingApiKey or vlm_key
+
+        # Resolve embedding URL and provider
+        emb_url = cfg.embeddingBaseUrl or cfg.baseUrl
+        emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
+
+        # Validation
+        if not vlm_key:
+            return convert_resp(code=400, status=400, message="VLM API key cannot be empty")
+        if not emb_key:
+            return convert_resp(code=400, status=400, message="Embedding API key cannot be empty")
+        if not cfg.modelId:
+            return convert_resp(code=400, status=400, message="VLM model ID cannot be empty")
+        if not cfg.embeddingModelId:
+            return convert_resp(
+                code=400, status=400, message="Embedding model ID cannot be empty"
+            )
+
+        # Build configs for validation (without saving)
+        vlm_config = _build_llm_config(
+            cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT, timeout=15
+        )
+        emb_config = _build_llm_config(
+            emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING, timeout=15
+        )
 
         # Validate VLM
-        vlm_valid, vlm_msg = LLMClient(llm_type=LLMType.CHAT, config=vlm_cfg).validate()
+        vlm_valid, vlm_msg = LLMClient(llm_type=LLMType.CHAT, config=vlm_config).validate()
 
         # Validate Embedding
-        emb_valid, emb_msg = LLMClient(llm_type=LLMType.EMBEDDING, config=emb_cfg).validate()
+        emb_valid, emb_msg = LLMClient(llm_type=LLMType.EMBEDDING, config=emb_config).validate()
 
         # Build error message
         if not vlm_valid or not emb_valid:

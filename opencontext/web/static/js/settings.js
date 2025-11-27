@@ -493,7 +493,27 @@ async function validateModelConfig() {
     try {
         showToast('正在测试连接...', false);
 
-        const response = await fetch('/api/model_settings/validate');
+        // Collect current configuration from the form
+        const useSeparate = document.getElementById('separateEmbedding').checked;
+
+        const settings = {
+            config: {
+                modelPlatform: document.getElementById('modelPlatform').value,
+                modelId: document.getElementById('modelId').value,
+                baseUrl: document.getElementById('baseUrl').value,
+                apiKey: document.getElementById('apiKey').value,
+                embeddingModelId: document.getElementById('embeddingModelId').value,
+                embeddingBaseUrl: useSeparate ? document.getElementById('embeddingBaseUrl').value : null,
+                embeddingApiKey: useSeparate ? document.getElementById('embeddingApiKey').value : null,
+                embeddingModelPlatform: useSeparate ? document.getElementById('embeddingModelPlatform').value : null
+            }
+        };
+
+        const response = await fetch('/api/model_settings/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        });
 
         const data = await response.json();
 

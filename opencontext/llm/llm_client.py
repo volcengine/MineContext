@@ -349,13 +349,42 @@ class LLMClient:
             tuple[bool, str]: (success, message)
         """
 
-        def _extract_error_summary(error_msg: str) -> str:
+        def _extract_error_summary(error: Any) -> str:
             """
             Extract a concise error summary from API error messages.
             Removes verbose API error details and keeps only the essential information.
             """
+            error_msg = str(error)
             if not error_msg:
                 return "Unknown error"
+
+            # 1. Check for specific Volcengine/Doubao error codes
+            volcengine_errors = {
+                "AccessDenied": "Access denied. Please ensure the model is enabled in the Volcengine console.",
+                "QuotaExceeded": "Quota exceeded. Please check your Volcengine account balance.",
+                "ModelAccountIpmRateLimitExceeded": "Model rate limit (IPM) exceeded.",
+                "AccountRateLimitExceeded": "Account rate limit exceeded.",
+                "RateLimitExceeded": "Rate limit exceeded.",
+                "InternalServiceError": "Volcengine internal service error.",
+                "ServiceUnavailable": "Service unavailable.",
+                "MethodNotAllowed": "Method not allowed. Check your configuration.",
+            }
+            
+            for code, msg in volcengine_errors.items():
+                if code in error_msg:
+                    return msg
+
+            # 2. Check for OpenAI specific errors
+            openai_errors = {
+                "insufficient_quota": "Insufficient quota. Check your plan and billing details.",
+                "invalid_api_key": "Invalid API key provided.",
+                "model_not_found": "The model does not exist or you do not have access to it.",
+                "context_length_exceeded": "Context length exceeded.",
+            }
+
+            for code, msg in openai_errors.items():
+                if code in error_msg:
+                    return msg
 
             # If it's an API error with detailed JSON response, extract key info
             if "Error code:" in error_msg:
@@ -425,14 +454,12 @@ class LLMClient:
                 return False, f"Unsupported LLM type: {self.llm_type}"
 
         except APIError as e:
-            error_msg = str(e)
-            logger.error(f"LLM validation failed with API error: {error_msg}")
+            logger.error(f"LLM validation failed with API error: {e}")
             # Extract concise error summary before returning
-            concise_error = _extract_error_summary(error_msg)
+            concise_error = _extract_error_summary(e)
             return False, concise_error
         except Exception as e:
-            error_msg = str(e)
-            logger.error(f"LLM validation failed with unexpected error: {error_msg}")
+            logger.error(f"LLM validation failed with unexpected error: {e}")
             # Extract concise error summary before returning
-            concise_error = _extract_error_summary(error_msg)
+            concise_error = _extract_error_summary(e)
             return False, concise_error
