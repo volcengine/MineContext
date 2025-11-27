@@ -50,7 +50,7 @@ capture:
     enabled: false
     monitor_interval: 30 # Monitor interval (seconds)
     watch_folder_paths:
-      - "/Users/${USERNAME}/Documents"
+      - "${CONTEXT_PATH:.}/persist/Documents"
 
     recursive: true
     max_file_size: 104857600 # Maximum file size to process (bytes), default: 100MB
