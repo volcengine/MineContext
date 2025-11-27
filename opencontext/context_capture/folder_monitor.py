@@ -26,7 +26,7 @@ from opencontext.utils.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
-class FolderMonitor(BaseCaptureComponent):
+class FolderMonitorCapture(BaseCaptureComponent):
     """
     Folder monitoring component that monitors local folder changes and generates context capture events.
     """
@@ -34,7 +34,7 @@ class FolderMonitor(BaseCaptureComponent):
     def __init__(self):
         """Initialize Folder monitoring component"""
         super().__init__(
-            name="FolderMonitor",
+            name="FolderMonitorCapture",
             description="Monitor document changes in local folders",
             source_type=ContextSource.LOCAL_FILE,
         )

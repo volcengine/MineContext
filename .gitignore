@@ -251,3 +251,5 @@ pyrightconfig.json
 # ide config file
 .trae
 .claude/
+GEMINI.md
+.gemini/
