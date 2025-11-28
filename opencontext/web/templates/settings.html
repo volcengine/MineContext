@@ -45,10 +45,26 @@
                             <label for="modelPlatform" class="form-label">模型平台</label>
                             <select class="form-select" id="modelPlatform" required>
                                 <option value="openai">OpenAI</option>
+                                <option value="azure">Azure OpenAI</option>
                                 <option value="anthropic">Anthropic</option>
                                 <option value="doubao">豆包</option>
                                 <option value="qwen">通义千问</option>
                             </select>
+                        </div>
+                        
+                        <!-- Azure Configuration Hint -->
+                        <div class="alert alert-info" id="azureHint" style="display: none;">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-info-circle"></i> Azure OpenAI 配置说明
+                            </h6>
+                            <p class="mb-2">请提供<strong>完整的 Azure API URL</strong>（包含 api-version 参数）</p>
+                            <p class="mb-2"><strong>示例：</strong></p>
+                            <code class="d-block bg-light p-2 rounded mb-2" style="font-size: 0.85em;">
+                                https://your-resource.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-01
+                            </code>
+                            <small class="text-muted">
+                                系统会自动提取 endpoint、deployment 和 api-version
+                            </small>
                         </div>
                         <div class="mb-3">
                             <label for="modelId" class="form-label">模型 ID</label>
@@ -77,8 +93,20 @@
                                 <label for="embeddingModelPlatform" class="form-label">Embedding 平台</label>
                                 <select class="form-select" id="embeddingModelPlatform">
                                     <option value="openai">OpenAI</option>
+                                    <option value="azure">Azure OpenAI</option>
                                     <option value="doubao">豆包</option>
                                 </select>
+                            </div>
+                            
+                            <!-- Azure Embedding Hint -->
+                            <div class="alert alert-info" id="embeddingAzureHint" style="display: none;">
+                                <h6 class="alert-heading">
+                                    <i class="bi bi-info-circle"></i> Azure Embedding 配置说明
+                                </h6>
+                                <p class="mb-2">请提供<strong>完整的 Azure Embedding API URL</strong></p>
+                                <code class="d-block bg-light p-2 rounded" style="font-size: 0.85em;">
+                                    https://your-resource.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2024-02-01
+                                </code>
                             </div>
                             <div class="mb-3">
                                 <label for="embeddingBaseUrl" class="form-label">Embedding Base URL</label>
