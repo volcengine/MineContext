@@ -18,4 +18,11 @@ __pycache__
 uv.lock
 uv.toml
 .idea
+
+# ide config file
+.trae
+# claude code
 .claude/
+# gemini cli
+GEMINI.md
+.gemini/

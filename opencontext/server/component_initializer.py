@@ -19,6 +19,7 @@ from opencontext.config.prompt_manager import PromptManager
 # Import capture components
 from opencontext.context_capture.screenshot import ScreenshotCapture
 from opencontext.context_capture.vault_document_monitor import VaultDocumentMonitor
+from opencontext.context_capture.web_link_capture import WebLinkCapture
 from opencontext.context_consumption.completion import CompletionService
 
 # Import consumption components
@@ -37,6 +38,7 @@ logger = get_logger(__name__)
 CAPTURE_COMPONENTS = {
     "screenshot": ScreenshotCapture,
     "vault_document_monitor": VaultDocumentMonitor,
+    "web_link_capture": WebLinkCapture,
 }
 
 CONSUMPTION_COMPONENTS = {
