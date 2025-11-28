@@ -251,30 +251,36 @@ class FolderMonitorCapture(BaseCaptureComponent):
             logger.info(f"Cleaned up {deleted_count} context entries for deleted file: {file_path}")
 
     def _cleanup_file_context(self, file_path: str) -> int:
-        # 这里需要review
         """Clean up processed contexts associated with a deleted file."""
         try:
             # Find contexts by file_path
-            contexts_to_delete = self._storage.get_all_processed_contexts(
-                filters={"knowledge_file_path": file_path}
+            contexts_dict = self._storage.get_all_processed_contexts(
+                context_types=[ContextType.KNOWLEDGE_CONTEXT],
+                filter={
+                    "knowledge_file_path": file_path,
+                },
             )
-            if not contexts_to_delete:
+            if not contexts_dict:
                 return 0
 
-            # Extract IDs for deletion
-            doc_ids = [ctx.get("doc_id") for ctx in contexts_to_delete if ctx.get("doc_id")]
-            if not doc_ids:
-                return 0
-
-            # Delete by IDs
-            # Note: Assuming delete_processed_context can handle a list or we call it in a loop.
-            # The current interface seems to take one ID at a time.
             count = 0
-            for doc_id in doc_ids:
-                if self._storage.delete_processed_context(
-                    doc_id=doc_id, context_type=ContextType.KNOWLEDGE_CONTEXT
-                ):
-                    count += 1
+            # Iterate over context types and their context lists
+            for context_type, contexts in contexts_dict.items():
+                # 二次校验
+                if context_type != ContextType.KNOWLEDGE_CONTEXT:
+                    continue
+                for ctx in contexts:
+                    # Get ID from ProcessedContext object (or dict if applicable)
+                    ctx_id = (
+                        getattr(ctx, "id", None) if not isinstance(ctx, dict) else ctx.get("id")
+                    )
+
+                    if ctx_id:
+                        # Delete using id and the correct context_type
+                        if self._storage.delete_processed_context(
+                            id=ctx_id, context_type=context_type
+                        ):
+                            count += 1
             return count
         except Exception as e:
             logger.exception(f"Failed to clean up context for file {file_path}: {e}")
