@@ -7,12 +7,15 @@ import { CardLayout } from '../layout'
 import { useMount, useUnmount } from 'ahooks'
 import { ActivityTimelineItem } from '@renderer/pages/screen-monitor/components/activitie-timeline-item'
 import { isEmpty } from 'lodash'
+import { useServiceHandler } from '@renderer/atom/event-loop.atom'
+import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
+import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 // import { useServiceHandler } from '@renderer/atom/event-loop.atom'
 // import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
 
 interface LatestActivityCardProps {
-  title: string
+  title?: string
   hasToDocButton?: boolean
   emptyText?: string
   children?: React.ReactNode
@@ -23,6 +26,7 @@ interface LatestActivityCardProps {
 
 const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   const { navigateToMainTab } = useNavigation()
+  const { t } = useTranslation()
 
   // Store polling timer ID
   // const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -91,13 +95,11 @@ const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   return (
     <CardLayout
       seeAllClick={handleNavigateToScreenMonitor}
-      title="Latest activity"
-      emptyText="No activity in the last 7 days. "
-      isEmpty={isEmpty(latestActivity)}>
-      {latestActivity ? (
-        <ActivityTimelineItem
-          activity={{ ...latestActivity, resources: JSON.parse(latestActivity.resources || '[]') } as any}
-        />
+      title={t('home.latest_activity.title')}
+      emptyText={t('home.latest_activity.empty')}
+      isEmpty={isEmpty(data)}>
+      {data ? (
+        <ActivityTimelineItem activity={{ ...data, resources: JSON.parse(data.resources || '[]') } as any} />
       ) : null}
     </CardLayout>
   )

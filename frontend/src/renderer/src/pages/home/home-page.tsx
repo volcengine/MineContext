@@ -17,6 +17,8 @@ import { ChatCard } from './components/chat-card/chat-card'
 import { setActiveConversationId, toggleHomeAiAssistant } from '@renderer/store/chat-history'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
+import { useUnmount } from 'ahooks'
+import { useTranslation } from 'react-i18next'
 import { useMemoizedFn, useUnmount } from 'ahooks'
 import { HeatmapEntry, MonthType } from './components/heatmap/heatmap'
 
@@ -29,6 +31,7 @@ const { Title, Text } = Typography
 // });
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation()
   const recentVaults = getRecentVaults()
   // const { isVisible, toggleAIAssistant, hideAIAssistant } = useAIAssistant()
   const isVisible = useSelector((state: RootState) => state.chatHistory.home.aiAssistantVisible)
@@ -58,12 +61,10 @@ const HomePage: React.FC = () => {
                   <div className="rounded-xl w-full flex justify-between items-start">
                     <div className="flex w-[639px] flex-col items-start gap-2">
                       <Title heading={3} style={{ marginTop: 5, fontWeight: 700, fontSize: 24 }}>
-                        Create with <span style={{ color: 'blue', fontWeight: 700 }}>Context</span>, Clarity from
-                        Chaos.👏
+                        {t('home.title')}
                       </Title>
                       <Text type="secondary" style={{ fontSize: 12 }}>
-                        Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other
-                        insights—emerging from all your collected Contexts ✨
+                        {t('home.description')}
                       </Text>
                     </div>
                     <AIToggleButton onClick={() => dispatch(toggleHomeAiAssistant(true))} isActive={isVisible} />
@@ -71,6 +72,8 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex items-start gap-3 flex-1 self-stretch">
                   <div className="flex flex-col items-start gap-3 flex-1 self-stretch">
+                    <ToDoCard />
+                    <LatestActivityCard />
                     <HeatmapEntry onChange={onChange} />
                     <ToDoCard selectedDays={selectedDays} />
                     <LatestActivityCard
