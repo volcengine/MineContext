@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useState, useEffect } from 'react'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import { useRequest } from 'ahooks'
 
 interface Vault {
   id: number
@@ -21,7 +22,7 @@ interface Vault {
 export interface Task {
   id: number
   content: string
-  status: number
+  status: number // 0: not done, 1: done
   start_time: string
   end_time: string
   urgency: number
@@ -44,7 +45,6 @@ export const useHomeInfo = () => {
   ) => {
     try {
       const res = await window.dbAPI.addTask(taskData)
-      console.log('addTask', res)
       setTasks((prevTasks) => [
         ...prevTasks,
         {
@@ -95,6 +95,18 @@ export const useHomeInfo = () => {
     }
   }
 
+  const { runAsync: fetchTasks } = useRequest<Task[] | undefined, any>(
+    async (day: Dayjs) => {
+      // Get tasks for the entire day
+      const startOfDay = day.startOf('day').toISOString()
+      const endOfDay = day.add(1, 'day').startOf('day').toISOString()
+      return await window.dbAPI.getTasks(startOfDay, endOfDay)
+    },
+    {
+      manual: true
+    }
+  )
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -104,9 +116,8 @@ export const useHomeInfo = () => {
         const weekly = await window.dbAPI.getVaultsByDocumentType('weekly')
         setWeeklySummary(weekly)
 
-        const startOfDay = dayjs().startOf('day').toISOString()
-        const tasks = await window.dbAPI.getTasks(startOfDay)
-        setTasks(tasks)
+        const tasks = await fetchTasks(dayjs())
+        setTasks(tasks || [])
         const allTips = await window.dbAPI.getAllTips()
         setTips(allTips.sort((a, b) => b.id - a.id))
       } catch (error) {
@@ -125,6 +136,7 @@ export const useHomeInfo = () => {
     toggleTaskStatus,
     updateTask,
     deleteTask,
-    addTask
+    addTask,
+    fetchTasks
   }
 }

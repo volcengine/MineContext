@@ -446,6 +446,44 @@ class Monitor:
 
         return summary
 
+    def get_data_stats_by_range(self, start_time: datetime, end_time: datetime) -> Dict[str, Any]:
+        """Get data statistics by custom time range"""
+        summary = {
+            "by_data_type": {},
+            "total_data_processed": 0,
+            "by_context_type": {},
+            "time_range": {
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+            },
+        }
+
+        try:
+            rows = get_storage().query_monitoring_data_stats_by_range(start_time, end_time)
+
+            # Process the grouped data
+            for row in rows:
+                data_type = row["data_type"]
+                count = row["count"]
+                context_type = row["context_type"]
+
+                # Aggregate by data type
+                if data_type not in summary["by_data_type"]:
+                    summary["by_data_type"][data_type] = 0
+                summary["by_data_type"][data_type] += count
+                summary["total_data_processed"] += count
+
+                # Aggregate context stats (only for 'context' data_type with non-null context_type)
+                if data_type == "context" and context_type is not None:
+                    if context_type not in summary["by_context_type"]:
+                        summary["by_context_type"][context_type] = 0
+                    summary["by_context_type"][context_type] += count
+
+        except Exception as e:
+            logger.error(f"Failed to get data stats by range: {e}")
+
+        return summary
+
     def get_data_stats_trend(self, hours: int = 24) -> Dict[str, Any]:
         """Get data statistics trend with time series data"""
         try:

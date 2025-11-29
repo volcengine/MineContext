@@ -34,6 +34,7 @@ class StorageBackendFactory:
         self._backends = {
             StorageType.VECTOR_DB: {
                 "chromadb": self._create_chromadb_backend,
+                "qdrant": self._create_qdrant_backend,
             },
             StorageType.DOCUMENT_DB: {
                 "sqlite": self._create_sqlite_backend,
@@ -74,6 +75,11 @@ class StorageBackendFactory:
         from opencontext.storage.backends.chromadb_backend import ChromaDBBackend
 
         return ChromaDBBackend()
+
+    def _create_qdrant_backend(self, config: Dict[str, Any]):
+        from opencontext.storage.backends.qdrant_backend import QdrantBackend
+
+        return QdrantBackend()
 
     def _create_sqlite_backend(self, config: Dict[str, Any]):
         from opencontext.storage.backends.sqlite_backend import SQLiteBackend
@@ -737,6 +743,12 @@ class UnifiedStorage:
     def query_monitoring_data_stats(self, hours: int = 24) -> List[Dict[str, Any]]:
         """Query data statistics monitoring data"""
         return self._document_backend.query_monitoring_data_stats(hours)
+
+    def query_monitoring_data_stats_by_range(
+        self, start_time: Any, end_time: Any
+    ) -> List[Dict[str, Any]]:
+        """Query data statistics monitoring data by custom time range"""
+        return self._document_backend.query_monitoring_data_stats_by_range(start_time, end_time)
 
     def query_monitoring_data_stats_trend(
         self, hours: int = 24, interval_hours: int = 1

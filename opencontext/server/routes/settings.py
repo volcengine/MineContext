@@ -55,41 +55,18 @@ class UpdateModelSettingsResponse(BaseModel):
     message: str
 
 
-class ValidateLLMRequest(BaseModel):
-    baseUrl: str
-    apiKey: str
-    modelId: str
-    provider: str
-    embeddingModelId: str
-    embeddingBaseUrl: str | None = None
-    embeddingApiKey: str | None = None
-    embeddingProvider: str | None = None
-
-
 # ==================== Helper Functions ====================
-
-
-def _mask_api_key(raw: str) -> str:
-    """Mask API key: keep first 4 and last 2 chars"""
-    if not raw:
-        return ""
-    if len(raw) <= 6:
-        return raw[0] + "***" if len(raw) > 1 else "***"
-    return f"{raw[:4]}***{raw[-2:]}"
-
-
-def _is_masked_api_key(val: str) -> bool:
-    """Check if API key is already masked"""
-    if not val:
-        return False
-    return ("***" in val) and not val.endswith("***") and len(val) >= 6
-
 
 def _build_llm_config(
     base_url: str, api_key: str, model: str, provider: str, llm_type: LLMType, **kwargs
 ) -> dict:
     """Build LLM config dict"""
     config = {"base_url": base_url, "api_key": api_key, "model": model, "provider": provider}
+    
+    # Add optional parameters
+    if "timeout" in kwargs:
+        config["timeout"] = kwargs["timeout"]
+
     if llm_type == LLMType.EMBEDDING:
         config["output_dim"] = kwargs.get("output_dim", 2048)
     return config
@@ -113,10 +90,10 @@ async def get_model_settings(_auth: str = auth_dependency):
             modelPlatform=vlm_cfg.get("provider", ""),
             modelId=vlm_cfg.get("model", ""),
             baseUrl=vlm_cfg.get("base_url", ""),
-            apiKey=_mask_api_key(vlm_cfg.get("api_key", "")),
+            apiKey=vlm_cfg.get("api_key", ""),
             embeddingModelId=emb_cfg.get("model", ""),
             embeddingBaseUrl=emb_cfg.get("base_url", ""),
-            embeddingApiKey=_mask_api_key(emb_cfg.get("api_key", "")),
+            embeddingApiKey=emb_cfg.get("api_key", ""),
             embeddingModelPlatform=emb_cfg.get("provider", ""),
         )
 
@@ -217,8 +194,15 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
                     code=400, status=400, message=f"向量模型校验失败：{emb_msg}"
                 )
 
-            # Save configuration
-            new_settings = {"vlm_model": vlm_config, "embedding_model": emb_config}
+            # Save configuration (without timeout limit)
+            vlm_config_save = _build_llm_config(
+                cfg.baseUrl, vlm_key, cfg.modelId, cfg.modelPlatform, LLMType.CHAT
+            )
+            emb_config_save = _build_llm_config(
+                emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
+            )
+            
+            new_settings = {"vlm_model": vlm_config_save, "embedding_model": emb_config_save}
 
             config_mgr = GlobalConfig.get_instance().get_config_manager()
             if not config_mgr:

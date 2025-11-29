@@ -26,8 +26,9 @@ import { getLogger } from '@shared/logger/main'
 import { monitor } from '@shared/logger/performance'
 import { TrayService } from './services/TrayService'
 import { ScreenMonitorTask } from './background/task/screen-monitor-task'
-import { autoUpdater } from "electron-updater"
+import { autoUpdater } from 'electron-updater'
 import { IpcChannel } from '@shared/IpcChannel'
+import { LatestActivityTask } from './background/task/latest-activity'
 
 initLog()
 const logger = getLogger('MainEntry')
@@ -36,6 +37,21 @@ autoUpdater.logger = logger
 
 const isPackaged = app.isPackaged
 const actuallyDev = isDev && !isPackaged // true
+
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) {
+  app.quit()
+  process.exit(0)
+} else {
+  app.on('second-instance', () => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.show()
+      win.focus()
+    }
+  })
+}
 
 // Save the original console.log
 const originalConsoleLog = console.log
@@ -182,6 +198,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 let server: any
 const task = new ScreenMonitorTask()
+const latestActivityTask = new LatestActivityTask()
 app.whenReady().then(() => {
   logger.info('app_started', { argv: process.argv, version: app.getVersion() })
   monitor.start(5000)
@@ -249,6 +266,7 @@ app.whenReady().then(() => {
   // Start screenshot cleanup scheduled task
   startScreenshotCleanup()
   task.init()
+  latestActivityTask.init()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -267,8 +285,13 @@ app.whenReady().then(() => {
 
   registerIpc(mainWindow, app)
 
-  mainWindow.webContents.send(IpcChannel.Notification_Send, { id: '123', type: 'info', message: "hello",
-  timestamp: new Date().getTime(), source: 'update' })
+  mainWindow.webContents.send(IpcChannel.Notification_Send, {
+    id: '123',
+    type: 'info',
+    message: 'hello',
+    timestamp: new Date().getTime(),
+    source: 'update'
+  })
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

@@ -258,12 +258,11 @@ class ConsumptionManager:
                 if self._should_generate("activity"):
                     end_time = int(datetime.now().timestamp())
                     last_generation_time = self._last_generation_time("activity")
-                    # start_time = (
-                    #     int(last_generation_time.timestamp())
-                    #     if last_generation_time
-                    #     else end_time - self._task_intervals.get("activity", 15 * 60)
-                    # )
-                    start_time = end_time - self._task_intervals.get("activity", 15 * 60)
+                    start_time = (
+                        int(last_generation_time.timestamp())
+                        if last_generation_time
+                        else end_time - self._task_intervals.get("activity", 15 * 60)
+                    )
                     self._real_activity_monitor.generate_realtime_activity_summary(
                         start_time, end_time
                     )

@@ -1194,6 +1194,41 @@ class SQLiteBackend(IDocumentStorageBackend):
             logger.error(f"Failed to query data stats: {e}")
             return []
 
+    def query_monitoring_data_stats_by_range(
+        self, start_time: datetime, end_time: datetime
+    ) -> List[Dict[str, Any]]:
+        """Query data statistics monitoring data by custom time range"""
+        if not self._initialized:
+            return []
+
+        try:
+            # Convert datetime to hourly bucket format
+            start_bucket = start_time.strftime("%Y-%m-%d %H:00:00")
+            end_bucket = end_time.strftime("%Y-%m-%d %H:00:00")
+
+            cursor = self.connection.cursor()
+            cursor.execute(
+                """
+                SELECT data_type, SUM(count) as total_count, context_type
+                FROM monitoring_data_stats
+                WHERE time_bucket >= ? AND time_bucket <= ?
+                GROUP BY data_type, context_type
+                """,
+                (start_bucket, end_bucket),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "data_type": row[0],
+                    "count": row[1],
+                    "context_type": row[2],
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Failed to query data stats by range: {e}")
+            return []
+
     def query_monitoring_data_stats_trend(
         self, hours: int = 24, interval_hours: int = 1
     ) -> List[Dict[str, Any]]:
@@ -2019,26 +2054,27 @@ class SQLiteBackend(IDocumentStorageBackend):
                         filters["tags"] if isinstance(filters["tags"], list) else [
                             filters["tags"]]
                     )
-                    tag_conditions = []
-                    for tag in tags:
-                        tag_conditions.append("document_tags.tag = ?")
-                        params.append(tag.lower())
-
-                    if tag_conditions:
+                    if tags:
+                        # Use proper parameterized query for tags
+                        tag_placeholders = ",".join(["?"] * len(tags))
                         where_conditions.append(
-                            f'id IN (SELECT document_id FROM document_tags WHERE {" OR ".join(tag_conditions)})'
+                            f'id IN (SELECT document_id FROM document_tags WHERE tag IN ({tag_placeholders}))'
                         )
+                        for tag in tags:
+                            params.append(tag.lower())
 
             # Build SQL query
             where_clause = " AND ".join(
                 where_conditions) if where_conditions else "1=1"
 
             # Get documents
-            sql = f"""
+            # Use text() for safe SQL composition with parameters
+            base_sql = """
                 SELECT DISTINCT d.id, d.content, d.data_type, d.metadata, d.created_at, d.updated_at
                 FROM documents d
                 LEFT JOIN document_tags dt ON d.id = dt.document_id
-                WHERE {where_clause}
+                WHERE """
+            sql = base_sql + where_clause + """
                 ORDER BY d.updated_at DESC
                 LIMIT ?
             """
@@ -2075,12 +2111,12 @@ class SQLiteBackend(IDocumentStorageBackend):
                 )
 
             # Get total count
-            count_sql = f"""
+            count_base_sql = """
                 SELECT COUNT(DISTINCT d.id)
                 FROM documents d
                 LEFT JOIN document_tags dt ON d.id = dt.document_id
-                WHERE {where_clause}
-            """
+                WHERE """
+            count_sql = count_base_sql + where_clause
             cursor.execute(count_sql, params[:-1])  # Exclude limit parameter
             total_count = cursor.fetchone()[0]
 
