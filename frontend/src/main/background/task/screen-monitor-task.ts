@@ -1,3 +1,4 @@
+import { ScreenSettings } from './../../../renderer/src/store/setting';
 import { CaptureSource } from '@interface/common/source'
 import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 import { BrowserWindow, ipcMain } from 'electron'
@@ -16,6 +17,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import { ScheduleNextTask } from './schedule-next-task'
+
 dayjs.extend(isBetween)
 dayjs.extend(customParseFormat)
 dayjs.extend(isSameOrAfter)
@@ -29,7 +31,8 @@ class ScreenMonitorTask extends ScheduleNextTask {
   private status: 'running' | 'stopped' = 'stopped'
   private appInfo: CaptureSource[] = []
   private configCache: AutoRefreshCache<CaptureSource[]> | null = null
-  private modelConfig: Record<string, unknown> = {}
+  private modelConfig: Partial<ScreenSettings> = {}
+
   constructor() {
     super()
   }
@@ -53,9 +56,9 @@ class ScreenMonitorTask extends ScheduleNextTask {
       this.appInfo = uniqBy([...this.appInfo, ...appInfo], 'id')
       this.configCache?.triggerUpdate(true)
     })
-    ipcMain.handle(IpcChannel.Task_Update_Model_Config, (_, config: Record<string, unknown>) => {
+    ipcMain.handle(IpcChannel.Task_Update_Model_Config, (_, config: ScreenSettings) => {
       this.modelConfig = config
-      this.updateInterval(config.interval as number)
+      this.updateInterval(config.recordInterval)
     })
     ipcMain.handle(IpcChannel.Task_Start, () => {
       logger.info('render notify ScreenMonitorTask start')
