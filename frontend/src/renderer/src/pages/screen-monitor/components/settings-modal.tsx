@@ -3,6 +3,8 @@ import { Button, Modal, Slider, TimePicker, Radio, Form, Checkbox, Spin, Switch 
 import clsx from 'clsx'
 import { Application } from './application'
 import screenIcon from '@renderer/assets/icons/screen.svg'
+import { ScreenSettings } from '@renderer/store/setting'
+
 interface SettingsModalProps {
   visible: boolean
   form: any
@@ -20,7 +22,7 @@ interface SettingsModalProps {
   onSetTempRecordInterval: (value: number) => void
   onSetTempEnableRecordingHours: (value: boolean) => void
   onSetTempRecordingHours: (value: [string, string]) => void
-  onSetTempApplyToDays: (value: string) => void
+  onSetTempApplyToDays: (value: ScreenSettings["applyToDays"]) => void
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
