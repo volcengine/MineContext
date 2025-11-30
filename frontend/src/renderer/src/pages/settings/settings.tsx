@@ -4,9 +4,10 @@
 import { FC, useMemo, useEffect } from 'react'
 import { Form, Button, Select, Input, Typography, Spin, Message } from '@arco-design/web-react'
 import { find, get, isEmpty, pick } from 'lodash'
+import { useTranslation } from 'react-i18next'
 
 import ModelRadio from './components/modelRadio/model-radio'
-import { ModelTypeList, BaseUrl, embeddingModels, ModelInfoList } from './constants'
+import { ModelTypeList, BaseUrl, embeddingModels, ModelInfoList, ZHIPU_BASE_URL, DEFAULT_ZHIPU_VLM, DEFAULT_DOUHAO_EMBEDDING } from './constants'
 import { getModelInfo, ModelConfigProps, updateModelSettingsAPI } from '../../services/Settings'
 import { useMemoizedFn, useMount, useRequest } from 'ahooks'
 
@@ -29,21 +30,20 @@ export interface CustomFormItemsProps {
 }
 const CustomFormItems: FC<CustomFormItemsProps> = (props) => {
   const { prefix } = props
+  const { t } = useTranslation()
   return (
     <>
       <div className="flex flex-col gap-6 mb-6">
         <div className="flex flex-col gap-[8px]">
-          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px] ">
-            Vision language model
-          </span>
+          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px] ">{t('settings.vision_title')}</span>
           <FormItem
             field={`${prefix}-modelId`}
             className="!mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
+            rules={[{ required: true, message: t('settings.errors.required') }]}
             requiredSymbol={false}>
             <Input
-              addBefore={<InputPrefix label="Model name" />}
-              placeholder="A VLM model with visual understanding capabilities is required."
+              addBefore={<InputPrefix label={t('settings.fields.model_name')} />}
+              placeholder={t('settings.placeholders.vision_model')}
               allowClear
               className="[&_.arco-input-inner-wrapper]: !w-[574px]"
             />
@@ -51,38 +51,38 @@ const CustomFormItems: FC<CustomFormItemsProps> = (props) => {
           <FormItem
             field={`${prefix}-baseUrl`}
             className="!mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
+            rules={[{ required: true, message: t('settings.errors.required') }]}
             requiredSymbol={false}>
             <Input
-              addBefore={<InputPrefix label="Base URL" />}
-              placeholder="Enter your base URL"
+              addBefore={<InputPrefix label={t('settings.fields.base_url')} />}
+              placeholder={t('settings.placeholders.base_url')}
               allowClear
               className="[&_.arco-input-inner-wrapper]: !w-[574px]"
             />
           </FormItem>
-          <FormItem
-            field={`${prefix}-apiKey`}
-            className="!mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
-            requiredSymbol={false}>
-            <Input
-              addBefore={<InputPrefix label="API Key" />}
-              placeholder="Enter your API Key"
-              allowClear
-              className="!w-[574px]"
-            />
-          </FormItem>
+        <FormItem
+          field={`${prefix}-apiKey`}
+          className="!mb-0"
+          rules={[]}
+          requiredSymbol={false}>
+          <Input
+            addBefore={<InputPrefix label={t('settings.fields.api_key')} />}
+            placeholder={t('settings.placeholders.api_key')}
+            allowClear
+            className="!w-[574px]"
+          />
+        </FormItem>
         </div>
         <div className="flex flex-col gap-[8px]">
-          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px]">Embedding model</span>
+          <span className="text-[#0B0B0F] font-roboto text-base font-normal leading-[22px]">{t('settings.embedding_title')}</span>
           <FormItem
             field={`${prefix}-embeddingModelId`}
             className="!mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
+            rules={[{ required: true, message: t('settings.errors.required') }]}
             requiredSymbol={false}>
             <Input
-              addBefore={<InputPrefix label="Model name" />}
-              placeholder="Enter your embedding model name"
+              addBefore={<InputPrefix label={t('settings.fields.model_name')} />}
+              placeholder={t('settings.placeholders.embedding_model')}
               allowClear
               className="!w-[574px]"
             />
@@ -90,28 +90,28 @@ const CustomFormItems: FC<CustomFormItemsProps> = (props) => {
           <FormItem
             field={`${prefix}-embeddingBaseUrl`}
             className="!mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
+            rules={[{ required: true, message: t('settings.errors.required') }]}
             requiredSymbol={false}>
             <Input
-              addBefore={<InputPrefix label="Base URL" />}
-              placeholder="Enter your base URL"
+              addBefore={<InputPrefix label={t('settings.fields.base_url')} />}
+              placeholder={t('settings.placeholders.base_url')}
               allowClear
               className="!w-[574px]"
             />
           </FormItem>
-          <FormItem
-            field={`${prefix}-embeddingApiKey`}
-            className="!mb-0"
-            rules={[{ required: true, message: 'Cannot be empty' }]}
-            requiredSymbol={false}>
-            <Input
-              addBefore={<InputPrefix label="API Key" />}
-              placeholder="Enter your API Key"
-              allowClear
-              className="!w-[574px]"
-            />
-          </FormItem>
-        </div>
+        <FormItem
+          field={`${prefix}-embeddingApiKey`}
+          className="!mb-0"
+          rules={[]}
+          requiredSymbol={false}>
+          <Input
+            addBefore={<InputPrefix label={t('settings.fields.api_key')} />}
+            placeholder={t('settings.placeholders.api_key')}
+            allowClear
+            className="!w-[574px]"
+          />
+        </FormItem>
+      </div>
       </div>
     </>
   )
@@ -122,6 +122,7 @@ export interface StandardFormItemsProps {
 }
 const StandardFormItems: FC<StandardFormItemsProps> = (props) => {
   const { modelPlatform, prefix } = props
+  const { t } = useTranslation()
   const option = useMemo(() => {
     const foundItem = find(ModelInfoList, (item) => item.value === modelPlatform)
     return foundItem ? foundItem.option : []
@@ -130,14 +131,14 @@ const StandardFormItems: FC<StandardFormItemsProps> = (props) => {
   return (
     <>
       <FormItem
-        label="Select AI model"
+        label={t('settings.title')}
         field={`${prefix}-modelId`}
         requiredSymbol={false}
         rules={[
           {
             validator(value, callback) {
               if (!value) {
-                callback('Please select AI model')
+                callback(t('settings.errors.select_model'))
               } else {
                 callback()
               }
@@ -148,7 +149,7 @@ const StandardFormItems: FC<StandardFormItemsProps> = (props) => {
       </FormItem>
       <FormItem
         requiredSymbol={false}
-        label="API Key"
+        label={t('settings.fields.api_key')}
         field={`${prefix}-apiKey`}
         extra={
           <div className="flex items-center text-[#6E718C] text-[14px] ">
@@ -170,14 +171,14 @@ const StandardFormItems: FC<StandardFormItemsProps> = (props) => {
           {
             validator(value, callback) {
               if (!value) {
-                callback('Please enter your API key')
+                callback(t('settings.errors.key_required'))
               } else {
                 callback()
               }
             }
           }
         ]}>
-        <Input autoFocus placeholder="Enter your API key" allowClear className="!w-[574px]" />
+        <Input autoFocus placeholder={t('settings.placeholders.api_key')} allowClear className="!w-[574px]" />
       </FormItem>
     </>
   )
@@ -189,7 +190,7 @@ export interface SettingsFormBase {
 }
 
 export type SettingsFormProps = SettingsFormBase & {
-  [K in ModelTypeList as `${K}-modelId` | `${K}-apiKey`]?: string
+  [K in ModelTypeList as `${K}-modelId` | `${K}-apiKey` | `${K}-baseUrl`]?: string
 } & {
   [K in
     | `${ModelTypeList.Custom}-embeddingModelId`
@@ -198,6 +199,7 @@ export type SettingsFormProps = SettingsFormBase & {
 }
 const Settings: FC<SettingsProps> = (props) => {
   const { closeSetting, init } = props
+  const { t } = useTranslation()
 
   const [form] = Form.useForm<SettingsFormProps>()
   const { run: getInfo, loading: getInfoLoading, data: modelInfo } = useRequest(getModelInfo, { manual: true })
@@ -205,14 +207,14 @@ const Settings: FC<SettingsProps> = (props) => {
   const { run: updateModelSettings, loading: updateLoading } = useRequest(updateModelSettingsAPI, {
     manual: true,
     onSuccess() {
-      Message.success('Your API key saved successfully')
+      Message.success(t('settings.toast.save_success'))
       getInfo()
       if (init) {
         closeSetting?.()
       }
     },
     onError(e: Error) {
-      const errMsg = get(e, 'response.data.message') || get(e, 'message') || 'Failed to save settings'
+      const errMsg = get(e, 'response.data.message') || get(e, 'message') || t('settings.errors.save_failed')
       Message.error(errMsg)
     }
   })
@@ -222,7 +224,7 @@ const Settings: FC<SettingsProps> = (props) => {
       const values = form.getFieldsValue()
       const isCustom = values.modelPlatform === ModelTypeList.Custom
       if (!values.modelPlatform) {
-        Message.error('Please select Model Platform')
+        Message.error(t('settings.errors.select_platform'))
         return
       }
       const commonKey = [
@@ -277,22 +279,23 @@ const Settings: FC<SettingsProps> = (props) => {
       <div className="top-0 left-0 flex flex-col h-full overflow-y-hidden py-2 pr-2 relative">
         <div className="bg-white rounded-[16px] pl-6 flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-hide pb-2">
           <div className="mb-[12px]">
-            <div className="mt-[26px] mb-[10px] text-[24px] font-bold text-[#000]">Select a AI model to start</div>
-            <Text type="secondary" className="text-[13px]">
-              Configure AI model and API Key, then you can start MineContext’s intelligent context capability
-            </Text>
+            <div className="mt-[26px] mb-[10px] text-[24px] font-bold text-[#000]">{t('settings.title')}</div>
+            <Text type="secondary" className="text-[13px]">{t('settings.subtitle')}</Text>
           </div>
 
           <div>
-            <Form
-              autoComplete="off"
-              layout={'vertical'}
-              form={form}
-              initialValues={{
-                modelPlatform: ModelTypeList.Doubao,
-                [`${ModelTypeList.Doubao}-modelId`]: 'doubao-seed-1-6-flash-250828',
-                [`${ModelTypeList.OpenAI}-modelId`]: 'gpt-5-nano'
-              }}>
+              <Form
+                autoComplete="off"
+                layout={'vertical'}
+                form={form}
+                initialValues={{
+                  modelPlatform: ModelTypeList.Custom,
+                  [`${ModelTypeList.Custom}-modelId`]: DEFAULT_ZHIPU_VLM,
+                  [`${ModelTypeList.Custom}-baseUrl`]: ZHIPU_BASE_URL,
+                  [`${ModelTypeList.Custom}-embeddingModelId`]: DEFAULT_DOUHAO_EMBEDDING,
+                  [`${ModelTypeList.Custom}-embeddingBaseUrl`]: BaseUrl.DoubaoUrl,
+                  // embedding platform is implied by baseUrl/model selection in Custom
+                }}>
               <FormItem label="Model platform" field={'modelPlatform'} requiredSymbol={false}>
                 <ModelRadio />
               </FormItem>
@@ -315,7 +318,7 @@ const Settings: FC<SettingsProps> = (props) => {
             </Form>
             <Spin loading={updateLoading}>
               <Button type="primary" onClick={submit} disabled={updateLoading} className="!bg-[#000]">
-                {init ? 'Get started' : 'Save'}
+                {init ? t('common.get_started') : t('common.save')}
               </Button>
             </Spin>
           </div>
