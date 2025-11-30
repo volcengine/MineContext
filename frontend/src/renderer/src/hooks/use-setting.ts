@@ -4,7 +4,7 @@
 import { useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
-import { setScreenSettings as setScreenSettingsAction } from '@renderer/store/setting'
+import { ApplyToDays, setScreenSettings as setScreenSettingsAction } from '@renderer/store/setting'
 
 export const useSetting = () => {
   const dispatch = useAppDispatch()
@@ -34,7 +34,7 @@ export const useSetting = () => {
   )
 
   const setApplyToDays = useCallback(
-    (days: 'weekday' | 'everyday') => {
+    (days: ApplyToDays) => {
       dispatch(setScreenSettingsAction({ applyToDays: days }))
     },
     [dispatch]

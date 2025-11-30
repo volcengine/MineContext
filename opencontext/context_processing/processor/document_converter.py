@@ -26,7 +26,14 @@ logger = get_logger(__name__)
 
 class PageInfo:
     """Page information container"""
-    def __init__(self, page_number: int, text: str = "", has_visual_elements: bool = False, doc_images: List[Image.Image] = None):
+
+    def __init__(
+        self,
+        page_number: int,
+        text: str = "",
+        has_visual_elements: bool = False,
+        doc_images: List[Image.Image] = None,
+    ):
         self.page_number = page_number
         self.text = text
         self.has_visual_elements = has_visual_elements  # Whether contains images/tables
@@ -102,7 +109,15 @@ class DocumentConverter:
 
             with tempfile.TemporaryDirectory() as temp_dir:
                 subprocess.run(
-                    ["libreoffice", "--headless", "--convert-to", "pdf", "--outdir", temp_dir, pptx_path],
+                    [
+                        "libreoffice",
+                        "--headless",
+                        "--convert-to",
+                        "pdf",
+                        "--outdir",
+                        temp_dir,
+                        pptx_path,
+                    ],
                     check=True,
                     capture_output=True,
                 )
@@ -116,7 +131,9 @@ class DocumentConverter:
                 images = self._convert_pdf_to_images(temp_pdf_path)
             return images
         except subprocess.CalledProcessError as e:
-            logger.error("LibreOffice conversion failed. Install with: sudo apt-get install libreoffice")
+            logger.error(
+                "LibreOffice conversion failed. Install with: sudo apt-get install libreoffice"
+            )
             raise RuntimeError(f"PPTX conversion failed: {e}")
         except Exception as e:
             logger.exception(f"Error converting PPTX: {e}")
@@ -130,7 +147,7 @@ class DocumentConverter:
 
         page_infos = []
 
-        with open(file_path, 'rb') as pdf_file:
+        with open(file_path, "rb") as pdf_file:
             pdf_reader = pypdf.PdfReader(pdf_file)
             num_pages = len(pdf_reader.pages)
 
@@ -143,9 +160,7 @@ class DocumentConverter:
                 needs_vlm = has_images or len(text.strip()) < text_threshold
 
                 page_info = PageInfo(
-                    page_number=page_num + 1,
-                    text=text,
-                    has_visual_elements=needs_vlm
+                    page_number=page_num + 1, text=text, has_visual_elements=needs_vlm
                 )
                 page_infos.append(page_info)
         return page_infos
@@ -153,15 +168,15 @@ class DocumentConverter:
     def _check_pdf_page_has_images(self, page) -> bool:
         """Check if PDF page contains images"""
         try:
-            if '/Resources' not in page:
+            if "/Resources" not in page:
                 return False
-            resources = page['/Resources']
-            if '/XObject' not in resources:
+            resources = page["/Resources"]
+            if "/XObject" not in resources:
                 return False
-            xobjects = resources['/XObject'].get_object()
+            xobjects = resources["/XObject"].get_object()
             for obj_name in xobjects:
                 xobject = xobjects[obj_name]
-                if xobject.get('/Subtype') == '/Image':
+                if xobject.get("/Subtype") == "/Image":
                     return True
             return False
         except Exception:
@@ -192,9 +207,9 @@ class DocumentConverter:
             # 2. Analyze each paragraph
             page_infos = []
             for page_num, group in enumerate(page_groups, start=1):
-                text = group['text']
-                has_images = group['has_images']
-                doc_images = group.get('doc_images', [])
+                text = group["text"]
+                has_images = group["has_images"]
+                doc_images = group.get("doc_images", [])
 
                 needs_vlm = has_images
                 page_info = PageInfo(
@@ -226,7 +241,7 @@ class DocumentConverter:
 
         # 2. Traverse document elements in order (paragraphs and tables)
         for element_type, element in body_elements:
-            if element_type == 'paragraph':
+            if element_type == "paragraph":
                 paragraph = element
                 # Check if has images
                 para_images = self._extract_paragraph_images(paragraph, doc)
@@ -241,26 +256,25 @@ class DocumentConverter:
                     current_paragraphs.append(para_text)
                     current_text_length += len(para_text)
 
-                should_split = (
-                    has_page_break or
-                    current_text_length >= chars_per_group
-                )
+                should_split = has_page_break or current_text_length >= chars_per_group
 
                 if should_split and current_paragraphs:
                     # Save current group
                     group_text = "\n\n".join(current_paragraphs)
-                    groups.append({
-                        'text': group_text,
-                        'has_images': current_has_images,
-                        'doc_images': current_doc_images,
-                    })
+                    groups.append(
+                        {
+                            "text": group_text,
+                            "has_images": current_has_images,
+                            "doc_images": current_doc_images,
+                        }
+                    )
 
                     current_paragraphs = []
                     current_text_length = 0
                     current_has_images = False
                     current_doc_images = []
 
-            elif element_type == 'table':
+            elif element_type == "table":
                 table = element
                 # Convert table to text
                 table_text = self._table_to_text(table)
@@ -271,21 +285,25 @@ class DocumentConverter:
         # 3. Save last group
         if current_paragraphs:
             group_text = "\n\n".join(current_paragraphs)
-            groups.append({
-                'text': group_text,
-                'has_images': current_has_images,
-                'doc_images': current_doc_images,
-            })
+            groups.append(
+                {
+                    "text": group_text,
+                    "has_images": current_has_images,
+                    "doc_images": current_doc_images,
+                }
+            )
 
         # 4. If no groups, treat entire document as one group
         if not groups:
             all_text = "\n\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
             all_images = self._extract_all_images(doc)
-            groups.append({
-                'text': all_text,
-                'has_images': bool(all_images),
-                'doc_images': all_images,
-            })
+            groups.append(
+                {
+                    "text": all_text,
+                    "has_images": bool(all_images),
+                    "doc_images": all_images,
+                }
+            )
         return groups
 
     def _get_body_elements(self, doc):
@@ -297,15 +315,15 @@ class DocumentConverter:
         body_elements = []
         body = doc.element.body
         for child in body:
-            if child.tag.endswith('p'):
+            if child.tag.endswith("p"):
                 for paragraph in doc.paragraphs:
                     if paragraph._element == child:
-                        body_elements.append(('paragraph', paragraph))
+                        body_elements.append(("paragraph", paragraph))
                         break
-            elif child.tag.endswith('tbl'):
+            elif child.tag.endswith("tbl"):
                 for table in doc.tables:
                     if table._element == child:
-                        body_elements.append(('table', table))
+                        body_elements.append(("table", table))
                         break
         return body_elements
 
@@ -324,14 +342,16 @@ class DocumentConverter:
     def _has_page_break(self, paragraph) -> bool:
         """Check if paragraph contains page break"""
         try:
-            if hasattr(paragraph, '_element'):
+            if hasattr(paragraph, "_element"):
                 for run in paragraph.runs:
-                    if hasattr(run, '_element'):
-                        #Check <w:br w:type="page"/>
+                    if hasattr(run, "_element"):
+                        # Check <w:br w:type="page"/>
                         for child in run._element:
-                            if child.tag.endswith('br'):
-                                br_type = child.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type')
-                                if br_type == 'page':
+                            if child.tag.endswith("br"):
+                                br_type = child.get(
+                                    "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type"
+                                )
+                                if br_type == "page":
                                     return True
             return False
         except Exception:
@@ -345,26 +365,26 @@ class DocumentConverter:
         """
         images = []
         try:
-            if not hasattr(paragraph, '_element'):
+            if not hasattr(paragraph, "_element"):
                 return images
 
             # Traverse runs in paragraph
             for run in paragraph.runs:
-                if not hasattr(run, '_element'):
+                if not hasattr(run, "_element"):
                     continue
                 # Find drawing elements
                 drawing_elements = run._element.findall(
-                    './/{http://schemas.openxmlformats.org/wordprocessingml/2006/main}drawing'
+                    ".//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}drawing"
                 )
                 for drawing in drawing_elements:
                     # Find blip elements in drawing (contains image references)
                     blip_elements = drawing.findall(
-                        './/{http://schemas.openxmlformats.org/drawingml/2006/main}blip'
+                        ".//{http://schemas.openxmlformats.org/drawingml/2006/main}blip"
                     )
                     for blip in blip_elements:
                         # Get image relationship ID
                         embed_attr = blip.get(
-                            '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed'
+                            "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
                         )
                         if embed_attr:
                             try:
@@ -374,6 +394,7 @@ class DocumentConverter:
 
                                 # Convert image data to PIL.Image
                                 import io
+
                                 img = Image.open(io.BytesIO(image_data))
                                 if img.mode != "RGB":
                                     img = img.convert("RGB")
@@ -422,7 +443,7 @@ class DocumentConverter:
             md_dir = Path(file_path).parent
 
             # Read Markdown file
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 md_content = f.read()
 
             if not md_content.strip():
@@ -439,9 +460,9 @@ class DocumentConverter:
             # Build PageInfo list
             page_infos = []
             for page_num, group in enumerate(groups, start=1):
-                text = group['text']
-                has_images = group['has_images']
-                doc_images = group.get('doc_images', [])
+                text = group["text"]
+                has_images = group["has_images"]
+                doc_images = group.get("doc_images", [])
 
                 page_info = PageInfo(
                     page_number=page_num,
@@ -457,7 +478,9 @@ class DocumentConverter:
             logger.exception(f"Error analyzing Markdown: {e}")
             raise
 
-    def _split_markdown_into_groups(self, md_content: str, md_dir: Path, chars_per_group: int = 2000) -> list:
+    def _split_markdown_into_groups(
+        self, md_content: str, md_dir: Path, chars_per_group: int = 2000
+    ) -> list:
         """
         Group Markdown by headings + character count
 
@@ -469,8 +492,8 @@ class DocumentConverter:
         import re
 
         # Parse heading positions (# and ##)
-        header_pattern = r'^(#{1,2})\s+(.+)$'
-        lines = md_content.split('\n')
+        header_pattern = r"^(#{1,2})\s+(.+)$"
+        lines = md_content.split("\n")
 
         groups = []
         current_lines = []
@@ -482,20 +505,22 @@ class DocumentConverter:
 
             # Hit heading or reached character threshold
             should_split = (
-                (is_header and current_lines) or  # Hit new heading (and has content)
-                current_text_length >= chars_per_group  # Reached character threshold
+                (is_header and current_lines)  # Hit new heading (and has content)
+                or current_text_length >= chars_per_group  # Reached character threshold
             )
 
             if should_split:
                 # Save current group
-                group_text = '\n'.join(current_lines)
+                group_text = "\n".join(current_lines)
                 if group_text.strip():
                     doc_images, has_images = self._extract_markdown_images(group_text, md_dir)
-                    groups.append({
-                        'text': group_text,
-                        'has_images': has_images,
-                        'doc_images': doc_images,
-                    })
+                    groups.append(
+                        {
+                            "text": group_text,
+                            "has_images": has_images,
+                            "doc_images": doc_images,
+                        }
+                    )
 
                 # Reset
                 current_lines = []
@@ -507,61 +532,71 @@ class DocumentConverter:
 
         # Save last group
         if current_lines:
-            group_text = '\n'.join(current_lines)
+            group_text = "\n".join(current_lines)
             if group_text.strip():
                 doc_images, has_images = self._extract_markdown_images(group_text, md_dir)
-                groups.append({
-                    'text': group_text,
-                    'has_images': has_images,
-                    'doc_images': doc_images,
-                })
+                groups.append(
+                    {
+                        "text": group_text,
+                        "has_images": has_images,
+                        "doc_images": doc_images,
+                    }
+                )
 
         return groups
 
     def _extract_markdown_images(self, md_text: str, md_dir: Path) -> tuple:
         """
-        Extract local images from Markdown text
+        Extract local and remote images from Markdown text.
 
         Returns: (images: List[PIL.Image], has_images: bool)
         """
+        import io
         import re
+        import urllib.request
 
         images = []
 
         # Match ![alt](path) syntax
-        pattern = r'!\[.*?\]\((.*?)\)'
+        pattern = r"!\[.*?\]\((.*?)\)"
         matches = re.findall(pattern, md_text)
 
         for img_path_str in matches:
             img_path_str = img_path_str.strip()
 
-            # Skip URLs (http/https)
-            if img_path_str.startswith(('http://', 'https://', 'data:')):
-                logger.debug(f"Skipping external/data URL: {img_path_str[:50]}...")
-                continue
-
             try:
-                # Parse path
-                img_path = Path(img_path_str)
+                if img_path_str.startswith(("http://", "https://")):
+                    # Handle remote image by downloading it
+                    with urllib.request.urlopen(img_path_str, timeout=10) as response:
+                        image_data = response.read()
+                        img = Image.open(io.BytesIO(image_data))
+                        if img.mode != "RGB":
+                            img = img.convert("RGB")
+                        images.append(img)
+                        logger.debug(
+                            f"Successfully downloaded remote image: {img_path_str[:70]}..."
+                        )
 
-                # Convert relative path to absolute path
-                if not img_path.is_absolute():
-                    img_path = (md_dir / img_path).resolve()
+                elif not img_path_str.startswith("data:"):
+                    # Handle local image
+                    img_path = Path(img_path_str)
 
-                # Check if file exists
-                if not img_path.exists():
-                    logger.warning(f"Image file not found: {img_path}")
-                    continue
+                    # Convert relative path to absolute path relative to the markdown file
+                    if not img_path.is_absolute():
+                        img_path = (md_dir / img_path).resolve()
 
-                # Load image
-                img = Image.open(img_path)
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                images.append(img)
-                logger.debug(f"Loaded image: {img_path} ({img.size})")
+                    if not img_path.exists():
+                        logger.warning(f"Local image file not found: {img_path}")
+                        continue
+
+                    img = Image.open(img_path)
+                    if img.mode != "RGB":
+                        img = img.convert("RGB")
+                    images.append(img)
+                    logger.debug(f"Loaded local image: {img_path}")
 
             except Exception as e:
-                logger.warning(f"Failed to load image {img_path_str}: {e}")
+                logger.warning(f"Failed to load or download image '{img_path_str}': {e}")
                 continue
 
         has_images = len(images) > 0
