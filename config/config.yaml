@@ -45,17 +45,6 @@ capture:
     capture_interval: 5 # Screenshot interval (seconds)
     storage_path: "${CONTEXT_PATH:.}/screenshots" # Screenshot save directory
 
-  # Folder monitoring
-  folder_monitor:
-    enabled: false
-    monitor_interval: 30 # Monitor interval (seconds)
-    watch_folder_paths:
-      - "${CONTEXT_PATH:.}/persist/Documents"
-
-    recursive: true
-    max_file_size: 104857600 # Maximum file size to process (bytes), default: 100MB
-    initial_scan: true
-
   # File monitoring
   file_monitor:
     enabled: false
@@ -63,6 +52,11 @@ capture:
     initial_scan: true
     monitor_paths: "./doc"
     capture_interval: 30 # File monitoring interval (seconds)
+    # file_patterns:
+    #   - "*.txt"
+    #   - "*.md"
+    #   - "*.py"
+    #   - "*.js"
     ignore_patterns:
       - "**/node_modules/**"
       - "**/.git/**"

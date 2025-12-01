@@ -8,7 +8,6 @@ Context capture module - responsible for capturing context information from vari
 """
 
 from opencontext.context_capture.base import BaseCaptureComponent
-from opencontext.context_capture.folder_monitor import FolderMonitorCapture
 from opencontext.context_capture.screenshot import ScreenshotCapture
 from opencontext.context_capture.vault_document_monitor import VaultDocumentMonitor
 
@@ -16,5 +15,4 @@ __all__ = [
     "BaseCaptureComponent",
     "ScreenshotCapture",
     "VaultDocumentMonitor",
-    "FolderMonitorCapture",
 ]
