@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import dayjs from 'dayjs'
+import { ApplyToDays } from '@renderer/store/setting'
+
 export const useRecordingTimeValidation = (
   enableRecordingHours: boolean,
   recordingHours: [string, string],
-  applyToDays: 'weekday' | 'everyday',
+  applyToDays: ApplyToDays,
   isMonitoring: boolean
 ) => {
   const [canRecord, setCanRecord] = useState(false)

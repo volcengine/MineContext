@@ -9,7 +9,9 @@ import type { Vault } from 'src/renderer/src/types/vault'
 import { Notification } from 'src/renderer/src/types/notification'
 import { serverPushAPI } from './server-push-api'
 import { CaptureSource } from '@interface/common/source'
+
 import { VaultDocumentType } from '@shared/enums/global-enum'
+import { ScreenSettings } from '@renderer/store/setting'
 
 // Custom APIs for renderer
 const api = {
@@ -96,7 +98,7 @@ const screenMonitorAPI = {
   setSettings: (key: string, value: unknown) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Set_Settings, key, value),
   clearSettings: (key: string) => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Clear_Settings, key),
   getRecordingStats: () => ipcRenderer.invoke(IpcChannel.Screen_Monitor_Get_Recording_Stats),
-  updateModelConfig: (config: Record<string, unknown>) =>
+  updateModelConfig: (config: ScreenSettings) =>
     ipcRenderer.invoke(IpcChannel.Task_Update_Model_Config, config),
   startTask: () => ipcRenderer.invoke(IpcChannel.Task_Start),
   stopTask: () => ipcRenderer.invoke(IpcChannel.Task_Stop),

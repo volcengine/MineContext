@@ -3,20 +3,19 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-export interface ScreenSettings {
-  recordInterval: number
-  enableRecordingHours: boolean
-  recordingHours: [string, string]
-  applyToDays: 'weekday' | 'everyday'
-}
+export type ApplyToDays = 'weekday' | 'everyday'
+
+export const defaultScreenSettings = {
+  recordInterval: 15,
+  enableRecordingHours: false,
+  recordingHours: ['08:00:00', '20:00:00'] as [string, string],
+  applyToDays: 'weekday' as ApplyToDays
+};
+
+export type ScreenSettings = typeof defaultScreenSettings;
 
 const initialState = {
-  screenSettings: {
-    recordInterval: 15,
-    enableRecordingHours: false,
-    recordingHours: ['08:00:00', '20:00:00'],
-    applyToDays: 'weekday'
-  }
+  screenSettings: defaultScreenSettings
   // other settings...
 }
 
