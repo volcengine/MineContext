@@ -255,7 +255,7 @@ class FolderMonitorCapture(BaseCaptureComponent):
         try:
             # Find contexts by file_path
             contexts_dict = self._storage.get_all_processed_contexts(
-                context_types=[ContextType.KNOWLEDGE_CONTEXT],
+                context_types=[ContextType.KNOWLEDGE_CONTEXT],  # filter by context type
                 filter={
                     "knowledge_file_path": file_path,
                 },
