@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineAssistant</title>
+  <link rel="stylesheet" href="./popup.css">
+</head>
+
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>MineAssistant</h1>
+      <div class="status-indicator">
+        <span class="status-dot inactive"></span>
+        <span class="status-text">已停止</span>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">已捕获</span>
+          <span class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">当前URL</span>
+          <span class="stat-url">无</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="toggle-capture-btn" class="btn btn-start">
+          开始捕获
+        </button>
+
+        <button id="capture-now-btn" class="btn btn-secondary" disabled>
+          立即捕获
+        </button>
+
+        <button id="sync-data-btn" class="btn btn-sync">
+          同步数据
+        </button>
+      </div>
+
+      <div class="settings">
+        <h3>设置</h3>
+        <div class="setting-item">
+          <label>
+            <input id="auto-capture-checkbox" type="checkbox" checked />
+            自动捕获
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input id="sync-enabled-checkbox" type="checkbox" checked />
+            自动同步
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            捕获间隔(秒):
+            <input id="capture-interval-input" type="number" value="30" min="5" max="300" />
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            最大存储数量:
+            <input id="max-contexts-input" type="number" value="100" min="1" max="1000" />
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            后端URL:
+            <input id="backend-url-input" type="text" value="http://localhost:3000" />
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            捕获模式:
+            <select id="capture-mode-select">
+              <option value="smart">智能模式</option>
+              <option value="basic">基础模式</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </main>
+
+    <div class="loading-overlay" style="display: none;">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./popup.ts"></script>
+</body>
+
+</html>
