@@ -6,6 +6,11 @@ export enum ContentType {
     UNKNOWN = 'unknown'
 }
 
+export enum ExtractionMode {
+    SMART = 'smart',    // 智能模式 - 提取结构化数据+截屏
+    BASIC = 'basic'     // 基础模式 - 只提取基础信息+rawContext
+}
+
 // 核心类型定义
 export interface BrowserContext {
     id: string;
@@ -16,6 +21,7 @@ export interface BrowserContext {
     structuredContent: StructuredContent;
     rawDom?: string; // 可选：存储body的innerHTML
     screenshot?: string; // 可选：Base64缩略图
+    extractionMode: ExtractionMode; // 提取模式
 }
 
 export interface PageMetadata {
@@ -56,7 +62,7 @@ export interface ArticleContent {
 export interface CodeContent {
     codeBlocks: CodeBlock[];
     languageStats: Record<string, number>;
-    fileStructure: FileStructure[];
+    fileStructure?: FileStructure[];
 }
 
 // 多媒体类型内容
