@@ -1,24 +1,7 @@
 import browser from 'webextension-polyfill';
-import { ExtensionState, ExtensionSettings, MessageTypeEnum } from './types';
+import { ExtensionState, ExtensionSettings, MessageTypeEnum } from '../types';
+import { DEFAULT_SETTINGS, DEFAULT_STATE } from '../constants';
 
-// 默认设置
-const DEFAULT_SETTINGS: ExtensionSettings = {
-    autoCapture: true,
-    captureInterval: 30000, // 30秒
-    maxContexts: 100,
-    syncEnabled: true,
-    backendUrl: 'http://localhost:1733'
-};
-
-// 默认状态
-const DEFAULT_STATE: ExtensionState = {
-    isActive: false,
-    currentUrl: '',
-    contextCount: 0,
-    settings: DEFAULT_SETTINGS
-};
-
-console.debug("[default state]", DEFAULT_STATE);
 
 export class PopupManager {
     private state: ExtensionState = { ...DEFAULT_STATE };
