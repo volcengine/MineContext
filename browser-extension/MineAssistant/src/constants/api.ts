@@ -1,6 +1,5 @@
-export const API_ENDPOINT = {
-    SYNC_CONTEXTS: '/api/contexts/sync',
-    HEALTH_CHECK: '/api/health'
-}
-
-export const API_TIMEOUT = 30000; // 30秒
+// API 请求路径
+export const PATH = {
+    UPLOAD_CONTEXT: '/context/upload',
+    SCREENSHOT_UPLOAD: '/screenshot/upload',
+} as const;

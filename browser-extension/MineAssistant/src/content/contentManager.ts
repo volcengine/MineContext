@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill';
 import { ExtensionState, ExtensionSettings, MessageTypeEnum } from '../types';
 import { DEFAULT_SETTINGS, DEFAULT_STATE } from '../constants';
-
+import storageManager from '../storage';
 
 export class PopupManager {
     private state: ExtensionState = { ...DEFAULT_STATE };
@@ -20,9 +20,7 @@ export class PopupManager {
         console.log("initialize popup manager", browser.storage);
         try {
             // 从存储中加载状态
-            const result = await browser.storage.local.get(['extensionState']);
-
-            const savedState = result.extensionState;
+            const savedState = await storageManager.settingsManager.getSettings();
 
             if (savedState) {
                 this.state = {
@@ -415,5 +413,34 @@ export class PopupManager {
      */
     public isReady(): boolean {
         return this.isInitialized;
+    }
+}
+
+let popupManager: PopupManager | null;
+
+
+export async function initializePopupManager(): Promise<void> {
+    try {
+        // 创建popup管理器实例
+        popupManager = new PopupManager();
+
+        // 等待初始化完成
+        const waitForInit = (): Promise<void> => {
+            return new Promise((resolve) => {
+                const checkReady = () => {
+                    if (popupManager && popupManager.isReady()) {
+                        resolve();
+                    } else {
+                        setTimeout(checkReady, 100);
+                    }
+                };
+                checkReady();
+            });
+        };
+
+        await waitForInit();
+        console.log('Popup application initialized successfully', popupManager);
+    } catch (error) {
+        console.error('Failed to initialize popup application:', error);
     }
 }

@@ -1,42 +1,58 @@
-import { PopupManager } from './contentManager';
+import { initializePopupManager } from './contentManager';
+import { initializeApiClient } from '../services/core/apiClient';
+import { initializeStorage } from '../storage';
 
-let popupManager: PopupManager | null = null;
+// 初始化状态跟踪
+const initializationState = {
+    storage: false,
+    apiClient: false,
+    popupManager: false,
+    allComplete: false
+};
 
-/**
- * 初始化popup应用
- */
-async function initializePopup(): Promise<void> {
-    try {
-        // 创建popup管理器实例
-        popupManager = new PopupManager();
 
-        // 等待初始化完成
-        const waitForInit = (): Promise<void> => {
-            return new Promise((resolve) => {
-                const checkReady = () => {
-                    if (popupManager && popupManager.isReady()) {
-                        resolve();
-                    } else {
-                        setTimeout(checkReady, 100);
-                    }
-                };
-                checkReady();
-            });
-        };
+// 初始化队列 - 按顺序定义初始化函数
+const initQueue = [
+    initializeStorage,
+    initializeApiClient,
+    initializePopupManager
+];
 
-        await waitForInit();
-        console.log('Popup application initialized successfully');
-    } catch (error) {
-        console.error('Failed to initialize popup application:', error);
+// 执行初始化队列
+async function executeInitQueue(queue: Array<() => Promise<any>>): Promise<void> {
+    for (const [index, initFunction] of queue.entries()) {
+        const stepName = initFunction.name || `step_${index + 1}`;
+        try {
+            console.log(`[Initialization] Executing ${stepName} (${index + 1}/${queue.length})`);
+            await initFunction();
+            console.log(`[Initialization] Completed ${stepName}`);
+        } catch (error) {
+            console.error(`[Initialization] Failed to execute ${stepName}:`, error);
+            console.log(`[Initialization] Continuing with remaining initialization steps...`);
+        }
     }
 }
 
-// 页面加载完成后初始化
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializePopup);
-} else {
-    initializePopup();
+async function main() {
+    try {
+        console.log('[Initialization] Starting main initialization sequence with queue...');
+
+        await executeInitQueue(initQueue);
+
+        initializationState.allComplete = true;
+        console.log('[Initialization] All components initialized successfully!');
+    } catch (error) {
+        console.error('[Initialization] Main initialization sequence failed:', error);
+    }
 }
 
-// 导出popup管理器供外部使用（如测试）
-export { popupManager };
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', async () => {
+        await main();
+    });
+} else {
+    main();
+}
+
+export { initializationState };
+

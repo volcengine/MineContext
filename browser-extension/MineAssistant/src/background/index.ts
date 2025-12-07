@@ -1,6 +1,7 @@
 import { BrowserContextExtractor } from "../content/BrowserContextExtractor";
-import { BrowserContext, ExtensionState, MessageTypeEnum } from "../types";
+import { BrowserContext, ExtensionState, ExtractionMode, MessageTypeEnum } from "../types";
 import browser from 'webextension-polyfill';
+import { detectContentType } from "../utils";
 
 /**
  * 内容脚本主类
@@ -142,8 +143,8 @@ class BackgroundScript {
     /**
      * 捕获上下文
      */
-    private async captureContext(mode: 'smart' | 'basic' = 'smart'): Promise<BrowserContext> {
-        const contentType = this.extractor.detectContentType();
+    private async captureContext(mode: ExtractionMode = ExtractionMode.SMART): Promise<BrowserContext> {
+        const contentType = detectContentType();
         if (mode === 'basic') {
             // 基础模式：只提取基本页面信息
             return {
@@ -155,7 +156,8 @@ class BackgroundScript {
                 structuredContent: {
                     title: document.title,
                     contentType: contentType
-                }
+                },
+                extractionMode: mode
             };
         }
 

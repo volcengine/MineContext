@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill';
 
-import { ExtensionSettings } from "../types";
-import { STORAGE_KEYS, DEFAULT_SETTINGS } from "../constants";
+import { ExtensionSettings, ExtensionState } from "../types";
+import { STORAGE_KEYS, DEFAULT_SETTINGS, DEFAULT_STATE } from "../constants";
 
 export class SettingsManager {
     private static instance: SettingsManager;
@@ -14,26 +14,26 @@ export class SettingsManager {
     }
 
     // 获取设置
-    async getSettings(): Promise<ExtensionSettings> {
+    async getSettings(): Promise<ExtensionState> {
         try {
             const result = await browser.storage.local.get(STORAGE_KEYS.SETTINGS);
-            const settings = result[STORAGE_KEYS.SETTINGS] as ExtensionSettings;
+            const settings = result[STORAGE_KEYS.SETTINGS] as ExtensionState;
 
             if (!settings) {
                 // 如果没有设置，使用默认值
-                await this.saveSettings(DEFAULT_SETTINGS);
-                return DEFAULT_SETTINGS;
+                await this.saveSettings(DEFAULT_STATE);
+                return DEFAULT_STATE;
             }
 
             return settings;
         } catch (error) {
             console.error('Failed to get settings:', error);
-            return DEFAULT_SETTINGS;
+            return DEFAULT_STATE;
         }
     }
 
     // 保存设置
-    async saveSettings(settings: ExtensionSettings): Promise<boolean> {
+    async saveSettings(settings: ExtensionState): Promise<boolean> {
         try {
             // 验证设置
             const validatedSettings = this.validateSettings(settings);
@@ -66,7 +66,7 @@ export class SettingsManager {
     // 考虑是否用 react, arco-design 提供的组件,支持控件输入源头的validation
     // 优点: 使用简单
     // 缺点: 体积变大; 重构项目为 react 项目
-    private validateSettings(settings: ExtensionSettings): ExtensionSettings {
+    private validateSettings(settings: ExtensionState): ExtensionState {
         const validated = { ...settings };
 
         return validated;
@@ -74,7 +74,7 @@ export class SettingsManager {
 
     // 重置为默认设置
     async resetToDefaults(): Promise<boolean> {
-        return await this.saveSettings(DEFAULT_SETTINGS);
+        return await this.saveSettings(DEFAULT_STATE);
     }
 
     // 监听设置变化
