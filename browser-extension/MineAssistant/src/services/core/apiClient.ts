@@ -5,7 +5,7 @@ import { getStorageManager } from '../../storage';
 /**
  * API客户端管理器 - 使用单例模式确保只有一个实例
  */
-class ApiClientManager {
+export class ApiClientManager {
   private static instance: ApiClientManager;
   private apiClient: AxiosInstance;
   private settingsManager: any = null;

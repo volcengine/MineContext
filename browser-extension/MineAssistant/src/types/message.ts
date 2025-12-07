@@ -1,19 +1,17 @@
 // 消息类型枚举
 export enum MessageTypeEnum {
-    // 捕获相关
-    CAPTURE_CONTEXT = 'CAPTURE_CONTEXT',
-    PAGE_CONTENT_UPDATED = 'PAGE_CONTENT_UPDATED',
+    //todo: 是否要这么设计 当插件配置 ready 时,发出信号, storage 的插件值允许读取
+    // SETTING_READY = 'SETTING_READY',
 
-    // 截图实现放在 popup 即可, 需要考虑实现
-    CAPTURE_SCREENSHOT = 'CAPTURE_SCREENSHOT',
+    // 对应 UI 操作
+    UI_START_RECORDING = 'UI_START_RECORDING',
+    UI_CAPTURE_NOW = 'UI_CAPTURE_NOW',
+    UI_SAVE_SETTINGS = 'UI_SAVE_SETTINGS',
 
-    GET_STATE = 'GET_STATE',
-
-    ANALYZE_PAGE_TYPE = 'ANALYZE_PAGE_TYPE',
-
-    GET_METADATA = 'GET_METADATA',
-
-    UPDATE_STATE = 'UPDATE_SETTINGS',
+    // 对应 background 后台操作
+    START_RECODING = 'START_RECODING',// 开始计时
+    ON_TIME_CAPTURE = 'ON_TIME_CAPTURE',
+    ON_TIME_UPLOAD = 'ON_TIME_UPLOAD',
 }
 
 export type MessageType = keyof typeof MessageTypeEnum;

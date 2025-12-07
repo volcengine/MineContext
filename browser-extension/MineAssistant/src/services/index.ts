@@ -1,5 +1,5 @@
 // Core API client
-export { initializeApiClient, updateBackendUrl } from './core/apiClient';
+export { initializeApiClient, updateBackendUrl, getRequest } from './core/apiClient';
 
 // Business services
 export { contextService } from './context';

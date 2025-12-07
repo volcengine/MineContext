@@ -3,11 +3,14 @@ import { ExtensionState, ExtensionSettings, MessageTypeEnum } from '../types';
 import { DEFAULT_SETTINGS, DEFAULT_STATE } from '../constants';
 import storageManager from '../storage';
 
+
+// TODO:  接入 storage 模块 和 api request 模块,移除多余 state code
 export class PopupManager {
     private state: ExtensionState = { ...DEFAULT_STATE };
     private isLoading = false;
     private captureMode: 'smart' | 'basic' = 'smart';
     private isInitialized = false;
+    storageManager: any;
 
     constructor() {
         this.initialize();
@@ -20,6 +23,7 @@ export class PopupManager {
         console.log("initialize popup manager", browser.storage);
         try {
             // 从存储中加载状态
+            this.storageManager = storageManager;
             const savedState = await storageManager.settingsManager.getSettings();
 
             if (savedState) {
@@ -77,7 +81,6 @@ export class PopupManager {
             autoCaptureCheckbox.addEventListener('change', (e) => {
                 const target = e?.target as HTMLInputElement;
                 this.updateSettings({ autoCapture: target?.checked || false });
-
             });
         }
 
@@ -138,19 +141,36 @@ export class PopupManager {
      */
     private handleMessage(message: any, sender: browser.Runtime.MessageSender, sendResponse: (response?: any) => void): true | void | Promise<any> {
         console.log('Received message from background:', message);
-        if (message.type === MessageTypeEnum.UPDATE_STATE) {
-            this.state = message.data;
-            // TODO:
-            console.log("定时保存 Context 提醒")
-        }
+        switch (message.type) {
+            // 来自 UI 的 action
+            case MessageTypeEnum.UI_CAPTURE_NOW:
+                const response = this.handleCaptureNow();
+                this.updateUI();
+                console.log('[MessageTypeEnum.UI_CAPTURE_NOW] response', response)
+                sendResponse(response);
+                break;
+            case MessageTypeEnum.START_RECODING:
+                this.state = {
+                    ...this.state,
+                    contextCount: this.state.contextCount + 1
+                };
+                this.updateUI();
+                sendResponse({ success: true });
+                break;
+            case MessageTypeEnum.UI_SAVE_SETTINGS:
+                this.updateUI();
+                sendResponse({ success: true });
+                break;
 
-        if (message.type === 'CONTEXT_CAPTURED') {
-            this.state = {
-                ...this.state,
-                contextCount: this.state.contextCount + 1
-            };
-            this.updateUI();
-            sendResponse({ success: true });
+            // 来自 background 的通讯
+            case MessageTypeEnum.ON_TIME_CAPTURE:
+                this.handleCaptureNow();
+                break;
+            case MessageTypeEnum.ON_TIME_UPLOAD:
+                this.handleSync();
+                break;
+            default:
+                console.warn(`Unhandled message type: ${message.type}`);
         }
     }
 
@@ -159,7 +179,7 @@ export class PopupManager {
      */
     private async saveState(): Promise<void> {
         try {
-            await browser.storage.local.set({ extensionState: this.state });
+            await this.storageManager.saveSettings(this.state.settings);
         } catch (error) {
             console.error('Failed to save extension state:', error);
         }
@@ -176,20 +196,23 @@ export class PopupManager {
                 isActive: !this.state.isActive
             };
 
-            await this.saveState();
+            this.saveState();
             this.state = newState;
 
             // 通知background script
             try {
-                await browser.runtime.sendMessage({
-                    type: 'TOGGLE_CAPTURE',
-                    data: { isActive: this.state.isActive }
+                browser.runtime.sendMessage({
+                    type: MessageTypeEnum.START_RECODING,
+                    data: { isActive: this.state.isActive, captureInterval: this.state.settings.captureInterval }
                 });
             } catch (error) {
                 console.error('Failed to send toggle capture message:', error);
             }
 
+            console.log('handleToggleCapture', this.state);
             this.updateUI();
+            this.setLoading(false);
+
         } finally {
             this.setLoading(false);
         }
@@ -198,7 +221,7 @@ export class PopupManager {
     /**
      * 处理立即捕获
      */
-    private async handleCaptureNow(): Promise<void> {
+    private async handleCaptureNow() {
         console.info("Capturing context now...");
 
         this.setLoading(true);
@@ -224,9 +247,9 @@ export class PopupManager {
                         contextCount: this.state.contextCount + 1,
                         currentUrl: tab.url || '',
                     };
-                    await this.saveState();
-                    this.updateUI();
                 }
+
+                return response;
             }
         } catch (error) {
             console.error('Failed to capture context:', error);
@@ -280,7 +303,8 @@ export class PopupManager {
     /**
      * 更新设置
      */
-    private async updateSettings(newSettings: Partial<ExtensionSettings>): Promise<void> {
+    private async updateSettings(newSettings: Partial<ExtensionSettings>) {
+        console.log('updateSettings', newSettings);
         const updatedSettings = {
             ...this.state.settings,
             ...newSettings
@@ -296,7 +320,7 @@ export class PopupManager {
         // 通知background script设置已更新
         try {
             await browser.runtime.sendMessage({
-                type: MessageTypeEnum.UPDATE_STATE,
+                type: MessageTypeEnum.UI_SAVE_SETTINGS,
                 data: { settings: updatedSettings }
             });
         } catch (error) {
@@ -353,15 +377,13 @@ export class PopupManager {
             toggleButton.disabled = this.isLoading;
         }
 
-        const captureButton = document.getElementById('capture-now-btn') as HTMLButtonElement;
-        if (captureButton) {
-            captureButton.disabled = this.isLoading || !this.state.isActive;
-        }
+        // const captureButton = document.getElementById('capture-now-btn') as HTMLButtonElement;
 
-        const syncButton = document.getElementById('sync-data-btn') as HTMLButtonElement;
-        if (syncButton) {
-            syncButton.disabled = this.isLoading;
-        }
+
+        // const syncButton = document.getElementById('sync-data-btn') as HTMLButtonElement;
+        // if (syncButton) {
+        //     syncButton.disabled = this.isLoading;
+        // }
 
         // 更新设置输入框
         const autoCaptureCheckbox = document.getElementById('auto-capture-checkbox') as HTMLInputElement;

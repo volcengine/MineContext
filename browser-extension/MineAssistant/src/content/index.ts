@@ -1,4 +1,4 @@
-import { initializePopupManager } from './contentManager';
+import { initializePopupManager } from '../popup/popupManager';
 import { initializeApiClient } from '../services/core/apiClient';
 import { initializeStorage } from '../storage';
 
@@ -46,13 +46,8 @@ async function main() {
     }
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', async () => {
-        await main();
-    });
-} else {
-    main();
-}
+
+main();
 
 export { initializationState };
 

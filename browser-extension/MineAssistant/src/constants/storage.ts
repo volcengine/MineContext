@@ -1,8 +1,8 @@
 export const STORAGE_KEYS = {
-    SETTINGS: 'mineAssistant_settings',
-    CONTEXTS: 'mineAssistant_contexts',
-    SYNC_STATE: 'mineAssistant_sync_state',
-    LAST_SYNC_TIME: 'mineAssistant_last_sync_time'
+    SETTINGS: 'MineAssistant_settings',
+    CONTEXTS: 'MineAssistant_contexts',
+    SYNC_STATE: 'MineAssistant_sync_state',
+    LAST_SYNC_TIME: 'MineAssistant_last_sync_time'
 } as const;
 
 export const STORAGE_LIMITS = {
@@ -12,3 +12,10 @@ export const STORAGE_LIMITS = {
 }
 
 export const GET_RECENT_CONTEXTS_LIMIT = 10;
+
+export const LOCAL_STORAGE_KEYS = {
+    SETTINGS: 'MineAssistant_settings',
+    CONTEXTS: 'MineAssistant_contexts',
+    SYNC_STATE: 'MineAssistant_sync_state',
+    LAST_SYNC_TIME: 'MineAssistant_last_sync_time'
+} as const;

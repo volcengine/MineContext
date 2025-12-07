@@ -6,8 +6,10 @@ import { ContextManager } from './context';
 
 export class StorageManager {
     private static instance: StorageManager;
+
     public settingsManager: SettingsManager;
     private contextManager: ContextManager;
+
     private isInitialized = false;
 
     constructor() {
@@ -36,7 +38,7 @@ export class StorageManager {
             await this.settingsManager.getSettings();
 
             // 初始化上下文管理器
-            await this.contextManager.getContexts();
+            // await this.contextManager.getContexts();
 
             this.isInitialized = true;
             console.log('[Storage] Initialization completed');

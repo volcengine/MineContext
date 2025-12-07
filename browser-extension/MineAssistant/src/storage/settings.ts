@@ -21,7 +21,6 @@ export class SettingsManager {
 
             if (!settings) {
                 // 如果没有设置，使用默认值
-                await this.saveSettings(DEFAULT_STATE);
                 return DEFAULT_STATE;
             }
 
@@ -33,13 +32,21 @@ export class SettingsManager {
     }
 
     // 保存设置
-    async saveSettings(settings: ExtensionState): Promise<boolean> {
+    async saveSettings(settings: Partial<ExtensionState>): Promise<boolean> {
         try {
             // 验证设置
             const validatedSettings = this.validateSettings(settings);
+            const originalSetting = await this.getSettings();
 
             await browser.storage.local.set({
-                [STORAGE_KEYS.SETTINGS]: validatedSettings
+                [STORAGE_KEYS.SETTINGS]: {
+                    ...originalSetting,
+                    ...validatedSettings,
+                    settings: {
+                        ...originalSetting.settings,
+                        ...validatedSettings.settings,
+                    }
+                }
             });
 
             return true;
@@ -66,7 +73,7 @@ export class SettingsManager {
     // 考虑是否用 react, arco-design 提供的组件,支持控件输入源头的validation
     // 优点: 使用简单
     // 缺点: 体积变大; 重构项目为 react 项目
-    private validateSettings(settings: ExtensionState): ExtensionState {
+    private validateSettings(settings: Partial<ExtensionState>) {
         const validated = { ...settings };
 
         return validated;
