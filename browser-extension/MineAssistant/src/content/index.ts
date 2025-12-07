@@ -1,5 +1,5 @@
 import { BrowserContextExtractor } from "./BrowserContextExtractor";
-import { BrowserContext, MessageTypeEnum } from "../types";
+import { BrowserContext, ExtensionState, MessageTypeEnum } from "../types";
 import browser from 'webextension-polyfill';
 
 /**
@@ -63,6 +63,10 @@ class ContentScript {
                     const metadata = await this.getMetadata();
                     sendResponse({ success: true, metadata });
                     break;
+                case MessageTypeEnum.UPDATE_STATE:
+                    await this.updateState(message);
+                    sendResponse({ success: true });
+                    break;
                 default:
                     sendResponse({ success: false, error: 'Unknown message type' });
             }
@@ -70,6 +74,15 @@ class ContentScript {
             console.error('Error handling message:', error);
             sendResponse({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
         }
+    }
+
+    private async updateState(state: ExtensionState) {
+        setTimeout(() => {
+            browser.runtime.sendMessage({
+                type: MessageTypeEnum.UPDATE_STATE,
+                data: { 11: 11, ...state }
+            });
+        }, 5000);
     }
 
     /**

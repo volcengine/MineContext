@@ -11,7 +11,9 @@ export enum MessageTypeEnum {
 
     ANALYZE_PAGE_TYPE = 'ANALYZE_PAGE_TYPE',
 
-    GET_METADATA = 'GET_METADATA'
+    GET_METADATA = 'GET_METADATA',
+
+    UPDATE_STATE = 'UPDATE_SETTINGS',
 }
 
 export type MessageType = keyof typeof MessageTypeEnum;

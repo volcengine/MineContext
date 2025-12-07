@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill';
-import { ExtensionState, ExtensionSettings } from './types';
+import { ExtensionState, ExtensionSettings, MessageTypeEnum } from './types';
 
 // 默认设置
 const DEFAULT_SETTINGS: ExtensionSettings = {
@@ -156,10 +156,11 @@ export class PopupManager {
      * 处理消息
      */
     private handleMessage(message: any, sender: browser.Runtime.MessageSender, sendResponse: (response?: any) => void): true | void | Promise<any> {
-        if (message.type === 'STATE_UPDATE') {
+        console.log('Received message from background:', message);
+        if (message.type === MessageTypeEnum.UPDATE_STATE) {
             this.state = message.data;
-            this.updateUI();
-            sendResponse({ success: true });
+            // TODO:
+            console.log("定时保存 Context 提醒")
         }
 
         if (message.type === 'CONTEXT_CAPTURED') {
@@ -314,7 +315,7 @@ export class PopupManager {
         // 通知background script设置已更新
         try {
             await browser.runtime.sendMessage({
-                type: 'UPDATE_SETTINGS',
+                type: MessageTypeEnum.UPDATE_STATE,
                 data: { settings: updatedSettings }
             });
         } catch (error) {
