@@ -57,12 +57,13 @@ class UpdateModelSettingsResponse(BaseModel):
 
 # ==================== Helper Functions ====================
 
+
 def _build_llm_config(
     base_url: str, api_key: str, model: str, provider: str, llm_type: LLMType, **kwargs
 ) -> dict:
     """Build LLM config dict"""
     config = {"base_url": base_url, "api_key": api_key, "model": model, "provider": provider}
-    
+
     # Add optional parameters
     if "timeout" in kwargs:
         config["timeout"] = kwargs["timeout"]
@@ -160,7 +161,7 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
             emb_config_save = _build_llm_config(
                 emb_url, emb_key, cfg.embeddingModelId, emb_provider, LLMType.EMBEDDING
             )
-            
+
             new_settings = {"vlm_model": vlm_config_save, "embedding_model": emb_config_save}
 
             config_mgr = GlobalConfig.get_instance().get_config_manager()
@@ -216,9 +217,7 @@ async def validate_llm_config(request: UpdateModelSettingsRequest, _auth: str = 
         if not cfg.modelId:
             return convert_resp(code=400, status=400, message="VLM model ID cannot be empty")
         if not cfg.embeddingModelId:
-            return convert_resp(
-                code=400, status=400, message="Embedding model ID cannot be empty"
-            )
+            return convert_resp(code=400, status=400, message="Embedding model ID cannot be empty")
 
         # Build configs for validation (without saving)
         vlm_config = _build_llm_config(
@@ -249,6 +248,32 @@ async def validate_llm_config(request: UpdateModelSettingsRequest, _auth: str = 
     except Exception as e:
         logger.exception(f"Validation failed: {e}")
         return convert_resp(code=500, status=500, message=f"Validation failed: {str(e)}")
+
+
+# ==================== System Info ====================
+
+
+@router.get("/api/settings/system_info")
+async def get_system_info(_auth: str = auth_dependency):
+    """Get system information including data directory path"""
+    try:
+        import os
+        from pathlib import Path
+
+        context_path = os.getenv("CONTEXT_PATH", ".")
+        # Get absolute path
+        absolute_path = str(Path(context_path).resolve())
+
+        return convert_resp(
+            data={
+                "context_path": context_path,
+                "context_path_absolute": absolute_path,
+            }
+        )
+
+    except Exception as e:
+        logger.exception(f"Failed to get system info: {e}")
+        return convert_resp(code=500, status=500, message=f"Failed to get system info: {str(e)}")
 
 
 # ==================== General Settings ====================

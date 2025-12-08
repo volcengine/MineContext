@@ -6,6 +6,18 @@
         <h1 class="h2">系统设置</h1>
     </div>
 
+    <!-- 数据目录信息 -->
+    <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-folder2-open me-2" style="font-size: 1.2rem;"></i>
+        <div>
+            <strong>数据目录 (CONTEXT_PATH):</strong>
+            <span id="contextPathDisplay" class="font-monospace ms-2">加载中...</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyContextPath()" title="复制路径">
+                <i class="bi bi-clipboard"></i>
+            </button>
+        </div>
+    </div>
+
     <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="model-tab" data-bs-toggle="tab" data-bs-target="#model" type="button" role="tab">
@@ -565,6 +577,41 @@
 {% block scripts %}
 <script src="/static/js/settings.js"></script>
 <script>
+// 加载数据目录信息
+async function loadSystemInfo() {
+    try {
+        const response = await fetch('/api/settings/system_info');
+        const data = await response.json();
+        if (data.code === 0 && data.data) {
+            const contextPath = data.data.context_path_absolute || data.data.context_path;
+            document.getElementById('contextPathDisplay').textContent = contextPath;
+            document.getElementById('contextPathDisplay').dataset.path = contextPath;
+        } else {
+            document.getElementById('contextPathDisplay').textContent = '获取失败';
+        }
+    } catch (error) {
+        console.error('加载系统信息失败:', error);
+        document.getElementById('contextPathDisplay').textContent = '获取失败';
+    }
+}
+
+// 复制数据目录路径
+function copyContextPath() {
+    const path = document.getElementById('contextPathDisplay').dataset.path ||
+                 document.getElementById('contextPathDisplay').textContent;
+    if (path && path !== '加载中...' && path !== '获取失败') {
+        navigator.clipboard.writeText(path).then(() => {
+            showToast('路径已复制到剪贴板');
+        }).catch(err => {
+            console.error('复制失败:', err);
+            showToast('复制失败', true);
+        });
+    }
+}
+
+// 页面加载时获取系统信息
+document.addEventListener('DOMContentLoaded', loadSystemInfo);
+
 // 导出历史记录
 window.exportHistoryRecord = async function() {
     if (!selectedHistoryFile || !currentCategory) {
