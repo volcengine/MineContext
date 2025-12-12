@@ -70,11 +70,12 @@ const CustomFormItems: FC<CustomFormItemsProps> = (props) => {
             className="!mb-0"
             rules={[{ required: true, message: t('common.required', 'Cannot be empty') }]}
             requiredSymbol={false}>
-            <Input
+            <Input.Password
               addBefore={<InputPrefix label={t('settings.api_key', 'API Key')} />}
               placeholder={t('settings.enter_api_key', 'Enter your API Key')}
               allowClear
               className="!w-[574px]"
+              defaultVisibility={false}
             />
           </FormItem>
         </div>
@@ -111,11 +112,12 @@ const CustomFormItems: FC<CustomFormItemsProps> = (props) => {
             className="!mb-0"
             rules={[{ required: true, message: t('common.required', 'Cannot be empty') }]}
             requiredSymbol={false}>
-            <Input
+            <Input.Password
               addBefore={<InputPrefix label={t('settings.api_key', 'API Key')} />}
               placeholder={t('settings.enter_api_key', 'Enter your API Key')}
               allowClear
               className="!w-[574px]"
+              defaultVisibility={false}
             />
           </FormItem>
         </div>
@@ -192,11 +194,12 @@ const StandardFormItems: FC<StandardFormItemsProps> = (props) => {
             }
           }
         ]}>
-        <Input
+        <Input.Password
           autoFocus
           placeholder={t('settings.enter_api_key', 'Enter your API Key')}
           allowClear
           className="!w-[574px]"
+          defaultVisibility={false}
         />
       </FormItem>
     </>

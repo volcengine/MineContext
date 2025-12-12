@@ -93,6 +93,7 @@ class ContextProcessorManager:
             ContextSource.SCREENSHOT: "screenshot_processor",
             ContextSource.LOCAL_FILE: "document_processor",
             ContextSource.VAULT: "document_processor",
+            ContextSource.WEB_LINK: "document_processor",
         }
 
     def register_processor(self, processor: IContextProcessor) -> bool:
@@ -144,13 +145,17 @@ class ContextProcessorManager:
 
         processor = self._processors.get(processor_name)
         if not processor or not processor.can_process(initial_input):
-            logger.error( f"Processor '{processor_name}' in processing chain not registered or does not support processing input type {initial_input.source}")
+            logger.error(
+                f"Processor '{processor_name}' in processing chain not registered or does not support processing input type {initial_input.source}"
+            )
             return False
 
         try:
             return processor.process(initial_input)
         except Exception as e:
-            logger.exception(f"Processing component '{processor_name}' encountered exception while processing data: {e}")
+            logger.exception(
+                f"Processing component '{processor_name}' encountered exception while processing data: {e}"
+            )
             return False
 
     def batch_process(

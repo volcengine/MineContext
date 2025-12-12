@@ -10,6 +10,7 @@
       "@logger": ["src/main/services/LoggerService"],
       "@main/*": ["src/main/*"],
       "@shared/*": ["packages/shared/*"],
+      "@renderer/*": ["src/renderer/src/*"],
       "@types": ["src/renderer/src/types/index.ts"]
     },
     "types": ["electron-vite/node"],
@@ -22,6 +23,7 @@
     "src/preload/**/*",
     "src/renderer/src/types/*",
     "packages/shared/**/*",
-    "src/interface/**/*"
+    "src/interface/**/*",
+    "src/renderer/src/store/setting.ts"
   ]
 }

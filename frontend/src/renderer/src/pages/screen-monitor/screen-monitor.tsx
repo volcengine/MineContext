@@ -386,7 +386,7 @@ const ScreenMonitor: React.FC = () => {
     setRecordInterval(tempRecordInterval)
     setEnableRecordingHours(tempEnableRecordingHours)
     setRecordingHours(tempRecordingHours as [string, string])
-    setApplyToDays(tempApplyToDays as 'weekday' | 'everyday')
+    setApplyToDays(tempApplyToDays)
     setSettingsVisible(false)
   })
 

@@ -59,7 +59,7 @@ interface ScreenMonitorAPI {
     success: boolean
     error?: string
   }>
-  updateModelConfig: (config: Record<string, unknown>) => Promise<{
+  updateModelConfig: (config: ScreenSettings) => Promise<{
     success: boolean
     error?: string
   }>
