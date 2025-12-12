@@ -14,6 +14,32 @@ function showToast(message, isError = false) {
     toast.show();
 }
 
+// ==================== Azure 平台提示管理 ====================
+
+// Platform change handler for main model
+document.addEventListener('DOMContentLoaded', function() {
+    const modelPlatformSelect = document.getElementById('modelPlatform');
+    const azureHint = document.getElementById('azureHint');
+    
+    if (modelPlatformSelect && azureHint) {
+        modelPlatformSelect.addEventListener('change', function(e) {
+            const isAzure = e.target.value === 'azure';
+            azureHint.style.display = isAzure ? 'block' : 'none';
+        });
+    }
+    
+    // Platform change handler for embedding model
+    const embeddingPlatformSelect = document.getElementById('embeddingModelPlatform');
+    const embeddingAzureHint = document.getElementById('embeddingAzureHint');
+    
+    if (embeddingPlatformSelect && embeddingAzureHint) {
+        embeddingPlatformSelect.addEventListener('change', function(e) {
+            const isAzure = e.target.value === 'azure';
+            embeddingAzureHint.style.display = isAzure ? 'block' : 'none';
+        });
+    }
+});
+
 // ==================== 截图捕获设置 ====================
 
 async function loadCaptureSettings() {

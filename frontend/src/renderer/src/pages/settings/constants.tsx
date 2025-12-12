@@ -5,10 +5,11 @@ import { ReactNode } from 'react'
 import openAI from '../../assets/images/settings/OpenAI.png'
 import doubao from '../../assets/images/settings/doubao.png'
 import custom from '../../assets/images/settings/custom.svg'
-
+import Azure from '../../assets/images/settings/azure.png'
 export enum ModelTypeList {
   Doubao = 'doubao',
   OpenAI = 'openai',
+  Azure = 'azure',
   Custom = 'custom'
 }
 
@@ -69,6 +70,11 @@ export const ModelInfoList = [
         label: 'GPT-5 Nano'
       }
     ]
+  },
+  {
+    icon: <img src={Azure} className="!max-w-none w-[24px] h-[24px]" />,
+    key: 'Azure',
+    value: 'azure'
   },
   {
     icon: <img src={custom} className="!max-w-none w-[18px] h-[18px]" />,
