@@ -22,14 +22,10 @@ interface RecordingStatsCardProps {
 
 const RecordingStatsCard: React.FC<RecordingStatsCardProps> = ({ stats }) => {
   const { t } = useTranslation()
-  console.log('[RecordingStatsCard] Rendering with stats:', stats)
 
   if (!stats) {
-    console.log('[RecordingStatsCard] Stats is null, not rendering')
     return null
   }
-
-  console.log('[RecordingStatsCard] Using stats:', stats)
 
   return (
     <div className="mt-2">

@@ -24,7 +24,6 @@ export const onI18nReady = (callback: I18nReadyCallback): void => {
 i18next
   .use(Backend)
   .init({
-    lng: 'en-US',
     fallbackLng: 'en-US',
     ns: ['translation'],
     defaultNS: 'translation',
@@ -39,7 +38,7 @@ i18next
     console.log('[i18n] Main process i18n initialized successfully')
     console.log(`[i18n] Locale files loaded from: ${loadPath}`)
     // Execute all ready callbacks
-    readyCallbacks.forEach(callback => callback())
+    readyCallbacks.forEach((callback) => callback())
     readyCallbacks.length = 0
   })
   .catch((error) => {

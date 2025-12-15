@@ -35,7 +35,8 @@ module.exports = {
       {
         lexer: 'JsxLexer',
         functions: ['t', 'Trans'], // 提取 t() 函数和 <Trans> 组件
-        attr: 'i18nKey' // 提取组件属性中的 Key
+        attr: 'i18nKey', // 提取组件属性中的 Key
+        componentFunctions: ['Trans'] // 提取 <Trans> 组件
       }
     ],
     js: ['JavascriptLexer'],
@@ -43,7 +44,8 @@ module.exports = {
       {
         lexer: 'JsxLexer',
         functions: ['t', 'Trans'],
-        attr: 'i18nKey'
+        attr: 'i18nKey',
+        componentFunctions: ['Trans']
       }
     ],
     default: ['JavascriptLexer']

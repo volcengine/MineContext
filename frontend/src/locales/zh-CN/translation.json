@@ -29,6 +29,7 @@
     "virtual_window": "虚拟窗口",
     "window_not_accessible": "窗口无法访问 - 可能已最小化或在其他桌面上"
   },
+  "Close": "关闭",
   "common": {
     "add": "添加",
     "back": "返回",
@@ -55,6 +56,7 @@
     "update": "更新",
     "view": "查看"
   },
+  "Display Screenshot": "显示截图",
   "feed": {
     "daily_summary": "每日摘要",
     "empty_hint": "主动洞察将出现在这里为您提供帮助",
@@ -91,6 +93,27 @@
     "less": "少",
     "more": "多"
   },
+  "home": {
+    "createWithContext": "Create with <b>嘎嘣那</b>, Clarity from Chaos.👏"
+  },
+  "Home": "首页",
+  "Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other insights—emerging from all your collected Contexts ✨": "123",
+  "Latest activity": "最新活动",
+  "No activity in the last 7 days": {
+    " ": "在过去 7 天内没有活动。"
+  },
+  "No chats in the latest 7 days": {
+    " ": "在过去 7 天内没有聊天记录。"
+  },
+  "No creation in the last 7 days": {
+    " ": "在过去 7 天内没有创建记录。"
+  },
+  "Recent chat": "最近聊天",
+  "Recent creation": "最近创建",
+  "Screen Monitor": "屏幕监控",
+  "Screen Monitor captures anything on your screen and transforms it into intelligent, connected Contexts": {
+    " All data stays local with full privacy protection ✨": "xxxx"
+  },
   "screen_monitor": {
     "empty": {
       "enable_permission_btn": "启用权限",
@@ -119,6 +142,7 @@
       "recording_stopped": "录制已停止"
     }
   },
+  "Select": "选择",
   "settings": {
     "api_key": "API Key",
     "apply_to_days": "应用到天数",
@@ -154,6 +178,13 @@
     "vlm_placeholder": "需要一个具有视觉理解能力的 VLM 模型。",
     "window": "窗口"
   },
+  "Settings": "设置",
+  "sidebar": {
+    "home": "首页",
+    "screen-monitor": "屏幕监控",
+    "settings": "设置"
+  },
+  "Start Recording": "开始录制",
   "status_bar": {
     "capture_method": "捕获方式",
     "context_type": "上下文类型",
@@ -170,6 +201,8 @@
     "summary": "摘要",
     "tags": "标签"
   },
+  "Stop Recording": "停止录制",
+  "Today": "今天",
   "todo": {
     "add_success": "任务添加成功",
     "add_todo": "添加待办",
@@ -229,6 +262,7 @@
     },
     "untitled": "未命名"
   },
+  "View": "查看",
   "web_preview": {
     "console": "控制台",
     "enter_url": "输入 URL...",

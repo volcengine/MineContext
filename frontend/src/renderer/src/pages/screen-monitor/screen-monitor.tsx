@@ -26,6 +26,7 @@ import { getLogger } from '@shared/logger/renderer'
 import { IpcChannel } from '@shared/IpcChannel'
 import type { RecordingStats } from './components/recording-stats-card'
 import { CaptureSource } from '@interface/common/source'
+import { useTranslation } from 'react-i18next'
 
 const logger = getLogger('ScreenMonitor')
 
@@ -488,6 +489,7 @@ const ScreenMonitor: React.FC = () => {
   const handleRequestPermission = useMemoizedFn(async () => {
     await grantPermission()
   })
+  const { t } = useTranslation()
 
   return (
     <div className="top-0 left-0 flex flex-col h-screen overflow-y-hidden pr-2 pb-2 pl-0 rounded-[20px] relative">
@@ -538,7 +540,7 @@ const ScreenMonitor: React.FC = () => {
 
         <Modal
           style={{ width: '60%', minHeight: '30%' }}
-          title="Display Screenshot"
+          title={t('Display Screenshot')}
           visible={!!selectedImage}
           onCancel={() => setSelectedImage(null)}
           footer={null}>

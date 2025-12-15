@@ -6,6 +6,7 @@ import docIcon from '@renderer/assets/icons/doc-icon.svg'
 import { VaultTreeNode } from '@renderer/types'
 import { useNavigation } from '@renderer/hooks/use-navigation'
 import { CardLayout } from '@renderer/pages/home/components/layout'
+import { useTranslation } from 'react-i18next'
 
 interface DocColumnBoxProps {
   vaultsList: VaultTreeNode[]
@@ -54,8 +55,12 @@ const DocColumn = ({ vault }: DocColumnProps) => {
 }
 
 const DocColumnsCard: React.FC<DocColumnBoxProps> = ({ vaultsList }) => {
+  const { t } = useTranslation()
   return (
-    <CardLayout title="Recent creation" emptyText="No creation in the last 7 days. " isEmpty={vaultsList.length === 0}>
+    <CardLayout
+      title={t('Recent creation')}
+      emptyText={t('No creation in the last 7 days. ')}
+      isEmpty={vaultsList.length === 0}>
       <div className="flex flex-col items-start gap-[4px] self-stretch">
         {vaultsList.map((vault) => (
           <DocColumn key={vault.id} vault={vault} />

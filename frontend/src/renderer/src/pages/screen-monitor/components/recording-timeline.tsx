@@ -27,13 +27,6 @@ const RecordingTimeline: React.FC<RecordingTimelineProps> = ({
   recordingStats
 }) => {
   const { t } = useTranslation()
-  console.log('[RecordingTimeline] Props:', {
-    isMonitoring,
-    isToday,
-    canRecord,
-    hasRecordingStats: !!recordingStats,
-    recordingStats
-  })
 
   return (
     <div className="mt-5">

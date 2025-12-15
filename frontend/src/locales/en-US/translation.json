@@ -29,6 +29,7 @@
     "virtual_window": "Virtual Window",
     "window_not_accessible": "Window not accessible - may be minimized or on another desktop"
   },
+  "Close": "Close",
   "common": {
     "add": "Add",
     "back": "Back",
@@ -55,6 +56,7 @@
     "update": "Update",
     "view": "View"
   },
+  "Display Screenshot": "Display Screenshot",
   "feed": {
     "daily_summary": "Daily Summary",
     "empty_hint": "Proactive insights will appear here to help you",
@@ -91,6 +93,27 @@
     "less": "Less",
     "more": "More"
   },
+  "home": {
+    "createWithContext": "Create with <1>Context</1>, Clarity from Chaos.👏"
+  },
+  "Home": "Home",
+  "Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other insights—emerging from all your collected Contexts ✨": "Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other insights—emerging from all your collected Contexts ✨",
+  "Latest activity": "Latest activity",
+  "No activity in the last 7 days": {
+    " ": "No activity in the last 7 days. "
+  },
+  "No chats in the latest 7 days": {
+    " ": "No chats in the latest 7 days. "
+  },
+  "No creation in the last 7 days": {
+    " ": "No creation in the last 7 days. "
+  },
+  "Recent chat": "Recent chat",
+  "Recent creation": "Recent creation",
+  "Screen Monitor": "Screen Monitor",
+  "Screen Monitor captures anything on your screen and transforms it into intelligent, connected Contexts": {
+    " All data stays local with full privacy protection ✨": "Screen Monitor captures anything on your screen and transforms it into intelligent, connected Contexts. All data stays local with full privacy protection ✨"
+  },
   "screen_monitor": {
     "empty": {
       "enable_permission_btn": "Enable Permission",
@@ -119,6 +142,7 @@
       "recording_stopped": "Recording stopped"
     }
   },
+  "Select": "Select",
   "settings": {
     "api_key": "API Key",
     "apply_to_days": "Apply to days",
@@ -154,6 +178,13 @@
     "vlm_placeholder": "A VLM model with visual understanding capabilities is required.",
     "window": "Window"
   },
+  "Settings": "Settings",
+  "sidebar": {
+    "home": "首页",
+    "screen-monitor": "屏幕监控",
+    "settings": "设置"
+  },
+  "Start Recording": "Start Recording",
   "status_bar": {
     "capture_method": "Capture method",
     "context_type": "Context type",
@@ -170,6 +201,8 @@
     "summary": "Summary",
     "tags": "Tags"
   },
+  "Stop Recording": "Stop Recording",
+  "Today": "Today",
   "todo": {
     "add_success": "Task add success",
     "add_todo": "Add todo",
@@ -229,6 +262,7 @@
     },
     "untitled": "Untitled"
   },
+  "View": "View",
   "web_preview": {
     "console": "Console",
     "enter_url": "Enter URL...",

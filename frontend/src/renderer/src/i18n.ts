@@ -30,20 +30,19 @@ i18n
   .use(initReactI18next)
   .init({
     debug: true,
-    lng: 'en-US',
     fallbackLng: 'en-US',
     resources,
     interpolation: {
-      escapeValue: false, // not needed for react as it escapes by default
+      escapeValue: false // not needed for react as it escapes by default
     },
     react: {
-      useSuspense: true,
-    },
+      useSuspense: true
+    }
   })
   .then(() => {
     console.log('[i18n] Renderer i18n initialized successfully')
     // Execute all ready callbacks
-    readyCallbacks.forEach(callback => callback())
+    readyCallbacks.forEach((callback) => callback())
     readyCallbacks.length = 0
   })
   .catch((error) => {

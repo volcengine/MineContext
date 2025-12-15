@@ -5,6 +5,7 @@ import { FC } from 'react'
 import { Button } from '@arco-design/web-react'
 import screenIcon from '@renderer/assets/icons/screen.svg'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 export interface ApplicationProps {
   value?: any[]
   onCancel?: () => void
@@ -14,6 +15,7 @@ export interface ApplicationProps {
 
 const Application: FC<ApplicationProps> = (props) => {
   const { value: source = [], onCancel, visible, onOk } = props
+  const { t } = useTranslation()
   return (
     <div className="flex justify-between items-center">
       {source.length > 0 ? (
@@ -50,11 +52,11 @@ const Application: FC<ApplicationProps> = (props) => {
       ) : null}
       {!visible ? (
         <Button type="text" className="!px-0 ml-[24px]" onClick={onOk}>
-          Select
+          {t('Select')}
         </Button>
       ) : (
         <Button type="text" className="!px-0 ml-[24px]" onClick={onCancel}>
-          Close
+          {t('Close')}
         </Button>
       )}
     </div>

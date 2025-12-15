@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
 import { useMemoizedFn, useUnmount } from 'ahooks'
 import { HeatmapEntry, MonthType } from './components/heatmap/heatmap'
+import { Trans, useTranslation } from 'react-i18next'
 
 const { Title, Text } = Typography
 
@@ -46,6 +47,7 @@ const HomePage: React.FC = () => {
       setSelectedDays(date)
     }
   })
+
   return (
     <div className={`flex flex-row h-full allotmentContainer ${!isVisible ? 'allotment-disabled' : ''}`}>
       <Allotment separator={false} ref={controller} defaultSizes={defaultSizes}>
@@ -58,12 +60,17 @@ const HomePage: React.FC = () => {
                   <div className="rounded-xl w-full flex justify-between items-start">
                     <div className="flex w-[639px] flex-col items-start gap-2">
                       <Title heading={3} style={{ marginTop: 5, fontWeight: 700, fontSize: 24 }}>
-                        Create with <span style={{ color: 'blue', fontWeight: 700 }}>Context</span>, Clarity from
-                        Chaos.👏
+                        <Trans
+                          components={{ b: <span style={{ color: 'blue', fontWeight: 700 }} /> }}
+                          i18nKey={'home.createWithContext'}>
+                          Create with <b>Context</b>, Clarity from Chaos.👏
+                        </Trans>
                       </Title>
                       <Text type="secondary" style={{ fontSize: 12 }}>
-                        Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other
-                        insights—emerging from all your collected Contexts ✨
+                        <Trans>
+                          Home 1s where MineContext proactively delivers your daily summaries, todos, tips and other
+                          insights—emerging from all your collected Contexts ✨
+                        </Trans>
                       </Text>
                     </div>
                     <AIToggleButton onClick={() => dispatch(toggleHomeAiAssistant(true))} isActive={isVisible} />
@@ -73,11 +80,7 @@ const HomePage: React.FC = () => {
                   <div className="flex flex-col items-start gap-3 flex-1 self-stretch">
                     <HeatmapEntry onChange={onChange} />
                     <ToDoCard selectedDays={selectedDays} />
-                    <LatestActivityCard
-                      title="Latest activity"
-                      emptyText="No activity in the last 7 days. "
-                      hasToDocButton
-                    />
+                    <LatestActivityCard />
                     <DocColumnsCard vaultsList={recentVaults} />
                     <ChatCard />
                   </div>

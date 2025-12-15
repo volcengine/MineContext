@@ -8,6 +8,7 @@ import { useAppDispatch } from '@renderer/store'
 import { setActiveConversationId, toggleCreationAiAssistant, toggleHomeAiAssistant } from '@renderer/store/chat-history'
 import { useNavigation } from '@renderer/hooks/use-navigation'
 import { formatRelativeTime } from '@renderer/utils/time'
+import { useTranslation } from 'react-i18next'
 const ChatCard = () => {
   const { data: conversationList, run } = useRequest(
     async () => {
@@ -42,8 +43,12 @@ const ChatCard = () => {
       } catch (error) {}
     }
   })
+  const { t } = useTranslation()
   return (
-    <CardLayout title="Recent chat" emptyText="No chats in the latest 7 days. " isEmpty={isEmpty(conversationList)}>
+    <CardLayout
+      title={t('Recent chat')}
+      emptyText={t('No chats in the latest 7 days. ')}
+      isEmpty={isEmpty(conversationList)}>
       {(conversationList || [])?.map((conversation) => (
         <div className="flex items-center cursor-pointer justify-between group w-full hover:bg-[#F7F8FD] rounded-[6px] py-[5px] px-[4px]">
           <div
@@ -63,7 +68,7 @@ const ChatCard = () => {
           <div className="flex items-center">
             {/* View button - hidden by default, shown on hover */}
             <button className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#7075FF] font-pingfang-sc text-[12px] font-medium leading-[20px] tracking-[0.036px] cursor-pointer">
-              View
+              {t('View')}
             </button>
           </div>
         </div>

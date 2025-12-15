@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, Typography, DatePicker } from '@arco-design/web-react'
 import { IconLeft, IconRight, IconDown } from '@arco-design/web-react/icon'
 import dayjs from 'dayjs'
+import { useTranslation } from 'react-i18next'
 
 const { Text } = Typography
 
@@ -26,6 +27,7 @@ const DateNavigation: React.FC<DateNavigationProps> = ({
   onSetCurrentDate,
   disabledDate
 }) => {
+  const { t } = useTranslation()
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center">
@@ -34,7 +36,7 @@ const DateNavigation: React.FC<DateNavigationProps> = ({
             <Button
               className="[&_.arco-btn-primary]: !bg-white [&_.arco-btn-primary]: !border-gray-200 [&_.arco-btn-primary]: !h-6 [&_.arco-btn-primary]: !text-black [&_.arco-btn-primary]:  !text-xs [&_.arco-btn-primary]: !mr-2 [&_.arco-btn:hover]: !bg-gray-50"
               onClick={() => onSetCurrentDate(new Date())}>
-              Today
+              {t('Today')}
             </Button>
             <Button
               icon={<IconLeft />}

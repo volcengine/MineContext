@@ -8,20 +8,14 @@ import { useMount, useUnmount } from 'ahooks'
 import { ActivityTimelineItem } from '@renderer/pages/screen-monitor/components/activitie-timeline-item'
 import { isEmpty } from 'lodash'
 import dayjs from 'dayjs'
+import { useTranslation } from 'react-i18next'
 // import { useServiceHandler } from '@renderer/atom/event-loop.atom'
 // import { POWER_MONITOR_KEY } from '@shared/constant/power-monitor'
-
-interface LatestActivityCardProps {
-  title: string
-  hasToDocButton?: boolean
-  emptyText?: string
-  children?: React.ReactNode
-}
 
 // const NORMAL_INTERVAL = 60000 // Normal: 60 seconds
 // const LOCKED_INTERVAL = 300000 // Locked: 5 minutes
 
-const LatestActivityCard: FC<LatestActivityCardProps> = () => {
+const LatestActivityCard: FC = () => {
   const { navigateToMainTab } = useNavigation()
 
   // Store polling timer ID
@@ -87,12 +81,12 @@ const LatestActivityCard: FC<LatestActivityCardProps> = () => {
   //     }
   //   }
   // })
-
+  const { t } = useTranslation()
   return (
     <CardLayout
       seeAllClick={handleNavigateToScreenMonitor}
-      title="Latest activity"
-      emptyText="No activity in the last 7 days. "
+      title={t('Latest activity')}
+      emptyText={t('No activity in the last 7 days. ')}
       isEmpty={isEmpty(latestActivity)}>
       {latestActivity ? (
         <ActivityTimelineItem
