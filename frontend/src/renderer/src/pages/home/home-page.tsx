@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '@renderer/store'
 import { useMemoizedFn, useUnmount } from 'ahooks'
 import { HeatmapEntry, MonthType } from './components/heatmap/heatmap'
-import { Trans, useTranslation } from 'react-i18next'
+import { Trans } from 'react-i18next'
 
 const { Title, Text } = Typography
 

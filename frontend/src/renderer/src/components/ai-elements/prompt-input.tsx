@@ -71,7 +71,6 @@ export const PromptInputTextarea = ({
         onChange?.(e)
       }}
       onKeyDown={handleKeyDown}
-      onKeyDown={handleKeyDown}
       placeholder={resolvedPlaceholder}
       {...props}
       {...props}
