@@ -58,7 +58,7 @@ class ScreenMonitorTask extends ScheduleNextTask {
     })
     ipcMain.handle(IpcChannel.Task_Update_Model_Config, (_, config: ScreenSettings) => {
       this.modelConfig = config
-      this.updateInterval(config.recordInterval)
+      this.updateInterval(config.recordInterval * 1000)
     })
     ipcMain.handle(IpcChannel.Task_Start, () => {
       logger.info('render notify ScreenMonitorTask start')
