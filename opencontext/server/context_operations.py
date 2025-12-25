@@ -14,7 +14,12 @@ import os
 from typing import Any, Dict, List, Optional
 
 from opencontext.models.context import ProcessedContext, RawContextProperties, Vectorize
-from opencontext.models.enums import ContentFormat, ContextSource, ContextType
+from opencontext.models.enums import (
+    ContentFormat,
+    ContextSource,
+    ContextType,
+    get_context_type_options,
+)
 from opencontext.storage.global_storage import get_storage
 from opencontext.utils.logging_utils import get_logger
 
@@ -217,7 +222,8 @@ class ContextOperations:
 
         try:
             collection_names = self.storage.get_vector_collection_names()
-            return [name for name in collection_names if name in ContextType]
+            valid_types = get_context_type_options()
+            return [name for name in collection_names if name in valid_types]
         except Exception as e:
             logger.exception(f"Failed to get context types: {e}")
             raise RuntimeError(f"Failed to get context types: {str(e)}") from e
