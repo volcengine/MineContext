@@ -107,7 +107,7 @@
     "code-inspector-plugin": "^0.20.14",
     "dexie": "^4.0.8",
     "dexie-react-hooks": "^1.1.7",
-    "electron": "^37.2.3",
+    "electron": "^37.10.0",
     "electron-builder": "^25.1.8",
     "electron-rebuild": "^3.2.9",
     "electron-vite": "^4.0.0",
