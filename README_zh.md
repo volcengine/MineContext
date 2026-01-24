@@ -125,7 +125,7 @@ MineContext 非常注重用户隐私，所有数据都默认保存在本地如�
 - 视觉语言模型：Doubao-Seed-1.6-flash
   ![doubao-vlm-model](src/doubao-vlm-model.png)
 
-- 向量化模型：Doubao-embedding-large
+- 向量化模型：Doubao-embedding-vision
   ![doubao-emb-model](src/doubao-emb-model.png)
 
 以下是获取了 API Key 后的填写流程：
@@ -354,7 +354,7 @@ server:
 embedding_model:
   provider: doubao # 选项：openai, doubao
   api_key: your-api-key
-  model: doubao-embedding-large-text-240915
+  model: doubao-embedding-vision-250615
 
 vlm_model:
   provider: doubao # 选项：openai, doubao

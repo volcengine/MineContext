@@ -13,7 +13,7 @@ export enum ModelTypeList {
 }
 
 export enum embeddingModels {
-  DoubaoEmbeddingModelId = 'doubao-embedding-large-text-240915',
+  DoubaoEmbeddingModelId = 'doubao-embedding-vision-250615',
   OpenAIEmbeddingModelId = 'text-embedding-3-large'
 }
 export enum BaseUrl {

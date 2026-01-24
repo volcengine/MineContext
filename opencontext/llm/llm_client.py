@@ -11,6 +11,7 @@ from enum import Enum
 from typing import Any, Dict, List
 
 from openai import APIError, AsyncOpenAI, OpenAI
+from volcenginesdkarkruntime import Ark
 
 from opencontext.models.context import Vectorize
 from opencontext.utils.logging_utils import get_logger
@@ -41,9 +42,10 @@ class LLMClient:
         if not self.api_key or not self.base_url or not self.model:
             raise ValueError("API key, base URL, and model must be provided")
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
-        self.async_client = AsyncOpenAI(
-            api_key=self.api_key, base_url=self.base_url, timeout=self.timeout
-        )
+        self.async_client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+        if self.provider == LLMProvider.DOUBAO.value and self.llm_type == LLMType.EMBEDDING:
+            self.client = Ark(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+            self.async_client = None
 
     def generate(self, prompt: str, **kwargs) -> str:
         messages = [{"role": "user", "content": prompt}]
@@ -77,13 +79,13 @@ class LLMClient:
 
     def generate_embedding(self, text: str, **kwargs) -> List[float]:
         if self.llm_type == LLMType.EMBEDDING:
-            return self._openai_embedding(text, **kwargs)
+            return self._request_embedding(text, **kwargs)
         else:
             raise ValueError(f"Unsupported LLM type for embedding generation: {self.llm_type}")
 
     async def generate_embedding_async(self, text: str, **kwargs) -> List[float]:
         if self.llm_type == LLMType.EMBEDDING:
-            return await self._openai_embedding_async(text, **kwargs)
+            return await self._request_embedding_async(text, **kwargs)
         else:
             raise ValueError(f"Unsupported LLM type for embedding generation: {self.llm_type}")
 
@@ -260,10 +262,19 @@ class LLMClient:
             logger.error(f"OpenAI API async stream error: {e}")
             raise
 
-    def _openai_embedding(self, text: str, **kwargs) -> List[float]:
+    def _request_embedding(self, text: str, **kwargs) -> List[float]:
         try:
-            response = self.client.embeddings.create(model=self.model, input=[text])
-            embedding = response.data[0].embedding
+            if self.provider == LLMProvider.OPENAI.value:
+                response = self.client.embeddings.create(model=self.model, input=[text])
+                embedding = response.data[0].embedding
+            else:
+                response = self.client.multimodal_embeddings.create(model=self.model, input=[
+                    {
+                        "type": "text",
+                        "text": text
+                    }
+                ])
+                embedding = response.data.embedding
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -292,11 +303,20 @@ class LLMClient:
         except APIError as e:
             logger.error(f"OpenAI API error during embedding: {e}")
             raise
-          
-    async def _openai_embedding_async(self, text: str, **kwargs) -> List[float]:
+
+    async def _request_embedding_async(self, text: str, **kwargs) -> List[float]:
         try:
-            response = await self.async_client.embeddings.create(model=self.model, input=[text])
-            embedding = response.data[0].embedding
+            if self.provider == LLMProvider.OPENAI.value:
+                response = await self.async_client.embeddings.create(model=self.model, input=[text])
+                embedding = response.data[0].embedding
+            else:
+                response = self.client.multimodal_embeddings.create(model=self.model, input=[
+                    {
+                        "type": "text",
+                        "text": text
+                    }
+                ])
+                embedding = response.data.embedding
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -445,11 +465,23 @@ class LLMClient:
 
             elif self.llm_type == LLMType.EMBEDDING:
                 # Test with a simple text
-                response = self.client.embeddings.create(model=self.model, input=["test"])
-                if response.data and len(response.data) > 0 and response.data[0].embedding:
-                    return True, "Embedding model validation successful"
+                if self.provider == LLMProvider.OPENAI.value:
+                    response = self.client.embeddings.create(model=self.model, input=["test"])
+                    if response.data and len(response.data) > 0 and response.data[0].embedding:
+                        return True, "Embedding model validation successful"
+                    else:
+                        return False, "Embedding model returned empty response"
                 else:
-                    return False, "Embedding model returned empty response"
+                    response = self.client.multimodal_embeddings.create(model=self.model, input=[
+                        {
+                            "type": "text",
+                            "text": "test"
+                        }
+                    ])
+                    if response.data and response.data.embedding:
+                        return True, "Embedding model validation successful"
+                    else:
+                        return False, "Embedding model returned empty response"
             else:
                 return False, f"Unsupported LLM type: {self.llm_type}"
 

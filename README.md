@@ -130,7 +130,7 @@ After obtaining the Doubao API Key, you need to activate two models in the [Mode
 - Visual Language Model: Doubao-Seed-1.6-flash
   ![doubao-vlm-model](src/doubao-vlm-model.png)
 
-- Embedding Model: Doubao-embedding-large
+- Embedding Model: Doubao-embedding-vision
   ![doubao-emb-model](src/doubao-emb-model.png)
 
 The following is the filling process after obtaining the API Key:
@@ -357,7 +357,7 @@ server:
 embedding_model:
   provider: doubao # options: openai, doubao
   api_key: your-api-key
-  model: doubao-embedding-large-text-240915
+  model: doubao-embedding-vision-250615
 
 vlm_model:
   provider: doubao # options: openai, doubao
