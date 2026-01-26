@@ -357,6 +357,22 @@ async def update_general_settings(request: GeneralSettingsRequest, _auth: str = 
             # Reload config
             config_mgr.load_config(config_mgr.get_config_path())
 
+            # 同步通知 ConsumptionManager 实时应用 content_generation 新配置
+            try:
+                from opencontext.opencontext import get_context_lab
+                opencontext = get_context_lab()
+                if opencontext and hasattr(opencontext, 'consumption_manager') and opencontext.consumption_manager and request.content_generation:
+                    # 提取相关字段构建更新配置
+                    gen_cfg = request.content_generation
+                    task_config = {}
+                    for field in ("activity", "tips", "todos", "report"):
+                        if field in gen_cfg:
+                            task_config[field] = gen_cfg[field]
+                    if task_config:
+                        opencontext.consumption_manager.update_task_config(task_config)
+            except Exception as e:
+                logger.warning(f"Failed to update ConsumptionManager runtime config: {e}")
+
             logger.info("General settings updated successfully")
             return convert_resp(code=0, status=200, message="Settings updated successfully")
 
