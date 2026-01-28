@@ -14,8 +14,8 @@ from openai import APIError, AsyncOpenAI, OpenAI
 from volcenginesdkarkruntime import Ark
 
 from opencontext.models.context import Vectorize
-from opencontext.utils.logging_utils import get_logger
 from opencontext.monitoring import record_processing_stage
+from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -42,7 +42,9 @@ class LLMClient:
         if not self.api_key or not self.base_url or not self.model:
             raise ValueError("API key, base URL, and model must be provided")
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
-        self.async_client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+        self.async_client = AsyncOpenAI(
+            api_key=self.api_key, base_url=self.base_url, timeout=self.timeout
+        )
         if self.provider == LLMProvider.DOUBAO.value and self.llm_type == LLMType.EMBEDDING:
             self.client = Ark(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
             self.async_client = None
@@ -268,12 +270,9 @@ class LLMClient:
                 response = self.client.embeddings.create(model=self.model, input=[text])
                 embedding = response.data[0].embedding
             else:
-                response = self.client.multimodal_embeddings.create(model=self.model, input=[
-                    {
-                        "type": "text",
-                        "text": text
-                    }
-                ])
+                response = self.client.multimodal_embeddings.create(
+                    model=self.model, input=[{"type": "text", "text": text}]
+                )
                 embedding = response.data.embedding
 
             # Record token usage
@@ -281,11 +280,19 @@ class LLMClient:
                 try:
                     from opencontext.monitoring import record_token_usage
 
+                    usage = response.usage
+                    if isinstance(usage, dict):
+                        prompt_tokens = usage.get("prompt_tokens", 0)
+                        total_tokens = usage.get("total_tokens", 0)
+                    else:
+                        prompt_tokens = usage.prompt_tokens
+                        total_tokens = usage.total_tokens
+
                     record_token_usage(
                         model=self.model,
-                        prompt_tokens=response.usage.prompt_tokens,
+                        prompt_tokens=prompt_tokens,
                         completion_tokens=0,  # embedding has no completion tokens
-                        total_tokens=response.usage.total_tokens,
+                        total_tokens=total_tokens,
                     )
                 except ImportError:
                     pass  # Monitoring module not installed or initialized
@@ -310,12 +317,9 @@ class LLMClient:
                 response = await self.async_client.embeddings.create(model=self.model, input=[text])
                 embedding = response.data[0].embedding
             else:
-                response = self.client.multimodal_embeddings.create(model=self.model, input=[
-                    {
-                        "type": "text",
-                        "text": text
-                    }
-                ])
+                response = self.client.multimodal_embeddings.create(
+                    model=self.model, input=[{"type": "text", "text": text}]
+                )
                 embedding = response.data.embedding
 
             # Record token usage
@@ -323,11 +327,19 @@ class LLMClient:
                 try:
                     from opencontext.monitoring import record_token_usage
 
+                    usage = response.usage
+                    if isinstance(usage, dict):
+                        prompt_tokens = usage.get("prompt_tokens", 0)
+                        total_tokens = usage.get("total_tokens", 0)
+                    else:
+                        prompt_tokens = usage.prompt_tokens
+                        total_tokens = usage.total_tokens
+
                     record_token_usage(
                         model=self.model,
-                        prompt_tokens=response.usage.prompt_tokens,
+                        prompt_tokens=prompt_tokens,
                         completion_tokens=0,  # embedding has no completion tokens
-                        total_tokens=response.usage.total_tokens,
+                        total_tokens=total_tokens,
                     )
                 except ImportError:
                     pass  # Monitoring module not installed or initialized
@@ -346,20 +358,19 @@ class LLMClient:
             logger.error(f"OpenAI API error during embedding: {e}")
             raise
 
-
-
     def vectorize(self, vectorize: Vectorize, **kwargs):
         if vectorize.vector:
             return
         vectorize.vector = self.generate_embedding(vectorize.get_vectorize_content(), **kwargs)
         return
-      
+
     async def vectorize_async(self, vectorize: Vectorize, **kwargs):
         if vectorize.vector:
             return
-        vectorize.vector = await self.generate_embedding_async(vectorize.get_vectorize_content(), **kwargs)
+        vectorize.vector = await self.generate_embedding_async(
+            vectorize.get_vectorize_content(), **kwargs
+        )
         return
-      
 
     def validate(self) -> tuple[bool, str]:
         """
@@ -389,7 +400,7 @@ class LLMClient:
                 "ServiceUnavailable": "Service unavailable.",
                 "MethodNotAllowed": "Method not allowed. Check your configuration.",
             }
-            
+
             for code, msg in volcengine_errors.items():
                 if code in error_msg:
                     return msg
@@ -472,12 +483,9 @@ class LLMClient:
                     else:
                         return False, "Embedding model returned empty response"
                 else:
-                    response = self.client.multimodal_embeddings.create(model=self.model, input=[
-                        {
-                            "type": "text",
-                            "text": "test"
-                        }
-                    ])
+                    response = self.client.multimodal_embeddings.create(
+                        model=self.model, input=[{"type": "text", "text": "test"}]
+                    )
                     if response.data and response.data.embedding:
                         return True, "Embedding model validation successful"
                     else:
