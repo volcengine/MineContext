@@ -72,6 +72,10 @@ Table of Contents
 
 <br>
 
+> **🔗 Related Project**: Check out **[OpenViking](https://github.com/volcengine/OpenViking)** - An open-source Context Database designed for AI Agents. OpenViking unifies Memories, Resources, and Skills through a "file system paradigm", providing the infrastructure layer for sophisticated context management.
+
+<br>
+
 # 👋🏻 What is MineContext
 
 MineContext is a proactive context-aware AI partner. By utilizing screenshots and content comprehension (with future support for multi-source multimodal information including documents, images, videos, code, and external application data), it can see and understand the user's digital world context. Based on an underlying contextual engineering framework, it actively delivers high-quality information such as insights, daily/weekly summaries, to-do lists, and activity records.
