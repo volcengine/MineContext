@@ -71,7 +71,9 @@
 - [📃 许可证](#-许可证)
 
 <br>
+
 > **🔗 相关项目**：欢迎了解 **[OpenViking](https://github.com/volcengine/OpenViking)** - 一个专为 AI Agents 设计的开源上下文数据库。OpenViking 通过"文件系统范式"统一管理记忆、资源和技能三类上下文，为复杂的上下文管理提供基础设施层。
+
 <br>
 # 👋🏻 MineContext 是什么
 
