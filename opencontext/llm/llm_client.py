@@ -266,7 +266,7 @@ class LLMClient:
 
     def _request_embedding(self, text: str, **kwargs) -> List[float]:
         try:
-            if self.provider == LLMProvider.OPENAI.value:
+            if self.provider != LLMProvider.DOUBAO.value:
                 response = self.client.embeddings.create(model=self.model, input=[text])
                 embedding = response.data[0].embedding
             else:
@@ -313,14 +313,15 @@ class LLMClient:
 
     async def _request_embedding_async(self, text: str, **kwargs) -> List[float]:
         try:
-            if self.provider == LLMProvider.OPENAI.value:
-                response = await self.async_client.embeddings.create(model=self.model, input=[text])
-                embedding = response.data[0].embedding
-            else:
+            if self.provider == LLMProvider.DOUBAO.value:
+                # Only ark has multimodal_embeddings
                 response = self.client.multimodal_embeddings.create(
                     model=self.model, input=[{"type": "text", "text": text}]
                 )
                 embedding = response.data.embedding
+            else:
+                response = await self.async_client.embeddings.create(model=self.model, input=[text])
+                embedding = response.data[0].embedding
 
             # Record token usage
             if hasattr(response, "usage") and response.usage:
@@ -476,17 +477,17 @@ class LLMClient:
 
             elif self.llm_type == LLMType.EMBEDDING:
                 # Test with a simple text
-                if self.provider == LLMProvider.OPENAI.value:
-                    response = self.client.embeddings.create(model=self.model, input=["test"])
-                    if response.data and len(response.data) > 0 and response.data[0].embedding:
-                        return True, "Embedding model validation successful"
-                    else:
-                        return False, "Embedding model returned empty response"
-                else:
+                if self.provider == LLMProvider.DOUBAO.value:
                     response = self.client.multimodal_embeddings.create(
                         model=self.model, input=[{"type": "text", "text": "test"}]
                     )
                     if response.data and response.data.embedding:
+                        return True, "Embedding model validation successful"
+                    else:
+                        return False, "Embedding model returned empty response"
+                else:
+                    response = self.client.embeddings.create(model=self.model, input=["test"])
+                    if response.data and len(response.data) > 0 and response.data[0].embedding:
                         return True, "Embedding model validation successful"
                     else:
                         return False, "Embedding model returned empty response"
