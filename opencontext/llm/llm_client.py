@@ -266,7 +266,7 @@ class LLMClient:
 
     def _request_embedding(self, text: str, **kwargs) -> List[float]:
         try:
-            if self.provider == LLMProvider.OPENAI.value:
+            if self.provider != LLMProvider.DOUBAO.value:
                 response = self.client.embeddings.create(model=self.model, input=[text])
                 embedding = response.data[0].embedding
             else:
