@@ -477,17 +477,17 @@ class LLMClient:
 
             elif self.llm_type == LLMType.EMBEDDING:
                 # Test with a simple text
-                if self.provider == LLMProvider.OPENAI.value:
-                    response = self.client.embeddings.create(model=self.model, input=["test"])
-                    if response.data and len(response.data) > 0 and response.data[0].embedding:
-                        return True, "Embedding model validation successful"
-                    else:
-                        return False, "Embedding model returned empty response"
-                else:
+                if self.provider == LLMProvider.DOUBAO.value:
                     response = self.client.multimodal_embeddings.create(
                         model=self.model, input=[{"type": "text", "text": "test"}]
                     )
                     if response.data and response.data.embedding:
+                        return True, "Embedding model validation successful"
+                    else:
+                        return False, "Embedding model returned empty response"
+                else:
+                    response = self.client.embeddings.create(model=self.model, input=["test"])
+                    if response.data and len(response.data) > 0 and response.data[0].embedding:
                         return True, "Embedding model validation successful"
                     else:
                         return False, "Embedding model returned empty response"
