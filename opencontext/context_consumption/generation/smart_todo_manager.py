@@ -92,7 +92,7 @@ class SmartTodoManager:
                             deadline = datetime.datetime.strptime(deadline_str, "%Y-%m-%d %H:%M")
                         else:
                             deadline = datetime.datetime.strptime(task["due_date"], "%Y-%m-%d")
-                    except:
+                    except Exception:
                         pass
 
                 todo_id = get_storage().insert_todo(

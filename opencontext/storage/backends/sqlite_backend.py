@@ -951,7 +951,7 @@ class SQLiteBackend(IDocumentStorageBackend):
             logger.error(f"Failed to save token usage: {e}")
             try:
                 self.connection.rollback()
-            except:
+            except Exception:
                 pass
             return False
 
@@ -1047,7 +1047,7 @@ class SQLiteBackend(IDocumentStorageBackend):
             logger.error(f"Failed to save stage timing: {e}")
             try:
                 self.connection.rollback()
-            except:
+            except Exception:
                 pass
             return False
 
@@ -1087,7 +1087,7 @@ class SQLiteBackend(IDocumentStorageBackend):
             logger.error(f"Failed to save data stats: {e}")
             try:
                 self.connection.rollback()
-            except:
+            except Exception:
                 pass
             return False
 
@@ -1313,7 +1313,7 @@ class SQLiteBackend(IDocumentStorageBackend):
             logger.error(f"Failed to cleanup old monitoring data: {e}")
             try:
                 self.connection.rollback()
-            except:
+            except Exception:
                 pass
             return False
 
