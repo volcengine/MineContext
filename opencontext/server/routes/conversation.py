@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from opencontext.server.background_generation import get_background_manager
 from opencontext.server.middleware.auth import auth_dependency
 from opencontext.storage.global_storage import get_storage
 from opencontext.utils.logging_utils import get_logger
@@ -27,19 +28,22 @@ router = APIRouter(prefix="/api/agent/chat", tags=["agent_chat"])
 # --- Pydantic Models ---
 # Based on API spec 4.1.1 - 4.1.5
 
+
 class CreateConversationRequest(BaseModel):
     """Request model for 4.1.1 Create Conversation"""
-    page_name: str = Field(...,
-                           description="Page name, e.g., 'home' or 'creation'")
-    document_id: Optional[str] = Field(None,
-                                       description="Optional document ID to store in metadata")
+
+    page_name: str = Field(..., description="Page name, e.g., 'home' or 'creation'")
+    document_id: Optional[str] = Field(
+        None, description="Optional document ID to store in metadata"
+    )
 
 
 class ConversationResponse(BaseModel):
     """
-    Response model for 4.1.1 (Create), 4.1.2 (Get Detail), 
+    Response model for 4.1.1 (Create), 4.1.2 (Get Detail),
     and 4.1.4 (Update Title).
     """
+
     id: int
     title: Optional[str] = None
     user_id: Optional[str] = None
@@ -52,27 +56,32 @@ class ConversationResponse(BaseModel):
 
 class ConversationSummary(ConversationResponse):
     """Individual conversation item for list response (matches detail)"""
+
     pass
 
 
 class GetConversationListResponse(BaseModel):
     """Response model for 4.1.3 Get Conversation List"""
+
     items: List[ConversationSummary]
     total: int
 
 
 class UpdateConversationRequest(BaseModel):
     """Request model for 4.1.4 Update Title"""
+
     title: str
 
 
 class DeleteConversationResponse(BaseModel):
     """Response model for 4.1.5 Delete Conversation"""
+
     success: bool
     id: int
 
 
 # --- API Endpoints ---
+
 
 @router.post("/conversations", response_model=ConversationResponse)
 async def create_conversation(
@@ -91,15 +100,10 @@ async def create_conversation(
             metadata = {"document_id": request.document_id}
 
         # user_id is optional in the backend and can be added later
-        conversation = storage.create_conversation(
-            page_name=request.page_name,
-            metadata=metadata
-        )
+        conversation = storage.create_conversation(page_name=request.page_name, metadata=metadata)
 
         if not conversation:
-            raise HTTPException(
-                status_code=500, detail="Failed to create conversation in database"
-            )
+            raise HTTPException(status_code=500, detail="Failed to create conversation in database")
 
         # The backend's `create_conversation` calls `get_conversation`,
         # which returns a dict that matches the ConversationResponse model.
@@ -114,12 +118,9 @@ async def create_conversation(
 async def get_conversation_list(
     limit: int = Query(default=20, description="Return limit"),
     offset: int = Query(default=0, description="Offset"),
-    page_name: Optional[str] = Query(
-        default=None, description="Filter by page_name"),
-    user_id: Optional[str] = Query(
-        default=None, description="Filter by user_id"),
-    status: str = Query(
-        default="active", description="Filter by status ('active', 'deleted')"),
+    page_name: Optional[str] = Query(default=None, description="Filter by page_name"),
+    user_id: Optional[str] = Query(default=None, description="Filter by user_id"),
+    status: str = Query(default="active", description="Filter by status ('active', 'deleted')"),
     _auth: str = auth_dependency,
 ):
     """
@@ -131,11 +132,7 @@ async def get_conversation_list(
         # The backend method returns a dict: {"items": [], "total": 0}
         # which directly matches the GetConversationListResponse model.
         result = storage.get_conversation_list(
-            limit=limit,
-            offset=offset,
-            page_name=page_name,
-            user_id=user_id,
-            status=status
+            limit=limit, offset=offset, page_name=page_name, user_id=user_id, status=status
         )
 
         return result
@@ -158,8 +155,7 @@ async def get_conversation_detail(
         conversation = storage.get_conversation(conversation_id=cid)
 
         if not conversation:
-            raise HTTPException(
-                status_code=404, detail="Conversation not found")
+            raise HTTPException(status_code=404, detail="Conversation not found")
 
         return conversation
 
@@ -184,15 +180,10 @@ async def update_conversation_title(
 
         # The backend's `update_conversation` calls `get_conversation`
         # on success, returning the updated object.
-        updated_convo = storage.update_conversation(
-            conversation_id=cid,
-            title=request.title
-        )
+        updated_convo = storage.update_conversation(conversation_id=cid, title=request.title)
 
         if not updated_convo:
-            raise HTTPException(
-                status_code=404, detail="Conversation not found or update failed"
-            )
+            raise HTTPException(status_code=404, detail="Conversation not found or update failed")
 
         return updated_convo
 
@@ -209,20 +200,25 @@ async def delete_conversation(
     _auth: str = auth_dependency,
 ):
     """
-    4.1.5 Mark a conversation as deleted (soft delete)
+    4.1.5 Hard-delete a conversation (cascade: messages + thinking records).
+    Any active background generation for this conversation is cancelled first.
     """
     try:
         storage = get_storage()
+        manager = get_background_manager()
 
-        # The backend's `delete_conversation` method handles setting
-        # the status to 'deleted' and returns the exact format
-        # required by `DeleteConversationResponse`.
-        result = storage.delete_conversation(conversation_id=cid)
+        # Cancel any in-progress generation for this conversation
+        session_id = manager.find_session_by_conversation(cid)
+        if session_id:
+            await manager.cancel_task(session_id)
+            logger.info(
+                f"Cancelled background generation {session_id} before deleting conversation {cid}"
+            )
+
+        result = storage.hard_delete_conversation(conversation_id=cid)
 
         if not result.get("success"):
-            raise HTTPException(
-                status_code=404, detail="Conversation not found or delete failed"
-            )
+            raise HTTPException(status_code=404, detail="Conversation not found or delete failed")
 
         return result
 
