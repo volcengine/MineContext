@@ -481,20 +481,17 @@ class ScreenshotCapture(BaseCaptureComponent):
         Returns:
             Dict[str, Any]: Statistics information
         """
-        active_contexts_info = {}
-        for monitor_id, history in self._active_screenshots.items():
-            active_contexts_info[monitor_id] = [
-                {
-                    "uuid": ctx.uuid,
-                    "duration_count": ctx.metadata.get("duration_count"),
-                    "timestamp": ctx.metadata.get("timestamp"),
-                }
-                for img, ctx in history
-            ]
+        last_screenshots_info = {}
+        for monitor_id, (img, ctx) in self._last_screenshots.items():
+            last_screenshots_info[monitor_id] = {
+                "uuid": ctx.uuid,
+                "duration_count": ctx.additional_info.get("duration_count"),
+                "timestamp": ctx.additional_info.get("timestamp"),
+            }
 
         return {
             "screenshot_count": self._screenshot_count,
-            "active_screenshots": active_contexts_info,
+            "last_screenshots": last_screenshots_info,
         }
 
     def _reset_statistics_impl(self) -> None:
@@ -502,6 +499,6 @@ class ScreenshotCapture(BaseCaptureComponent):
         Reset statistics implementation
         """
         self._screenshot_count = 0
-        self._active_screenshots = {}
+        self._last_screenshots.clear()
         self._last_screenshot_time = None
         self._last_screenshot_path = None
