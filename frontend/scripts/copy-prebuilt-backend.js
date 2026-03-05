@@ -10,7 +10,9 @@ console.log('📦 Copying pre-built backend executable...')
 const backendDir = path.join(__dirname, '..', 'backend')
 const sourceDir = path.join(__dirname, '..', '..')
 const executableName = process.platform === 'win32' ? 'main.exe' : 'main'
-const sourceExecutablePath = path.join(sourceDir, 'dist', executableName)
+const sourceDistDir = path.join(sourceDir, 'dist')
+const sourceOnedirPath = path.join(sourceDistDir, 'main')
+const sourceOnedirExecutablePath = path.join(sourceOnedirPath, executableName)
 const destExecutablePath = path.join(backendDir, executableName)
 
 // Clean up existing backend directory
@@ -22,9 +24,8 @@ if (fs.existsSync(backendDir)) {
 // Ensure backend directory exists
 fs.mkdirSync(backendDir, { recursive: true })
 
-// Check if pre-built executable exists
-if (!fs.existsSync(sourceExecutablePath)) {
-  console.error(`❌ Pre-built executable not found at: ${sourceExecutablePath}`)
+if (!fs.existsSync(sourceOnedirExecutablePath)) {
+  console.error(`❌ Pre-built onedir executable not found at: ${sourceOnedirExecutablePath}`)
   console.log('')
   console.log('🔧 Please build the backend first by running `build.sh` in the project root directory:')
   console.log('   cd ../..')
@@ -33,8 +34,18 @@ if (!fs.existsSync(sourceExecutablePath)) {
   process.exit(1)
 }
 
-// Copy the executable
-fs.copyFileSync(sourceExecutablePath, destExecutablePath)
+console.log(`📁 Detected onedir backend build at: ${sourceOnedirPath}`)
+const entries = fs.readdirSync(sourceOnedirPath)
+entries.forEach((entry) => {
+  const src = path.join(sourceOnedirPath, entry)
+  const dest = path.join(backendDir, entry)
+  fs.cpSync(src, dest, { recursive: true, force: true })
+})
+
+if (!fs.existsSync(destExecutablePath)) {
+  console.error(`❌ Backend executable missing after copy: ${destExecutablePath}`)
+  process.exit(1)
+}
 
 // Make executable on Unix systems
 if (process.platform !== 'win32') {
@@ -49,7 +60,7 @@ console.log(`✅ Copied executable (${fileSizeInMB} MB)`)
 
 // Copy config files
 const configDir = path.join(backendDir, 'config')
-const sourceConfigDir = path.join(sourceDir, 'dist', 'config')
+const sourceConfigDir = path.join(sourceDistDir, 'config')
 
 if (fs.existsSync(sourceConfigDir)) {
   // Create config directory

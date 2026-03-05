@@ -15,8 +15,7 @@ extraResources:
   - from: backend/
     to: backend/
     filter:
-      - 'main*'
-      - 'config/**/*'
+      - '**/*'
 asarUnpack:
   - resources/**
 win:

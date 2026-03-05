@@ -19,7 +19,7 @@ import db from './services/DatabaseService'
 import screenshotService from './services/ScreenshotService'
 import { isDev, isMac } from './constant'
 import icon from '../../resources/icon.png?asset'
-import { ensureBackendRunning, startBackendInBackground, stopBackendServerSync } from './backend'
+import { startBackendInBackground, stopBackendServerSync } from './backend'
 import { powerWatcher } from './background/os/Power'
 import { initLog } from '@shared/logger/init'
 import { getLogger } from '@shared/logger/main'
@@ -34,9 +34,6 @@ initLog()
 const logger = getLogger('MainEntry')
 
 autoUpdater.logger = logger
-
-const isPackaged = app.isPackaged
-const actuallyDev = isDev && !isPackaged // true
 
 const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
@@ -161,12 +158,6 @@ function createWindow() {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
-
-    if (!actuallyDev) {
-      ensureBackendRunning(mainWindow).catch((error) => {
-        logger.error('Failed to ensure backend is running:', error)
-      })
-    }
   })
 
   // Intercept window close event to hide instead of closing

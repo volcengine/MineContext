@@ -109,9 +109,8 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
+    exclude_binaries=True,
     name='main',
     debug=False,
     bootloader_ignore_signals=False,
@@ -123,4 +122,14 @@ exe = EXE(
     disable_windowed_traceback=False,
     codesign_identity=get_codesign_identity(),
     icon=None,  # Disable icon to avoid Windows resource locking issues
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=not is_windows,
+    upx=False,
+    upx_exclude=[],
+    name='main',
 )

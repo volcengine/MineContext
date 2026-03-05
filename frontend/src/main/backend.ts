@@ -17,6 +17,14 @@ let backendLogFile: string | null = null
 let backendProcess: any = null
 let backendPort = 1733 // Dynamic port, starting from 1733
 let backendStatus: 'starting' | 'running' | 'stopped' | 'error' = 'stopped' // Backend service status
+let ensureBackendRunningPromise: Promise<void> | null = null
+
+interface HealthCheckOptions {
+  port?: number
+  maxRetries?: number
+  retryDelayMs?: number
+  requestTimeoutMs?: number
+}
 
 const safeLog = {
   log: (...args) => {
@@ -80,18 +88,20 @@ async function findAvailablePort(startPort: number = 1733, maxAttempts: number =
 
 // The backend service supports health checks
 // @ts-expect-error Ignore type error
-async function checkBackendHealth() {
-  const maxRetries = 20
-  const retryDelay = 20000
+async function checkBackendHealth(options: HealthCheckOptions = {}) {
+  const {
+    port = backendPort,
+    maxRetries = 20,
+    retryDelayMs = 1000,
+    requestTimeoutMs = 5000
+  } = options
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      logToBackendFile(
-        `Health check attempt ${i + 1}/${maxRetries} - checking http://127.0.0.1:${backendPort}/api/health`
-      )
+      logToBackendFile(`Health check attempt ${i + 1}/${maxRetries} - checking http://127.0.0.1:${port}/api/health`)
 
       const healthCheckResult = await new Promise((resolve, reject) => {
-        const req = http.get(`http://127.0.0.1:${backendPort}/api/health`, { timeout: 5000 }, (res) => {
+        const req = http.get(`http://127.0.0.1:${port}/api/health`, { timeout: requestTimeoutMs }, (res) => {
           let data = ''
 
           res.on('data', (chunk) => {
@@ -113,21 +123,20 @@ async function checkBackendHealth() {
           reject(error)
         })
 
-        req.setTimeout(5000, () => {
+        req.setTimeout(requestTimeoutMs, () => {
           req.destroy()
-          reject(new Error('Health check timeout after 5 seconds'))
+          reject(new Error(`Health check timeout after ${requestTimeoutMs}ms`))
         })
       })
 
       logToBackendFile('✅ Backend health check passed')
-      console.log('healthCheckResult', healthCheckResult)
       return healthCheckResult
     } catch (error: any) {
       logToBackendFile(`❌ Health check attempt ${i + 1} failed: ${error.message} (code: ${error.code})`)
 
-      if (i < maxRetries - 1) {
-        logToBackendFile(`Retrying in ${retryDelay}ms...`)
-        await new Promise((resolve) => setTimeout(resolve, retryDelay))
+      if (i < maxRetries - 1 && retryDelayMs > 0) {
+        logToBackendFile(`Retrying in ${retryDelayMs}ms...`)
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
       } else {
         logToBackendFile(`All health check attempts failed. Final error: ${error.message}`)
         throw error
@@ -136,10 +145,41 @@ async function checkBackendHealth() {
   }
 }
 
+async function findRunningBackendPort(startPort: number = 1733, maxAttempts: number = 20) {
+  for (let port = startPort; port < startPort + maxAttempts; port++) {
+    const available = await isPortAvailable(port)
+    if (available) {
+      continue
+    }
+
+    try {
+      const healthCheckResult = await checkBackendHealth({
+        port,
+        maxRetries: 1,
+        retryDelayMs: 0,
+        requestTimeoutMs: 1200
+      })
+      logToBackendFile(`Detected healthy backend on existing port ${port}`)
+      return {
+        port,
+        healthCheckResult
+      }
+    } catch (error: any) {
+      logToBackendFile(`Port ${port} is occupied but not a healthy MineContext backend: ${error.message}`)
+    }
+  }
+  return null
+}
+
 // Check if backend is running and healthy
 async function isBackendHealthy(mainWindow: BrowserWindow) {
   try {
-    const res = await checkBackendHealth()
+    const res = await checkBackendHealth({
+      port: backendPort,
+      maxRetries: 2,
+      retryDelayMs: 300,
+      requestTimeoutMs: 2000
+    })
     mainWindow.webContents.send(IpcServerPushChannel.PushGetInitCheckData, res)
     return true
   } catch (error: any) {
@@ -314,33 +354,56 @@ function killProcessByPort(port: number) {
 
 // Ensure backend is running (start if not running)
 export async function ensureBackendRunning(mainWindow: BrowserWindow) {
-  if (actuallyDev && !serverRunInFrontend) {
-    safeLog.log('Development mode: Backend should be running separately')
-    return
+  if (ensureBackendRunningPromise) {
+    logToBackendFile('Backend startup is already in progress, waiting for existing task...')
+    return ensureBackendRunningPromise
   }
 
-  // Check if backend process is still running
-  if (backendProcess && backendProcess.exitCode === null) {
-    // Process is still running, check if it's healthy
-    const isHealthy = await isBackendHealthy(mainWindow)
-    if (isHealthy) {
-      logToBackendFile('Backend is already running and healthy')
+  ensureBackendRunningPromise = (async () => {
+    if (actuallyDev && !serverRunInFrontend) {
+      safeLog.log('Development mode: Backend should be running separately')
       return
-    } else {
-      logToBackendFile('Backend process is running but not healthy, restarting...')
-      stopBackendServer()
     }
-  } else {
-    logToBackendFile('Backend process is not running, starting...')
-  }
 
-  // Start the backend
+    // Check if backend process is still running
+    if (backendProcess && backendProcess.exitCode === null) {
+      // Process is still running, check if it's healthy
+      const isHealthy = await isBackendHealthy(mainWindow)
+      if (isHealthy) {
+        logToBackendFile('Backend is already running and healthy')
+        return
+      } else {
+        logToBackendFile('Backend process is running but not healthy, restarting...')
+        stopBackendServer()
+      }
+    } else {
+      logToBackendFile('Backend process is not running, starting...')
+    }
+
+    // Try to reuse already-running backend first (e.g. after abnormal exit or external startup).
+    const existingBackend = await findRunningBackendPort(1733, 20)
+    if (existingBackend) {
+      backendPort = existingBackend.port
+      setBackendStatus('running')
+      mainWindow.webContents.send(IpcServerPushChannel.PushGetInitCheckData, existingBackend.healthCheckResult)
+      logToBackendFile(`Reused existing backend service on port ${backendPort}`)
+      return
+    }
+
+    // Start backend only when no reusable service is available.
+    try {
+      await startBackendServer(mainWindow)
+      logToBackendFile('Backend started successfully')
+    } catch (error: any) {
+      logToBackendFile(`Failed to start backend: ${error.message}`)
+      throw error
+    }
+  })()
+
   try {
-    await startBackendServer(mainWindow)
-    logToBackendFile('Backend started successfully')
-  } catch (error: any) {
-    logToBackendFile(`Failed to start backend: ${error.message}`)
-    throw error
+    await ensureBackendRunningPromise
+  } finally {
+    ensureBackendRunningPromise = null
   }
 }
 
@@ -478,6 +541,35 @@ async function startBackendServer(mainWindow: BrowserWindow) {
 
       let healthCheckStarted = false
 
+      const triggerStartupHealthCheck = (source: 'stdout' | 'stderr') => {
+        if (healthCheckStarted) {
+          return
+        }
+
+        healthCheckStarted = true
+        logToBackendFile(`Backend server startup detected in ${source}, starting health check...`)
+
+        setTimeout(() => {
+          checkBackendHealth({
+            port: backendPort,
+            maxRetries: 60,
+            retryDelayMs: 500,
+            requestTimeoutMs: 2000
+          })
+            .then((res) => {
+              logToBackendFile('Backend health check passed, resolving startup')
+              setBackendStatus('running')
+              mainWindow.webContents.send(IpcServerPushChannel.PushGetInitCheckData, res)
+              resolve(res)
+            })
+            .catch((healthError) => {
+              logToBackendFile(`Backend health check failed: ${healthError.message}`)
+              setBackendStatus('error')
+              reject(healthError)
+            })
+        }, 500)
+      }
+
       backendProcess.stdout.on('data', (data) => {
         const output = data.toString().trim()
         logToBackendFile(`STDOUT: ${output}`)
@@ -487,24 +579,7 @@ async function startBackendServer(mainWindow: BrowserWindow) {
           output.includes('Application startup complete') ||
           output.includes('Started server process')
         ) {
-          if (!healthCheckStarted) {
-            healthCheckStarted = true
-            logToBackendFile('Backend server startup detected, starting health check...')
-            setTimeout(() => {
-              checkBackendHealth()
-                .then((res) => {
-                  logToBackendFile('Backend health check passed, resolving startup')
-                  setBackendStatus('running')
-                  mainWindow.webContents.send(IpcServerPushChannel.PushGetInitCheckData, res)
-                  resolve(res)
-                })
-                .catch((healthError) => {
-                  logToBackendFile(`Backend health check failed: ${healthError.message}`)
-                  setBackendStatus('error')
-                  reject(healthError)
-                })
-            }, 3000)
-          }
+          triggerStartupHealthCheck('stdout')
         }
       })
 
@@ -518,24 +593,7 @@ async function startBackendServer(mainWindow: BrowserWindow) {
           output.includes('Application startup complete') ||
           output.includes('Started server process')
         ) {
-          if (!healthCheckStarted) {
-            healthCheckStarted = true
-            logToBackendFile('Backend server startup detected in stderr, starting health check...')
-            setTimeout(() => {
-              checkBackendHealth()
-                .then((res) => {
-                  logToBackendFile('Backend health check passed, resolving startup')
-                  setBackendStatus('running')
-                  mainWindow.webContents.send(IpcServerPushChannel.PushGetInitCheckData, res)
-                  resolve(res)
-                })
-                .catch((healthError) => {
-                  logToBackendFile(`Backend health check failed: ${healthError.message}`)
-                  setBackendStatus('error')
-                  reject(healthError)
-                })
-            }, 3000)
-          }
+          triggerStartupHealthCheck('stderr')
         }
       })
 
@@ -558,7 +616,12 @@ async function startBackendServer(mainWindow: BrowserWindow) {
       setTimeout(() => {
         if (backendProcess && backendProcess.exitCode === null && !healthCheckStarted) {
           logToBackendFile('Backend startup timeout, trying health check...')
-          checkBackendHealth()
+          checkBackendHealth({
+            port: backendPort,
+            maxRetries: 4,
+            retryDelayMs: 500,
+            requestTimeoutMs: 2000
+          })
             .then((res) => {
               logToBackendFile('Health check passed despite timeout')
               setBackendStatus('running')

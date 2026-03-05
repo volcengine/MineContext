@@ -54,13 +54,24 @@ fi
 # 6. Verify build and package
 echo "--> Verifying build output..."
 EXECUTABLE_NAME="main" # As defined in the original script
-if [ -f "dist/$EXECUTABLE_NAME" ] || [ -f "dist/$EXECUTABLE_NAME.exe" ]; then
+ONEDIR_EXECUTABLE="dist/$EXECUTABLE_NAME/$EXECUTABLE_NAME"
+ONEDIR_EXECUTABLE_WIN="dist/$EXECUTABLE_NAME/$EXECUTABLE_NAME.exe"
+
+if [ -f "$ONEDIR_EXECUTABLE" ]; then
+    BUILT_EXECUTABLE="$ONEDIR_EXECUTABLE"
+elif [ -f "$ONEDIR_EXECUTABLE_WIN" ]; then
+    BUILT_EXECUTABLE="$ONEDIR_EXECUTABLE_WIN"
+else
+    BUILT_EXECUTABLE=""
+fi
+
+if [ -n "$BUILT_EXECUTABLE" ]; then
     echo "✅ Build successful!"
 
     # Ad-hoc sign for macOS to avoid Gatekeeper issues
-    if [[ "$OSTYPE" == "darwin"* ]] && [ -f "dist/$EXECUTABLE_NAME" ]; then
+    if [[ "$OSTYPE" == "darwin"* ]] && [ -f "$BUILT_EXECUTABLE" ]; then
         echo "--> Performing ad-hoc sign for macOS executable..."
-        codesign -s - --force --all-architectures --timestamp=none --deep "dist/$EXECUTABLE_NAME" 2>/dev/null || {
+        codesign -s - --force --all-architectures --timestamp=none --deep "$BUILT_EXECUTABLE" 2>/dev/null || {
             echo "⚠️ Warning: Ad-hoc signing failed. The app might still run, but you may see security warnings."
         }
     fi
@@ -81,7 +92,11 @@ if [ -f "dist/$EXECUTABLE_NAME" ] || [ -f "dist/$EXECUTABLE_NAME.exe" ]; then
     echo "✅ Build complete!"
     echo
     echo "To run:"
-    echo "  cd dist && ./main start"
+    if [ -f "$ONEDIR_EXECUTABLE" ]; then
+        echo "  cd dist/main && ./main start"
+    else
+        echo "  cd dist/main && main.exe start"
+    fi
     echo
     echo "Options: --port 9000 | --host 0.0.0.0 | --config config/config.yaml"
     echo

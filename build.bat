@@ -88,7 +88,14 @@ if errorlevel 1 (
 REM 6. Verify build and package
 echo --^> Verifying build output...
 set EXECUTABLE_NAME=main
-if exist "dist\%EXECUTABLE_NAME%.exe" (
+set ONEDIR_EXE=dist\%EXECUTABLE_NAME%\%EXECUTABLE_NAME%.exe
+set BUILT_EXECUTABLE=
+
+if exist "%ONEDIR_EXE%" (
+    set BUILT_EXECUTABLE=%ONEDIR_EXE%
+)
+
+if not "!BUILT_EXECUTABLE!"=="" (
     echo Build successful!
     echo.
 
@@ -110,7 +117,11 @@ if exist "dist\%EXECUTABLE_NAME%.exe" (
     echo Build complete!
     echo.
     echo To run:
-    echo   cd dist ^&^& main.exe start
+    if exist "%ONEDIR_EXE%" (
+        echo   cd dist\main ^&^& main.exe start
+    ) else (
+        echo   cd dist ^&^& main.exe start
+    )
     echo.
     echo Options: --port 9000 ^| --host 0.0.0.0 ^| --config config\config.yaml
     echo.

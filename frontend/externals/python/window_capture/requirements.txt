@@ -1,6 +1,5 @@
 pyobjc-core>=10.0
 pyobjc-framework-Cocoa>=10.0
-pyobjc>=10.0
 pyobjc-framework-Quartz>=10.0
 pyobjc-framework-CoreServices>=10.0
 pyobjc-framework-LaunchServices>=10.0
