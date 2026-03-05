@@ -439,7 +439,7 @@ class LLMClient:
                                         if ". Request id:" in actual_msg:
                                             actual_msg = actual_msg.split(". Request id:")[0]
                                         return actual_msg
-                            except:
+                            except Exception:
                                 pass
                         return f"Error {code}"
 

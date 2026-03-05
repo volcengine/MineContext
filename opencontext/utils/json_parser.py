@@ -101,5 +101,5 @@ def _fix_json_quotes(json_str: str) -> str:
     try:
         fixed = re.sub(pattern, fix_quotes_in_match, json_str)
         return fixed
-    except:
+    except Exception:
         return json_str
