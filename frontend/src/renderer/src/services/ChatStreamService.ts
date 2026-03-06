@@ -89,19 +89,26 @@ export interface StreamEvent {
 
 // Streaming chat service class
 export class ChatStreamService {
-  private abortController?: AbortController
+  // One AbortController per active conversation (keyed by conversation_id).
+  // Using conversation_id = 0 as a fallback when no id is available.
+  private controllers: Map<number, AbortController> = new Map()
 
-  // Send a streaming chat request
+  // Send a streaming chat request.
+  // Only aborts a pre-existing stream for the SAME conversation so that
+  // background generations in other conversations are unaffected.
   async sendStreamMessage(
     request: ChatStreamRequest,
     onEvent: (event: StreamEvent) => void,
     onError?: (error: Error) => void,
     onComplete?: () => void
   ): Promise<void> {
-    // Cancel the previous request
-    this.abortStream()
+    const convId = request.conversation_id ?? 0
 
-    this.abortController = new AbortController()
+    // Cancel any previous stream for THIS conversation only
+    this.abortStreamForConversation(convId)
+
+    const controller = new AbortController()
+    this.controllers.set(convId, controller)
 
     try {
       // Use the baseURL of axiosInstance to ensure consistent ports
@@ -112,7 +119,7 @@ export class ChatStreamService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(request),
-        signal: this.abortController.signal
+        signal: controller.signal
       })
 
       if (!response.ok) {
@@ -170,15 +177,30 @@ export class ChatStreamService {
 
       console.error('Stream request failed:', error)
       onError?.(error as Error)
+    } finally {
+      // Clean up the controller entry when this conversation's stream ends
+      this.controllers.delete(convId)
     }
   }
 
-  // Cancel the current streaming request
-  abortStream(): void {
-    if (this.abortController) {
-      this.abortController.abort()
-      this.abortController = undefined
+  // Cancel the streaming request for a specific conversation
+  abortStreamForConversation(conversationId: number): void {
+    const controller = this.controllers.get(conversationId)
+    if (controller) {
+      controller.abort()
+      this.controllers.delete(conversationId)
     }
+  }
+
+  // Cancel ALL active streaming requests (e.g., on app shutdown)
+  abortStream(): void {
+    this.controllers.forEach((ctrl) => ctrl.abort())
+    this.controllers.clear()
+  }
+
+  // Return whether a particular conversation currently has an active stream
+  isStreaming(conversationId: number): boolean {
+    return this.controllers.has(conversationId)
   }
 
   // Generate a session ID

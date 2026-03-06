@@ -1,12 +1,14 @@
 import { FC, useState, MouseEvent } from 'react'
 
-import { Typography, Trigger, Modal, Form, Input } from '@arco-design/web-react'
+import { Typography, Trigger, Modal, Form, Input, Spin } from '@arco-design/web-react'
 import { IconDelete, IconMore } from '@arco-design/web-react/icon'
 import { useMemoizedFn, useRequest } from 'ahooks'
 import { conversationService } from '@renderer/services/conversation-service'
 import chatHistoryIcon from '@renderer/assets/icons/ai-assistant/chat-history.svg'
 import renameIcon from '@renderer/assets/icons/rename.svg'
 import clsx from 'clsx'
+import { useAppDispatch, useAppSelector } from '@renderer/store'
+import { deleteConversation as deleteConversationAction } from '@renderer/store/chat-history'
 export interface ChatHistoryListItemProps {
   conversation: any
   refreshConversationList?: () => void
@@ -17,6 +19,12 @@ const ChatHistoryListItem: FC<ChatHistoryListItemProps> = (props) => {
   const { conversation, refreshConversationList, handleGetMessages } = props
   const [renameVisible, setRenameVisible] = useState(false)
   const [form] = Form.useForm()
+  const dispatch = useAppDispatch()
+  const backgroundGeneratingConversations = useAppSelector(
+    (state) => state.chatHistory.backgroundGeneratingConversations
+  )
+  const isGenerating = backgroundGeneratingConversations.includes(conversation.id)
+
   const { run: updateConversationTitle } = useRequest(conversationService.updateConversationTitle, { manual: true })
   const { run: deleteConversation } = useRequest(conversationService.deleteConversation, { manual: true })
   const handleDelete = useMemoizedFn(async () => {
@@ -27,6 +35,8 @@ const ChatHistoryListItem: FC<ChatHistoryListItemProps> = (props) => {
       okText: 'Delete',
       onOk: () => {
         deleteConversation(conversation.id)
+        // Sync Redux state so the sidebar removes this item immediately
+        dispatch(deleteConversationAction(conversation.id))
         refreshConversationList?.()
       }
     })
@@ -79,11 +89,14 @@ const ChatHistoryListItem: FC<ChatHistoryListItemProps> = (props) => {
             { 'bg-[#F6F7FA]': editMenuVisible }
           )}
           onClick={(e) => handleGetMessages?.(e, conversation.id)}>
-          <div className="flex items-center gap-[6px] flex-1">
-            <img src={chatHistoryIcon} className="block" />
+          <div className="flex items-center gap-[6px] flex-1 min-w-0">
+            <img src={chatHistoryIcon} className="block flex-shrink-0" />
             <Typography.Text className="!my-0 !flex-1 !text-[13px] !leading-[22px]" ellipsis={{ rows: 1 }}>
               {conversation.title || 'Untitled Conversation'}
             </Typography.Text>
+            {isGenerating && (
+              <Spin size={12} className="flex-shrink-0" />
+            )}
           </div>
           <Trigger
             updateOnScroll
