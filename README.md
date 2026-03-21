@@ -123,7 +123,7 @@ Click [Github Latest Release](https://github.com/volcengine/MineContext/releases
 
 After the application launches, please follow the prompts to enter your API key. (Note: On the first run, the application needs to install the backend environment, which may take about two minutes).
 
-We currently support services from Doubao, OpenAI, and custom models. This includes any **local models** or **third-party model** services that are compatible with the OpenAI API format.
+We currently support services from Doubao, OpenAI, MiniMax, and custom models. This includes any **local models** or **third-party model** services that are compatible with the OpenAI API format.
 
 We recommend using [LMStudio](https://lmstudio.ai/) to run local models. It provides a simple interface and powerful features to help you quickly deploy and manage them.
 
@@ -326,7 +326,7 @@ opencontext/
 
 6. **LLM Integration** (`llm/`)
 
-   - Support for multiple LLM providers (OpenAI, Doubao)
+   - Support for multiple LLM providers (OpenAI, Doubao, MiniMax)
    - VLM (Vision-Language Model) integration
    - Embedding generation services
 
@@ -359,12 +359,12 @@ server:
   debug: false
 
 embedding_model:
-  provider: doubao # options: openai, doubao
+  provider: doubao # options: openai, doubao, minimax
   api_key: your-api-key
   model: doubao-embedding-vision-250615
 
 vlm_model:
-  provider: doubao # options: openai, doubao
+  provider: doubao # options: openai, doubao, minimax
   api_key: your-api-key
   model: doubao-seed-1-6-flash-250828
 

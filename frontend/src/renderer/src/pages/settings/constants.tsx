@@ -4,21 +4,25 @@
 import { ReactNode } from 'react'
 import openAI from '../../assets/images/settings/OpenAI.png'
 import doubao from '../../assets/images/settings/doubao.png'
+import minimax from '../../assets/images/settings/minimax.svg'
 import custom from '../../assets/images/settings/custom.svg'
 
 export enum ModelTypeList {
   Doubao = 'doubao',
   OpenAI = 'openai',
+  MiniMax = 'minimax',
   Custom = 'custom'
 }
 
 export enum embeddingModels {
   DoubaoEmbeddingModelId = 'doubao-embedding-vision-250615',
-  OpenAIEmbeddingModelId = 'text-embedding-3-large'
+  OpenAIEmbeddingModelId = 'text-embedding-3-large',
+  MiniMaxEmbeddingModelId = 'embo-01'
 }
 export enum BaseUrl {
   DoubaoUrl = 'https://ark.cn-beijing.volces.com/api/v3',
-  OpenAIUrl = 'https://api.openai.com/v1'
+  OpenAIUrl = 'https://api.openai.com/v1',
+  MiniMaxUrl = 'https://api.minimax.io/v1'
 }
 export interface OptionInfo {
   value: string
@@ -67,6 +71,21 @@ export const ModelInfoList = [
       {
         value: 'gpt-5-nano',
         label: 'GPT-5 Nano'
+      }
+    ]
+  },
+  {
+    icon: <img src={minimax} className="!max-w-none w-[24px] h-[24px]" />,
+    key: 'MiniMax',
+    value: 'minimax',
+    option: [
+      {
+        value: 'MiniMax-M2.7',
+        label: 'MiniMax-M2.7'
+      },
+      {
+        value: 'MiniMax-M2.7-highspeed',
+        label: 'MiniMax-M2.7-highspeed'
       }
     ]
   },

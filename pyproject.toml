@@ -44,6 +44,7 @@ dependencies = [
     "python-multipart",
     "playwright",
     "volcengine-python-sdk[ark]",
+    "httpx",
 ]
 
 [project.optional-dependencies]
@@ -51,6 +52,8 @@ dev = [
     "black>=24.8.0",
     "isort>=5.13.0",
     "pre-commit>=3.6.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
 ]
 
 [project.scripts]
@@ -89,6 +92,12 @@ extend-exclude = '''
   | frontend
 )/
 '''
+
+# pytest - test configuration
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests that require a real MiniMax API key (deselect with '-m \"not integration\"')",
+]
 
 # isort - import 语句排序工具
 [tool.isort]
