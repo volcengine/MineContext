@@ -21,6 +21,27 @@ _config_path = None
 _context_lab_instance = None
 
 
+class _LazyApp:
+    """Compatibility shim that defers app creation until first use."""
+
+    def __init__(self) -> None:
+        self._app = None
+
+    def _get_app(self):
+        if self._app is None:
+            self._app = create_app()
+        return self._app
+
+    def __getattr__(self, name):
+        return getattr(self._get_app(), name)
+
+    async def __call__(self, scope, receive, send):
+        await self._get_app()(scope, receive, send)
+
+
+app = _LazyApp()
+
+
 def get_or_create_context_lab():
     """Get or create the global OpenContext instance for the current process."""
     global _context_lab_instance, _config_path

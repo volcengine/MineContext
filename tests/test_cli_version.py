@@ -65,3 +65,67 @@ builtins.__import__ = guarded_import
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stdout, self.expected_version_output)
         self.assertEqual(result.stderr, "")
+
+    def test_app_compatibility_shim_exists_without_eager_runtime_imports(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            sitecustomize = Path(temp_dir) / "sitecustomize.py"
+            sitecustomize.write_text(
+                """import builtins
+import json
+import sys
+
+real_import = builtins.__import__
+blocked = []
+
+def guarded_import(name, *args, **kwargs):
+    if (
+        name in {"fastapi", "uvicorn"}
+        or name.startswith("fastapi.")
+        or name.startswith("uvicorn.")
+    ):
+        blocked.append(name)
+        raise ImportError(f"blocked import: {name}")
+    return real_import(name, *args, **kwargs)
+
+builtins.__import__ = guarded_import
+
+def print_result(payload):
+    print(json.dumps(payload, sort_keys=True))
+""",
+                encoding="utf-8",
+            )
+
+            env = os.environ.copy()
+            env["PYTHONPATH"] = temp_dir if "PYTHONPATH" not in env else (
+                os.pathsep.join([temp_dir, env["PYTHONPATH"]])
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    (
+                        "import sitecustomize; "
+                        "import opencontext.cli as cli; "
+                        "sitecustomize.print_result({"
+                        "'has_app': hasattr(cli, 'app'), "
+                        "'app_type': type(cli.app).__name__, "
+                        "'fastapi_loaded': 'fastapi' in __import__('sys').modules, "
+                        "'uvicorn_loaded': 'uvicorn' in __import__('sys').modules, "
+                        "'blocked': sitecustomize.blocked"
+                        "})"
+                    ),
+                ],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+                env=env,
+                timeout=10,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = __import__("json").loads(result.stdout)
+        self.assertTrue(payload["has_app"])
+        self.assertFalse(payload["fastapi_loaded"])
+        self.assertFalse(payload["uvicorn_loaded"])
+        self.assertEqual(payload["blocked"], [])
