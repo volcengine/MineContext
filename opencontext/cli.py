@@ -14,17 +14,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-import uvicorn
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-
-from opencontext.config.config_manager import ConfigManager
-from opencontext.server.api import router as api_router
-from opencontext.server.opencontext import OpenContext
-from opencontext.utils.logging_utils import get_logger, setup_logging
-
-logger = get_logger(__name__)
+from opencontext import __version__
 
 # Global variables for multi-process support
 _config_path = None
@@ -42,43 +32,24 @@ def get_or_create_context_lab():
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app):
     """Lifespan context manager for FastAPI."""
-    # Startup
     if not hasattr(app.state, "context_lab_instance"):
         app.state.context_lab_instance = get_or_create_context_lab()
     yield
-    # Shutdown - cleanup if needed
-    pass
-
-
-app = FastAPI(title="OpenContext", version="1.0.0", lifespan=lifespan)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173",
-                   "http://localhost"],  # React dev server
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Project root
-if hasattr(sys, "_MEIPASS"):
-    project_root = Path(sys._MEIPASS)
-else:
-    project_root = Path(__file__).parent.parent.parent.resolve()
 
 
 def _get_project_root() -> Path:
     """Get the project root directory."""
-    return project_root
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS)
+    return Path(__file__).parent.parent.parent.resolve()
 
 
-def _setup_static_files() -> None:
+def _mount_static_files(app) -> None:
     """Setup static file mounts for the FastAPI app."""
-    # Mount static files
+    from fastapi.staticfiles import StaticFiles
+
     if hasattr(sys, "_MEIPASS"):
         static_path = Path(sys._MEIPASS) / "opencontext/web/static"
     else:
@@ -89,26 +60,41 @@ def _setup_static_files() -> None:
     print(f"Static path absolute: {static_path.resolve()}")
 
     if static_path.exists():
-        app.mount("/static", StaticFiles(directory=str(static_path)),
-                  name="static")
+        app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
         print(f"Mounted static files from: {static_path}")
     else:
         print(f"Static path does not exist: {static_path}")
 
-    # Mount screenshots directory
     screenshots_path = Path("./screenshots").resolve()
     if screenshots_path.exists():
-        app.mount("/screenshots",
-                  StaticFiles(directory=screenshots_path), name="screenshots")
+        app.mount(
+            "/screenshots",
+            StaticFiles(directory=screenshots_path),
+            name="screenshots",
+        )
 
 
-_setup_static_files()
+def create_app():
+    """Create and configure the FastAPI app."""
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    from opencontext.server.api import router as api_router
 
-app.include_router(api_router)
+    app = FastAPI(title="OpenContext", version=__version__, lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://localhost"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    _mount_static_files(app)
+    app.include_router(api_router)
+    return app
 
 
 def start_web_server(
-    context_lab_instance: OpenContext,
+    context_lab_instance,
     host: str,
     port: int,
     workers: int = 1,
@@ -123,21 +109,30 @@ def start_web_server(
         workers: Number of worker processes
         config_path: Configuration file path for multi-process mode
     """
+    import uvicorn
+
+    logger = _get_logger()
+
     global _config_path
     _config_path = config_path
 
     if workers > 1:
         logger.info(f"Starting with {workers} worker processes")
-        # For multi-process mode, use import string to avoid the warning
-        uvicorn.run("opencontext.cli:app", host=host, port=port,
-                    log_level="info", workers=workers)
+        uvicorn.run(
+            "opencontext.cli:create_app",
+            host=host,
+            port=port,
+            log_level="info",
+            workers=workers,
+            factory=True,
+        )
     else:
-        # For single process mode, use the existing instance
+        app = create_app()
         app.state.context_lab_instance = context_lab_instance
         uvicorn.run(app, host=host, port=port, log_level="info")
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     """Parse command line arguments.
 
     Returns:
@@ -146,27 +141,33 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="OpenContext - Context capture, processing, storage and consumption system"
     )
-
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands")
-
-    # Start command
-    start_parser = subparsers.add_parser(
-        "start", help="Start OpenContext server")
-    start_parser.add_argument("--config", type=str,
-                              help="Configuration file path")
-    start_parser.add_argument(
-        "--host", type=str, help="Host address (overrides config file)")
-    start_parser.add_argument(
-        "--port", type=int, help="Port number (overrides config file)")
-    start_parser.add_argument(
-        "--workers", type=int, default=1, help="Number of worker processes (default: 1)"
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"opencontext {__version__}",
     )
 
-    return parser.parse_args()
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    start_parser = subparsers.add_parser("start", help="Start OpenContext server")
+    start_parser.add_argument("--config", type=str, help="Configuration file path")
+    start_parser.add_argument(
+        "--host", type=str, help="Host address (overrides config file)"
+    )
+    start_parser.add_argument(
+        "--port", type=int, help="Port number (overrides config file)"
+    )
+    start_parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="Number of worker processes (default: 1)",
+    )
+
+    return parser.parse_args(argv)
 
 
-def _initialize_context_lab(config_path: Optional[str]) -> OpenContext:
+def _initialize_context_lab(config_path: Optional[str]):
     """Initialize the OpenContext instance.
 
     Args:
@@ -178,6 +179,10 @@ def _initialize_context_lab(config_path: Optional[str]) -> OpenContext:
     Raises:
         RuntimeError: If initialization fails
     """
+    from opencontext.server.opencontext import OpenContext
+
+    logger = _get_logger()
+
     try:
         lab_instance = OpenContext(config_path=config_path)
         lab_instance.initialize()
@@ -187,12 +192,14 @@ def _initialize_context_lab(config_path: Optional[str]) -> OpenContext:
         raise RuntimeError(f"OpenContext initialization failed: {e}") from e
 
 
-def _run_headless_mode(lab_instance: OpenContext) -> None:
+def _run_headless_mode(lab_instance) -> None:
     """Run in headless mode without web server.
 
     Args:
         lab_instance: The opencontext instance
     """
+    logger = _get_logger()
+
     try:
         logger.info("Running in headless mode. Press Ctrl+C to exit.")
         while True:
@@ -211,6 +218,8 @@ def handle_start(args: argparse.Namespace) -> int:
     Returns:
         Exit code (0 for success, 1 for failure)
     """
+    logger = _get_logger()
+
     try:
         lab_instance = _initialize_context_lab(args.config)
     except RuntimeError:
@@ -223,7 +232,6 @@ def handle_start(args: argparse.Namespace) -> int:
 
     web_config = get_config("web")
     if web_config.get("enabled", True):
-        # Command line arguments override config file
         host = args.host if args.host else web_config.get("host", "localhost")
         port = args.port if args.port else web_config.get("port", 1733)
 
@@ -247,10 +255,17 @@ def _setup_logging(config_path: Optional[str]) -> None:
         config_path: Optional path to configuration file
     """
     from opencontext.config.global_config import GlobalConfig
+    from opencontext.utils.logging_utils import setup_logging
 
     GlobalConfig.get_instance().initialize(config_path)
-
     setup_logging(GlobalConfig.get_instance().get_config("logging"))
+
+
+def _get_logger():
+    """Create the CLI logger lazily."""
+    from opencontext.utils.logging_utils import get_logger
+
+    return get_logger(__name__)
 
 
 def main() -> int:
@@ -261,9 +276,9 @@ def main() -> int:
     """
     args = parse_args()
 
-    # Setup logging first
     _setup_logging(getattr(args, "config", None))
 
+    logger = _get_logger()
     logger.debug(f"Command line arguments: {args}")
 
     if not args.command:
@@ -274,9 +289,9 @@ def main() -> int:
 
     if args.command == "start":
         return handle_start(args)
-    else:
-        logger.error(f"Unknown command: {args.command}")
-        return 1
+
+    logger.error(f"Unknown command: {args.command}")
+    return 1
 
 
 if __name__ == "__main__":
