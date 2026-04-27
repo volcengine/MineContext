@@ -198,28 +198,50 @@ app.whenReady().then(() => {
       let filePath = request.url.replace('vikingdb://', '')
       filePath = decodeURIComponent(filePath)
 
-      const fullPath = path.resolve(filePath)
+      const resolved = path.resolve(filePath)
 
-      console.log('Reading file:', fullPath)
-
-      if (fs.existsSync(fullPath)) {
-        const data = fs.readFileSync(fullPath)
-        const extension = path.extname(fullPath).toLowerCase()
-
-        // Set MIME type based on file extension
-        let mimeType = 'application/octet-stream'
-        if (extension === '.png') mimeType = 'image/png'
-        else if (extension === '.jpg' || extension === '.jpeg') mimeType = 'image/jpeg'
-        else if (extension === '.gif') mimeType = 'image/gif'
-        else if (extension === '.svg') mimeType = 'image/svg+xml'
-
-        callback({
-          mimeType: mimeType,
-          data: data
-        })
-      } else {
-        callback({ error: -6 })
+      if (!fs.existsSync(resolved)) {
+        callback({ error: -6 /* net::ERR_FILE_NOT_FOUND */ })
+        return
       }
+
+      // Constrain reads to the directory the backend writes its data into
+      // (mirrors `CONTEXT_PATH` in backend.ts). Without this, the renderer
+      // can read arbitrary local files via e.g. `vikingdb:///Users/<u>/.ssh/id_rsa`,
+      // which combined with `webSecurity: false` and the permissive CSP
+      // (`connect-src *`) makes any future renderer XSS a full local-file
+      // exfiltration primitive. We also realpath() the resolved path so a
+      // symlink planted inside userData cannot be used to escape the sandbox.
+      const allowedRoot =
+        !app.isPackaged && is.dev
+          ? path.resolve('.')
+          : path.resolve(app.getPath('userData'))
+      const realPath = fs.realpathSync(resolved)
+      const isUnderRoot =
+        realPath === allowedRoot || realPath.startsWith(allowedRoot + path.sep)
+
+      if (!isUnderRoot) {
+        console.error(
+          `vikingdb:// blocked path outside allowed root: ${realPath} (root: ${allowedRoot})`
+        )
+        callback({ error: -10 /* net::ERR_ACCESS_DENIED */ })
+        return
+      }
+
+      const data = fs.readFileSync(realPath)
+      const extension = path.extname(realPath).toLowerCase()
+
+      // Set MIME type based on file extension
+      let mimeType = 'application/octet-stream'
+      if (extension === '.png') mimeType = 'image/png'
+      else if (extension === '.jpg' || extension === '.jpeg') mimeType = 'image/jpeg'
+      else if (extension === '.gif') mimeType = 'image/gif'
+      else if (extension === '.svg') mimeType = 'image/svg+xml'
+
+      callback({
+        mimeType: mimeType,
+        data: data
+      })
     } catch (error) {
       console.error('Error reading file:', error)
       callback({ error: -2 })
