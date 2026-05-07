@@ -93,9 +93,8 @@ class DocumentConverter:
         """Load single image"""
         logger.info(f"Loading image: {image_path}")
         try:
-            img = Image.open(image_path)
-            if img.mode != "RGB":
-                img = img.convert("RGB")
+            with Image.open(image_path) as fp:
+                img = fp.convert("RGB")
             return [img]
         except Exception as e:
             logger.exception(f"Error loading image: {e}")
@@ -395,9 +394,8 @@ class DocumentConverter:
                                 # Convert image data to PIL.Image
                                 import io
 
-                                img = Image.open(io.BytesIO(image_data))
-                                if img.mode != "RGB":
-                                    img = img.convert("RGB")
+                                with Image.open(io.BytesIO(image_data)) as fp:
+                                    img = fp.convert("RGB")
                                 images.append(img)
                                 logger.debug(f"Extracted image from paragraph: {img.size}")
 
@@ -569,9 +567,8 @@ class DocumentConverter:
                     # Handle remote image by downloading it
                     with urllib.request.urlopen(img_path_str, timeout=10) as response:
                         image_data = response.read()
-                        img = Image.open(io.BytesIO(image_data))
-                        if img.mode != "RGB":
-                            img = img.convert("RGB")
+                        with Image.open(io.BytesIO(image_data)) as fp:
+                            img = fp.convert("RGB")
                         images.append(img)
                         logger.debug(
                             f"Successfully downloaded remote image: {img_path_str[:70]}..."
@@ -589,9 +586,8 @@ class DocumentConverter:
                         logger.warning(f"Local image file not found: {img_path}")
                         continue
 
-                    img = Image.open(img_path)
-                    if img.mode != "RGB":
-                        img = img.convert("RGB")
+                    with Image.open(img_path) as fp:
+                        img = fp.convert("RGB")
                     images.append(img)
                     logger.debug(f"Loaded local image: {img_path}")
 

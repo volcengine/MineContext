@@ -21,11 +21,8 @@ def calculate_bytes2phash(image_bytes: bytes) -> Optional[str]:
     try:
         import io
 
-        from PIL import Image
-
-        image = Image.open(io.BytesIO(image_bytes))
-        hash_result = str(imagehash.dhash(image, hash_size=8))
-        return hash_result
+        with Image.open(io.BytesIO(image_bytes)) as image:
+            return str(imagehash.dhash(image, hash_size=8))
     except Exception:
         return None
 
@@ -35,10 +32,8 @@ def calculate_phash(path: str) -> Optional[str]:
     Calculate perceptual hash of image file (cached).
     """
     try:
-        from PIL import Image
-
-        image = Image.open(path)
-        return str(imagehash.dhash(image, hash_size=8))
+        with Image.open(path) as image:
+            return str(imagehash.dhash(image, hash_size=8))
     except Exception:
         return None
 
