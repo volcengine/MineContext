@@ -209,6 +209,23 @@ api_auth:
     - "/assistant"
     - "/vaults"
 
+# Security-related settings
+security:
+  # Allow-list for the /api/documents/upload endpoint. Any file path passed
+  # to this endpoint must resolve to a location under one of these roots,
+  # otherwise the upload is rejected. This prevents the endpoint from being
+  # abused to read arbitrary files (e.g. ~/.ssh/id_rsa) and ship their
+  # contents to the configured VLM/embedding provider.
+  #
+  # Paths under capture.folder_monitor.watch_folder_paths are implicitly
+  # allowed and do not need to be repeated here.
+  #
+  # If both this list and watch_folder_paths are empty, the upload endpoint
+  # falls back to ~/Documents, ~/Downloads and ~/Desktop (when they exist).
+  document_upload_allowed_paths: []
+    # - "${CONTEXT_PATH:.}/uploads"
+    # - "~/Documents/MineContext"
+
 # Prompts configuration
 prompts:
   language: "zh"
