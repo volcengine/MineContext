@@ -10,6 +10,8 @@ import {
   chatStreamService
 } from '@renderer/services/ChatStreamService'
 import { get } from 'lodash'
+import { useAppDispatch } from '@renderer/store'
+import { addGeneratingConversation, removeGeneratingConversation } from '@renderer/store/chat-history'
 
 export interface ChatState {
   messages: ChatMessage[]
@@ -32,6 +34,8 @@ export interface StreamingMessage {
 }
 
 export const useChatStream = () => {
+  const dispatch = useAppDispatch()
+
   const [chatState, setChatState] = useState<ChatState>({
     messages: [],
     isLoading: false,
@@ -42,11 +46,15 @@ export const useChatStream = () => {
 
   const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null)
   const currentStreamingId = useRef<string | null>(null)
+  // Tracks which conversation is currently being streamed in this hook instance
+  const currentConversationId = useRef<number>(0)
 
-  // Cleanup function
+  // Cleanup: do NOT abort the stream on unmount so that background generation
+  // in other conversations continues uninterrupted.  The user can always stop
+  // via the explicit Stop button which calls stopStreaming().
   useEffect(() => {
     return () => {
-      chatStreamService.abortStream()
+      // intentionally empty — background generation should survive navigation
     }
   }, [])
 
@@ -54,6 +62,9 @@ export const useChatStream = () => {
   const sendMessage = useCallback(
     async (query: string, conversation_id: number, context?: ChatStreamRequest['context']) => {
       if (!query.trim() || chatState.isLoading) return
+
+      // Remember which conversation we're streaming into
+      currentConversationId.current = conversation_id
 
       // Add user message
       const userMessage: ChatMessage = {
@@ -103,6 +114,10 @@ export const useChatStream = () => {
             sessionId: event.session_id!,
             messageId: get(event, 'assistant_message_id', prev.messageId)
           }))
+        }
+        // Mark this conversation as actively generating in global Redux state
+        if (currentConversationId.current) {
+          dispatch(addGeneratingConversation(currentConversationId.current))
         }
         break
 
@@ -196,6 +211,9 @@ export const useChatStream = () => {
           }))
           return null
         })
+        if (currentConversationId.current) {
+          dispatch(removeGeneratingConversation(currentConversationId.current))
+        }
         break
 
       case 'completed':
@@ -224,6 +242,9 @@ export const useChatStream = () => {
         }
         setStreamingMessage(null)
         currentStreamingId.current = null
+        if (currentConversationId.current) {
+          dispatch(removeGeneratingConversation(currentConversationId.current))
+        }
         break
 
       case 'fail':
@@ -234,6 +255,9 @@ export const useChatStream = () => {
           currentStage: 'failed'
         }))
         setStreamingMessage(null)
+        if (currentConversationId.current) {
+          dispatch(removeGeneratingConversation(currentConversationId.current))
+        }
         break
 
       case 'done':
@@ -244,7 +268,7 @@ export const useChatStream = () => {
         }))
         break
     }
-  }, [])
+  }, [dispatch])
 
   // Handle stream error
   const handleStreamError = useCallback((error: Error) => {
@@ -277,7 +301,7 @@ export const useChatStream = () => {
 
   // Clear chat history
   const clearChat = useCallback(() => {
-    chatStreamService.abortStream()
+    chatStreamService.abortStreamForConversation(currentConversationId.current)
     setChatState({
       messages: [],
       isLoading: false,
@@ -291,13 +315,16 @@ export const useChatStream = () => {
 
   // Stop the current streaming request
   const stopStreaming = useCallback(() => {
-    chatStreamService.abortStream()
+    chatStreamService.abortStreamForConversation(currentConversationId.current)
+    if (currentConversationId.current) {
+      dispatch(removeGeneratingConversation(currentConversationId.current))
+    }
     setChatState((prev) => ({
       ...prev,
       isLoading: false
     }))
     setStreamingMessage(null)
-  }, [])
+  }, [dispatch])
 
   return {
     ...chatState,

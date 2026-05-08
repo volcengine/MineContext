@@ -29,6 +29,8 @@ export interface ChatHistoryState {
   loading: boolean
   // Error message
   error: string | null
+  // Conversations that currently have an active background generation stream
+  backgroundGeneratingConversations: number[]
   // AI assistant visibility for each page
   home: {
     aiAssistantVisible: boolean
@@ -44,6 +46,7 @@ const initialState: ChatHistoryState = {
   chatHistoryMessages: [],
   loading: false,
   error: null,
+  backgroundGeneratingConversations: [],
   home: {
     aiAssistantVisible: false
   },
@@ -226,6 +229,26 @@ const chatHistorySlice = createSlice({
      */
     resetChatHistory(state) {
       Object.assign(state, initialState)
+    },
+
+    // ========== Background Generation Tracking ==========
+
+    /**
+     * Mark a conversation as having an active background generation stream.
+     */
+    addGeneratingConversation(state, action: PayloadAction<number>) {
+      if (!state.backgroundGeneratingConversations.includes(action.payload)) {
+        state.backgroundGeneratingConversations.push(action.payload)
+      }
+    },
+
+    /**
+     * Remove a conversation from the active-generation set (stream finished/cancelled).
+     */
+    removeGeneratingConversation(state, action: PayloadAction<number>) {
+      state.backgroundGeneratingConversations = state.backgroundGeneratingConversations.filter(
+        (id) => id !== action.payload
+      )
     }
   }
 })
@@ -254,7 +277,10 @@ export const {
   setLoading,
   setError,
   clearError,
-  resetChatHistory
+  resetChatHistory,
+  // Background generation tracking
+  addGeneratingConversation,
+  removeGeneratingConversation
 } = chatHistorySlice.actions
 
 export default chatHistorySlice.reducer

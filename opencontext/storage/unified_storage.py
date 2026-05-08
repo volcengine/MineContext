@@ -472,6 +472,18 @@ class UnifiedStorage:
 
         return self._document_backend.delete_conversation(conversation_id)
 
+    def hard_delete_conversation(self, conversation_id: int) -> Dict[str, Any]:
+        """Permanently delete conversation and all associated messages / thinking records."""
+        if not self._initialized:
+            logger.error("Unified storage system not initialized")
+            return {"success": False, "id": conversation_id}
+
+        if not self._document_backend:
+            logger.error("Document database backend not initialized")
+            return {"success": False, "id": conversation_id}
+
+        return self._document_backend.hard_delete_conversation(conversation_id)
+
     def insert_vaults(
         self,
         title: str,
@@ -836,9 +848,7 @@ class UnifiedStorage:
             message_id=message_id, content_chunk=content_chunk, token_count=token_count
         )
 
-    def update_message_metadata(
-        self, message_id: int, metadata: Dict[str, Any]
-    ) -> bool:
+    def update_message_metadata(self, message_id: int, metadata: Dict[str, Any]) -> bool:
         """Update message metadata"""
         if not self._initialized or not self._document_backend:
             logger.error("Storage not initialized")
