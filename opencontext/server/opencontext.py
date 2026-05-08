@@ -291,7 +291,12 @@ def main():
         print(f"Using config file: {args.config}")
 
     uvicorn.run(
-        "opencontext.cli:app", host=args.host, port=args.port, reload=args.reload, log_level="info"
+        "opencontext.cli:create_app",
+        host=args.host,
+        port=args.port,
+        reload=args.reload,
+        log_level="info",
+        factory=True,
     )
 
 
