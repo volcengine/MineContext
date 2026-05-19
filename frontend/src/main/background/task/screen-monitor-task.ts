@@ -42,7 +42,7 @@ class ScreenMonitorTask extends ScheduleNextTask {
       fetchFn: async () => {
         return await this.getVisibleSourcesUseCache()
       },
-      interval: 3 * 1000,
+      interval: 3,
       immediate: true
     })
     logger.info('ScreenMonitorTask initialized')
@@ -150,7 +150,10 @@ class ScreenMonitorTask extends ScheduleNextTask {
   }
   private async startScreenMonitor() {
     try {
-      const visibleSources = this.configCache?.get()
+      let visibleSources = this.configCache?.get()
+      if (!visibleSources || visibleSources.length === 0) {
+        visibleSources = await this.getVisibleSourcesUseCache()
+      }
       logger.debug(
         'visibleSources',
         visibleSources?.map((item) => pick(item, ['name', 'type', 'isVisible']))

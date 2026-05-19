@@ -15,9 +15,10 @@ from loguru import logger
 
 
 class PromptManager:
-    def __init__(self, prompt_config_path: str = None):
+    def __init__(self, prompt_config_path: str = None, user_prompts_dir: str = None):
         self.prompts = {}
         self.prompt_config_path = prompt_config_path
+        self.user_prompts_dir = user_prompts_dir
         if prompt_config_path and os.path.exists(prompt_config_path):
             with open(prompt_config_path, "r", encoding="utf-8") as f:
                 self.prompts = yaml.safe_load(f)
@@ -37,12 +38,21 @@ class PromptManager:
         return value if isinstance(value, str) else default
 
     def get_prompt_group(self, name: str) -> Dict[str, str]:
+        prompt_aliases = {
+            "processing.extraction.screenshot_analyze": (
+                "processing.extraction.screenshot_contextual_batch"
+            )
+        }
         keys = name.split(".")
         value = self.prompts
         for key in keys:
             if isinstance(value, dict) and key in value:
                 value = value[key]
             else:
+                alias = prompt_aliases.get(name)
+                if alias:
+                    logger.warning(f"Prompt group '{name}' not found, trying alias '{alias}'.")
+                    return self.get_prompt_group(alias)
                 logger.warning(f"Prompt group '{name}' not found.")
                 return {}
         return value if isinstance(value, dict) else {}
@@ -68,7 +78,7 @@ class PromptManager:
         base_name = os.path.basename(self.prompt_config_path)
         if "_" in base_name:
             lang = base_name.split("_")[1].split(".")[0]
-            dir_name = os.path.dirname(self.prompt_config_path)
+            dir_name = self.user_prompts_dir or os.path.dirname(self.prompt_config_path)
             return os.path.join(dir_name, f"user_prompts_{lang}.yaml")
         return None
 

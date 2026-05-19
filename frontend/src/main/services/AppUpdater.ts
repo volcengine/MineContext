@@ -13,8 +13,7 @@ export default class AppUpdater {
   private cancellationToken: CancellationToken = new CancellationToken()
   constructor(mainWindow: BrowserWindow) {
     autoUpdater.logger = logger
-    // for dev test
-    autoUpdater.forceDevUpdateConfig = !app.isPackaged
+    autoUpdater.forceDevUpdateConfig = false
 
     // if (isDev) {
     //     const devConfigPath = path.join(process.cwd(), 'dev-app-update.yml')
@@ -47,13 +46,23 @@ export default class AppUpdater {
       })
   }
   public async checkForUpdates() {
+    if (!app.isPackaged) {
+      logger.info('Skip update check in development mode')
+      return {
+        currentVersion: app.getVersion(),
+        updateInfo: null
+      }
+    }
+
     try {
       this.updateCheckResult = await this.autoUpdater.checkForUpdates()
       if (this.updateCheckResult?.isUpdateAvailable && !this.autoUpdater.autoDownload) {
         // 如果 autoDownload 为 false，则需要再调用下面的函数触发下
         // do not use await, because it will block the return of this function
         logger.info('downloadUpdate manual by check for updates', this.cancellationToken)
-        this.autoUpdater.downloadUpdate(this.cancellationToken)
+        void this.autoUpdater.downloadUpdate(this.cancellationToken).catch((error) => {
+          logger.error('Failed to download update:', error as Error)
+        })
       }
       logger.info(
         `update check result: ${this.updateCheckResult?.isUpdateAvailable}, channel: ${this.autoUpdater.channel}, currentVersion: ${this.autoUpdater.currentVersion}`

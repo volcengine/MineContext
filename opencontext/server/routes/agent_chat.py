@@ -45,6 +45,11 @@ def get_agent():
     return agent_instance
 
 
+def create_request_agent(enable_streaming: bool):
+    """Create an isolated agent so concurrent chats do not share one event queue."""
+    return ContextAgent(enable_streaming=enable_streaming)
+
+
 # Request models
 class ChatRequest(BaseModel):
     """Chat request"""
@@ -81,7 +86,7 @@ class ChatResponse(BaseModel):
 async def chat(request: ChatRequest, _auth: str = auth_dependency) -> ChatResponse:
     """Intelligent chat interface (non-streaming)"""
     try:
-        agent = get_agent()
+        agent = create_request_agent(enable_streaming=False)
 
         # Generate session_id
         if not request.session_id:
@@ -125,7 +130,7 @@ async def chat_stream(request: ChatRequest, _auth: str = auth_dependency):
         storage = None
 
         try:
-            agent = get_agent()
+            agent = create_request_agent(enable_streaming=True)
             storage = get_storage()
 
             if not request.session_id:

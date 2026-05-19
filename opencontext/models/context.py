@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from opencontext.utils.logging_utils import get_logger
 
@@ -66,6 +66,30 @@ class ExtractedData(BaseModel):
     context_type: ContextType  # context type
     confidence: int = 0  # confidence
     importance: int = 0  # importance
+
+    @field_validator("title", "summary", mode="before")
+    @classmethod
+    def _coerce_text(cls, value: Any) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return value
+        if isinstance(value, list):
+            return "\n".join(cls._coerce_text(item) or "" for item in value).strip()
+        if isinstance(value, dict):
+            return json.dumps(value, ensure_ascii=False)
+        return str(value)
+
+    @field_validator("keywords", "entities", mode="before")
+    @classmethod
+    def _coerce_string_list(cls, value: Any) -> List[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return [value] if value else []
+        if isinstance(value, list):
+            return [cls._coerce_text(item) or "" for item in value if item is not None]
+        return [cls._coerce_text(value) or ""]
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert model to dictionary"""

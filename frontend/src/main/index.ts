@@ -31,6 +31,7 @@ import { IpcChannel } from '@shared/IpcChannel'
 import { LatestActivityTask } from './background/task/latest-activity'
 
 initLog()
+app.setName('MineContext')
 const logger = getLogger('MainEntry')
 
 autoUpdater.logger = logger

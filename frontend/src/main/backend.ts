@@ -15,6 +15,7 @@ import { IpcServerPushChannel } from '@shared/ipc-server-push-channel'
 
 let backendLogFile: string | null = null
 let backendProcess: any = null
+let backendOwnedByThisProcess = false
 let backendPort = 1733 // Dynamic port, starting from 1733
 let backendStatus: 'starting' | 'running' | 'stopped' | 'error' = 'stopped' // Backend service status
 let ensureBackendRunningPromise: Promise<void> | null = null
@@ -52,7 +53,7 @@ function isPortAvailable(port: number): Promise<boolean> {
     server.once('error', (err: any) => {
       // Port is occupied or other errors
       if (err.code === 'EADDRINUSE') {
-        logToBackendFile(`Port ${port} is in use (EADDRINUSE)`)
+        logToBackendFile(`Port ${port} is already occupied; checking whether it is an existing MineContext backend`)
       } else {
         logToBackendFile(`Port ${port} check error: ${err.code} - ${err.message}`)
       }
@@ -241,6 +242,11 @@ export function logToBackendFile(message) {
 }
 
 export function stopBackendServer() {
+  if (!backendOwnedByThisProcess) {
+    logToBackendFile(`Skipping backend stop for reused external service on port ${backendPort}`)
+    return
+  }
+
   if (backendProcess) {
     logToBackendFile('Stopping backend server...')
     setBackendStatus('stopped')
@@ -270,6 +276,7 @@ export function stopBackendServer() {
     }
 
     backendProcess = null
+    backendOwnedByThisProcess = false
     logToBackendFile('Backend server stop signal sent')
   }
 
@@ -384,6 +391,7 @@ export async function ensureBackendRunning(mainWindow: BrowserWindow) {
     const existingBackend = await findRunningBackendPort(1733, 20)
     if (existingBackend) {
       backendPort = existingBackend.port
+      backendOwnedByThisProcess = false
       setBackendStatus('running')
       mainWindow.webContents.send(IpcServerPushChannel.PushGetInitCheckData, existingBackend.healthCheckResult)
       logToBackendFile(`Reused existing backend service on port ${backendPort}`)
@@ -527,6 +535,7 @@ async function startBackendServer(mainWindow: BrowserWindow) {
         cwd: backendDir, // Change to backend directory before executing
         env: env
       })
+      backendOwnedByThisProcess = true
 
       // On Unix systems, create a new process group
       if (process.platform !== 'win32' && backendProcess.pid) {
@@ -600,6 +609,7 @@ async function startBackendServer(mainWindow: BrowserWindow) {
       backendProcess.on('close', (code) => {
         logToBackendFile(`Backend process exited with code ${code}`)
         setBackendStatus('stopped')
+        backendOwnedByThisProcess = false
         if (code !== 0 && !healthCheckStarted) {
           setBackendStatus('error')
           reject(new Error(`Backend process exited with code ${code}`))
@@ -680,6 +690,11 @@ export async function startBackendInBackground(mainWindow: BrowserWindow) {
 export function stopBackendServerSync() {
   logToBackendFile('Synchronously stopping backend server...')
 
+  if (!backendOwnedByThisProcess) {
+    logToBackendFile(`Skipping sync backend stop for reused external service on port ${backendPort}`)
+    return
+  }
+
   if (backendProcess) {
     try {
       // 立即发送终止信号
@@ -714,6 +729,7 @@ export function stopBackendServerSync() {
     }
 
     backendProcess = null
+    backendOwnedByThisProcess = false
   }
 
   // 立即尝试清理端口

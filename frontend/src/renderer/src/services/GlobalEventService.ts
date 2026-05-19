@@ -10,6 +10,7 @@ import { PushDataTypes } from '@renderer/constant/feed'
 import { getLogger } from '@shared/logger/renderer'
 const logger = getLogger('GlobalEventService')
 const NORMAL_POLLING_INTERVAL = 30 * 1000 // Normal: 30 seconds
+const MAX_NOTIFICATION_MESSAGE_LENGTH = 180
 
 class GlobalEventService {
   private static instance: GlobalEventService
@@ -84,7 +85,7 @@ class GlobalEventService {
         id: `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: this.mapEventTypeToNotificationType(event.type),
         title: this.getEventTitle(event),
-        message: removeMarkdownSymbols(event.data.title || '有新的事件通知'),
+        message: this.getEventMessage(event),
         timestamp: Date.now(),
         source: 'assistant', // Can be set based on the event source
         channel: 'in-app',
@@ -120,6 +121,22 @@ class GlobalEventService {
       system_status: '系统状态'
     }
     return titleMap[event.type] || '新通知'
+  }
+
+  private getEventMessage(event: any): string {
+    const rawMessage =
+      event.type === PushDataTypes.TIP_GENERATED
+        ? event.data?.content || event.data?.title
+        : event.data?.title || event.data?.content
+    return this.compactNotificationMessage(rawMessage || '有新的事件通知')
+  }
+
+  private compactNotificationMessage(message: string): string {
+    const plainText = removeMarkdownSymbols(String(message)).replace(/\s+/g, ' ').trim()
+    if (plainText.length <= MAX_NOTIFICATION_MESSAGE_LENGTH) {
+      return plainText
+    }
+    return `${plainText.slice(0, MAX_NOTIFICATION_MESSAGE_LENGTH - 1)}…`
   }
 }
 

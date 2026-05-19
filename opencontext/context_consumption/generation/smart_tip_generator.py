@@ -24,6 +24,7 @@ from opencontext.tools.tool_definitions import ALL_TOOL_DEFINITIONS
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
+SMART_TIP_TITLE = "智能提醒"
 
 
 @dataclass
@@ -76,11 +77,11 @@ class SmartTipGenerator:
                 data={
                     "doc_id": str(tip_id),
                     "doc_type": "tips",
-                    "title": "intelligence reminder",
+                    "title": SMART_TIP_TITLE,
                     "content": tip_content,
                 },
             )
-            return {"doc_id": str(tip_id), "title": "intelligence reminder", "content": tip_content}
+            return {"doc_id": str(tip_id), "title": SMART_TIP_TITLE, "content": tip_content}
 
         except Exception as e:
             logger.exception(f"Failed to generate smart tip: {e}")

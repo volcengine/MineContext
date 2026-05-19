@@ -3,15 +3,14 @@
 
 // electron/database.ts - SQLite Database Manager (ES Module Compatible)
 import Database from 'better-sqlite3'
-import path from 'node:path'
+import path from 'path'
 import fs from 'fs'
-import { app } from 'electron'
 import { isValidIsoString, toSqliteDatetime } from '../utils/time'
-import { is } from '@electron-toolkit/utils'
 import { DB } from './Database'
 import { TODOActivity } from '@interface/db/todo'
 import { getLogger } from '@shared/logger/main'
 import { VaultDatabaseService } from './VaultDatabaseService'
+import { resolveSqliteDbPath } from './dbPath'
 const logger = getLogger('DatabaseManager')
 class DatabaseManager extends VaultDatabaseService {
   private db: Database.Database | null = null
@@ -21,14 +20,7 @@ class DatabaseManager extends VaultDatabaseService {
 
   constructor() {
     super()
-    // Dynamically get the application path
-    // this.dbPath = path.join(app.getPath('userData'), "persist", "sqlite", "app.db")
-    this.dbPath = path.join(
-      !app.isPackaged && is.dev ? 'backend' : app.getPath('userData'),
-      'persist',
-      'sqlite',
-      'app.db'
-    )
+    this.dbPath = resolveSqliteDbPath()
     logger.info('📁 Database path:', this.dbPath)
   }
 

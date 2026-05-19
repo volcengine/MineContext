@@ -5,8 +5,8 @@ import { is } from '@electron-toolkit/utils'
 import BetterSqlite3, { type Statement, type RunResult, type Database as BetterSqliteDatabase } from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import { app } from 'electron'
 import { getLogger } from '@shared/logger/main'
+import { resolveSqliteDbPath } from './dbPath'
 const logger = getLogger('Database')
 /**
  * Represents the result of a query returning a list of items.
@@ -67,10 +67,7 @@ export class DB {
 
   public static getInstance(dbName: string = 'app.db', dbPath1?: string): DB {
     if (!this.instance) {
-      // It is recommended to place the database file in a fixed location, such as the data folder in the project root directory
-      const dbPath =
-        dbPath1 ||
-        path.join(!app.isPackaged && is.dev ? 'backend' : app.getPath('userData'), 'persist', 'sqlite', dbName)
+      const dbPath = dbPath1 || resolveSqliteDbPath(dbName)
       this.instance = new DB(dbPath)
     }
     return this.instance

@@ -9,6 +9,7 @@ OpenContext module: generation_report
 
 import datetime
 import json
+import re
 from typing import Any, Dict, List, Optional
 
 from opencontext.config.global_config import get_prompt_group
@@ -51,27 +52,67 @@ class ReportGenerator:
             from opencontext.models.enums import VaultType
             from opencontext.storage.global_storage import get_storage
 
-            now = datetime.datetime.now()
-            report_id = get_storage().insert_vaults(
-                title=f"Daily Report - {now.strftime('%Y-%m-%d')}",
-                summary="",
-                content=result,
-                document_type=VaultType.DAILY_REPORT.value,
-            )
+            report_date = datetime.datetime.fromtimestamp(start_time).date()
+            title = f"Daily Report - {report_date.strftime('%Y-%m-%d')}"
+            normalized_result = self._normalize_report_content(result, report_date)
+            storage = get_storage()
+            existing_report = self._find_existing_daily_report(title)
+            if existing_report:
+                report_id = existing_report["id"]
+                storage.update_vault(
+                    vault_id=report_id,
+                    title=title,
+                    summary="",
+                    content=normalized_result,
+                )
+            else:
+                report_id = storage.insert_vaults(
+                    title=title,
+                    summary="",
+                    content=normalized_result,
+                    document_type=VaultType.DAILY_REPORT.value,
+                )
             publish_event(
                 event_type=EventType.DAILY_SUMMARY_GENERATED,
                 data={
                     "doc_id": str(report_id),
                     "doc_type": "vaults",
-                    "title": f"Daily Report - {now.strftime('%Y-%m-%d')}",
-                    "content": result,
+                    "title": title,
+                    "content": normalized_result,
                 },
             )
-            return result
+            return normalized_result
         except Exception as e:
             logger.exception(f"Error generating activity report: {e}")
             return f"Error generating activity report: {str(e)}"
 
+    def _find_existing_daily_report(self, title: str) -> Optional[Dict[str, Any]]:
+        from opencontext.storage.global_storage import get_storage
+
+        reports = get_storage().get_reports(limit=200, offset=0)
+        for report in reports:
+            if report.get("document_type") == "DailyReport" and report.get("title") == title:
+                return report
+        return None
+
+    def _normalize_report_content(self, content: str, report_date: datetime.date) -> str:
+        normalized = content.strip()
+        fence_match = re.fullmatch(r"```(?:markdown)?\s*\n([\s\S]*?)\n```", normalized)
+        if fence_match:
+            normalized = fence_match.group(1).strip()
+
+        heading = f"# 日报 - {report_date.strftime('%Y年%m月%d日')}"
+        if re.match(r"^#\s*日报\s*-\s*\d{4}年\d{2}月\d{2}日", normalized):
+            normalized = re.sub(
+                r"^#\s*日报\s*-\s*\d{4}年\d{2}月\d{2}日.*$",
+                heading,
+                normalized,
+                count=1,
+                flags=re.MULTILINE,
+            )
+        elif normalized:
+            normalized = f"{heading}\n\n{normalized}"
+        return normalized
 
     async def _process_chunks_concurrently(self, start_time: int, end_time: int) -> list:
         """Process all time chunks concurrently."""

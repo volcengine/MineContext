@@ -137,7 +137,11 @@ class GlobalConfig:
             return False
 
         try:
-            self._prompt_manager = PromptManager(absolute_prompts_path)
+            user_setting_path = config.get("user_setting_path")
+            user_prompts_dir = os.path.dirname(user_setting_path) if user_setting_path else None
+            self._prompt_manager = PromptManager(
+                absolute_prompts_path, user_prompts_dir=user_prompts_dir
+            )
             self._prompt_path = absolute_prompts_path
             self._language = language
             logger.info(f"Prompts loaded from: {self._prompt_path} (language: {language})")
@@ -221,7 +225,12 @@ class GlobalConfig:
                 logger.error(f"Prompt file not found: {absolute_prompts_path}")
                 return False
 
-            self._prompt_manager = PromptManager(absolute_prompts_path)
+            config = self._config_manager.get_config() if self._config_manager else {}
+            user_setting_path = config.get("user_setting_path") if config else None
+            user_prompts_dir = os.path.dirname(user_setting_path) if user_setting_path else None
+            self._prompt_manager = PromptManager(
+                absolute_prompts_path, user_prompts_dir=user_prompts_dir
+            )
             self._prompt_path = absolute_prompts_path
             logger.info(f"Prompts reloaded from: {self._prompt_path} (language: {language})")
 
