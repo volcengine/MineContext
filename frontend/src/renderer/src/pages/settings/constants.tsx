@@ -80,6 +80,10 @@ export const ModelInfoList = [
     value: 'minimax',
     option: [
       {
+        value: 'MiniMax-M3',
+        label: 'MiniMax-M3'
+      },
+      {
         value: 'MiniMax-M2.7',
         label: 'MiniMax-M2.7'
       },

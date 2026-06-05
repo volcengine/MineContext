@@ -37,7 +37,7 @@ class TestMiniMaxChatClient:
         config = {
             "api_key": "test-minimax-api-key",
             "base_url": "https://api.minimax.io/v1",
-            "model": "MiniMax-M2.7",
+            "model": "MiniMax-M3",
             "provider": "minimax",
         }
         config.update(overrides)
@@ -47,7 +47,7 @@ class TestMiniMaxChatClient:
         """MiniMax uses OpenAI-compatible API, so it should create an OpenAI client."""
         client = LLMClient(llm_type=LLMType.CHAT, config=self._make_config())
         assert client.provider == "minimax"
-        assert client.model == "MiniMax-M2.7"
+        assert client.model == "MiniMax-M3"
         assert client.base_url == "https://api.minimax.io/v1"
         # Should use OpenAI client (not Ark)
         assert client.client is not None
@@ -96,7 +96,7 @@ class TestMiniMaxChatClient:
         assert result == mock_response
         mock_client.chat.completions.create.assert_called_once()
         call_kwargs = mock_client.chat.completions.create.call_args
-        assert call_kwargs[1]["model"] == "MiniMax-M2.7"
+        assert call_kwargs[1]["model"] == "MiniMax-M3"
 
     @patch("opencontext.llm.llm_client.OpenAI")
     def test_stream_completion(self, mock_openai_cls):
@@ -276,7 +276,7 @@ class TestMiniMaxValidation:
         return {
             "api_key": "test-key",
             "base_url": "https://api.minimax.io/v1",
-            "model": "MiniMax-M2.7",
+            "model": "MiniMax-M3",
             "provider": "minimax",
             "timeout": 15,
         }
@@ -366,7 +366,7 @@ class TestMiniMaxErrorHandling:
         return {
             "api_key": "test-key",
             "base_url": "https://api.minimax.io/v1",
-            "model": "MiniMax-M2.7",
+            "model": "MiniMax-M3",
             "provider": "minimax",
             "timeout": 15,
         }
@@ -437,7 +437,7 @@ class TestMiniMaxIntegration:
         config = {
             "api_key": api_key,
             "base_url": "https://api.minimax.io/v1",
-            "model": "MiniMax-M2.7",
+            "model": "MiniMax-M3",
             "provider": "minimax",
         }
         client = LLMClient(llm_type=LLMType.CHAT, config=config)
@@ -466,7 +466,7 @@ class TestMiniMaxIntegration:
         config = {
             "api_key": api_key,
             "base_url": "https://api.minimax.io/v1",
-            "model": "MiniMax-M2.7",
+            "model": "MiniMax-M3",
             "provider": "minimax",
             "timeout": 30,
         }
