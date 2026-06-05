@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 class LLMProvider(Enum):
     OPENAI = "openai"
     DOUBAO = "doubao"
+    MINIMAX = "minimax"
 
 
 class LLMType(Enum):
@@ -264,9 +265,42 @@ class LLMClient:
             logger.error(f"OpenAI API async stream error: {e}")
             raise
 
+    def _minimax_embedding(self, text: str, **kwargs) -> List[float]:
+        """Request embedding from MiniMax's native embedding API (embo-01).
+
+        MiniMax uses a non-OpenAI-compatible format:
+        - Request: {"model": "embo-01", "texts": [...], "type": "db"|"query"}
+        - Response: {"vectors": [[...]], "total_tokens": N, "base_resp": {...}}
+        """
+        import httpx
+
+        url = f"{self.base_url.rstrip('/')}/embeddings"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "texts": [text],
+            "type": kwargs.get("embedding_type", "db"),
+        }
+        resp = httpx.post(url, json=payload, headers=headers, timeout=self.timeout)
+        resp.raise_for_status()
+        data = resp.json()
+        base_resp = data.get("base_resp", {})
+        if base_resp.get("status_code", 0) != 0:
+            raise ValueError(f"MiniMax embedding error: {base_resp.get('status_msg', 'unknown')}")
+        vectors = data.get("vectors", [])
+        if not vectors:
+            raise ValueError("MiniMax embedding returned empty vectors")
+        return vectors[0]
+
     def _request_embedding(self, text: str, **kwargs) -> List[float]:
         try:
-            if self.provider != LLMProvider.DOUBAO.value:
+            response = None
+            if self.provider == LLMProvider.MINIMAX.value:
+                embedding = self._minimax_embedding(text)
+            elif self.provider != LLMProvider.DOUBAO.value:
                 response = self.client.embeddings.create(model=self.model, input=[text])
                 embedding = response.data[0].embedding
             else:
@@ -276,7 +310,7 @@ class LLMClient:
                 embedding = response.data.embedding
 
             # Record token usage
-            if hasattr(response, "usage") and response.usage:
+            if response and hasattr(response, "usage") and response.usage:
                 try:
                     from opencontext.monitoring import record_token_usage
 
@@ -311,9 +345,38 @@ class LLMClient:
             logger.error(f"OpenAI API error during embedding: {e}")
             raise
 
+    async def _minimax_embedding_async(self, text: str, **kwargs) -> List[float]:
+        """Async request embedding from MiniMax's native embedding API."""
+        import httpx
+
+        url = f"{self.base_url.rstrip('/')}/embeddings"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "texts": [text],
+            "type": kwargs.get("embedding_type", "db"),
+        }
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(url, json=payload, headers=headers)
+            resp.raise_for_status()
+        data = resp.json()
+        base_resp = data.get("base_resp", {})
+        if base_resp.get("status_code", 0) != 0:
+            raise ValueError(f"MiniMax embedding error: {base_resp.get('status_msg', 'unknown')}")
+        vectors = data.get("vectors", [])
+        if not vectors:
+            raise ValueError("MiniMax embedding returned empty vectors")
+        return vectors[0]
+
     async def _request_embedding_async(self, text: str, **kwargs) -> List[float]:
         try:
-            if self.provider == LLMProvider.DOUBAO.value:
+            response = None
+            if self.provider == LLMProvider.MINIMAX.value:
+                embedding = await self._minimax_embedding_async(text, **kwargs)
+            elif self.provider == LLMProvider.DOUBAO.value:
                 # Only ark has multimodal_embeddings
                 response = self.client.multimodal_embeddings.create(
                     model=self.model, input=[{"type": "text", "text": text}]
@@ -324,7 +387,7 @@ class LLMClient:
                 embedding = response.data[0].embedding
 
             # Record token usage
-            if hasattr(response, "usage") and response.usage:
+            if response and hasattr(response, "usage") and response.usage:
                 try:
                     from opencontext.monitoring import record_token_usage
 
@@ -406,7 +469,17 @@ class LLMClient:
                 if code in error_msg:
                     return msg
 
-            # 2. Check for OpenAI specific errors
+            # 2. Check for MiniMax specific errors
+            minimax_errors = {
+                "invalid_api_key": "Invalid MiniMax API key.",
+                "insufficient_balance": "Insufficient MiniMax account balance.",
+            }
+
+            for code, msg in minimax_errors.items():
+                if code in error_msg:
+                    return msg
+
+            # 3. Check for OpenAI specific errors
             openai_errors = {
                 "insufficient_quota": "Insufficient quota. Check your plan and billing details.",
                 "invalid_api_key": "Invalid API key provided.",
@@ -477,7 +550,13 @@ class LLMClient:
 
             elif self.llm_type == LLMType.EMBEDDING:
                 # Test with a simple text
-                if self.provider == LLMProvider.DOUBAO.value:
+                if self.provider == LLMProvider.MINIMAX.value:
+                    embedding = self._minimax_embedding("test")
+                    if embedding and len(embedding) > 0:
+                        return True, "Embedding model validation successful"
+                    else:
+                        return False, "Embedding model returned empty response"
+                elif self.provider == LLMProvider.DOUBAO.value:
                     response = self.client.multimodal_embeddings.create(
                         model=self.model, input=[{"type": "text", "text": "test"}]
                     )

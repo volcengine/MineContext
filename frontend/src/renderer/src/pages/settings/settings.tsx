@@ -157,14 +157,19 @@ const StandardFormItems: FC<StandardFormItemsProps> = (props) => {
             You can get the API Key Here:
             <Button
               onClick={() => {
-                const url =
-                  modelPlatform === ModelTypeList.Doubao
-                    ? 'https://www.volcengine.com/docs/82379/1541594'
-                    : 'https://platform.openai.com/settings/organization/api-keys'
-                window.open(`${url}`)
+                const urlMap: Record<string, string> = {
+                  [ModelTypeList.Doubao]: 'https://www.volcengine.com/docs/82379/1541594',
+                  [ModelTypeList.MiniMax]: 'https://platform.minimaxi.com/user-center/basic-information/interface-key',
+                  [ModelTypeList.OpenAI]: 'https://platform.openai.com/settings/organization/api-keys'
+                }
+                window.open(urlMap[modelPlatform] || urlMap[ModelTypeList.OpenAI])
               }}
               type="text">
-              {modelPlatform === ModelTypeList.Doubao ? 'Get Doubao API Key' : 'Get OpenAI API Key'}
+              {modelPlatform === ModelTypeList.Doubao
+                ? 'Get Doubao API Key'
+                : modelPlatform === ModelTypeList.MiniMax
+                  ? 'Get MiniMax API Key'
+                  : 'Get OpenAI API Key'}
             </Button>
           </div>
         }
@@ -246,15 +251,22 @@ const Settings: FC<SettingsProps> = (props) => {
       const formatData = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [key.replace(`${values.modelPlatform}-`, ''), value])
       )
+      const getBaseUrl = (platform: string) => {
+        if (platform === ModelTypeList.Doubao) return BaseUrl.DoubaoUrl
+        if (platform === ModelTypeList.MiniMax) return BaseUrl.MiniMaxUrl
+        return BaseUrl.OpenAIUrl
+      }
+      const getEmbeddingModelId = (platform: string) => {
+        if (platform === ModelTypeList.Doubao) return embeddingModels.DoubaoEmbeddingModelId
+        if (platform === ModelTypeList.MiniMax) return embeddingModels.MiniMaxEmbeddingModelId
+        return embeddingModels.OpenAIEmbeddingModelId
+      }
       const params = isCustom
         ? formatData
         : {
             ...formatData,
-            baseUrl: values.modelPlatform === ModelTypeList.Doubao ? BaseUrl.DoubaoUrl : BaseUrl.OpenAIUrl,
-            embeddingModelId:
-              values.modelPlatform === ModelTypeList.Doubao
-                ? embeddingModels.DoubaoEmbeddingModelId
-                : embeddingModels.OpenAIEmbeddingModelId
+            baseUrl: getBaseUrl(values.modelPlatform),
+            embeddingModelId: getEmbeddingModelId(values.modelPlatform)
           }
 
       updateModelSettings(params as unknown as ModelConfigProps)
@@ -299,7 +311,8 @@ const Settings: FC<SettingsProps> = (props) => {
               initialValues={{
                 modelPlatform: ModelTypeList.Doubao,
                 [`${ModelTypeList.Doubao}-modelId`]: 'doubao-seed-1-6-flash-250828',
-                [`${ModelTypeList.OpenAI}-modelId`]: 'gpt-5-nano'
+                [`${ModelTypeList.OpenAI}-modelId`]: 'gpt-5-nano',
+                [`${ModelTypeList.MiniMax}-modelId`]: 'MiniMax-M2.7'
               }}>
               <FormItem label="Model platform" field={'modelPlatform'} requiredSymbol={false}>
                 <ModelRadio />
@@ -315,6 +328,8 @@ const Settings: FC<SettingsProps> = (props) => {
                     return <StandardFormItems modelPlatform={modelPlatform} prefix={ModelTypeList.Doubao} />
                   } else if (modelPlatform === ModelTypeList.OpenAI) {
                     return <StandardFormItems modelPlatform={modelPlatform} prefix={ModelTypeList.OpenAI} />
+                  } else if (modelPlatform === ModelTypeList.MiniMax) {
+                    return <StandardFormItems modelPlatform={modelPlatform} prefix={ModelTypeList.MiniMax} />
                   } else {
                     return null
                   }
