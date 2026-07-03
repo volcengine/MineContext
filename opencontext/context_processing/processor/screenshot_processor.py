@@ -31,6 +31,7 @@ from opencontext.models.enums import get_context_type_descriptions_for_extractio
 from opencontext.monitoring.monitor import record_processing_error
 from opencontext.storage.global_storage import get_storage
 from opencontext.tools.tool_definitions import ALL_TOOL_DEFINITIONS
+from opencontext.utils.datetime_utils import ensure_local_naive, now_local, parse_local_datetime
 from opencontext.utils.image import calculate_phash, resize_image
 from opencontext.utils.json_parser import parse_json_from_response
 from opencontext.utils.logging_utils import get_logger
@@ -266,11 +267,11 @@ class ScreenshotProcessor(BaseContextProcessor):
             }
         ]
 
-        time_now = datetime.datetime.now()
+        time_now = now_local()
         user_prompt = user_prompt_template.format(
             current_date=time_now.isoformat(),
             current_timestamp=int(time_now.timestamp()),
-            current_timezone=time_now.tzname(),
+            current_timezone=datetime.datetime.now().astimezone().tzname(),
         )
         content.insert(0, {"type": "text", "text": user_prompt})
         system_prompt = system_prompt.format(
@@ -362,7 +363,7 @@ class ScreenshotProcessor(BaseContextProcessor):
 
         # Process results and build ProcessedContext objects
         result_contexts = []
-        now = datetime.datetime.now()
+        now = now_local()
         if context_type.value not in self._processed_cache:
             self._processed_cache[context_type.value] = {}
         need_to_del_ids = []
@@ -383,10 +384,24 @@ class ScreenshotProcessor(BaseContextProcessor):
                     logger.error(f"No valid items for merged_ids: {merged_ids}")
                     continue
 
-                min_create_time = min((i.properties.create_time for i in items_to_merge if i.properties.create_time), default=now)
+                min_create_time = min(
+                    (
+                        ensure_local_naive(i.properties.create_time)
+                        for i in items_to_merge
+                        if i.properties.create_time
+                    ),
+                    default=now,
+                )
                 event_time = self._parse_event_time_str(
                     data.get("event_time"),
-                    max((i.properties.event_time for i in items_to_merge if i.properties.event_time), default=now)
+                    max(
+                        (
+                            ensure_local_naive(i.properties.event_time)
+                            for i in items_to_merge
+                            if i.properties.event_time
+                        ),
+                        default=now,
+                    ),
                 )
 
                 all_raw_props = []
@@ -458,23 +473,21 @@ class ScreenshotProcessor(BaseContextProcessor):
         item.extracted_data.entities = entities_results
         return item
 
-    def _parse_event_time_str(self, time_str: Optional[str], default: datetime.datetime) -> datetime.datetime:
+    def _parse_event_time_str(
+        self, time_str: Optional[str], default: datetime.datetime
+    ) -> datetime.datetime:
         """Parse ISO time string, return default if invalid."""
         if not time_str or time_str == "null":
-            return default
+            return ensure_local_naive(default)
         try:
             if any(
                 invalid_char in time_str
                 for invalid_char in ["xxxx", "XXXX", "TZ:TZ", "TZ", "????"]
             ):
-                event_time = default
-            elif time_str.endswith("Z"):
-                time_str = time_str[:-1] + "+00:00"
-                event_time = datetime.datetime.fromisoformat(time_str)
-                return event_time
-            return default
+                return ensure_local_naive(default)
+            return parse_local_datetime(time_str)
         except (ValueError, TypeError):
-            return default
+            return ensure_local_naive(default)
 
     def _safe_int(self, value, default=0) -> int:
         """Safely convert to int."""
@@ -531,7 +544,7 @@ class ScreenshotProcessor(BaseContextProcessor):
         return newly_processed_contexts
 
     def _create_processed_context(self, analysis: Dict[str, Any], raw_context: RawContextProperties = None) -> ProcessedContext:
-        now = datetime.datetime.now()
+        now = now_local()
         if not analysis:
             logger.warning(f"Skipping incomplete item: {analysis}")
             return None
@@ -565,7 +578,7 @@ class ScreenshotProcessor(BaseContextProcessor):
             properties=ContextProperties(
                 raw_properties=[raw_context] if raw_context else [],
                 source=ContextSource.SCREENSHOT,
-                create_time=raw_context.create_time if raw_context else now,
+                create_time=ensure_local_naive(raw_context.create_time) if raw_context else now,
                 update_time=now,
                 event_time=event_time,
                 enable_merge=True,

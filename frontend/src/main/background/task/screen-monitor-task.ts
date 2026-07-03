@@ -205,7 +205,7 @@ class ScreenMonitorTask extends ScheduleNextTask {
       const data = {
         path: url,
         window: type === 'screen' ? 'screen' : '',
-        create_time: createTime.format('YYYY-MM-DD HH:mm:ss'),
+        create_time: createTime.toISOString(),
         app: type === 'window' ? 'window' : ''
       }
       const res = await axios.post(`http://127.0.0.1:${getBackendPort()}/api/add_screenshot`, data)
