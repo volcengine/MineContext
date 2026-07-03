@@ -21,6 +21,7 @@ from opencontext.models.enums import (
     get_context_type_options,
 )
 from opencontext.storage.global_storage import get_storage
+from opencontext.utils.datetime_utils import now_local, parse_local_datetime
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -87,14 +88,10 @@ class ContextOperations:
 
         try:
             screenshot_format = os.path.splitext(path)[1][1:]
-            # Handle ISO format time string, supports Z suffix
-            if create_time.endswith("Z"):
-                create_time = create_time[:-1] + "+00:00"
-
             raw_context = RawContextProperties(
                 source=ContextSource.SCREENSHOT,
                 content_format=ContentFormat.IMAGE,
-                create_time=datetime.datetime.fromisoformat(create_time),
+                create_time=parse_local_datetime(create_time),
                 content_path=path,
                 additional_info={
                     "window": window,
@@ -135,7 +132,7 @@ class ContextOperations:
             raw_context = RawContextProperties(
                 source=ContextSource.LOCAL_FILE,
                 content_format=ContentFormat.FILE,
-                create_time=datetime.datetime.now(),
+                create_time=now_local(),
                 object_id=object_id,
                 content_path=str(path),
                 additional_info={

@@ -23,6 +23,7 @@ from opencontext.context_consumption.generation.smart_todo_manager import SmartT
 from opencontext.managers.event_manager import EventType, get_event_manager
 from opencontext.models.enums import VaultType
 from opencontext.storage.global_storage import get_storage
+from opencontext.utils.datetime_utils import now_local, parse_local_datetime
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -116,7 +117,7 @@ class ConsumptionManager:
             if last_time is None:
                 return True
 
-            elapsed = (datetime.now() - last_time).total_seconds()
+            elapsed = (now_local() - last_time).total_seconds()
             interval = self._task_intervals.get(task_type, 0)
             should_generate = elapsed >= interval
             return should_generate
@@ -171,7 +172,7 @@ class ConsumptionManager:
     def _calculate_seconds_until_daily_time(self, target_time_str: str) -> float:
         try:
             hour, minute = map(int, target_time_str.split(":"))
-            now = datetime.now()
+            now = now_local()
             target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
             if target <= now:
@@ -192,10 +193,10 @@ class ConsumptionManager:
             if reports:
                 created_at_str = reports[0]["created_at"]
                 if created_at_str:
-                    return datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
-            return datetime.now()
+                    return parse_local_datetime(created_at_str)
+            return now_local()
         except Exception:
-            return datetime.now()
+            return now_local()
 
     def _start_report_timer(self):
         """Start daily report timer"""
@@ -213,7 +214,7 @@ class ConsumptionManager:
             if not self._activity_generator or not self._task_enabled.get("report", True):
                 return
             try:
-                now = datetime.now()
+                now = now_local()
                 today = now.date()
 
                 hour, minute = map(int, self._daily_report_time.split(":"))
@@ -256,7 +257,7 @@ class ConsumptionManager:
 
             try:
                 if self._should_generate("activity"):
-                    end_time = int(datetime.now().timestamp())
+                    end_time = int(now_local().timestamp())
                     last_generation_time = self._last_generation_time("activity")
                     start_time = (
                         int(last_generation_time.timestamp())
@@ -266,7 +267,7 @@ class ConsumptionManager:
                     self._real_activity_monitor.generate_realtime_activity_summary(
                         start_time, end_time
                     )
-                    self._last_generation_times["activity"] = datetime.now()
+                    self._last_generation_times["activity"] = now_local()
             except Exception as e:
                 logger.exception(f"Failed to generate activity record: {e}")
 
@@ -295,7 +296,7 @@ class ConsumptionManager:
 
             try:
                 if self._should_generate("tips"):
-                    end_time = int(datetime.now().timestamp())
+                    end_time = int(now_local().timestamp())
                     last_generation_time = self._last_generation_time("tips")
                     start_time = (
                         int(last_generation_time.timestamp())
@@ -303,7 +304,7 @@ class ConsumptionManager:
                         else end_time - self._task_intervals.get("tips", 60 * 60)
                     )
                     self._smart_tip_generator.generate_smart_tip(start_time, end_time)
-                    self._last_generation_times["tips"] = datetime.now()
+                    self._last_generation_times["tips"] = now_local()
             except Exception as e:
                 logger.exception(f"Failed to generate smart tip: {e}")
 
@@ -332,7 +333,7 @@ class ConsumptionManager:
 
             try:
                 if self._should_generate("todos"):
-                    end_time = int(datetime.now().timestamp())
+                    end_time = int(now_local().timestamp())
                     last_generation_time = self._last_generation_time("todos")
                     start_time = (
                         int(last_generation_time.timestamp())
@@ -342,7 +343,7 @@ class ConsumptionManager:
                     self._smart_todo_manager.generate_todo_tasks(
                         start_time=start_time, end_time=end_time
                     )
-                    self._last_generation_times["todos"] = datetime.now()
+                    self._last_generation_times["todos"] = now_local()
             except Exception as e:
                 logger.exception(f"Failed to generate smart todo: {e}")
 

@@ -10,7 +10,6 @@ Vault document monitoring component that monitors changes in the vaults table an
 
 import threading
 import time
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
@@ -18,6 +17,7 @@ from opencontext.context_capture import BaseCaptureComponent
 from opencontext.models.context import RawContextProperties
 from opencontext.models.enums import ContentFormat, ContextSource
 from opencontext.storage.global_storage import get_storage
+from opencontext.utils.datetime_utils import now_local, parse_local_datetime
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -63,7 +63,7 @@ class VaultDocumentMonitor(BaseCaptureComponent):
             self._monitor_interval = config.get("monitor_interval", 5)
 
             # Set initial scan time to current time
-            self._last_scan_time = datetime.now()
+            self._last_scan_time = now_local()
 
             logger.info(
                 f"Vault document monitoring component initialized successfully, monitor interval: {self._monitor_interval}s"
@@ -164,7 +164,7 @@ class VaultDocumentMonitor(BaseCaptureComponent):
                         "event_type": "existing",
                         "vault_id": doc["id"],
                         "document_data": doc,
-                        "timestamp": datetime.now(),
+                        "timestamp": now_local(),
                     }
 
                     with self._event_lock:
@@ -180,7 +180,7 @@ class VaultDocumentMonitor(BaseCaptureComponent):
         """Scan changes in the vaults table"""
         try:
             # Get recent documents (based on created_at and updated_at)
-            current_time = datetime.now()
+            current_time = now_local()
             documents = self._storage.get_vaults(limit=100, offset=0, is_deleted=False)
 
             new_documents = []
@@ -188,9 +188,9 @@ class VaultDocumentMonitor(BaseCaptureComponent):
 
             for doc in documents:
                 vault_id = doc["id"]
-                created_at = datetime.fromisoformat(doc["created_at"].replace("Z", "+00:00"))
+                created_at = parse_local_datetime(doc["created_at"])
                 updated_at = (
-                    datetime.fromisoformat(doc["updated_at"].replace("Z", "+00:00"))
+                    parse_local_datetime(doc["updated_at"])
                     if doc.get("updated_at")
                     else created_at
                 )
@@ -267,7 +267,7 @@ class VaultDocumentMonitor(BaseCaptureComponent):
                 source=ContextSource.VAULT,
                 content_format=ContentFormat.TEXT,
                 content_text=doc.get("title", "") + doc.get("summary", "") + doc.get("content", ""),
-                create_time=datetime.fromisoformat(doc["created_at"].replace("Z", "+00:00")),
+                create_time=parse_local_datetime(doc["created_at"]),
                 filter_path=self._get_document_path(doc),
                 additional_info={
                     "vault_id": vault_id,

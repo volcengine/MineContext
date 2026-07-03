@@ -21,6 +21,7 @@ from opencontext.models.enums import ContextType
 from opencontext.storage.base_storage import DocumentData
 from opencontext.storage.global_storage import get_storage
 from opencontext.tools.tool_definitions import ALL_TOOL_DEFINITIONS
+from opencontext.utils.datetime_utils import now_local, parse_local_datetime
 from opencontext.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -90,7 +91,7 @@ class SmartTipGenerator:
         """Analyze activity patterns to find content that needs a reminder."""
         try:
             # Calculate the time range
-            end_time = datetime.datetime.now()
+            end_time = now_local()
             start_time = end_time - datetime.timedelta(hours=hours)
 
             # Query recent activity records
@@ -151,12 +152,8 @@ class SmartTipGenerator:
                 time_diffs = []
                 for i in range(1, len(activities)):
                     try:
-                        prev_time = datetime.datetime.fromisoformat(
-                            activities[i - 1]["end_time"].replace("Z", "+00:00")
-                        )
-                        curr_time = datetime.datetime.fromisoformat(
-                            activities[i]["start_time"].replace("Z", "+00:00")
-                        )
+                        prev_time = parse_local_datetime(activities[i - 1]["end_time"])
+                        curr_time = parse_local_datetime(activities[i]["start_time"])
                         diff = (curr_time - prev_time).total_seconds() / 60  # Convert to minutes
                         time_diffs.append(diff)
                     except Exception:
@@ -179,7 +176,7 @@ class SmartTipGenerator:
     def _get_recent_tips(self, days: int = 1) -> List[Dict[str, Any]]:
         """Get recent tips to avoid repetition."""
         try:
-            end_time = datetime.datetime.now()
+            end_time = now_local()
             today_start = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
             start_time = today_start - datetime.timedelta(days=days - 1)
 
@@ -256,7 +253,7 @@ class SmartTipGenerator:
         # Format time information
         start_time_str = datetime.datetime.fromtimestamp(start_time).strftime("%H:%M:%S")
         end_time_str = datetime.datetime.fromtimestamp(end_time).strftime("%H:%M:%S")
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_time = now_local().strftime("%Y-%m-%d %H:%M:%S")
 
         # Build the user prompt
         user_prompt = user_prompt_template.format(
@@ -345,7 +342,7 @@ class SmartTipGenerator:
             keep_hours: The number of hours to keep, default is 48 hours.
         """
         try:
-            cutoff_time = datetime.datetime.now() - datetime.timedelta(hours=keep_hours)
+            cutoff_time = now_local() - datetime.timedelta(hours=keep_hours)
             cutoff_timestamp = int(cutoff_time.timestamp())
 
             # Get all tips
