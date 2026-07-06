@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/volcengine-minecontext-badge.png)](https://mseep.ai/app/volcengine-minecontext)
+
 <div align="center">
 
 <picture>
