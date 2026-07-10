@@ -38,8 +38,8 @@ export const ModelInfoList = [
     value: 'doubao',
     option: [
       {
-        value: 'doubao-seed-1-6-flash-250828',
-        label: 'doubao-seed-1.6-flash'
+        value: 'doubao-seed-2-0-mini-260428',
+        label: 'doubao-seed-2.0-mini'
       },
       {
         value: 'doubao-1-5-vision-pro-250328',
