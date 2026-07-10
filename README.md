@@ -366,7 +366,7 @@ embedding_model:
 vlm_model:
   provider: doubao # options: openai, doubao
   api_key: your-api-key
-  model: doubao-seed-1-6-flash-250828
+  model: doubao-seed-2-0-mini-260428
 
 capture:
   enabled: true

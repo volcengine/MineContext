@@ -298,7 +298,7 @@ const Settings: FC<SettingsProps> = (props) => {
               form={form}
               initialValues={{
                 modelPlatform: ModelTypeList.Doubao,
-                [`${ModelTypeList.Doubao}-modelId`]: 'doubao-seed-1-6-flash-250828',
+                [`${ModelTypeList.Doubao}-modelId`]: 'doubao-seed-2-0-mini-260428',
                 [`${ModelTypeList.OpenAI}-modelId`]: 'gpt-5-nano'
               }}>
               <FormItem label="Model platform" field={'modelPlatform'} requiredSymbol={false}>
