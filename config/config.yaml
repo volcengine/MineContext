@@ -182,7 +182,7 @@ storage:
     #   backend: "milvus"
     #   config:
     #     # Vector size MUST match your embedding model's output dimension
-    #     vector_size: 1536
+    #     vector_size: 2048
     #     collection_prefix: "opencontext"
     #     consistency_level: "Session"
     #

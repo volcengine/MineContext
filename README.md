@@ -394,7 +394,7 @@ Then replace the default ChromaDB vector backend in `config/config.yaml`:
   storage_type: "vector_db"
   backend: "milvus"
   config:
-    vector_size: 1536 # Must match the embedding model output dimension
+    vector_size: 2048 # Must match the embedding model output dimension
     uri: "${MILVUS_URI:./persist/milvus.db}"
     token: "${MILVUS_TOKEN:}"
     collection_prefix: "opencontext"

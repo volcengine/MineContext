@@ -37,6 +37,7 @@ FIELD_METADATA = "metadata"
 
 MAX_ID_LENGTH = 512
 MAX_TEXT_LENGTH = 65535
+DEFAULT_VECTOR_SIZE = 2048
 _FILTER_FIELD_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _REMOTE_URI_PATTERN = re.compile(r"^https?://", re.IGNORECASE)
 
@@ -76,7 +77,7 @@ class MilvusBackend(IVectorStorageBackend):
         self._config: Optional[Dict[str, Any]] = None
         self._uri = "./milvus.db"
         self._is_local = True
-        self._vector_size = 1536
+        self._vector_size = DEFAULT_VECTOR_SIZE
         self._collection_prefix = ""
         self._consistency_level = "Session"
 
@@ -87,7 +88,7 @@ class MilvusBackend(IVectorStorageBackend):
             self._uri = str(milvus_config.get("uri", "./milvus.db"))
             _validate_uri_for_platform(self._uri)
             self._is_local = not _is_remote_uri(self._uri)
-            self._vector_size = int(milvus_config.get("vector_size", 1536))
+            self._vector_size = int(milvus_config.get("vector_size", DEFAULT_VECTOR_SIZE))
             if self._vector_size <= 0:
                 raise ValueError("Milvus vector_size must be greater than zero")
 

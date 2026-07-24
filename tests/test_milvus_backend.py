@@ -109,6 +109,10 @@ def test_default_config_keeps_chromadb_and_documents_milvus():
     assert vector_backends[0]["backend"] == "chromadb"
     assert 'backend: "milvus"' in config_text
     assert 'uri: "${MILVUS_URI:./persist/milvus.db}"' in config_text
+    milvus_example = config_text.split("# Milvus (alternative vector database)", 1)[1].split(
+        '- name: "document_store"', 1
+    )[0]
+    assert "#     vector_size: 2048" in milvus_example
 
 
 @pytest.fixture
