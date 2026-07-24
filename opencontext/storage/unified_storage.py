@@ -35,6 +35,7 @@ class StorageBackendFactory:
             StorageType.VECTOR_DB: {
                 "chromadb": self._create_chromadb_backend,
                 "qdrant": self._create_qdrant_backend,
+                "milvus": self._create_milvus_backend,
             },
             StorageType.DOCUMENT_DB: {
                 "sqlite": self._create_sqlite_backend,
@@ -80,6 +81,11 @@ class StorageBackendFactory:
         from opencontext.storage.backends.qdrant_backend import QdrantBackend
 
         return QdrantBackend()
+
+    def _create_milvus_backend(self, config: Dict[str, Any]):
+        from opencontext.storage.backends.milvus_backend import MilvusBackend
+
+        return MilvusBackend()
 
     def _create_sqlite_backend(self, config: Dict[str, Any]):
         from opencontext.storage.backends.sqlite_backend import SQLiteBackend
@@ -836,9 +842,7 @@ class UnifiedStorage:
             message_id=message_id, content_chunk=content_chunk, token_count=token_count
         )
 
-    def update_message_metadata(
-        self, message_id: int, metadata: Dict[str, Any]
-    ) -> bool:
+    def update_message_metadata(self, message_id: int, metadata: Dict[str, Any]) -> bool:
         """Update message metadata"""
         if not self._initialized or not self._document_backend:
             logger.error("Storage not initialized")

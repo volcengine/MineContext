@@ -47,10 +47,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+milvus = [
+    "pymilvus[milvus-lite]>=3.0.0",
+]
 dev = [
     "black>=24.8.0",
     "isort>=5.13.0",
     "pre-commit>=3.6.0",
+    "pytest>=8.3.0",
 ]
 
 [project.scripts]

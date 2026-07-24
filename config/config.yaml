@@ -146,7 +146,7 @@ processing:
 storage:
   enabled: true
   backends:
-    # Vector database configuration - Choose either ChromaDB or Qdrant
+    # Vector database configuration - Choose ChromaDB, Qdrant, or Milvus
     # ChromaDB (default)
     - name: "default_vector"
       storage_type: "vector_db"
@@ -173,6 +173,25 @@ storage:
     #     # port: 6333
     #     # https: false
     #     # api_key: "${QDRANT_API_KEY}"  # Optional: API key for authentication
+
+    # Milvus (alternative vector database)
+    # Install first with: uv sync --extra milvus
+    # Uncomment to use Milvus instead of ChromaDB:
+    # - name: "default_vector"
+    #   storage_type: "vector_db"
+    #   backend: "milvus"
+    #   config:
+    #     # Vector size MUST match your embedding model's output dimension
+    #     vector_size: 1536
+    #     collection_prefix: "opencontext"
+    #     consistency_level: "Session"
+    #
+    #     # Milvus Lite (local file; not supported on Windows):
+    #     uri: "${MILVUS_URI:./persist/milvus.db}"
+    #
+    #     # Remote Milvus or Zilliz Cloud (also supported on Windows):
+    #     # uri: "${MILVUS_URI:http://localhost:19530}"
+    #     # token: "${MILVUS_TOKEN:}"  # Required for authenticated endpoints
 
     - name: "document_store"
       storage_type: "document_db"
