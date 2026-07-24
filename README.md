@@ -320,7 +320,7 @@ opencontext/
 
 5. **Storage Layer** (`storage/`)
 
-   - Multi-backend support (SQLite, ChromaDB)
+   - Multi-backend support (SQLite, ChromaDB, Qdrant, and Milvus)
    - Vector storage for similarity search
    - Unified storage interface
 
@@ -378,6 +378,33 @@ capture:
 2. **Prompt Templates** (`config/prompts_*.yaml`):
    - `prompts_en.yaml`: English prompt templates
    - `prompts_zh.yaml`: Chinese prompt templates
+
+#### Milvus vector backend
+
+Milvus is available as an optional vector backend. Install the extra before selecting it:
+
+```bash
+uv sync --extra milvus
+```
+
+Then replace the default ChromaDB vector backend in `config/config.yaml`:
+
+```yaml
+- name: "default_vector"
+  storage_type: "vector_db"
+  backend: "milvus"
+  config:
+    vector_size: 2048 # Must match the embedding model output dimension
+    uri: "${MILVUS_URI:./persist/milvus.db}"
+    token: "${MILVUS_TOKEN:}"
+    collection_prefix: "opencontext"
+    consistency_level: "Session"
+```
+
+The same `uri` setting supports Milvus Lite database files, remote Milvus servers such as
+`http://localhost:19530`, and Zilliz Cloud endpoints. Set `MILVUS_TOKEN` for authenticated
+servers. Milvus Lite is not supported on Windows; Windows users must configure an `http://`
+or `https://` remote URI. ChromaDB remains the default backend.
 
 ### Running the Server
 
