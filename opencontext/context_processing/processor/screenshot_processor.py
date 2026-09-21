@@ -294,9 +294,25 @@ class ScreenshotProcessor(BaseContextProcessor):
             logger.error(f"Empty VLM response.")
             raise ValueError(f"Empty VLM response.")
         
-        items = raw_resp.get("items", [])
+        # Some OpenAI-compatible / self-hosted VLMs return the item array at the
+        # top level instead of the documented {"items": [...]} object. Accept both
+        # shapes instead of crashing with AttributeError: 'list' object has no
+        # attribute 'get'.
+        if isinstance(raw_resp, dict):
+            items = raw_resp.get("items", [])
+        elif isinstance(raw_resp, list):
+            items = raw_resp
+        else:
+            logger.error(f"Invalid VLM response format: {raw_resp}")
+            raise ValueError(
+                "Invalid VLM response format: expected an object with 'items' or a list of items"
+            )
+
         processed_items = []
         for item in items:
+            if not isinstance(item, dict):
+                logger.warning(f"Skipping non-object item in VLM response: {item}")
+                continue
             processed_items.append(self._create_processed_context(item, raw_context))
         return processed_items
 
