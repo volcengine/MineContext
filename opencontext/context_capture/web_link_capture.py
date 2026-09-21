@@ -47,8 +47,12 @@ class WebLinkCapture(BaseCaptureComponent):
         self._max_workers = 4
         # Temporary storage for URLs passed to the overridden capture method
         self._urls_to_process: List[str] = []
+        # Optional per-URL output filename hints, consumed by the next capture
+        self._filename_hints: Dict[str, str] = {}
 
-    def submit_url(self, url: str) -> List[RawContextProperties]:
+    def submit_url(
+        self, url: str, filename_hint: Optional[str] = None
+    ) -> List[RawContextProperties]:
         """
         Submits a single URL for immediate capture and processing.
         This is a convenience method that directly calls the main capture logic.
@@ -57,7 +61,8 @@ class WebLinkCapture(BaseCaptureComponent):
             logger.error(f"Invalid URL submitted: {url}")
             return []
         # Directly invoke the capture mechanism for a single URL
-        return self.capture(urls=[url])
+        hints = {url: filename_hint} if filename_hint else None
+        return self.capture(urls=[url], filename_hints=hints)
 
     def convert_url_to_markdown(
         self, url: str, filename_hint: Optional[str] = None
@@ -188,13 +193,19 @@ class WebLinkCapture(BaseCaptureComponent):
         # Nothing to stop, no background threads are managed by this component.
         return True
 
-    def capture(self, urls: Optional[List[str]] = None) -> List[RawContextProperties]:
+    def capture(
+        self,
+        urls: Optional[List[str]] = None,
+        filename_hints: Optional[Dict[str, str]] = None,
+    ) -> List[RawContextProperties]:
         """
         Overrides the base capture method to accept a list of URLs.
         It stores the URLs and then calls the base class's capture method.
         """
         if urls:
             self._urls_to_process = urls
+        if filename_hints:
+            self._filename_hints = dict(filename_hints)
         # Call the base implementation which will, in turn, call _capture_impl
         return super().capture()
 
@@ -203,6 +214,7 @@ class WebLinkCapture(BaseCaptureComponent):
         Processes the list of URLs stored in self._urls_to_process.
         """
         urls_to_process = self._urls_to_process
+        filename_hints = self._filename_hints
         if not urls_to_process:
             return []
 
@@ -218,7 +230,10 @@ class WebLinkCapture(BaseCaptureComponent):
 
         with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
             # Submit all URL conversion tasks to the thread pool
-            future_to_url = {executor.submit(convert_function, url): url for url in urls_to_process}
+            future_to_url = {
+                executor.submit(convert_function, url, filename_hints.get(url)): url
+                for url in urls_to_process
+            }
 
             for future in as_completed(future_to_url):
                 url = future_to_url[future]
@@ -245,6 +260,7 @@ class WebLinkCapture(BaseCaptureComponent):
 
         # Clear the list for the next capture call
         self._urls_to_process = []
+        self._filename_hints = {}
 
         logger.info(
             f"Finished capture. Successfully converted {len(results)} out of {len(urls_to_process)} URLs."
