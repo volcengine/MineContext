@@ -605,7 +605,7 @@ class ChromaDBBackend(IVectorStorageBackend):
                 with self._write_lock:
                     results = collection.query(
                         query_embeddings=[query_vector],
-                        n_results=top_k,
+                        n_results=min(top_k, count),
                         where=where_clause,
                         include=(
                             ["metadatas", "documents", "distances", "embeddings"]
