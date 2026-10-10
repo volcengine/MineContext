@@ -242,7 +242,7 @@ class DocumentProcessor(BaseContextProcessor):
             error_msg = f"Failed to batch process documents. Error: {e}"
             logger.exception(error_msg)
             record_processing_error(error_msg, processor_name=self.get_name(), context_count=1)
-            return False
+            return []
 
     def _process_structured_document(
         self, raw_context: RawContextProperties
