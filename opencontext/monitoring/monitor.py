@@ -68,7 +68,7 @@ class ContextTypeStats:
 class ProcessingError:
     """Processing error record"""
 
-    error_message: str
+    error_msg: str
     processor_name: str = ""
     context_count: int = 0
     timestamp: datetime = field(default_factory=datetime.now)
@@ -529,7 +529,7 @@ class Monitor:
 
     def record_processing_error(
         self,
-        error_message: str,
+        error_msg: str,
         processor_name: str = "",
         context_count: int = 0,
         timestamp: datetime = None,
@@ -539,7 +539,7 @@ class Monitor:
             timestamp = datetime.now()
         with self._lock:
             error = ProcessingError(
-                error_message=error_message,
+                error_msg=error_msg,
                 processor_name=processor_name,
                 context_count=context_count,
                 timestamp=timestamp,
@@ -559,7 +559,7 @@ class Monitor:
 
             errors_list = [
                 {
-                    "error_message": e.error_message,
+                    "error_message": e.error_msg,
                     "processor_name": e.processor_name,
                     "context_count": e.context_count,
                     "timestamp": e.timestamp.isoformat(),
@@ -682,7 +682,7 @@ class Monitor:
             session_start = self._recording_stats.session_start_time
             recent_errors = [
                 {
-                    "error_message": e.error_message,
+                    "error_message": e.error_msg,
                     "processor_name": e.processor_name,
                     "timestamp": e.timestamp.isoformat(),
                 }
@@ -769,10 +769,10 @@ def record_retrieval_metrics(
 
 
 def record_processing_error(
-    error_message: str, processor_name: str = "", context_count: int = 0, timestamp: datetime = None
+    error_msg: str, processor_name: str = "", context_count: int = 0, timestamp: datetime = None
 ):
     """Global function: Record processing error"""
-    get_monitor().record_processing_error(error_message, processor_name, context_count, timestamp)
+    get_monitor().record_processing_error(error_msg, processor_name, context_count, timestamp)
 
 
 def record_processing_stage(
