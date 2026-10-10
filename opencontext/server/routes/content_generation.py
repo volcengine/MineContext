@@ -10,7 +10,7 @@ Content generation routes (smart tips, todos, activities, reports)
 from typing import Optional
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from opencontext.server.middleware.auth import auth_dependency
 from opencontext.server.opencontext import OpenContext
@@ -55,6 +55,17 @@ class ReportConfig(BaseModel):
 
     enabled: Optional[bool] = None
     time: Optional[str] = Field(None, pattern=r"^\d{2}:\d{2}$", description="Time in HH:MM format")
+
+    @field_validator("time")
+    @classmethod
+    def validate_time_range(cls, v: str) -> str:
+        if v is None:
+            return v
+        parts = v.split(":")
+        hour, minute = int(parts[0]), int(parts[1])
+        if not (0 <= hour <= 23 and 0 <= minute <= 59):
+            raise ValueError("time must be a valid HH:MM value (00:00–23:59)")
+        return v
 
 
 class ContentGenerationConfig(BaseModel):
