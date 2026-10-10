@@ -213,9 +213,12 @@ async def validate_llm_config(request: UpdateModelSettingsRequest, _auth: str = 
         vlm_key = cfg.apiKey
         emb_key = cfg.embeddingApiKey or vlm_key
 
-        # Resolve embedding URL and provider
+        # Resolve embedding URL and provider (same logic as update endpoint).
         emb_url = cfg.embeddingBaseUrl or cfg.baseUrl
-        emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
+        if cfg.embeddingBaseUrl:
+            emb_provider = cfg.embeddingModelPlatform or LLMProvider.OPENAI.value
+        else:
+            emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
 
         # Validation
         if not vlm_key:
