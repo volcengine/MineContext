@@ -311,15 +311,15 @@ const ScreenMonitor: React.FC = () => {
   useObservableTask(
     {
       active: () => {
-        isScreenLockedRef.current = true
-        if (isMonitoring) {
-          pauseMonitoring()
-        }
-      },
-      inactive: () => {
         isScreenLockedRef.current = false
         if (isMonitoring) {
           resumeMonitoring()
+        }
+      },
+      inactive: () => {
+        isScreenLockedRef.current = true
+        if (isMonitoring) {
+          pauseMonitoring()
         }
       }
     },

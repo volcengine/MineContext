@@ -246,31 +246,44 @@ export function stopBackendServer() {
     setBackendStatus('stopped')
 
     // Step 1: Gracefully terminate the process group
+    const processToKill = backendProcess
+    backendProcess = null
+    logToBackendFile('Backend server stop signal sent')
+
     try {
       // On Unix systems, use a negative PID to kill the entire process group
       if (process.platform !== 'win32') {
-        logToBackendFile(`Sending SIGTERM to process group -${backendProcess.pid}`)
-        process.kill(-backendProcess.pid, 'SIGTERM')
+        logToBackendFile(`Sending SIGTERM to process group -${processToKill.pid}`)
+        process.kill(-processToKill.pid, 'SIGTERM')
       } else {
         // Windows system
-        logToBackendFile(`Sending SIGTERM to process ${backendProcess.pid}`)
-        backendProcess.kill('SIGTERM')
+        logToBackendFile(`Sending SIGTERM to process ${processToKill.pid}`)
+        processToKill.kill('SIGTERM')
       }
 
       // Wait for a while for the process to exit gracefully
       setTimeout(() => {
-        if (backendProcess && backendProcess.exitCode === null) {
+        if (processToKill.exitCode === null) {
           logToBackendFile('Process did not exit gracefully, forcing termination...')
-          forceKillBackendProcess()
+          try {
+            if (process.platform !== 'win32') {
+              process.kill(-processToKill.pid, 'SIGKILL')
+            } else {
+              processToKill.kill('SIGKILL')
+            }
+          } catch {}
         }
       }, 5000)
     } catch (error) {
       logToBackendFile(`Error killing process group: ${error}`)
-      forceKillBackendProcess()
+      try {
+        if (process.platform !== 'win32') {
+          process.kill(-processToKill.pid, 'SIGKILL')
+        } else {
+          processToKill.kill('SIGKILL')
+        }
+      } catch {}
     }
-
-    backendProcess = null
-    logToBackendFile('Backend server stop signal sent')
   }
 
   // Additionally, check and kill any remaining processes on the port
