@@ -42,28 +42,39 @@ async def read_contexts(
     opencontext: OpenContext = Depends(get_context_lab),
 ):
     offset = (page - 1) * limit
-    types = []
-    if type:
-        types.append(type)
-    contexts_dict = get_storage().get_all_processed_contexts(
-        context_types=list(types), limit=limit + 1, offset=offset, need_vector=False
-    )
-    contexts = []
-    for backend_contexts in contexts_dict.values():
-        contexts.extend(backend_contexts)
 
-    # Sort with timezone-aware datetime handling
     def get_sort_key(context):
         dt = context.properties.create_time
-        # Convert naive datetime to aware (assume UTC if naive)
         if dt.tzinfo is None:
             import datetime as dt_module
+
             dt = dt.replace(tzinfo=dt_module.timezone.utc)
         return dt
 
-    contexts.sort(key=get_sort_key, reverse=True)
-    has_next = len(contexts) > limit
-    contexts_to_display = contexts[:limit]
+    if type:
+        # Single-type: per-collection pagination is correct as-is
+        contexts_dict = get_storage().get_all_processed_contexts(
+            context_types=[type], limit=limit + 1, offset=offset, need_vector=False
+        )
+        contexts = []
+        for backend_contexts in contexts_dict.values():
+            contexts.extend(backend_contexts)
+        contexts.sort(key=get_sort_key, reverse=True)
+        has_next = len(contexts) > limit
+        contexts_to_display = contexts[:limit]
+    else:
+        # Multi-type: applying the same offset to each collection independently
+        # skips records when they are spread across types.  Fetch everything,
+        # merge and sort, then slice in Python.
+        contexts_dict = get_storage().get_all_processed_contexts(
+            context_types=[], limit=10_000, offset=0, need_vector=False
+        )
+        contexts = []
+        for backend_contexts in contexts_dict.values():
+            contexts.extend(backend_contexts)
+        contexts.sort(key=get_sort_key, reverse=True)
+        has_next = len(contexts) > offset + limit
+        contexts_to_display = contexts[offset : offset + limit]
 
     context_types = get_storage().get_available_context_types()
 
