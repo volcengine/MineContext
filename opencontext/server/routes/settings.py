@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from opencontext.config.global_config import GlobalConfig
 from opencontext.llm.global_embedding_client import GlobalEmbeddingClient
 from opencontext.llm.global_vlm_client import GlobalVLMClient
-from opencontext.llm.llm_client import LLMClient, LLMType
+from opencontext.llm.llm_client import LLMClient, LLMProvider, LLMType
 from opencontext.server.middleware.auth import auth_dependency
 from opencontext.server.utils import convert_resp
 from opencontext.utils.logging_utils import get_logger
@@ -116,9 +116,17 @@ async def update_model_settings(request: UpdateModelSettingsRequest, _auth: str 
             vlm_key = cfg.apiKey
             emb_key = cfg.embeddingApiKey or vlm_key
 
-            # Resolve embedding URL and provider
+            # Resolve embedding URL and provider.
+            # When a separate embeddingBaseUrl is supplied the user is pointing at a
+            # different service (often a local OpenAI-compatible server).  Inheriting
+            # the VLM provider in that case would select the Ark SDK and call
+            # multimodal_embeddings() against a server that only implements the
+            # standard /v1/embeddings endpoint, causing a 500 / AttributeError.
             emb_url = cfg.embeddingBaseUrl or cfg.baseUrl
-            emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
+            if cfg.embeddingBaseUrl:
+                emb_provider = cfg.embeddingModelPlatform or LLMProvider.OPENAI.value
+            else:
+                emb_provider = cfg.embeddingModelPlatform or cfg.modelPlatform
 
             # Validation
             if not vlm_key:
