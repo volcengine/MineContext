@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from opencontext.models.context import ProcessedContextModel
 from opencontext.models.enums import ContentFormat, ContextSource
@@ -46,7 +46,7 @@ class UpdateContextIn(BaseModel):
 
 
 class QueryIn(BaseModel):
-    query: str
+    query: str = Field(..., min_length=1)
 
 
 class ConsumeIn(BaseModel):
@@ -60,8 +60,8 @@ class ContextDetailRequest(BaseModel):
 
 
 class VectorSearchRequest(BaseModel):
-    query: str
-    top_k: int = 10
+    query: str = Field(..., min_length=1)
+    top_k: int = Field(default=10, ge=1, le=100)
     context_types: Optional[List[str]] = None
     filters: Optional[Dict[str, Any]] = None
 
