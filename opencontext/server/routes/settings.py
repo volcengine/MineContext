@@ -584,7 +584,7 @@ async def get_prompts_history(category: str, _auth: str = auth_dependency):
 
         debug_config = config.get("content_generation", {}).get("debug", {})
         if not debug_config.get("enabled", False):
-            return convert_resp(code=400, status=400, message="Debug mode is not enabled")
+            return convert_resp(data=[])
 
         base_path = debug_config.get("output_path", "${CONTEXT_PATH:.}/debug/generation")
 

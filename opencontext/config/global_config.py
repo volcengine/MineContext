@@ -126,7 +126,7 @@ class GlobalConfig:
 
         # Get prompt configuration from the main configuration
         prompts_config = config.get("prompts", {})
-        language = prompts_config.get("language", "zh")
+        language = prompts_config.get("language", "en")
         prompts_path = f"prompts_{language}.yaml"
 
         base_dir = os.path.dirname(self._config_path)
@@ -182,7 +182,7 @@ class GlobalConfig:
         """
         if hasattr(self, "_language"):
             return self._language
-        return "zh"
+        return "en"
 
     def set_language(self, language: str) -> bool:
         """
