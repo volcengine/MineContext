@@ -5,6 +5,16 @@ import { getLogger } from '@shared/logger/renderer'
 import dayjs from 'dayjs'
 
 const logger = getLogger('useActivityPolling')
+
+const safeParseResources = (raw: unknown): any[] => {
+  if (!raw || typeof raw !== 'string') return []
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return []
+  }
+}
+
 export const useActivityPolling = (
   currentDate: Date,
   getActivitiesByDate: (date: Date) => Promise<any[]>,
@@ -24,7 +34,7 @@ export const useActivityPolling = (
       const todayActivities = await getActivitiesByDate(date)
       const todayActivitiesParsed: Activity[] = todayActivities.map((item: any) => ({
         ...item,
-        resources: JSON.parse(item.resources)
+        resources: safeParseResources(item.resources)
       }))
       const uniqueActivities = Array.from(new Map(todayActivitiesParsed.map((item) => [item.id, item])).values())
       setActivities(uniqueActivities)
@@ -57,7 +67,7 @@ export const useActivityPolling = (
         const newActivities = await getNewActivities(lastCheckedTimeRef.current)
         const newActivitiesParsed: Activity[] = newActivities.map((item: any) => ({
           ...item,
-          resources: JSON.parse(item.resources)
+          resources: safeParseResources(item.resources)
         }))
         if (newActivitiesParsed && newActivitiesParsed.length > 0) {
           // Filter activities for the current date

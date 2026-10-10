@@ -55,7 +55,7 @@ class GlobalEventService {
   public async fetchEvents(dispatch): Promise<void> {
     try {
       const res = await axiosInstance.get('/api/events/fetch')
-      if (res.status === 200 && res.data && res.data.data.events) {
+      if (res.status === 200 && res.data?.data?.events) {
         // Store events in Redux
         dispatch(addEvent(res.data.data.events))
 

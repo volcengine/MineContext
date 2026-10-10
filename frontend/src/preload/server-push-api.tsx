@@ -21,11 +21,10 @@ export const serverPushAPI = {
   },
   pushScreenMonitorStatus: (callback: (data: any) => void): any => {
     try {
-      ipcRenderer.on(IpcServerPushChannel.PushScreenMonitorStatus, (_, data) => {
-        callback(data)
-      })
+      const wrapper = (_: unknown, data: unknown) => callback(data as any)
+      ipcRenderer.on(IpcServerPushChannel.PushScreenMonitorStatus, wrapper)
       return () => {
-        ipcRenderer.off(IpcServerPushChannel.PushScreenMonitorStatus, callback)
+        ipcRenderer.off(IpcServerPushChannel.PushScreenMonitorStatus, wrapper)
       }
     } catch (error) {
       logger.error('Error setting up screenMonitorStatus event listener', error)
@@ -33,11 +32,10 @@ export const serverPushAPI = {
   },
   pushHomeLatestActivity: (callback: (data: any) => void): any => {
     try {
-      ipcRenderer.on(IpcServerPushChannel.Home_PushLatestActivity, (_, data) => {
-        callback(data)
-      })
+      const wrapper = (_: unknown, data: unknown) => callback(data as any)
+      ipcRenderer.on(IpcServerPushChannel.Home_PushLatestActivity, wrapper)
       return () => {
-        ipcRenderer.off(IpcServerPushChannel.Home_PushLatestActivity, callback)
+        ipcRenderer.off(IpcServerPushChannel.Home_PushLatestActivity, wrapper)
       }
     } catch (error) {
       logger.error('Error setting up homeLatestActivity event listener', error)
