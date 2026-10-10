@@ -52,6 +52,12 @@ class ContextMerger(BaseContextProcessor):
         # Intelligent merging switch
         self.use_intelligent_merging = config.get("use_intelligent_merging", True)
 
+        # Memory management settings (BUG 4 fix: assign missing instance attributes)
+        self.enable_memory_management = config.get("enable_memory_management", False)
+        self.cleanup_interval_hours = config.get("cleanup_interval_hours", 24)
+        self.enable_cross_type_processing = config.get("enable_cross_type_processing", False)
+        self.cross_type_manager = config.get("cross_type_manager", None)
+
     @property
     def storage(self):
         """Get storage from global singleton"""
@@ -147,14 +153,11 @@ class ContextMerger(BaseContextProcessor):
     ) -> List[ProcessedContext]:
         """Get merge candidate contexts"""
         try:
-            backend = self.storage._get_or_create_backend(context.extracted_data.context_type.value)
-            if not backend:
-                return []
-
-            # Use vector similarity query
-            similar_results = backend.query(
+            # Use vector similarity search via public storage API
+            similar_results = self.storage.search(
                 query=Vectorize(vector=context.vectorize.vector),
                 top_k=max_candidates + 1,  # +1 because the result might include self
+                context_types=[context.extracted_data.context_type.value],
                 filters={},
             )
 
@@ -197,17 +200,12 @@ class ContextMerger(BaseContextProcessor):
             thirty_minutes_ago = datetime.now() - timedelta(minutes=30)
             time_filter = {"update_time_ts": {"$gte": int(thirty_minutes_ago.timestamp())}}
 
-            # Get the appropriate storage backend
-            backend = self.storage._get_or_create_backend(context.extracted_data.context_type.value)
-            if not backend:
-                logger.warning(
-                    f"No backend found for context type {context.extracted_data.context_type.value}"
-                )
-                return None, 0.0
-
-            # Query for similar contexts within the time window
-            similar_results = backend.query(
-                query=Vectorize(vector=context.vectorize.vector), top_k=5, filters=time_filter
+            # Query for similar contexts within the time window via public storage API
+            similar_results = self.storage.search(
+                query=Vectorize(vector=context.vectorize.vector),
+                top_k=5,
+                context_types=[context.extracted_data.context_type.value],
+                filters=time_filter,
             )
 
             # Filter out the context itself from the results
@@ -242,9 +240,11 @@ class ContextMerger(BaseContextProcessor):
     ) -> tuple[Optional[ProcessedContext], float]:
 
         try:
-            backend = self.storage._get_or_create_backend(context.extracted_data.context_type.value)
-            similar_results = backend.query(
-                query=Vectorize(vector=context.vectorize.vector), top_k=2, filters={}
+            similar_results = self.storage.search(
+                query=Vectorize(vector=context.vectorize.vector),
+                top_k=2,
+                context_types=[context.extracted_data.context_type.value],
+                filters={},
             )
             similar_results = [res for res in similar_results if res[0].id != context.id]
 
@@ -402,7 +402,7 @@ class ContextMerger(BaseContextProcessor):
                         confidence=int(response_data["confidence"]),
                         importance=int(response_data["importance"]),
                     )
-                    now = datetime.datetime.now()
+                    now = datetime.now()
                     properties = ContextProperties(
                         raw_properties=target.properties.raw_properties,
                         create_time=target.properties.create_time,
@@ -424,14 +424,14 @@ class ContextMerger(BaseContextProcessor):
                             # Check if it's only the time part, e.g., '11:53:00'
                             if len(event_time_str) == 8 and ":" in event_time_str:
                                 # Add the current date to form a full ISO format
-                                today = datetime.date.today().isoformat()
+                                today = datetime.now().date().isoformat()
                                 full_event_time_str = f"{today}T{event_time_str}"
-                                properties.event_time = datetime.datetime.fromisoformat(
+                                properties.event_time = datetime.fromisoformat(
                                     full_event_time_str
                                 )
                             else:
                                 # Try to parse directly
-                                properties.event_time = datetime.datetime.fromisoformat(
+                                properties.event_time = datetime.fromisoformat(
                                     event_time_str
                                 )
                         except ValueError:
@@ -480,12 +480,12 @@ class ContextMerger(BaseContextProcessor):
                 "update_time_ts": {
                     "$gte": int(
                         (
-                            datetime.datetime.now()
+                            datetime.now()
                             - timedelta(seconds=interval_seconds)
                             - timedelta(minutes=5)
                         ).timestamp()
                     ),
-                    "$lte": int((datetime.datetime.now() - timedelta(minutes=5)).timestamp()),
+                    "$lte": int((datetime.now() - timedelta(minutes=5)).timestamp()),
                 },
                 "has_compression": False,
                 "enable_merge": True,
@@ -627,11 +627,6 @@ class ContextMerger(BaseContextProcessor):
         stats = {"checked": 0, "cleaned": 0, "errors": 0}
 
         try:
-            # 获取该类型的所有上下文
-            backend = self.storage._get_or_create_backend(context_type.value)
-            if not backend:
-                return stats
-
             # 分批获取上下文进行清理
             limit = 100
             offset = 0
@@ -722,22 +717,18 @@ class ContextMerger(BaseContextProcessor):
     def _find_context_by_id(self, context_id: str) -> Optional[ProcessedContext]:
         """在所有后端中查找指定ID的上下文"""
         try:
-            # 遍历所有后端查找
-            for context_type in ContextType:
-                backend = self.storage._get_or_create_backend(context_type.value)
-                if backend:
-                    # 这里需要实现根据ID查找的方法，当前storage可能不支持
-                    # 暂时使用查询方法的变通方案
-                    contexts_dict = self.storage.get_all_processed_contexts(
-                        limit=1000, offset=0, filter={}
-                    )
-                    all_contexts = []
-                    for contexts_list in contexts_dict.values():
-                        all_contexts.extend(contexts_list)
+            # 这里需要实现根据ID查找的方法，当前storage可能不支持
+            # 暂时使用查询方法的变通方案
+            contexts_dict = self.storage.get_all_processed_contexts(
+                limit=1000, offset=0, filter={}
+            )
+            all_contexts = []
+            for contexts_list in contexts_dict.values():
+                all_contexts.extend(contexts_list)
 
-                    for context in all_contexts:
-                        if context.id == context_id:
-                            return context
+            for context in all_contexts:
+                if context.id == context_id:
+                    return context
 
             return None
 
