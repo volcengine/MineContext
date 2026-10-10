@@ -7,6 +7,7 @@
 OpenContext module: llm_client
 """
 
+import asyncio
 from enum import Enum
 from typing import Any, Dict, List
 
@@ -314,9 +315,13 @@ class LLMClient:
     async def _request_embedding_async(self, text: str, **kwargs) -> List[float]:
         try:
             if self.provider == LLMProvider.DOUBAO.value:
-                # Only ark has multimodal_embeddings
-                response = self.client.multimodal_embeddings.create(
-                    model=self.model, input=[{"type": "text", "text": text}]
+                # Only ark has multimodal_embeddings; run the blocking call in a thread pool
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: self.client.multimodal_embeddings.create(
+                        model=self.model, input=[{"type": "text", "text": text}]
+                    ),
                 )
                 embedding = response.data.embedding
             else:
