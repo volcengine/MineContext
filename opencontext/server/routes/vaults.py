@@ -76,7 +76,7 @@ async def note_editor_page(request: Request):
 
 @router.get("/api/vaults/list")
 async def get_documents_list(
-    limit: int = Query(default=50, description="Return limit"),
+    limit: int = Query(default=50, ge=1, le=1000, description="Return limit"),
     offset: int = Query(default=0, description="Offset"),
     _auth: str = auth_dependency,
 ):
@@ -165,15 +165,7 @@ async def get_document(document_id: int, _auth: str = auth_dependency):
     """
     try:
         storage = get_storage()
-        # Get all documents to find the document with specified ID
-        documents = storage.get_vaults(limit=100, offset=0, is_deleted=False)
-
-        # Find the document with specified ID
-        document = None
-        for doc in documents:
-            if doc["id"] == document_id:
-                document = doc
-                break
+        document = storage.get_vault(document_id)
 
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
